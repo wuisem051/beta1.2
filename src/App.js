@@ -1,0 +1,98 @@
+import React, { lazy, Suspense } from 'react'; // Importar lazy y Suspense
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+import Header from './common/layout/Header';
+import Footer from './common/layout/Footer';
+import { AuthProvider } from './context/AuthContext';
+import './App.css';
+import { db } from './services/firebase'; // Importar db desde firebase.js
+import { doc, getDoc } from 'firebase/firestore';
+import { ThemeContext } from './context/ThemeContext'; // Importar ThemeContext
+import { useContext, useEffect } from 'react'; // Importar useContext y useEffect
+
+// Carga perezosa de componentes de página
+const Home = lazy(() => import('./user/pages/Home'));
+const Login = lazy(() => import('./user/pages/Login'));
+const Signup = lazy(() => import('./user/pages/Signup'));
+const UserPanel = lazy(() => import('./user/pages/UserPanel'));
+const AdminPanel = lazy(() => import('./admin/pages/AdminPanel'));
+const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
+
+function App() {
+  const { darkMode, theme } = useContext(ThemeContext); // Usar ThemeContext
+
+  // Efecto para cargar el favicon dinámicamente
+  useEffect(() => {
+    const fetchSiteSettings = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'siteConfig');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // Actualizar favicon
+          if (data.faviconUrl) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.head.appendChild(link);
+            }
+            link.href = data.faviconUrl;
+          }
+          // Actualizar título del documento
+          if (data.siteName) {
+            document.title = data.siteName;
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching site settings for App component from Firebase:", err);
+      }
+    };
+    fetchSiteSettings();
+  }, []);
+
+  return (
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <div className={`flex flex-col min-h-screen ${theme.background} ${theme.text}`}> {/* Aplicar clases de tema */}
+        <Header />
+        <main className="flex-grow">
+          <AuthProvider>
+            <Suspense fallback={<div>Cargando...</div>}> {/* Mostrar un mensaje de carga mientras los componentes se cargan */}
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                {/* Ruta temporal para acceso de prueba a la configuración del usuario */}
+                <Route 
+                  path="/test-user-settings/*" 
+                  element={
+                    <ProtectedRoute>
+                      <UserPanel />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/user/*" 
+                  element={
+                    <ProtectedRoute>
+                      <UserPanel />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route
+                  path="/admin/*"
+                  element={<AdminPanel />}
+                />
+                <Route path="/admin-login" element={<AdminLogin />} /> {/* Nueva ruta para el login de administrador */}
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+
+export default App;
