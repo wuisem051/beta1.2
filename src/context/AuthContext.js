@@ -41,8 +41,11 @@ export function AuthProvider({ children }) {
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            setIsAdmin(userDoc.data().role === 'admin');
+            const userData = userDoc.data();
+            console.log("User data from Firestore:", userData);
+            setIsAdmin(userData.role === 'admin');
           } else {
+            console.log("User document does not exist for UID:", user.uid);
             setIsAdmin(false);
           }
         } catch (error) {
@@ -67,11 +70,19 @@ export function AuthProvider({ children }) {
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
-        return { user };
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log("Admin login - User data from Firestore:", userData);
+        if (userData.role === 'admin') {
+          return { user };
+        } else {
+          await signOut(auth); // Cerrar sesión si no es administrador
+          throw new Error('Acceso denegado: No eres administrador.');
+        }
       } else {
-        await signOut(auth); // Cerrar sesión si no es administrador
-        throw new Error('Acceso denegado: No eres administrador.');
+        console.log("Admin login - User document does not exist for UID:", user.uid);
+        await signOut(auth); // Cerrar sesión si no se encuentra el documento
+        throw new Error('Acceso denegado: No se encontró el perfil de usuario.');
       }
     } catch (error) {
       throw error;
