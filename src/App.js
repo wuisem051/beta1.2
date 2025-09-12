@@ -17,6 +17,7 @@ const Signup = lazy(() => import('./user/pages/Signup'));
 const UserPanel = lazy(() => import('./user/pages/UserPanel'));
 const AdminPanel = lazy(() => import('./admin/pages/AdminPanel'));
 const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
+const AllNewsPage = lazy(() => import('./user/pages/AllNewsPage')); // Nueva página para todas las noticias
 
 function App() {
   const { darkMode, theme } = useContext(ThemeContext); // Usar ThemeContext
@@ -85,6 +86,7 @@ function App() {
                   element={<AdminPanel />}
                 />
                 <Route path="/admin-login" element={<AdminLogin />} /> {/* Nueva ruta para el login de administrador */}
+                <Route path="/news" element={<AllNewsPage />} /> {/* Nueva ruta para todas las noticias */}
               </Routes>
             </Suspense>
           </AuthProvider>
