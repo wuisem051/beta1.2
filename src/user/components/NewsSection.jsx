@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 const NewsSection = () => {
   const [news, setNews] = useState([]);
@@ -8,7 +9,7 @@ const NewsSection = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(3));
+        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc')); // Mostrar todas las noticias
         const querySnapshot = await getDocs(q);
         const fetchedNews = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -39,6 +40,11 @@ const NewsSection = () => {
           ) : (
             <p className="text-gray_text text-center col-span-full">No hay noticias disponibles.</p>
           )}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/news" className="bg-primary_button hover:bg-primary_button_hover text-white font-bold py-2 px-4 rounded">
+            Leer más Noticias Publicadas
+          </Link>
         </div>
       </div>
     </section>
