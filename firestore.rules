@@ -2,23 +2,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /settings/{document} {
-      allow read: if true; // Permitir lectura pública para la configuración del sitio
+      allow read, list: if true; // Permitir lectura pública y listado para la configuración del sitio
     }
 
     match /news/{document} {
-      allow read: if true; // Permitir lectura pública para las noticias
+      allow read, list: if true; // Permitir lectura pública y listado para las noticias
     }
 
     match /poolConfig/{document} {
-      allow read: if true; // Permitir lectura pública para la configuración del pool
+      allow read, list: if true; // Permitir lectura pública y listado para la configuración del pool
     }
 
     match /profitabilitySettings/{document} {
-      allow read: if true; // Permitir lectura pública para la configuración de rentabilidad
+      allow read, list: if true; // Permitir lectura pública y listado para la configuración de rentabilidad
     }
 
     match /performanceStats/{document} {
-      allow read: if true; // Permitir lectura pública para las estadísticas de rendimiento
+      allow read, list: if true; // Permitir lectura pública y listado para las estadísticas de rendimiento
     }
 
     // Reglas para colecciones que requieren autenticación
