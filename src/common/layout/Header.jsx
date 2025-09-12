@@ -80,6 +80,17 @@ const Header = () => {
             >
               Estadísticas
             </Link>
+            {/* Botón de acceso directo al Panel de Usuario para pruebas */}
+            <Link 
+              to="/user/dashboard" 
+              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
+                location.pathname.startsWith('/user') 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+              }`}
+            >
+              Panel de Usuario
+            </Link>
             {currentUser ? (
               <>
                 <Link 
