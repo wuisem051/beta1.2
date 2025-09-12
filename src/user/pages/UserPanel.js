@@ -20,6 +20,8 @@ import { useError } from '../../context/ErrorContext'; // Importar useError
 const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, styles, totalHashrate, estimatedDailyUSD }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
 
+  console.log("DashboardContent: Renderizando con props:", { userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, totalHashrate, estimatedDailyUSD });
+
   const estimatedDailyBTC = useMemo(() => {
     return btcToUsdRate > 0 ? estimatedDailyUSD / btcToUsdRate : 0;
   }, [estimatedDailyUSD, btcToUsdRate]);
@@ -1578,6 +1580,18 @@ const UserPanel = () => {
 
   const demoUser = { email: 'demo@example.com' };
   const displayUser = currentUser || demoUser;
+
+  console.log("UserPanel: currentUser", currentUser);
+  console.log("UserPanel: userMiners", userMiners);
+  console.log("UserPanel: userBalances", userBalances);
+  console.log("UserPanel: paymentRate", paymentRate);
+  console.log("UserPanel: btcToUsdRate", btcToUsdRate);
+  console.log("UserPanel: totalHashratePool", totalHashratePool);
+  console.log("UserPanel: poolCommission", poolCommission);
+  console.log("UserPanel: paymentsHistory", paymentsHistory);
+  console.log("UserPanel: withdrawalsHistory", withdrawalsHistory);
+  console.log("UserPanel: userPaymentAddresses", userPaymentAddresses);
+
 
   const totalHashrate = useMemo(() => {
     return userMiners.reduce((sum, miner) => sum + (miner.currentHashrate || 0), 0);

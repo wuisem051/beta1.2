@@ -3,7 +3,7 @@ import { Link, useMatch, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
 const Sidebar = ({ unreadTicketsCount, displayUser }) => {
-  const { darkMode, setDarkMode } = useContext(ThemeContext); // Añadir setDarkMode
+  const { darkMode, setDarkMode, theme } = useContext(ThemeContext); // Añadir setDarkMode y theme
   const { pathname } = useLocation();
   const basePath = pathname.split('/').slice(0, 2).join('/');
 
