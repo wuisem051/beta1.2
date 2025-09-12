@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Importar Link
+import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import { Link } from 'react-router-dom';
 import { db } from '../../services/firebase';
-import { doc, getDoc } from 'firebase/firestore'; // Importar doc y getDoc
+import { doc, getDoc } from 'firebase/firestore';
+import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 const Footer = () => {
   const [footerText, setFooterText] = useState('');
 
@@ -25,10 +26,12 @@ const Footer = () => {
     fetchFooterText();
   }, []);
 
+  const { theme } = useContext(ThemeContext); // Usar ThemeContext
+
   return (
-    <footer className="bg-light_card border-t border-gray_border">
-      <div className="container mx-auto py-6 px-4 text-center text-gray_text">
-        <p>{footerText} <Link to="/admin-login" className="text-gray_text">dev</Link></p>
+    <footer className={`${theme.backgroundAlt} border-t ${theme.borderColor}`}> {/* Aplicar clases de tema */}
+      <div className={`container mx-auto py-6 px-4 text-center ${theme.textSoft}`}> {/* Aplicar clases de tema */}
+        <p>{footerText} <Link to="/admin-login" className={`${theme.textSoft}`}>dev</Link></p> {/* Aplicar clases de tema */}
       </div>
     </footer>
   );
