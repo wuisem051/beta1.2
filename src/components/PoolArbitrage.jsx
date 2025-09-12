@@ -3,6 +3,10 @@ import { collection, addDoc, getDocs, doc, deleteDoc } from 'firebase/firestore'
 import { db } from '../services/firebase';
 import { useTheme } from '../context/ThemeContext';
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Input from './common/Input'; // Importar el componente Input
+import TextArea from './common/TextArea'; // Importar el componente TextArea
+import Checkbox from './common/Checkbox'; // Importar el componente Checkbox
+import Button from './common/Button'; // Importar el componente Button
 
 const PoolArbitrage = () => {
   const { theme } = useTheme();
@@ -95,136 +99,104 @@ const PoolArbitrage = () => {
       {/* Sección Agregar Nueva Pool */}
       <div className={`${theme.backgroundAlt} ${theme.borderColor} p-6 rounded-lg shadow-md mb-8 border`}>
         <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
-          <input type="checkbox" className={`mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-500 ${theme.inputBackground} ${theme.borderColor}`} checked readOnly />
-          Agregar Nueva Pool
+          <Checkbox label="Agregar Nueva Pool" checked readOnly />
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label htmlFor="name" className={`block text-sm mb-1 ${theme.textSoft}`}>Nombre de la Pool</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={newPool.name}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="Ej: DogecoinPool Pro"
-            />
-          </div>
-          <div>
-            <label htmlFor="cryptocurrency" className={`block text-sm mb-1 ${theme.textSoft}`}>Criptomoneda</label>
-            <select
-              id="cryptocurrency"
-              name="cryptocurrency"
-              value={newPool.cryptocurrency}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-            >
-              <option value="">Seleccionar moneda</option>
-              {cryptocurrencies.map((coin) => (
-                <option key={coin} value={coin}>{coin}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="url" className={`block text-sm mb-1 ${theme.textSoft}`}>URL de la Pool</label>
-            <input
-              type="text"
-              id="url"
-              name="url"
-              value={newPool.url}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="stratum+tcp://pool.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="port" className={`block text-sm mb-1 ${theme.textSoft}`}>Puerto</label>
-            <input
-              type="text"
-              id="port"
-              name="port"
-              value={newPool.port}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="4444"
-            />
-          </div>
-          <div>
-            <label htmlFor="defaultWorkerName" className={`block text-sm mb-1 ${theme.textSoft}`}>Nombre de Worker por Defecto</label>
-            <input
-              type="text"
-              id="defaultWorkerName"
-              name="defaultWorkerName"
-              value={newPool.defaultWorkerName}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="Ej: worker1"
-            />
-          </div>
-          <div>
-            <label htmlFor="commission" className={`block text-sm mb-1 ${theme.textSoft}`}>Comisión de la Pool (%)</label>
-            <input
-              type="number"
-              id="commission"
-              name="commission"
-              step="0.1"
-              value={newPool.commission}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="1.5"
-            />
-          </div>
-          <div>
-            <label htmlFor="thsRate" className={`block text-sm mb-1 ${theme.textSoft}`}>Tasa por TH/s (USD)</label>
-            <input
-              type="number"
-              id="thsRate"
-              name="thsRate"
-              step="0.01"
-              value={newPool.thsRate}
-              onChange={handleInputChange}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-              placeholder="0.05"
-            />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="description" className={`block text-sm mb-1 ${theme.textSoft}`}>Descripción</label>
-          <textarea
-            id="description"
-            name="description"
-            value={newPool.description}
+          <Input
+            id="name"
+            label="Nombre de la Pool"
+            name="name"
+            value={newPool.name}
             onChange={handleInputChange}
-            rows="3"
-            className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${theme.inputBackground} ${theme.borderColor} ${theme.text}`}
-            placeholder="Descripción de la pool y sus beneficios..."
-          ></textarea>
-        </div>
-        <div className="flex items-center mb-6">
-          <input
-            type="checkbox"
-            id="isActive"
-            name="isActive"
-            checked={newPool.isActive}
-            onChange={handleInputChange}
-            className={`mr-2 h-4 w-4 text-green-500 rounded focus:ring-green-500 ${theme.inputBackground} ${theme.borderColor}`}
+            placeholder="Ej: DogecoinPool Pro"
           />
-          <label htmlFor="isActive" className={`${theme.text} text-base`}>Pool activa y disponible para usuarios</label>
+          <Input
+            id="cryptocurrency"
+            label="Criptomoneda"
+            name="cryptocurrency"
+            type="select"
+            value={newPool.cryptocurrency}
+            onChange={handleInputChange}
+          >
+            <option value="">Seleccionar moneda</option>
+            {cryptocurrencies.map((coin) => (
+              <option key={coin} value={coin}>{coin}</option>
+            ))}
+          </Input>
+          <Input
+            id="url"
+            label="URL de la Pool"
+            name="url"
+            value={newPool.url}
+            onChange={handleInputChange}
+            placeholder="stratum+tcp://pool.com"
+          />
+          <Input
+            id="port"
+            label="Puerto"
+            name="port"
+            value={newPool.port}
+            onChange={handleInputChange}
+            placeholder="4444"
+          />
+          <Input
+            id="defaultWorkerName"
+            label="Nombre de Worker por Defecto"
+            name="defaultWorkerName"
+            value={newPool.defaultWorkerName}
+            onChange={handleInputChange}
+            placeholder="Ej: worker1"
+          />
+          <Input
+            id="commission"
+            label="Comisión de la Pool (%)"
+            name="commission"
+            type="number"
+            step="0.1"
+            value={newPool.commission}
+            onChange={handleInputChange}
+            placeholder="1.5"
+          />
+          <Input
+            id="thsRate"
+            label="Tasa por TH/s (USD)"
+            name="thsRate"
+            type="number"
+            step="0.01"
+            value={newPool.thsRate}
+            onChange={handleInputChange}
+            placeholder="0.05"
+          />
         </div>
-        <button
+        <TextArea
+          id="description"
+          label="Descripción"
+          name="description"
+          value={newPool.description}
+          onChange={handleInputChange}
+          rows="3"
+          placeholder="Descripción de la pool y sus beneficios..."
+        />
+        <Checkbox
+          id="isActive"
+          label="Pool activa y disponible para usuarios"
+          name="isActive"
+          checked={newPool.isActive}
+          onChange={handleInputChange}
+        />
+        <Button
           onClick={handleAddPool}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200 flex items-center justify-center"
+          variant="success"
+          className="w-full flex items-center justify-center"
         >
           <span className="mr-2">+</span> Agregar Pool
-        </button>
+        </Button>
       </div>
 
       {/* Sección Pools Configuradas */}
       <div className={`${theme.backgroundAlt} ${theme.borderColor} p-6 rounded-lg shadow-md border`}>
         <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
-          <input type="checkbox" className={`mr-2 h-4 w-4 text-blue-500 rounded focus:ring-blue-500 ${theme.inputBackground} ${theme.borderColor}`} checked readOnly />
-          Pools Configuradas
+          <Checkbox label="Pools Configuradas" checked readOnly />
         </h3>
         {pools.length === 0 ? (
           <div className={`text-center py-8 ${theme.textSoft}`}>
@@ -240,12 +212,13 @@ const PoolArbitrage = () => {
                   <p className={`text-sm ${theme.textSoft}`}>{pool.url}:{pool.port}</p>
                   <p className={`text-sm ${theme.textSoft}`}>Comisión: {pool.commission}% | Tasa TH/s: ${pool.thsRate}</p>
                 </div>
-                <button
+                <Button
                   onClick={() => handleDeletePool(pool.id)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"
+                  variant="danger"
+                  className="px-3 py-1 text-sm"
                 >
                   Eliminar
-                </button>
+                </Button>
               </div>
             ))}
           </div>

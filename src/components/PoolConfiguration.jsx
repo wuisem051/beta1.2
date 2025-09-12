@@ -3,6 +3,9 @@ import { db } from '../services/firebase'; // Importar Firebase Firestore
 import { collection, getDocs, setDoc, query, where } from 'firebase/firestore';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Input from './common/Input'; // Importar el componente Input
+import Checkbox from './common/Checkbox'; // Importar el componente Checkbox
+import Button from './common/Button'; // Importar el componente Button
 
 const PoolConfiguration = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -145,185 +148,137 @@ const PoolConfiguration = () => {
         {/* Configuración de Pagos */}
         <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
           <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Configuración de Pagos</h3>
-          <div className="mb-4">
-            <label htmlFor="poolCommission" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Comisión de la Pool (%)</label>
-            <input
-              type="number"
-              id="poolCommission"
-              value={poolCommission}
-              onChange={(e) => setPoolCommission(parseFloat(e.target.value))}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="obsoletePrice" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Precio por TH/s (USD)</label>
-            <input
-              type="number"
-              id="obsoletePrice"
-              value={obsoletePrice}
-              onChange={(e) => setObsoletePrice(parseFloat(e.target.value))}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="bitcoinAddress" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Dirección de Pago (Bitcoin)</label>
-            <input
-              type="text"
-              id="bitcoinAddress"
-              value={bitcoinAddress}
-              onChange={(e) => setBitcoinAddress(e.target.value)}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-              placeholder="bc1q..."
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="minPaymentThresholdBTC" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Umbral mínimo de pago (BTC)</label>
-            <input
-              type="number"
-              id="minPaymentThresholdBTC"
-              value={minPaymentThresholdBTC}
-              onChange={(e) => setMinPaymentThresholdBTC(parseFloat(e.target.value))}
-              step="0.00000001"
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="minPaymentThresholdDOGE" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Umbral mínimo de pago (DOGE)</label>
-            <input
-              type="number"
-              id="minPaymentThresholdDOGE"
-              value={minPaymentThresholdDOGE}
-              onChange={(e) => setMinPaymentThresholdDOGE(parseFloat(e.target.value))}
-              step="0.01"
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="minPaymentThresholdLTC" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Umbral mínimo de pago (LTC)</label>
-            <input
-              type="number"
-              id="minPaymentThresholdLTC"
-              value={minPaymentThresholdLTC}
-              onChange={(e) => setMinPaymentThresholdLTC(parseFloat(e.target.value))}
-              step="0.00000001"
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="minPaymentThresholdUSD" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Umbral mínimo de pago (USD)</label>
-            <input
-              type="number"
-              id="minPaymentThresholdUSD"
-              value={minPaymentThresholdUSD}
-              onChange={(e) => setMinPaymentThresholdUSD(parseFloat(e.target.value))}
-              step="0.01"
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="paymentInterval" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Intervalo de pago</label>
-            <select
-              id="paymentInterval"
-              value={paymentInterval}
-              onChange={(e) => setPaymentInterval(e.target.value)}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            >
-              <option value="Diario">Diario</option>
-              <option value="Semanal">Semanal</option>
-              <option value="Mensual">Mensual</option>
-            </select>
-          </div>
+          <Input
+            id="poolCommission"
+            label="Comisión de la Pool (%)"
+            type="number"
+            value={poolCommission}
+            onChange={(e) => setPoolCommission(parseFloat(e.target.value))}
+          />
+          <Input
+            id="obsoletePrice"
+            label="Precio por TH/s (USD)"
+            type="number"
+            value={obsoletePrice}
+            onChange={(e) => setObsoletePrice(parseFloat(e.target.value))}
+          />
+          <Input
+            id="bitcoinAddress"
+            label="Dirección de Pago (Bitcoin)"
+            type="text"
+            value={bitcoinAddress}
+            onChange={(e) => setBitcoinAddress(e.target.value)}
+            placeholder="bc1q..."
+          />
+          <Input
+            id="minPaymentThresholdBTC"
+            label="Umbral mínimo de pago (BTC)"
+            type="number"
+            value={minPaymentThresholdBTC}
+            onChange={(e) => setMinPaymentThresholdBTC(parseFloat(e.target.value))}
+            step="0.00000001"
+          />
+          <Input
+            id="minPaymentThresholdDOGE"
+            label="Umbral mínimo de pago (DOGE)"
+            type="number"
+            value={minPaymentThresholdDOGE}
+            onChange={(e) => setMinPaymentThresholdDOGE(parseFloat(e.target.value))}
+            step="0.01"
+          />
+          <Input
+            id="minPaymentThresholdLTC"
+            label="Umbral mínimo de pago (LTC)"
+            type="number"
+            value={minPaymentThresholdLTC}
+            onChange={(e) => setMinPaymentThresholdLTC(parseFloat(e.target.value))}
+            step="0.00000001"
+          />
+          <Input
+            id="minPaymentThresholdUSD"
+            label="Umbral mínimo de pago (USD)"
+            type="number"
+            value={minPaymentThresholdUSD}
+            onChange={(e) => setMinPaymentThresholdUSD(parseFloat(e.target.value))}
+            step="0.01"
+          />
+          <Input
+            id="paymentInterval"
+            label="Intervalo de pago"
+            type="select"
+            value={paymentInterval}
+            onChange={(e) => setPaymentInterval(e.target.value)}
+          >
+            <option value="Diario">Diario</option>
+            <option value="Semanal">Semanal</option>
+            <option value="Mensual">Mensual</option>
+          </Input>
           <div className="mb-4">
             <h4 className={`text-sm mb-2 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Monedas de Pago Soportadas</h4>
             <div className="flex items-center space-x-4">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                  checked={supportedCurrencies.bitcoin}
-                  onChange={() => handleCurrencyChange('bitcoin')}
-                />
-                <span className={`ml-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Bitcoin</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                  checked={supportedCurrencies.dogecoin}
-                  onChange={() => handleCurrencyChange('dogecoin')}
-                />
-                <span className={`ml-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Dogecoin</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                  checked={supportedCurrencies.litecoin}
-                  onChange={() => handleCurrencyChange('litecoin')}
-                />
-                <span className={`ml-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Litecoin</span>
-              </label>
+              <Checkbox
+                label="Bitcoin"
+                checked={supportedCurrencies.bitcoin}
+                onChange={() => handleCurrencyChange('bitcoin')}
+              />
+              <Checkbox
+                label="Dogecoin"
+                checked={supportedCurrencies.dogecoin}
+                onChange={() => handleCurrencyChange('dogecoin')}
+              />
+              <Checkbox
+                label="Litecoin"
+                checked={supportedCurrencies.litecoin}
+                onChange={() => handleCurrencyChange('litecoin')}
+              />
             </div>
           </div>
-          <div className="mb-6">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                checked={enableBinancePay}
-                onChange={(e) => setEnableBinancePay(e.target.checked)}
-              />
-              <span className={`ml-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Habilitar Binance Pay</span>
-            </label>
-          </div>
-          <button
+          <Checkbox
+            label="Habilitar Binance Pay"
+            checked={enableBinancePay}
+            onChange={(e) => setEnableBinancePay(e.target.checked)}
+          />
+          <Button
             onClick={handleSaveConfig}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200"
+            className="w-full"
           >
             Guardar Configuración
-          </button>
+          </Button>
         </div>
 
         {/* Configuración de Minería */}
         <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
           <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Configuración de Minería</h3>
-          <div className="mb-4">
-            <label htmlFor="poolUrl" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>URL del Pool</label>
-            <input
-              type="text"
-              id="poolUrl"
-              value={poolUrl}
-              onChange={(e) => setPoolUrl(e.target.value)}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="poolPort" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Puerto del Pool</label>
-            <input
-              type="text"
-              id="poolPort"
-              value={poolPort}
-              onChange={(e) => setPoolPort(e.target.value)}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            />
-          </div>
+          <Input
+            id="poolUrl"
+            label="URL del Pool"
+            type="text"
+            value={poolUrl}
+            onChange={(e) => setPoolUrl(e.target.value)}
+          />
+          <Input
+            id="poolPort"
+            label="Puerto del Pool"
+            type="text"
+            value={poolPort}
+            onChange={(e) => setPoolPort(e.target.value)}
+          />
           <div className="mb-6">
-            <label htmlFor="defaultWorkerName" className={`block text-sm mb-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Nombre de Worker por Defecto</label>
-            <input
-              type="text"
+            <Input
               id="defaultWorkerName"
+              label="Nombre de Worker por Defecto"
+              type="text"
               value={defaultWorkerName}
               onChange={(e) => setDefaultWorkerName(e.target.value)}
-              className={`w-full p-2 rounded border focus:outline-none focus:border-blue-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
             />
             <p className={`text-sm mt-1 ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Se mostrará como: usuario.worker_name en la página principal</p>
           </div>
-          <button
+          <Button
             onClick={handleSaveConfig}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200"
+            className="w-full"
           >
             Guardar Configuración
-          </button>
+          </Button>
         </div>
       </div>
     </div>

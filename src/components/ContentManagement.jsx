@@ -3,6 +3,8 @@ import { db } from '../services/firebase';
 import { doc, getDocs, setDoc, query, collection, where } from 'firebase/firestore';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import TextArea from './common/TextArea'; // Importar el componente TextArea
+import Button from './common/Button'; // Importar el componente Button
 
 const ContentManagement = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -77,48 +79,36 @@ const ContentManagement = () => {
       <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
         <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Gestión de Contenido</h2>
         
-        <div className="mb-6">
-          <label htmlFor="aboutContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Sección "Acerca de"</label>
-          <textarea
-            id="aboutContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={aboutContent}
-            onChange={(e) => setAboutContent(e.target.value)}
-            placeholder="Escribe aquí el contenido de la sección 'Acerca de'..."
-          ></textarea>
-        </div>
+        <TextArea
+          id="aboutContent"
+          label="Sección 'Acerca de'"
+          value={aboutContent}
+          onChange={(e) => setAboutContent(e.target.value)}
+          placeholder="Escribe aquí el contenido de la sección 'Acerca de'..."
+        />
 
-        <div className="mb-6">
-          <label htmlFor="termsContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Términos y Condiciones</label>
-          <textarea
-            id="termsContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={termsContent}
-            onChange={(e) => setTermsContent(e.target.value)}
-            placeholder="Términos y condiciones del servicio..."
-          ></textarea>
-        </div>
+        <TextArea
+          id="termsContent"
+          label="Términos y Condiciones"
+          value={termsContent}
+          onChange={(e) => setTermsContent(e.target.value)}
+          placeholder="Términos y condiciones del servicio..."
+        />
 
-        <div className="mb-6">
-          <label htmlFor="privacyContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Política de Privacidad</label>
-          <textarea
-            id="privacyContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={privacyContent}
-            onChange={(e) => setPrivacyContent(e.target.value)}
-            placeholder="Política de privacidad..."
-          ></textarea>
-        </div>
+        <TextArea
+          id="privacyContent"
+          label="Política de Privacidad"
+          value={privacyContent}
+          onChange={(e) => setPrivacyContent(e.target.value)}
+          placeholder="Política de privacidad..."
+        />
 
-        <button
+        <Button
           onClick={handleSaveContent}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md w-full"
+          className="w-full"
         >
           Guardar Contenido
-        </button>
+        </Button>
       </div>
     </div>
   );

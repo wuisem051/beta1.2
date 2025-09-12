@@ -4,6 +4,9 @@ import { collection, query, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDo
 import { createUserWithEmailAndPassword, updateEmail, updatePassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Input from './common/Input'; // Importar el componente Input
+import Checkbox from './common/Checkbox'; // Importar el componente Checkbox
+import Button from './common/Button'; // Importar el componente Button
 
 const UserManagement = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -248,34 +251,28 @@ const UserManagement = () => {
       <div className={`mb-8 p-4 rounded-lg ${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
         <h3 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Añadir Nuevo Usuario</h3>
         <form onSubmit={handleAddUser} className="space-y-4">
-          <div>
-            <label htmlFor="newUserEmail" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email:</label>
-            <input
-              type="email"
-              id="newUserEmail"
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-              value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="newUserPassword" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Contraseña:</label>
-            <input
-              type="password"
-              id="newUserPassword"
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-              value={newUserPassword}
-              onChange={(e) => setNewUserPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
+          <Input
+            id="newUserEmail"
+            label="Email:"
+            type="email"
+            value={newUserEmail}
+            onChange={(e) => setNewUserEmail(e.target.value)}
+            required
+          />
+          <Input
+            id="newUserPassword"
+            label="Contraseña:"
+            type="password"
+            value={newUserPassword}
+            onChange={(e) => setNewUserPassword(e.target.value)}
+            required
+          />
+          <Button
             type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            variant="primary"
           >
             Añadir Usuario
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -291,13 +288,13 @@ const UserManagement = () => {
               <p className={`text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
                 {selectedUserIds.length} usuario(s) seleccionado(s)
               </p>
-              <button
+              <Button
                 onClick={handleMassDeleteUsers}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
+                variant="danger"
                 disabled={selectedUserIds.length === 0}
               >
                 Eliminar Seleccionados
-              </button>
+              </Button>
             </div>
 
             <div className="overflow-x-auto">
@@ -305,9 +302,7 @@ const UserManagement = () => {
                 <thead className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
                   <tr>
                     <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
-                      <input
-                        type="checkbox"
-                        className={`form-checkbox h-4 w-4 text-yellow-500 rounded ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-700 border-gray-600'}`}
+                      <Checkbox
                         onChange={handleSelectAllUsers}
                         checked={selectedUserIds.length === users.length && users.length > 0}
                       />
@@ -322,9 +317,7 @@ const UserManagement = () => {
                   {users.map((user) => (
                     <tr key={user.id}>
                       <td className="px-4 py-2 whitespace-nowrap text-sm">
-                        <input
-                          type="checkbox"
-                          className={`form-checkbox h-4 w-4 text-yellow-500 rounded ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-700 border-gray-600'}`}
+                        <Checkbox
                           checked={selectedUserIds.includes(user.id)}
                           onChange={() => handleSelectUser(user.id)}
                         />
@@ -333,18 +326,20 @@ const UserManagement = () => {
                       <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.id}</td>
                       <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.role || 'user'}</td>
                       <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
-                        <button
+                        <Button
                           onClick={() => handleEditClick(user)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded mr-2 text-xs"
+                          variant="secondary"
+                          className="py-1 px-3 mr-2 text-xs"
                         >
                           Editar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleDeleteUser(user)}
-                          className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs"
+                          variant="danger"
+                          className="py-1 px-3 text-xs"
                         >
                           Eliminar
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -359,55 +354,48 @@ const UserManagement = () => {
         <div className={`p-4 rounded-lg ${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
           <h3 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Editar Usuario: {editingUser.email}</h3>
           <form onSubmit={handleUpdateUser} className="space-y-4">
-            <div>
-              <label htmlFor="editEmail" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email:</label>
-              <input
-                type="email"
-                id="editEmail"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="editRole" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rol:</label>
-              <select
-                id="editRole"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editRole}
-                onChange={(e) => setEditRole(e.target.value)}
-              >
-                <option value="user">Usuario</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="editPassword" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nueva Contraseña (dejar en blanco para no cambiar):</label>
-              <input
-                type="password"
-                id="editPassword"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editPassword}
-                onChange={(e) => setEditPassword(e.target.value)}
-                placeholder="********"
-              />
-              <p className={`text-xs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>La contraseña puede ser cambiada aquí.</p>
-            </div>
+            <Input
+              id="editEmail"
+              label="Email:"
+              type="email"
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+              required
+            />
+            <Input
+              id="editRole"
+              label="Rol:"
+              type="select"
+              value={editRole}
+              onChange={(e) => setEditRole(e.target.value)}
+            >
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
+            </Input>
+            <Input
+              id="editPassword"
+              label="Nueva Contraseña (dejar en blanco para no cambiar):"
+              type="password"
+              value={editPassword}
+              onChange={(e) => setEditPassword(e.target.value)}
+              placeholder="********"
+            />
+            <p className={`text-xs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>La contraseña puede ser cambiada aquí.</p>
             <div className="flex justify-end">
-              <button
+              <Button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2"
+                variant="secondary"
+                className="mr-2"
               >
                 Cancelar
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+                variant="primary"
               >
                 Actualizar Usuario
-              </button>
+              </Button>
             </div>
           </form>
         </div>

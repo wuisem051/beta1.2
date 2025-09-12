@@ -3,6 +3,10 @@ import { db } from '../services/firebase'; // Importar Firebase Firestore
 import { collection, getDocs, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Input from './common/Input'; // Importar el componente Input
+import TextArea from './common/TextArea'; // Importar el componente TextArea
+import Checkbox from './common/Checkbox'; // Importar el componente Checkbox
+import Button from './common/Button'; // Importar el componente Button
 
 const NewsManagement = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -111,57 +115,43 @@ const NewsManagement = () => {
         <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
           <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>{editingNews ? 'Editar Noticia' : 'Añadir Nueva Noticia'}</h2>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="title" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Título</label>
-              <input
-                type="text"
-                id="title"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="category" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Categoría</label>
-              <select
-                id="category"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="General">General</option>
-                <option value="Actualizaciones">Actualizaciones</option>
-                <option value="Mantenimiento">Mantenimiento</option>
-                <option value="Eventos">Eventos</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label htmlFor="content" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Contenido</label>
-              <textarea
-                id="content"
-                rows="5"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              ></textarea>
-            </div>
-            <div className="mb-6">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                  checked={isFeatured}
-                  onChange={(e) => setIsFeatured(e.target.checked)}
-                />
-                <span className={`ml-2 text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Noticia destacada</span>
-              </label>
-            </div>
-            <button
+            <Input
+              id="title"
+              label="Título"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <Input
+              id="category"
+              label="Categoría"
+              type="select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="General">General</option>
+              <option value="Actualizaciones">Actualizaciones</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+              <option value="Eventos">Eventos</option>
+            </Input>
+            <TextArea
+              id="content"
+              label="Contenido"
+              rows="5"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            />
+            <Checkbox
+              label="Noticia destacada"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+            />
+            <Button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md w-full"
+              className="w-full"
             >
               {editingNews ? 'Guardar Cambios' : 'Publicar Noticia'}
-            </button>
+            </Button>
           </form>
         </div>
 
@@ -176,18 +166,20 @@ const NewsManagement = () => {
                   <p className={`text-sm mb-2 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Categoría: {item.category} {item.isFeatured && <span className={`${darkMode ? 'text-accent' : 'text-yellow-400'}`}>(Destacada)</span>}</p>
                   <p className={`text-sm line-clamp-3 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{item.content}</p>
                   <div className="mt-3 flex space-x-2">
-                    <button
+                    <Button
                       onClick={() => handleEdit(item)}
-                      className="text-indigo-400 hover:text-indigo-600 text-sm"
+                      variant="secondary"
+                      className="text-sm"
                     >
                       Editar
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(item.id)}
-                      className="text-red-400 hover:text-red-600 text-sm"
+                      variant="danger"
+                      className="text-sm"
                     >
                       Eliminar
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

@@ -5,6 +5,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 import { Bar } from 'react-chartjs-2';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Input from './common/Input'; // Importar el componente Input
+import Button from './common/Button'; // Importar el componente Button
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -258,74 +260,64 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
       {/* Formulario para añadir nuevo minero */}
       {/* Formulario para añadir nuevo minero */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label htmlFor="newMinerUserId" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID de Usuario:</label>
-          <select
-            id="newMinerUserId"
-            value={newMinerUserId}
-            onChange={(e) => setNewMinerUserId(e.target.value)}
-            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-          >
-            <option value="">Selecciona un Usuario</option>
-            {users.map(user => (
-              <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="newMinerWorkerName" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Worker:</label>
-          <input
-            type="text"
-            id="newMinerWorkerName"
-            value={newMinerWorkerName}
-            onChange={(e) => setNewMinerWorkerName(e.target.value)}
-            placeholder="Ej: worker01 o wuisem.345076"
-            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-          />
-        </div>
-        <div>
-          <label htmlFor="newMinerHashrate" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate (TH/s):</label>
-          <input
-            type="number"
-            id="newMinerHashrate"
-            value={newMinerHashrate}
-            onChange={(e) => setNewMinerHashrate(parseFloat(e.target.value))}
-            placeholder="0"
-            step="0.01"
-            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-          />
-        </div>
-        <div>
-          <label htmlFor="newMinerStatus" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Estado:</label>
-          <select
-            id="newMinerStatus"
-            value={newMinerStatus}
-            onChange={(e) => setNewMinerStatus(e.target.value)}
-            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-          >
-            <option value="activo">Activo</option>
-            <option value="inactivo">Inactivo</option>
-            <option value="offline">Offline</option>
-          </select>
-        </div>
+        <Input
+          id="newMinerUserId"
+          label="ID de Usuario:"
+          type="select"
+          value={newMinerUserId}
+          onChange={(e) => setNewMinerUserId(e.target.value)}
+        >
+          <option value="">Selecciona un Usuario</option>
+          {users.map(user => (
+            <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
+          ))}
+        </Input>
+        <Input
+          id="newMinerWorkerName"
+          label="Nombre del Worker:"
+          type="text"
+          value={newMinerWorkerName}
+          onChange={(e) => setNewMinerWorkerName(e.target.value)}
+          placeholder="Ej: worker01 o wuisem.345076"
+        />
+        <Input
+          id="newMinerHashrate"
+          label="Hashrate (TH/s):"
+          type="number"
+          value={newMinerHashrate}
+          onChange={(e) => setNewMinerHashrate(parseFloat(e.target.value))}
+          placeholder="0"
+          step="0.01"
+        />
+        <Input
+          id="newMinerStatus"
+          label="Estado:"
+          type="select"
+          value={newMinerStatus}
+          onChange={(e) => setNewMinerStatus(e.target.value)}
+        >
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+          <option value="offline">Offline</option>
+        </Input>
         <div className="md:col-span-4 flex justify-end">
-          <button
+          <Button
             onClick={handleAddNewMiner}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            variant="success"
           >
             Añadir Minero
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Sección de Búsqueda y Filtro */}
       <div className="mb-6 flex flex-col md:flex-row gap-4">
-        <input
+        <Input
           type="text"
           placeholder="Buscar por nombre de worker o ID de usuario..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full md:w-2/3 rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          className="w-full md:w-2/3"
         />
         <select
           value={filterStatus}
@@ -411,12 +403,12 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
       {/* Botón de Eliminar Seleccionados */}
       {selectedMiners.length > 0 && (
         <div className="mt-4 flex justify-end">
-          <button
+          <Button
             onClick={handleDeleteSelectedMiners}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            variant="danger"
           >
             Eliminar Seleccionados ({selectedMiners.length})
-          </button>
+          </Button>
         </div>
       )}
 
@@ -459,72 +451,62 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
           <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-white'} p-8 rounded-lg shadow-xl w-full max-w-md`}>
             <h2 className="text-2xl font-bold mb-4">Editar Minero</h2>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="editMinerUserId" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID de Usuario</label>
-                <select
-                  id="editMinerUserId"
-                  name="userId"
-                  value={newMinerUserId}
-                  onChange={handleMinerEditChange}
-                  className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                >
-                  <option value="">Selecciona un Usuario</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="editWorkerName" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Worker</label>
-                <input
-                  type="text"
-                  name="workerName"
-                  id="editWorkerName"
-                  value={newMinerWorkerName}
-                  onChange={handleMinerEditChange}
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                />
-              </div>
-              <div>
-                <label htmlFor="editCurrentHashrate" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate (TH/s)</label>
-                <input
-                  type="number"
-                  name="currentHashrate"
-                  id="editCurrentHashrate"
-                  value={newMinerHashrate}
-                  onChange={handleMinerEditChange}
-                  step="0.01"
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                />
-              </div>
-              <div>
-                <label htmlFor="editStatus" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Estado</label>
-                <select
-                  name="status"
-                  id="editStatus"
-                  value={newMinerStatus}
-                  onChange={handleMinerEditChange}
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                >
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
-                  <option value="offline">Offline</option>
-                </select>
-              </div>
+              <Input
+                id="editMinerUserId"
+                label="ID de Usuario"
+                name="userId"
+                type="select"
+                value={newMinerUserId}
+                onChange={handleMinerEditChange}
+              >
+                <option value="">Selecciona un Usuario</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
+                ))}
+              </Input>
+              <Input
+                id="editWorkerName"
+                label="Nombre del Worker"
+                name="workerName"
+                type="text"
+                value={newMinerWorkerName}
+                onChange={handleMinerEditChange}
+              />
+              <Input
+                id="editCurrentHashrate"
+                label="Hashrate (TH/s)"
+                name="currentHashrate"
+                type="number"
+                value={newMinerHashrate}
+                onChange={handleMinerEditChange}
+                step="0.01"
+              />
+              <Input
+                id="editStatus"
+                label="Estado"
+                name="status"
+                type="select"
+                value={newMinerStatus}
+                onChange={handleMinerEditChange}
+              >
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+                <option value="offline">Offline</option>
+              </Input>
             </div>
             <div className="mt-6 flex justify-end space-x-3">
-              <button
+              <Button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                variant="secondary"
               >
                 Cancelar
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSaveChanges}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                variant="primary"
               >
                 Guardar Cambios
-              </button>
+              </Button>
             </div>
           </div>
         </div>

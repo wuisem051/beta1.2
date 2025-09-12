@@ -3,6 +3,7 @@ import { db } from '../services/firebase';
 import { collection, getDocs, onSnapshot, doc, updateDoc, query, orderBy, where, deleteDoc } from 'firebase/firestore';
 import { ThemeContext } from '../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../context/ErrorContext'; // Importar useError
+import Button from './common/Button'; // Importar el componente Button
 
 const ContactRequestsManagement = ({ onUnreadCountChange }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -119,12 +120,13 @@ const ContactRequestsManagement = ({ onUnreadCountChange }) => {
       <div className={`w-1/3 p-4 border-r overflow-y-auto ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-white border-gray-200'}`}>
         <div className="flex justify-between items-center mb-4">
           <h2 className={`text-xl font-bold ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>Solicitudes de Contacto</h2>
-          <button
+          <Button
             onClick={handleDeleteClosedRequests}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-1.5 px-3 rounded-md text-sm"
+            variant="danger"
+            className="py-1.5 px-3 text-sm"
           >
             Eliminar Cerrados
-          </button>
+          </Button>
         </div>
         {requests.length === 0 ? (
           <p className={`${darkMode ? 'text-light_text' : 'text-gray-600'}`}>No hay solicitudes de contacto.</p>
@@ -201,18 +203,18 @@ const ContactRequestsManagement = ({ onUnreadCountChange }) => {
                 onChange={(e) => setAdminReply(e.target.value)}
               ></textarea>
               <div className="flex justify-end space-x-2">
-                <button
+                <Button
                   onClick={handleSendReply}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md"
+                  variant="primary"
                 >
                   Enviar Respuesta
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleCloseRequest}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
+                  variant="success"
                 >
                   Cerrar Solicitud
-                </button>
+                </Button>
               </div>
             </div>
           </div>
