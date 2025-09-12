@@ -55,7 +55,7 @@ const Header = () => {
             <Link to="/" className={`flex-shrink-0 text-xl font-bold mr-4 ${theme.text}`}> {/* Aplicar clases de tema */}
               <span className="text-accent">{siteName.charAt(0)}</span>{siteName.substring(1)}
             </Link>
-            {/* Botón para alternar modo oscuro/claro (desactivado temporalmente) */}
+            {/* Botón para alternar modo oscuro/claro (desactivado por petición del usuario) */}
             {/*
             <button 
               onClick={toggleDarkMode} 
@@ -69,10 +69,10 @@ const Header = () => {
           </div>
 
           {/* Navegación principal (Desktop) */}
-          <nav className="hidden md:flex items-center space-x-1"> {/* Reducir espacio entre elementos */}
+          <nav className="hidden md:flex items-center space-x-0.5"> {/* Reducir espacio entre elementos */}
             <Link 
               to="/" 
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
                 location.pathname === '/' && location.hash === '' 
                   ? 'bg-accent text-white' 
                   : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
@@ -84,7 +84,7 @@ const Header = () => {
               <>
                 <Link 
                   to="/user/dashboard" 
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
                     location.pathname.startsWith('/user') 
                       ? 'bg-accent text-white' 
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
@@ -94,7 +94,7 @@ const Header = () => {
                 </Link>
                 <button 
                   onClick={handleLogout} 
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
                     `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
                   }`}
                 >
@@ -105,7 +105,7 @@ const Header = () => {
               <>
                 <Link 
                   to="/signup" 
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
                     location.pathname === '/signup' 
                       ? 'bg-accent text-white' 
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
@@ -115,7 +115,7 @@ const Header = () => {
                 </Link>
                 <Link 
                   to="/login" 
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
                     location.pathname === '/login' 
                       ? 'bg-accent text-white' 
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`

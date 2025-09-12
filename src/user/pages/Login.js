@@ -23,7 +23,8 @@ const Login = () => {
       const sanitizedPassword = sanitizeInput(passwordRef.current.value);
 
       await login(sanitizedEmail, sanitizedPassword);
-      navigate('/user/dashboard'); // Redirigir al panel de usuario
+      // La redirección al panel de usuario será manejada por ProtectedRoute
+      // una vez que el estado de autenticación se haya actualizado.
     } catch (err) {
       showError('Fallo al iniciar sesión. Revisa tus credenciales.');
       console.error("Error al iniciar sesión:", err);

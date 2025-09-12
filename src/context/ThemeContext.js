@@ -3,10 +3,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    return savedMode === 'true' ? true : false;
-  });
+  const [darkMode, setDarkMode] = useState(true); // Modo oscuro por defecto
 
   useEffect(() => {
     localStorage.setItem('darkMode', darkMode);
@@ -14,7 +11,7 @@ export const ThemeProvider = ({ children }) => {
 
   const theme = {
     background: darkMode ? 'bg-gray-900' : 'bg-white',
-    backgroundAlt: darkMode ? 'bg-gray-800' : 'bg-gray-100',
+    backgroundAlt: darkMode ? 'bg-gray-900' : 'bg-gray-100', // Ajustado a bg-gray-900 para un fondo más oscuro en el menú
     text: darkMode ? 'text-white' : 'text-gray-900',
     textSoft: darkMode ? 'text-gray-300' : 'text-gray-600',
     inputBackground: darkMode ? 'bg-gray-700' : 'bg-gray-50',

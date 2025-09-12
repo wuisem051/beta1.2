@@ -51,11 +51,14 @@ function App() {
       }
     };
     fetchSiteSettings();
-  }, []);
+
+    // No aplicar la clase 'dark' al body globalmente, ya que cada panel debe tener su propio CSS.
+    // Los componentes individuales usarán las clases de tema de ThemeContext.
+  }, []); // No hay dependencia de darkMode ya que el modo oscuro se gestiona a nivel de componente
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className={`flex flex-col min-h-screen ${theme.background} ${theme.text}`}> {/* Aplicar clases de tema */}
+      <div className="flex flex-col min-h-screen"> {/* Eliminar clases de tema globales */}
         <Header />
         <main className="flex-grow">
           <AuthProvider>
