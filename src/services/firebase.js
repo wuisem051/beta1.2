@@ -22,7 +22,7 @@ const db = getFirestore(app);
 if (process.env.NODE_ENV === 'development') {
   if (window.location.hostname === "localhost") {
     connectAuthEmulator(auth, "http://localhost:9099"); // Puerto por defecto para Auth Emulator
-    connectFirestoreEmulator(db, "localhost", 8080); // Puerto por defecto para Firestore Emulator
+    connectFirestoreEmulator(db, "localhost", 8081); // Puerto configurado en firebase.json
   }
 }
 
