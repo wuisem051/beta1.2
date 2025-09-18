@@ -4,9 +4,11 @@ service cloud.firestore {
     // Reglas para colecciones públicas (sin autenticación)
     match /settings/{document} {
       allow read, list: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     match /news/{document} {
       allow read, list: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     match /poolConfig/{document} {
       allow read, list: if true;
@@ -16,6 +18,7 @@ service cloud.firestore {
     }
     match /performanceStats/{document} {
       allow read, list: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Reglas para colecciones que requieren autenticación
@@ -33,6 +36,7 @@ service cloud.firestore {
 
     match /userBalances/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /withdrawals/{withdrawalId} {
@@ -44,8 +48,7 @@ service cloud.firestore {
       allow read: if true;
       // Asumiendo que hay un campo 'ownerId' en arbitragePools
       allow write: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
-      // O si solo los administradores pueden escribir:
-      // allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /userArbitragePools/{userId}/{poolId} {
