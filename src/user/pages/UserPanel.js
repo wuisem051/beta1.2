@@ -12,12 +12,14 @@ import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar Use
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
+import StatsSection from '../components/StatsSection'; // Importar StatsSection
+import PerformanceStatsSection from '../components/PerformanceStatsSection'; // Importar PerformanceStatsSection
 import styles from './UserPanel.module.css'; // Importar estilos CSS Modules
 import useFormValidation from '../../hooks/useFormValidation'; // Importar useFormValidation
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 // Componentes de las sub-secciones
-const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, styles, totalHashrate, estimatedDailyUSD }) => {
+const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, styles, totalHashrate, estimatedDailyUSD, activeMinersAllUsers, pricePerTHs }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
 
   console.log("DashboardContent: Renderizando con props:", { userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, totalHashrate, estimatedDailyUSD });
@@ -86,6 +88,9 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
           </div>
         </div>
       </div>
+
+      <PerformanceStatsSection /> {/* Añadir PerformanceStatsSection */}
+      <StatsSection totalHashrate={totalHashratePool} activeMiners={activeMinersAllUsers} pricePerTHs={pricePerTHs} /> {/* Añadir StatsSection */}
 
       <div className={styles.chartAndStatsGrid}>
         {/* Rendimiento Histórico */}
@@ -1568,6 +1573,7 @@ const UserPanel = () => {
     USD: 10,
   });
   const [totalHashratePool, setTotalHashratePool] = useState(0); // Nuevo estado para el hashrate total de la pool
+  const [activeMinersAllUsers, setActiveMinersAllUsers] = useState(0); // Nuevo estado para mineros activos de la pool
   const [poolCommission, setPoolCommission] = useState(0); // Nuevo estado para la comisión de la pool
   const [paymentsHistory, setPaymentsHistory] = useState([]); // Estado para el historial de pagos
   const [withdrawalsHistory, setWithdrawalsHistory] = useState([]); // Estado para el historial de retiros
@@ -1641,10 +1647,14 @@ const UserPanel = () => {
     const allMinersQuery = collection(db, "miners");
     const unsubscribe = onSnapshot(allMinersQuery, (snapshot) => {
       let totalHash = 0;
+      let activeCount = 0;
       snapshot.docs.forEach(doc => {
-        totalHash += doc.data().currentHashrate || 0;
+        const miner = doc.data();
+        totalHash += miner.currentHashrate || 0;
+        activeCount += 1; // Asumimos que todos los mineros en la colección son activos para este conteo
       });
       setTotalHashratePool(totalHash);
+      setActiveMinersAllUsers(activeCount);
     }, (error) => {
       console.error("UserPanel: Error en la suscripción de todos los mineros:", error);
     });
@@ -1791,7 +1801,7 @@ const UserPanel = () => {
         </header>
         
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} />} />
+          <Route path="dashboard/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
           <Route path="mining-info/*" element={<MiningInfoContent currentUser={currentUser} userMiners={userMiners} setUserMiners={setUserMiners} styles={styles} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
@@ -1799,7 +1809,7 @@ const UserPanel = () => {
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} />} />
+          <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
         </Routes>
       </MainContent>
     </div>
