@@ -70,6 +70,30 @@ const Header = () => {
 
           {/* Navegación principal (Desktop) */}
           <nav className="hidden md:flex items-center space-x-0.5"> {/* Reducir espacio entre elementos */}
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <Link
+                  to="/admin"
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-red-600 text-white' // Color distintivo para admin dev
+                      : `text-red-400 hover:bg-red-800 hover:text-white`
+                  }`}
+                >
+                  Admin (Dev)
+                </Link>
+                <Link
+                  to="/user/dashboard"
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
+                    location.pathname.startsWith('/user')
+                      ? 'bg-blue-600 text-white' // Color distintivo para user dev
+                      : `text-blue-400 hover:bg-blue-800 hover:text-white`
+                  }`}
+                >
+                  Usuario (Dev)
+                </Link>
+              </>
+            )}
             <Link 
               to="/" 
               className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
@@ -157,6 +181,30 @@ const Header = () => {
       {isOpen && (
         <div className={`md:hidden ${theme.backgroundAlt}`} id="mobile-menu"> {/* Aplicar clases de tema */}
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <Link
+                  to="/admin"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-red-600 text-white'
+                      : `text-red-400 hover:bg-red-800 hover:text-white`
+                  }`}
+                >
+                  Admin (Dev)
+                </Link>
+                <Link
+                  to="/user/dashboard"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    location.pathname.startsWith('/user')
+                      ? 'bg-blue-600 text-white'
+                      : `text-blue-400 hover:bg-blue-800 hover:text-white`
+                  }`}
+                >
+                  Usuario (Dev)
+                </Link>
+              </>
+            )}
             <Link 
               to="/" 
               className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
