@@ -1,33 +1,71 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Reglas para colecciones públicas (sin autenticación)
     match /settings/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para la configuración del sitio
+      allow read, list: if true;
     }
-
     match /news/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para las noticias
+      allow read, list: if true;
     }
-
     match /poolConfig/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para la configuración del pool
+      allow read, list: if true;
     }
-
     match /profitabilitySettings/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para la configuración de rentabilidad
+      allow read, list: if true;
     }
-
     match /performanceStats/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para las estadísticas de rendimiento
-    }
-
-    match /miners/{document} {
-      allow read, list: if true; // Permitir lectura pública y listado para la colección de mineros
+      allow read, list: if true;
     }
 
     // Reglas para colecciones que requieren autenticación
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /miners/{minerId} {
+      allow read, create, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow list: if request.auth != null; // Permitir listar todos los mineros para usuarios autenticados
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /userBalances/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /withdrawals/{withdrawalId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /arbitragePools/{poolId} {
+      allow read: if true;
+      // Asumiendo que hay un campo 'ownerId' en arbitragePools
+      allow write: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+      // O si solo los administradores pueden escribir:
+      // allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /userArbitragePools/{userId}/{poolId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if false;
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /contactRequests/{ticketId} {
+      allow read, create, update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow read, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Regla general para cualquier otra colección (denegar todo)
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

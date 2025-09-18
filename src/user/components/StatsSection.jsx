@@ -9,7 +9,7 @@ const StatsSection = ({ totalHashrate, activeMiners, pricePerTHs }) => {
                 <p className="text-3xl font-bold text-dark_text mt-2">{totalHashrate.toFixed(2)} TH/s</p>
             </div>
             <div className="stat-card p-6 rounded-lg text-center shadow-md">
-                <h3 className="text-gray_text text-sm font-medium uppercase">Mineros Activos</h3>
+                <h3 className="text-gray_text text-sm font-medium uppercase">Mineros En La Red</h3>
                 <p className="text-3xl font-bold text-dark_text mt-2">{activeMiners}</p>
             </div>
             <div className="stat-card p-6 rounded-lg text-center shadow-md">

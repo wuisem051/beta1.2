@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
 import { db } from '../../services/firebase'; // Importar Firebase Firestore
-import { collection, getDocs, setDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, setDoc, query, where, doc } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
