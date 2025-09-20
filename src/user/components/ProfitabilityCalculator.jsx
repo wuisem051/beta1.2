@@ -3,9 +3,9 @@ import { db } from '../../services/firebase'; // Importar Firebase Firestore
 import { doc, getDoc } from 'firebase/firestore'; // Importar doc y getDoc
 
 const ProfitabilityCalculator = () => {
-  const [hashrate, setHashrate] = useState(1);
-  const [consumption, setConsumption] = useState(3000);
-  const [costPerKWH, setCostPerKWH] = useState(0.12);
+  const [hashrate, setHashrate] = useState(10);
+  // const [consumption, setConsumption] = useState(3000); // Eliminado
+  // const [costPerKWH, setCostPerKWH] = useState(0.12); // Eliminado
 
   // Valores de configuración obtenidos del administrador (ahora de Firebase)
   const [fixedRatePerTHs, setFixedRatePerTHs] = useState(0.06);
@@ -16,7 +16,7 @@ const ProfitabilityCalculator = () => {
   const [btcPrice, setBtcPrice] = useState(121692); 
   const [difficulty, setDifficulty] = useState(73197634206448); 
 
-  const [dailyElectricCost, setDailyElectricCost] = useState(0);
+  // const [dailyElectricCost, setDailyElectricCost] = useState(0); // Eliminado
   const [dailyBtcGain, setDailyBtcGain] = useState(0);
   const [dailyUsdGain, setDailyUsdGain] = useState(0);
   const [weeklyBtcGain, setWeeklyBtcGain] = useState(0);
@@ -47,9 +47,9 @@ const ProfitabilityCalculator = () => {
   const previewCommission = fixedPoolCommission;
 
   const calculateProfitability = () => {
-    const dailyConsumptionKWH = (consumption * 24) / 1000;
-    const calculatedDailyElectricCost = dailyConsumptionKWH * costPerKWH;
-    setDailyElectricCost(calculatedDailyElectricCost);
+    // const dailyConsumptionKWH = (consumption * 24) / 1000; // Eliminado
+    // const calculatedDailyElectricCost = dailyConsumptionKWH * costPerKWH; // Eliminado
+    // setDailyElectricCost(calculatedDailyElectricCost); // Eliminado
 
     let calculatedDailyBtcGain = 0;
     let calculatedDailyUsdGain = 0;
@@ -73,7 +73,8 @@ const ProfitabilityCalculator = () => {
     setAnnualBtcGain(calculatedDailyBtcGain * 365);
     setAnnualUsdGain(calculatedDailyUsdGain * 365);
 
-    const calculatedNetDailyGain = calculatedDailyUsdGain - calculatedDailyElectricCost;
+    // const calculatedNetDailyGain = calculatedDailyUsdGain - calculatedDailyElectricCost; // Modificado
+    const calculatedNetDailyGain = calculatedDailyUsdGain; // Modificado
     setNetDailyGain(calculatedNetDailyGain);
   };
 
@@ -106,7 +107,7 @@ const ProfitabilityCalculator = () => {
     }
     
     calculateProfitability();
-  }, [hashrate, consumption, costPerKWH, fixedPoolCommission, fixedRatePerTHs, useFixedRate, btcPrice, difficulty]);
+  }, [hashrate, fixedPoolCommission, fixedRatePerTHs, useFixedRate, btcPrice, difficulty]); // Eliminado consumption y costPerKWH
 
   return (
     <div className="p-6 bg-light_card text-dark_text rounded-lg shadow-lg max-w-4xl mx-auto my-8">
@@ -128,27 +129,8 @@ const ProfitabilityCalculator = () => {
               className="w-full p-2 rounded bg-white border border-gray_border focus:outline-none focus:border-blue_link text-dark_text"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="consumption" className="block text-gray_text text-sm mb-1">Consumo (W)</label>
-            <input
-              type="number"
-              id="consumption"
-              value={consumption}
-              onChange={(e) => setConsumption(parseFloat(e.target.value))}
-              className="w-full p-2 rounded bg-white border border-gray_border focus:outline-none focus:border-blue_link text-dark_text"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="costPerKWH" className="block text-gray_text text-sm mb-1">Costo (USD/kWh)</label>
-            <input
-              type="number"
-              id="costPerKWH"
-              step="0.01"
-              value={costPerKWH}
-              onChange={(e) => setCostPerKWH(parseFloat(e.target.value))}
-              className="w-full p-2 rounded bg-white border border-gray_border focus:outline-none focus:border-blue_link text-dark_text"
-            />
-          </div>
+          {/* Eliminado: Consumo (W) */}
+          {/* Eliminado: Costo (USD/kWh) */}
           <button
             onClick={calculateProfitability}
             className="w-full bg-accent hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200"
@@ -174,14 +156,6 @@ const ProfitabilityCalculator = () => {
             <p className="text-gray_text">Uso de Tasa Fija:</p>
             <p className="text-lg font-bold text-dark_text">{useFixedRate ? 'Sí' : 'No'}</p>
           </div>
-          <div className="mt-auto pt-4 border-t border-gray_border">
-            <h3 className="text-lg font-semibold mb-2 text-accent">Vista previa del cálculo:</h3>
-            <ul className="list-disc list-inside text-gray_text">
-              <li>1 TH/s = ${preview1THs.toFixed(4)} USD/día</li>
-              <li>10 TH/s = ${preview10THs.toFixed(4)} USD/día</li>
-              <li>Comisión: {previewCommission.toFixed(1)}%</li>
-            </ul>
-          </div>
         </div>
 
         {/* Ganancias a Corto Plazo */}
@@ -198,10 +172,6 @@ const ProfitabilityCalculator = () => {
             <p className="text-gray_text">Semanal:</p>
             <p className="text-lg font-bold text-dark_text">{weeklyBtcGain.toFixed(8)} BTC</p>
             <p className="text-md text-gray_text">${weeklyUsdGain.toFixed(2)} USD</p>
-          </div>
-          <div className="mt-auto pt-4 border-t border-gray_border">
-            <p className="text-gray_text">Costo eléctrico diario:</p>
-            <p className="text-lg font-bold text-red_error">${dailyElectricCost.toFixed(2)} USD</p>
           </div>
         </div>
 
