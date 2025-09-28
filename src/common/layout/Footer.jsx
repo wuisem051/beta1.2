@@ -14,13 +14,13 @@ const Footer = () => {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setFooterText(data.footerText || `© ${new Date().getFullYear()} BitcoinPool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
+          setFooterText(data.footerText || `© ${new Date().getFullYear()} MaxiOS Pool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
         } else {
-          setFooterText(`© ${new Date().getFullYear()} BitcoinPool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
+          setFooterText(`© ${new Date().getFullYear()} MaxiOS Pool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
         }
       } catch (err) {
         console.error("Error fetching footer text from Firebase:", err);
-        setFooterText(`© ${new Date().getFullYear()} BitcoinPool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`); // Fallback en caso de error
+        setFooterText(`© ${new Date().getFullYear()} MaxiOS Pool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`); // Fallback en caso de error
       }
     };
     fetchFooterText();

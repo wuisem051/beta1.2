@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
 import { db } from '../../services/firebase'; // Importar Firebase Firestore
 import { doc, getDoc } from 'firebase/firestore'; // Importar doc y getDoc
+import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 
 const ProfitabilityCalculator = () => {
   const [hashrate, setHashrate] = useState(10);
@@ -107,26 +108,28 @@ const ProfitabilityCalculator = () => {
     }
     
     calculateProfitability();
-  }, [hashrate, fixedPoolCommission, fixedRatePerTHs, useFixedRate, btcPrice, difficulty]); // Eliminado consumption y costPerKWH
+  }, [hashrate, fixedPoolCommission, fixedRatePerTHs, useFixedRate, btcPrice, difficulty]);
+
+  const { theme } = useContext(ThemeContext); // Usar ThemeContext
 
   return (
-    <div className="p-6 bg-light_card text-dark_text rounded-lg shadow-lg max-w-4xl mx-auto my-8">
+    <div className={`p-6 ${theme.backgroundAlt} ${theme.text} rounded-lg shadow-lg max-w-4xl mx-auto my-8`}>
       <h2 className="text-3xl font-bold text-center mb-6">Calculadora de Rentabilidad</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Datos de Entrada */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray_border">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
+        <div className={`${theme.background} p-6 rounded-lg shadow-sm border ${theme.borderColor}`}>
+          <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
             <span className="mr-2">📊</span> Datos de Entrada
           </h3>
           <div className="mb-4">
-            <label htmlFor="hashrate" className="block text-gray_text text-sm mb-1">Hashrate (TH/s)</label>
+            <label htmlFor="hashrate" className={`block ${theme.textSoft} text-sm mb-1`}>Hashrate (TH/s)</label>
             <input
               type="number"
               id="hashrate"
               value={hashrate}
               onChange={(e) => setHashrate(parseFloat(e.target.value))}
-              className="w-full p-2 rounded bg-white border border-gray_border focus:outline-none focus:border-blue_link text-dark_text"
+              className={`w-full p-2 rounded ${theme.inputBackground} border ${theme.borderColor} focus:outline-none focus:border-accent ${theme.text}`}
             />
           </div>
           {/* Eliminado: Consumo (W) */}
@@ -140,58 +143,58 @@ const ProfitabilityCalculator = () => {
         </div>
 
         {/* Configuración de Rentabilidad Actual */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray_border">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
+        <div className={`${theme.background} p-6 rounded-lg shadow-sm border ${theme.borderColor}`}>
+          <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
             <span className="mr-2">⚙️</span> Configuración Actual
           </h3>
           <div className="mb-4">
-            <p className="text-gray_text">Tasa Fija por TH/s:</p>
-            <p className="text-lg font-bold text-dark_text">${fixedRatePerTHs.toFixed(4)} USD/día</p>
+            <p className={`${theme.textSoft}`}>Tasa Fija por TH/s:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>${fixedRatePerTHs.toFixed(4)} USD/día</p>
           </div>
           <div className="mb-4">
-            <p className="text-gray_text">Comisión de la Pool:</p>
-            <p className="text-lg font-bold text-dark_text">{fixedPoolCommission.toFixed(1)}%</p>
+            <p className={`${theme.textSoft}`}>Comisión de la Pool:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{fixedPoolCommission.toFixed(1)}%</p>
           </div>
           <div className="mb-6">
-            <p className="text-gray_text">Uso de Tasa Fija:</p>
-            <p className="text-lg font-bold text-dark_text">{useFixedRate ? 'Sí' : 'No'}</p>
+            <p className={`${theme.textSoft}`}>Uso de Tasa Fija:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{useFixedRate ? 'Sí' : 'No'}</p>
           </div>
         </div>
 
         {/* Ganancias a Corto Plazo */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray_border">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
+        <div className={`${theme.background} p-6 rounded-lg shadow-sm border ${theme.borderColor}`}>
+          <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
             <span className="mr-2">💰</span> Ganancias a Corto Plazo
           </h3>
           <div className="mb-4">
-            <p className="text-gray_text">Diario:</p>
-            <p className="text-lg font-bold text-dark_text">{dailyBtcGain.toFixed(8)} BTC</p>
-            <p className="text-md text-gray_text">${dailyUsdGain.toFixed(2)} USD</p>
+            <p className={`${theme.textSoft}`}>Diario:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{dailyBtcGain.toFixed(8)} BTC</p>
+            <p className={`text-md ${theme.textSoft}`}>${dailyUsdGain.toFixed(2)} USD</p>
           </div>
           <div className="mb-6">
-            <p className="text-gray_text">Semanal:</p>
-            <p className="text-lg font-bold text-dark_text">{weeklyBtcGain.toFixed(8)} BTC</p>
-            <p className="text-md text-gray_text">${weeklyUsdGain.toFixed(2)} USD</p>
+            <p className={`${theme.textSoft}`}>Semanal:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{weeklyBtcGain.toFixed(8)} BTC</p>
+            <p className={`text-md ${theme.textSoft}`}>${weeklyUsdGain.toFixed(2)} USD</p>
           </div>
         </div>
 
         {/* Ganancias a Largo Plazo */}
-        <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray_border">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
+        <div className={`${theme.background} p-6 rounded-lg shadow-sm border ${theme.borderColor}`}>
+          <h3 className={`text-xl font-semibold mb-4 flex items-center ${theme.text}`}>
             <span className="mr-2">📈</span> Ganancias a Largo Plazo
           </h3>
           <div className="mb-4">
-            <p className="text-gray_text">Mensual:</p>
-            <p className="text-lg font-bold text-dark_text">{monthlyBtcGain.toFixed(8)} BTC</p>
-            <p className="text-md text-gray_text">${monthlyUsdGain.toFixed(2)} USD</p>
+            <p className={`${theme.textSoft}`}>Mensual:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{monthlyBtcGain.toFixed(8)} BTC</p>
+            <p className={`text-md ${theme.textSoft}`}>${monthlyUsdGain.toFixed(2)} USD</p>
           </div>
           <div className="mb-6">
-            <p className="text-gray_text">Anual:</p>
-            <p className="text-lg font-bold text-dark_text">{annualBtcGain.toFixed(8)} BTC</p>
-            <p className="text-md text-gray_text">${annualUsdGain.toFixed(2)} USD</p>
+            <p className={`${theme.textSoft}`}>Anual:</p>
+            <p className={`text-lg font-bold ${theme.text}`}>{annualBtcGain.toFixed(8)} BTC</p>
+            <p className={`text-md ${theme.textSoft}`}>${annualUsdGain.toFixed(2)} USD</p>
           </div>
-          <div className="mt-auto pt-4 border-t border-gray_border">
-            <p className="text-gray_text">Ganancia neta diaria:</p>
+          <div className={`mt-auto pt-4 border-t ${theme.borderColor}`}>
+            <p className={`${theme.textSoft}`}>Ganancia neta diaria:</p>
             <p className="text-lg font-bold text-blue_link">${netDailyGain.toFixed(2)} USD</p>
           </div>
         </div>

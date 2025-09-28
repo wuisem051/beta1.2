@@ -13,7 +13,6 @@ import ContactRequestsManagement from '../components/ContactRequestsManagement';
 import WithdrawalRequestsManagement from '../components/WithdrawalRequestsManagement';
 import BalanceManagement from '../../user/components/BalanceManagement';
 import SiteSettingsContent from '../components/SiteSettingsContent'; // Importar el nuevo componente
-import FileManager from '../components/FileManager'; // Importar el nuevo componente FileManager
 
 const AdminPanel = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -212,18 +211,6 @@ const AdminPanel = () => {
                 Configuración del Sitio
               </Link>
             </li>
-            <li className="mb-0.5"> {/* Nuevo enlace para Gestor de Archivos */}
-              <Link 
-                to="/admin/file-manager" 
-                className={`flex items-center py-1.5 rounded-lg text-sm font-medium ${
-                  location.pathname === '/admin/file-manager' 
-                    ? 'bg-accent text-white' 
-                    : (darkMode ? 'text-light_text hover:bg-dark_border' : 'text-gray-300 hover:bg-gray-700')
-                }`}
-              >
-                Gestor de Archivos
-              </Link>
-            </li>
           </ul>
         </nav>
       </aside>
@@ -253,7 +240,6 @@ const AdminPanel = () => {
           />
           <Route path="balance-management" element={<BalanceManagement />} />
           <Route path="site-settings" element={<SiteSettingsContent />} /> {/* Nueva ruta para Configuración del Sitio */}
-          <Route path="file-manager" element={<FileManager />} /> {/* Nueva ruta para Gestor de Archivos */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
             <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-gray-300'} p-6 rounded-lg`}>

@@ -11,7 +11,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Obtener la ubicación actual
   const [isOpen, setIsOpen] = useState(false); // Estado para el menú móvil
-  const [siteName, setSiteName] = useState('BitcoinPool'); // Estado para el nombre del sitio
+  const [siteName, setSiteName] = useState('MaxiOS Pool'); // Estado para el nombre del sitio
 
   useEffect(() => {
     const fetchSiteName = async () => {
@@ -21,13 +21,13 @@ const Header = () => {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setSiteName(data.siteName || 'BitcoinPool');
+          setSiteName(data.siteName || 'MaxiOS Pool');
         } else {
-          setSiteName('BitcoinPool');
+          setSiteName('MaxiOS Pool');
         }
       } catch (err) {
         console.error("Error fetching site name for Header from Firebase:", err);
-        setSiteName('BitcoinPool'); // Fallback en caso de error
+        setSiteName('MaxiOS Pool'); // Fallback en caso de error
       }
     };
     fetchSiteName();
@@ -103,6 +103,16 @@ const Header = () => {
               }`}
             >
               Estadísticas
+            </Link>
+            <Link 
+              to="/calculator" 
+              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
+                location.pathname === '/calculator' 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+              }`}
+            >
+              Calculadora
             </Link>
             {currentUser ? (
               <>
@@ -214,6 +224,16 @@ const Header = () => {
               }`}
             >
               Estadísticas
+            </Link>
+            <Link 
+              to="/calculator" 
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                location.pathname === '/calculator' 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+              }`}
+            >
+              Calculadora
             </Link>
             {currentUser ? (
               <>
