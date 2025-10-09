@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
-import ProfitabilityCalculator from '../components/ProfitabilityCalculator';
 import { db } from '../../services/firebase'; // Importar db desde firebase.js
 import { collection, doc, getDoc, query, where, getDocs } from 'firebase/firestore';
 
@@ -54,7 +53,6 @@ const Home = () => {
   return (
     <div className="min-h-screen py-8">
       <HeroSection homeText={siteConfig.homeText} heroTitle={siteConfig.heroTitle} />
-      <ProfitabilityCalculator />
     </div>
   );
 };
