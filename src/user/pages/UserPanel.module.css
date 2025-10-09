@@ -1198,3 +1198,153 @@ body.dark .disabledCheckbox {
   background-color: var(--dark-bg); /* Fondo en modo oscuro */
   border-color: var(--dark-border); /* Borde en modo oscuro */
 }
+
+/* Estilos específicos para TradingSignal y TradingSignalManagement */
+
+.signalBuy {
+  color: var(--green-check); /* Define esta variable en tu CSS global o tailwind.config.js */
+}
+
+.signalSell {
+  color: var(--red-error); /* Define esta variable en tu CSS global o tailwind.config.js */
+}
+
+.settingsContent {
+  /* Asegúrate de que este estilo base exista y sea adecuado */
+}
+
+.pageTitle {
+  /* Estilos para títulos de página */
+}
+
+.sectionCard {
+  /* Estilos para las tarjetas de sección */
+}
+
+.sectionTitle {
+  /* Estilos para títulos de sección */
+}
+
+.noDataText {
+  /* Estilos para mensajes de "no hay datos" */
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.formInput,
+.formSelect,
+.replyTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color); /* Asegúrate de que --border-color esté definido */
+  background-color: var(--input-bg); /* Asegúrate de que --input-bg esté definido */
+  color: var(--text-color); /* Asegúrate de que --text-color esté definido */
+}
+
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--accent); /* Asegúrate de que --accent esté definido */
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.submitButton:hover {
+  background-color: var(--accent-dark); /* Asegúrate de que --accent-dark esté definido */
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.tableHeader {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tableCell {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tableCellActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton, .deleteButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.editButton {
+  background-color: var(--blue-link);
+  color: white;
+}
+
+.editButton:hover {
+  background-color: darken(var(--blue-link), 10%);
+}
+
+.deleteButton {
+  background-color: var(--red-error);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: darken(var(--red-error), 10%);
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loadingText {
+  color: white;
+  font-size: 1.25rem;
+}

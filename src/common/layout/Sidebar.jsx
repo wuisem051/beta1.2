@@ -90,6 +90,19 @@ const Sidebar = ({ unreadTicketsCount, displayUser }) => {
           </li>
           <li className="mb-0.5">
             <Link
+              to={`${basePath}/trading-signal`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/trading-signal`) 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/trading-signal`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M18 14v4h4m-9-1V5h-2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Señal Trading
+            </Link>
+          </li>
+          <li className="mb-0.5">
+            <Link
               to={`${basePath}/pool-arbitrage`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 useMatch(`${basePath}/pool-arbitrage`) 

@@ -68,6 +68,12 @@ service cloud.firestore {
       allow read, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // Reglas para señales de trading
+    match /tradingSignals/{signalId} {
+      allow read, list: if request.auth != null; // Los usuarios autenticados pueden leer las señales
+      allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; // Solo los administradores pueden crear, actualizar y eliminar
+    }
+
     // Regla general para cualquier otra colección (denegar todo)
     match /{document=**} {
       allow read, write: if false;
