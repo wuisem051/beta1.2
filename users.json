@@ -3,6 +3,7 @@
     "email": "wuisem051@gmail.com",
     "passwordHash": "123456",
     "emailVerified": true,
-    "disabled": false
+    "disabled": false,
+    "role": "admin"
   }
 ]
