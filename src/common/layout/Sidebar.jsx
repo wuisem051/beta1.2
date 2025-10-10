@@ -1,7 +1,5 @@
 import React, { useContext } from 'react';
 import { Link, useMatch, useLocation } from 'react-router-dom';
-import React, { useContext } from 'react';
-import { Link, useMatch, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
 const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser }) => {
