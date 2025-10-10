@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
 import { Link, useMatch, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useMatch, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
-const Sidebar = ({ unreadTicketsCount, displayUser }) => {
-  const { darkMode, setDarkMode, theme } = useContext(ThemeContext); // Añadir setDarkMode y theme
+const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser }) => {
+  const { darkMode, setDarkMode, theme } = useContext(ThemeContext);
   const { pathname } = useLocation();
   const basePath = pathname.split('/').slice(0, 2).join('/');
 
@@ -99,6 +101,11 @@ const Sidebar = ({ unreadTicketsCount, displayUser }) => {
             >
               <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/trading-signal`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M18 14v4h4m-9-1V5h-2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
               Señal Trading
+              {newTradingSignalsCount > 0 && (
+                <span className="ml-auto bg-red_error text-white text-xxs font-bold px-2 py-0.5 rounded-full">
+                  {newTradingSignalsCount}
+                </span>
+              )}
             </Link>
           </li>
           <li className="mb-0.5">

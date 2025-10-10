@@ -1559,6 +1559,7 @@ const UserPanel = () => {
   const navigate = useNavigate();
   const [userMiners, setUserMiners] = useState([]);
   const [unreadTicketsCount, setUnreadTicketsCount] = useState(0);
+  const [newTradingSignalsCount, setNewTradingSignalsCount] = useState(0); // Nuevo estado para el conteo de señales de trading
   const [userBalances, setUserBalances] = useState({
     balanceUSD: 0,
     balanceBTC: 0,
@@ -1583,6 +1584,12 @@ const UserPanel = () => {
 
   const handleUnreadCountChange = (count) => {
     setUnreadTicketsCount(count);
+  };
+
+  // Función para marcar las señales de trading como leídas
+  const markTradingSignalsAsRead = () => {
+    localStorage.setItem('lastViewedTradingSignals', new Date().toISOString());
+    setNewTradingSignalsCount(0);
   };
 
   const demoUser = { email: 'demo@example.com' };
@@ -1764,22 +1771,40 @@ const UserPanel = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  // Suscripción para historial de retiros
+  // Suscripción para nuevas señales de trading
   useEffect(() => {
-    if (!currentUser?.uid) {
-      setWithdrawalsHistory([]);
-      return;
-    }
-    console.log("UserPanel: Configurando suscripción para historial de retiros.");
-    const withdrawalsQuery = query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(withdrawalsQuery, (snapshot) => {
-      const fetchedWithdrawals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
-      setWithdrawalsHistory(fetchedWithdrawals);
+    console.log("UserPanel: Configurando suscripción para señales de trading.");
+    const tradingSignalsQuery = query(collection(db, "tradingSignals"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(tradingSignalsQuery, (snapshot) => {
+      const lastViewedTimestamp = localStorage.getItem('lastViewedTradingSignals');
+      let newSignals = 0;
+      if (lastViewedTimestamp) {
+        const lastViewedDate = new Date(lastViewedTimestamp);
+        snapshot.docs.forEach(doc => {
+          const signal = doc.data();
+          if (signal.createdAt.toDate() > lastViewedDate) {
+            newSignals++;
+          }
+        });
+      } else {
+        // Si no hay marca de tiempo, todas las señales son nuevas hasta que se visiten
+        newSignals = snapshot.docs.length;
+      }
+      setNewTradingSignalsCount(newSignals);
     }, (error) => {
-      console.error("UserPanel: Error en la suscripción de retiros:", error);
+      console.error("UserPanel: Error en la suscripción de señales de trading:", error);
     });
     return () => unsubscribe();
-  }, [currentUser]);
+  }, []);
+
+  // Efecto para marcar señales como leídas al navegar a la ruta de señales
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname.includes('/user-panel/trading-signal')) {
+      markTradingSignalsAsRead();
+    }
+  }, [location.pathname]);
+
 
   async function handleLogout() {
     try {
@@ -1794,6 +1819,8 @@ const UserPanel = () => {
     <div className={styles.userPanelContainer}>
       <Sidebar 
         unreadTicketsCount={unreadTicketsCount} 
+        newTradingSignalsCount={newTradingSignalsCount} // Pasar el conteo de nuevas señales
+        markTradingSignalsAsRead={markTradingSignalsAsRead} // Pasar la función para marcar como leídas
         displayUser={displayUser} 
       />
       <MainContent>
