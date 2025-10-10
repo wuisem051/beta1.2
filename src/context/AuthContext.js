@@ -41,12 +41,14 @@ export function AuthProvider({ children }) {
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            const userData = userDoc.data();
-            console.log("User data from Firestore:", userData);
-            setIsAdmin(userData.role === 'admin');
+          const userData = userDoc.data();
+          console.log("User data from Firestore for UID:", user.uid, ":", userData);
+          setIsAdmin(userData.role === 'admin');
+          console.log("Is Admin:", userData.role === 'admin');
           } else {
-            console.log("User document does not exist for UID:", user.uid);
-            setIsAdmin(false);
+        console.log("User document does not exist for UID:", user.uid);
+        setIsAdmin(false);
+        console.log("Is Admin: false (user document not found)");
           }
         } catch (error) {
           console.error("Error fetching user role from Firestore:", error);
@@ -54,6 +56,7 @@ export function AuthProvider({ children }) {
         }
       } else {
         setIsAdmin(false);
+        console.log("User is not authenticated. Is Admin: false");
       }
       setLoading(false);
     });
