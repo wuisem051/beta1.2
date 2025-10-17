@@ -111,3 +111,33 @@ exports.writeFile = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Error al escribir archivo.', error.message);
   }
 });
+
+// Nueva función HTTP para obtener señales de trading
+exports.getTradingSignals = functions.https.onRequest(async (req, res) => {
+  // Configurar CORS para permitir solicitudes desde TradingView
+  res.set('Access-Control-Allow-Origin', '*'); // Permitir cualquier origen por simplicidad, considerar restringir en producción
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    // Pre-flight request
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const signalsRef = admin.firestore().collection('tradingSignals');
+    const snapshot = await signalsRef.orderBy('createdAt', 'desc').get();
+
+    const signals = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt.toDate().toISOString(), // Convertir a ISO string para fácil manejo
+    }));
+
+    res.status(200).json(signals);
+  } catch (error) {
+    console.error("Error fetching trading signals:", error);
+    res.status(500).json({ error: "Error al obtener las señales de trading.", details: error.message });
+  }
+});
