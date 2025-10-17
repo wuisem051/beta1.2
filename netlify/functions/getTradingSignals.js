@@ -35,6 +35,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+// Función para obtener señales de trading
 exports.handler = async (event, context) => {
   // Configurar CORS para permitir solicitudes desde TradingView
   // Netlify Functions maneja CORS de forma ligeramente diferente,
