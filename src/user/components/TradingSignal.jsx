@@ -122,26 +122,28 @@ const TradingSignal = () => {
     });
 
     chartRef.current = chart;
+    console.log("DEBUG: Chart object created.", chartRef.current); // Log simple
 
-    // Se comentan temporalmente las líneas que causan el error
-    // console.log("Objeto del gráfico después de la creación (sin try/catch):", chartRef.current);
-    // console.dir(chartRef.current);
-    // console.log("Claves de chartRef.current (sin try/catch):", JSON.stringify(Object.keys(chartRef.current), null, 2));
-
-    // const newSeries = chart.addCandlestickSeries({
-    //     upColor: '#4CAF50',
-    //     downColor: '#EF5350',
-    //     borderVisible: false,
-    //     wickUpColor: '#4CAF50',
-    //     wickDownColor: '#EF5350',
-    // });
-    // seriesRef.current = newSeries;
-    // newSeries.setData(sampleCandleData);
-    // chart.timeScale().fitContent();
-
-    // Asignar un valor nulo o un objeto dummy a seriesRef.current para evitar errores de referencia
-    seriesRef.current = null;
-    chart.timeScale().fitContent();
+    let newSeries;
+    try {
+      newSeries = chart.addCandlestickSeries({
+          upColor: '#4CAF50',
+          downColor: '#EF5350',
+          borderVisible: false,
+          wickUpColor: '#4CAF50',
+          wickDownColor: '#EF5350',
+      });
+      seriesRef.current = newSeries;
+      if (newSeries) { // Asegurarse de que newSeries no es null
+        newSeries.setData(sampleCandleData);
+      }
+      chart.timeScale().fitContent();
+    } catch (error) {
+      console.error("Error al añadir la serie de velas:", error);
+      showError("Error al inicializar el gráfico de trading: " + error.message);
+      // No retornar aquí para que el componente siga intentando renderizar otras cosas si es posible.
+      // Opcional: Podríamos re-tirar el error o manejarlo de otra forma si queremos una interrupción completa.
+    }
 
 
     // Manejar redimensionamiento
@@ -198,13 +200,14 @@ const TradingSignal = () => {
         >
           <option value="BTC">BTC</option>
           <option value="ETH">ETH</option>
+          <option value="ARPA/USDT">ARPA/USDT</option> {/* Nueva opción */}
           <option value="XRP">XRP</option>
           {/* Añadir más opciones según los activos de tus señales */}
         </select>
       </CardStyled>
 
       {/* Contenedor para el gráfico de Lightweight Charts */}
-      <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard} style={{ height: '500px', marginBottom: '20px' }}>
+      <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard} style={{ height: '350px', marginBottom: '20px' }}> {/* Altura ajustada */}
         <div id="lightweight_chart_container" ref={chartContainerRef} style={{ height: '100%' }}></div>
       </CardStyled>
 
