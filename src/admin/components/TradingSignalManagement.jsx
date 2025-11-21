@@ -3,12 +3,14 @@ import { ThemeContext } from '../../context/ThemeContext';
 import { db } from '../../services/firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useError } from '../../context/ErrorContext';
+import { useAuth } from '../../context/AuthContext'; // Importar useAuth
 import { SolidSectionStyled, CardStyled, InputStyled, SelectStyled, TextareaStyled } from '../../user/styles/StyledComponents'; // Reutilizar componentes estilizados
 import styles from '../../user/pages/UserPanel.module.css'; // Reutilizar estilos del UserPanel
 
 const TradingSignalManagement = () => {
   const { darkMode } = useContext(ThemeContext);
   const { showError, showSuccess } = useError();
+  const { currentUser } = useAuth(); // Obtener el usuario actual
   const [signals, setSignals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,6 +31,24 @@ const TradingSignalManagement = () => {
   const [editTakeProfit, setEditTakeProfit] = useState('');
   const [editStopLoss, setEditStopLoss] = useState('');
   const [editNotes, setEditNotes] = useState('');
+
+  // Función para calcular el porcentaje de ganancia/pérdida
+  const calculatePercentage = (type, entry, takeProfit) => {
+    const entryNum = parseFloat(entry);
+    const tpNum = parseFloat(takeProfit);
+
+    if (isNaN(entryNum) || isNaN(tpNum) || entryNum === 0) {
+      return 'N/A';
+    }
+
+    let percentage;
+    if (type === 'Compra') {
+      percentage = ((tpNum - entryNum) / entryNum) * 100;
+    } else { // Venta
+      percentage = ((entryNum - tpNum) / entryNum) * 100;
+    }
+    return percentage.toFixed(2) + '%';
+  };
 
   useEffect(() => {
     const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'));
@@ -52,6 +72,12 @@ const TradingSignalManagement = () => {
   const handleAddSignal = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    if (!currentUser || !currentUser.uid) { // Verificar autenticación
+      showError('Debes iniciar sesión para añadir una señal de trading.');
+      setIsSubmitting(false);
+      return;
+    }
 
     if (!asset || !entryPrice || !takeProfit || !stopLoss) {
       showError('Todos los campos de la señal son obligatorios.');
@@ -99,6 +125,12 @@ const TradingSignalManagement = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    if (!currentUser || !currentUser.uid) { // Verificar autenticación
+      showError('Debes iniciar sesión para actualizar una señal de trading.');
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!editAsset || !editEntryPrice || !editTakeProfit || !editStopLoss) {
       showError('Todos los campos de la señal son obligatorios.');
       setIsSubmitting(false);
@@ -126,6 +158,10 @@ const TradingSignalManagement = () => {
   };
 
   const handleDeleteSignal = async (id) => {
+    if (!currentUser || !currentUser.uid) { // Verificar autenticación
+      showError('Debes iniciar sesión para eliminar una señal de trading.');
+      return;
+    }
     if (window.confirm('¿Estás seguro de que quieres eliminar esta señal de trading?')) {
       setIsSubmitting(true);
       try {
@@ -276,6 +312,7 @@ const TradingSignalManagement = () => {
                   <th className={styles.tableHeader}>Stop Loss</th>
                   <th className={styles.tableHeader}>Notas</th>
                   <th className={styles.tableHeader}>Fecha</th>
+                  <th className={styles.tableHeader}>%</th> {/* Nueva columna para el porcentaje */}
                   <th className={styles.tableHeader}>Acciones</th>
                 </tr>
               </thead>
@@ -306,6 +343,9 @@ const TradingSignalManagement = () => {
                           <TextareaStyled theme={darkMode ? 'dark' : 'light'} rows="1" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} disabled={isSubmitting} />
                         </td>
                         <td className={styles.tableCell}>{signal.createdAt.toLocaleDateString()}</td>
+                        <td className={styles.tableCell}>
+                          {calculatePercentage(editType, editEntryPrice, editTakeProfit)}
+                        </td>
                         <td className={styles.tableCellActions}>
                           <button onClick={handleUpdateSignal} className={styles.submitButton} disabled={isSubmitting}>Guardar</button>
                           <button onClick={() => setEditingSignalId(null)} className={styles.deleteButton} disabled={isSubmitting}>Cancelar</button>
@@ -320,6 +360,9 @@ const TradingSignalManagement = () => {
                         <td className={styles.tableCell}>{signal.stopLoss}</td>
                         <td className={styles.tableCell}>{signal.notes}</td>
                         <td className={styles.tableCell}>{signal.createdAt.toLocaleDateString()}</td>
+                        <td className={styles.tableCell}>
+                          {calculatePercentage(signal.type, signal.entryPrice, signal.takeProfit)}
+                        </td>
                         <td className={styles.tableCellActions}>
                           <button onClick={() => handleEditClick(signal)} className={styles.editButton} disabled={isSubmitting}>Editar</button>
                           <button onClick={() => handleDeleteSignal(signal.id)} className={styles.deleteButton} disabled={isSubmitting}>Eliminar</button>
