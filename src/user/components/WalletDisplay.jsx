@@ -23,33 +23,33 @@ const WalletDisplay = ({ currentUser }) => {
                   BTC: userData.balanceBTC || 0,
                   LTC: userData.balanceLTC || 0,
                   DOGE: userData.balanceDOGE || 0,
-                  // Añadir otros holdings de criptomonedas si existen en userData
+                  USDT: userData.balanceUSDT || 0, // Incluir USDT
                 },
-                updatedAt: new Date(), // Asumimos que se actualiza con cualquier cambio
+                updatedAt: new Date(),
               };
               setUserPortfolio(mappedPortfolio);
             } else {
               console.log("No se encontró el documento del usuario. Inicializando balances por defecto.");
-              // Inicializar balances por defecto si el documento del usuario no existe
               const defaultBalances = {
                 balanceUSD: 0,
                 balanceBTC: 0,
                 balanceLTC: 0,
                 balanceDOGE: 0,
+                balanceUSDT: 0, // Incluir balanceUSDT en la inicialización
                 role: 'user',
                 email: currentUser.email,
                 paymentAddresses: {},
                 createdAt: new Date(),
               };
               try {
-                await setDoc(userDocRef, defaultBalances, { merge: true }); // Usar merge: true
-                // Mapear los balances del documento de usuario a la estructura de portfolio
+                await setDoc(userDocRef, defaultBalances, { merge: true });
                 const mappedPortfolio = {
                   virtualBalance: defaultBalances.balanceUSD,
                   holdings: {
                     BTC: defaultBalances.balanceBTC,
                     LTC: defaultBalances.balanceLTC,
                     DOGE: defaultBalances.balanceDOGE,
+                    USDT: defaultBalances.balanceUSDT, // Incluir USDT
                   },
                   updatedAt: new Date(),
                 };
