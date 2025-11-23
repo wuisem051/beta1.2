@@ -26,6 +26,19 @@ service cloud.firestore {
       allow read, update: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId;
       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+
+      // Subcolección para los portfolios de trading
+      match /portfolios/{portfolioId} {
+        allow read, create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null && request.auth.uid == userId; // Permitir actualizar holdings y balance
+        allow delete: if false; // Denegar eliminación de portfolios
+
+        // Subcolección para las transacciones del portfolio
+        match /transactions/{transactionId} {
+          allow read, create: if request.auth != null && request.auth.uid == userId;
+          allow update, delete: if false;
+        }
+      }
     }
 
     match /miners/{minerId} {
@@ -34,6 +47,8 @@ service cloud.firestore {
       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // Nota: userBalances ya no es necesario como colección de nivel superior si los balances están en el documento de usuario.
+    // Si todavía existe y se usa, mantendría una regla similar.
     match /userBalances/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
@@ -72,6 +87,26 @@ service cloud.firestore {
     match /tradingSignals/{signalId} {
       allow read, list: if request.auth != null; // Los usuarios autenticados pueden leer las señales
       allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; // Solo los administradores pueden crear, actualizar y eliminar
+    }
+
+    // Reglas para el sistema P2P
+    match /p2p_offers/{offerId} {
+      allow read, list: if request.auth != null; // Cualquier usuario autenticado puede ver las ofertas
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId; // Solo el propietario puede crear su oferta
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId; // Solo el propietario puede modificar/eliminar su oferta
+      // Los administradores también pueden modificar/eliminar si se requiere supervisión
+      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /p2p_trades/{tradeId} {
+      allow create: if request.auth != null; // Cualquier usuario autenticado puede iniciar un trade
+      allow read: if request.auth != null && (request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.sellerId); // Solo los participantes pueden leer el trade
+      allow update: if request.auth != null && (request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.sellerId); // Los participantes pueden actualizar el trade (ej. confirmar pago, liberar fondos)
+      allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; // Los administradores también pueden modificar
+      allow delete: if false; // Los trades no deben ser eliminados fácilmente, solo cancelados/archivados
+
+      // Nota: La lógica de seguridad detallada para los cambios de estado (ej. sellerReleasesFunds solo si PAGO_CONFIRMADO)
+      // debe implementarse en las Cloud Functions, ya que las reglas de seguridad son más limitadas para eso.
     }
 
     // Regla general para cualquier otra colección (denegar todo)
