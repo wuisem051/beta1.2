@@ -112,6 +112,90 @@ exports.writeFile = functions.https.onCall(async (data, context) => {
   }
 });
 
+// Función para ejecutar una operación de compra/venta (trade)
+exports.executeTrade = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'La solicitud debe estar autenticada.');
+  }
+
+  const userId = context.auth.uid;
+  const { coinId, amount, priceAtMoment, type } = data;
+
+  if (!coinId || !amount || !priceAtMoment || !type) {
+    throw new functions.https.HttpsError('invalid-argument', 'Faltan parámetros de trading.');
+  }
+  if (amount <= 0 || priceAtMoment <= 0) {
+    throw new functions.https.HttpsError('invalid-argument', 'La cantidad y el precio deben ser mayores que cero.');
+  }
+  if (!['buy', 'sell'].includes(type)) {
+    throw new functions.https.HttpsError('invalid-argument', 'El tipo de operación debe ser "buy" o "sell".');
+  }
+
+  const portfolioRef = admin.firestore().collection('users').doc(userId).collection('portfolios').doc('default'); // Asumimos un portfolio 'default' por usuario
+  const transactionRef = portfolioRef.collection('transactions');
+
+  try {
+    const result = await admin.firestore().runTransaction(async (transaction) => {
+      const portfolioDoc = await transaction.get(portfolioRef);
+
+      if (!portfolioDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Portfolio no encontrado.');
+      }
+
+      const portfolioData = portfolioDoc.data();
+      let { virtualBalance, holdings, totalValue } = portfolioData;
+      const cost = amount * priceAtMoment;
+
+      if (type === 'buy') {
+        if (virtualBalance < cost) {
+          throw new functions.https.HttpsError('failed-precondition', 'Saldo virtual insuficiente para la compra.');
+        }
+        virtualBalance -= cost;
+        holdings[coinId] = (holdings[coinId] || 0) + amount;
+      } else { // type === 'sell'
+        if ((holdings[coinId] || 0) < amount) {
+          throw new functions.https.HttpsError('failed-precondition', 'Cantidad insuficiente de la moneda para la venta.');
+        }
+        virtualBalance += cost; // Sumar el ingreso de la venta al saldo virtual
+        holdings[coinId] -= amount;
+        if (holdings[coinId] === 0) {
+          delete holdings[coinId]; // Eliminar la moneda si la cantidad llega a cero
+        }
+      }
+
+      // Actualizar el totalValue (esto es una simplificación, en un sistema real se recalcularía el valor de mercado de holdings)
+      // Por ahora, solo se actualiza en base a la transacción
+      // Para un cálculo preciso, necesitarías los precios actuales de todas las holdings.
+      // totalValue = virtualBalance + calculateHoldingsValue(holdings, currentPrices);
+
+      transaction.update(portfolioRef, {
+        virtualBalance: virtualBalance,
+        holdings: holdings,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      transaction.set(transactionRef.doc(), {
+        type: type,
+        currency: coinId,
+        amount: amount,
+        entryPrice: priceAtMoment,
+        transactionDate: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      return { success: true, message: `Operación de ${type} exitosa.` };
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error('Error al ejecutar la operación de trading:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Error interno al ejecutar la operación de trading.', error.message);
+  }
+});
+
 // Nueva función HTTP para obtener señales de trading
 exports.getTradingSignals = functions.https.onRequest(async (req, res) => {
   // Configurar CORS para permitir solicitudes desde TradingView

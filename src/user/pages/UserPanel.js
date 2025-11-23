@@ -10,6 +10,7 @@ import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, a
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
 import TradingSignal from '../components/TradingSignal'; // Importar TradingSignal
+import TradingPanel from '../components/TradingPanel'; // Importar TradingPanel
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
@@ -1836,6 +1837,7 @@ const UserPanel = () => {
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
           <Route path="trading-signal/*" element={<TradingSignal />} /> {/* Nueva ruta para Señal Trading */}
+          <Route path="trading-panel/*" element={<TradingPanel />} /> {/* Nueva ruta para el Panel de Trading */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />

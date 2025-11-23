@@ -108,6 +108,19 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           </li>
           <li className="mb-0.5">
             <Link
+              to={`${basePath}/trading-panel`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/trading-panel`) 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/trading-panel`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l-5 4V6l9-4 9 4v4l-5-4v13"/></svg>
+              Panel de Trading
+            </Link>
+          </li>
+          <li className="mb-0.5">
+            <Link
               to={`${basePath}/pool-arbitrage`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 useMatch(`${basePath}/pool-arbitrage`) 
