@@ -79,17 +79,6 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
           </div>
         </div>
-        {/* Balances */}
-        <div className={`${styles.statCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.statTitle}>Balances</h3>
-          <p className={styles.statValueGreen}>${(userBalances.balanceUSD || 0).toFixed(2)} USD</p>
-          <p className={styles.statSubValue}>{(userBalances.balanceBTC || 0).toFixed(8)} BTC</p>
-          <p className={styles.statSubValue}>{(userBalances.balanceLTC || 0).toFixed(8)} LTC</p>
-          <p className={styles.statSubValue}>{(userBalances.balanceDOGE || 0).toFixed(8)} DOGE</p>
-          <div className={styles.statIconGreen}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green_check" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-          </div>
-        </div>
       </div>
 
       <PerformanceStatsSection /> {/* Añadir PerformanceStatsSection */}
