@@ -11,7 +11,8 @@ import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCrede
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
 import TradingSignal from '../components/TradingSignal'; // Importar TradingSignal
 import TradingPanel from '../components/TradingPanel'; // Importar TradingPanel
-import P2P_WalletSection from '../components/P2P_WalletSection'; // Importar P2P_WalletSection
+import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
+import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
@@ -1884,7 +1885,8 @@ const UserPanel = () => {
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
           <Route path="trading-signal/*" element={<TradingSignal />} /> {/* Nueva ruta para Señal Trading */}
           <Route path="trading-panel/*" element={<TradingPanel />} /> {/* Nueva ruta para el Panel de Trading */}
-          <Route path="p2p-wallet/*" element={<P2P_WalletSection />} /> {/* Nueva ruta para la sección de Billetera P2P */}
+          <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
+          <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />

@@ -18,7 +18,8 @@ const WalletDisplay = ({ currentUser }) => {
               const userData = docSnap.data();
               // Mapear los balances del documento de usuario a la estructura de portfolio
               const mappedPortfolio = {
-                virtualBalance: userData.balanceUSD || 0,
+                fiatBalanceUSD: userData.balanceUSD || 0, // Saldo Fiat USD
+                virtualBalanceUSD: userData.virtualBalanceUSD || 0, // Nuevo Saldo Virtual USD
                 holdings: {
                   BTC: userData.balanceBTC || 0,
                   LTC: userData.balanceLTC || 0,
@@ -32,6 +33,7 @@ const WalletDisplay = ({ currentUser }) => {
               console.log("No se encontró el documento del usuario. Inicializando balances por defecto.");
               const defaultBalances = {
                 balanceUSD: 0,
+                virtualBalanceUSD: 0, // Inicializar saldo virtual
                 balanceBTC: 0,
                 balanceLTC: 0,
                 balanceDOGE: 0,
@@ -44,7 +46,8 @@ const WalletDisplay = ({ currentUser }) => {
               try {
                 await setDoc(userDocRef, defaultBalances, { merge: true });
                 const mappedPortfolio = {
-                  virtualBalance: defaultBalances.balanceUSD,
+                  fiatBalanceUSD: defaultBalances.balanceUSD,
+                  virtualBalanceUSD: defaultBalances.virtualBalanceUSD, // Mapear saldo virtual
                   holdings: {
                     BTC: defaultBalances.balanceBTC,
                     LTC: defaultBalances.balanceLTC,
@@ -104,12 +107,20 @@ const WalletDisplay = ({ currentUser }) => {
 
       {/* Sección de Saldos Fiat */}
       <div className="mb-8 p-4 rounded-md border border-gray-300 dark:border-gray-600">
-        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos Fiat</h3>
-        <div className="text-center">
-          <p className="text-xl">USD:</p>
-          <p className="text-5xl font-extrabold text-green-500 mt-2">
-            ${userPortfolio.virtualBalance ? userPortfolio.virtualBalance.toFixed(2) : '0.00'}
-          </p>
+        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos USD</h3>
+        <div className="flex flex-col md:flex-row justify-around items-center gap-4">
+            <div className="text-center">
+                <p className="text-xl">USD (Fiat):</p>
+                <p className="text-4xl font-extrabold text-green-500 mt-2">
+                    ${userPortfolio.fiatBalanceUSD ? userPortfolio.fiatBalanceUSD.toFixed(2) : '0.00'}
+                </p>
+            </div>
+            <div className="text-center">
+                <p className="text-xl">USD (Virtual):</p>
+                <p className="text-4xl font-extrabold text-blue-500 mt-2">
+                    ${userPortfolio.virtualBalanceUSD ? userPortfolio.virtualBalanceUSD.toFixed(2) : '0.00'}
+                </p>
+            </div>
         </div>
         {/* Aquí se podrían añadir otras monedas fiat si el esquema de datos lo permite */}
       </div>

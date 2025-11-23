@@ -134,15 +134,28 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           </li>
           <li className="mb-0.5">
             <Link
-              to={`${basePath}/p2p-wallet`}
+              to={`${basePath}/my-wallet`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/p2p-wallet`) 
+                useMatch(`${basePath}/my-wallet`) 
                   ? 'bg-accent text-white' 
                   : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/p2p-wallet`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-              Billetera P2P
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/my-wallet`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              Mi Billetera
+            </Link>
+          </li>
+          <li className="mb-0.5">
+            <Link
+              to={`${basePath}/p2p-marketplace`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/p2p-marketplace`) 
+                  ? 'bg-accent text-white' 
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/p2p-marketplace`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              Mercado P2P
             </Link>
           </li>
           <li className="mb-0.5">

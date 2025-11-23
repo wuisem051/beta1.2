@@ -12,6 +12,7 @@ const BalanceManagement = () => {
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Para operaciones masivas
   const [amountToAdd, setAmountToAdd] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedBalanceType, setSelectedBalanceType] = useState('fiat'); // 'fiat' o 'virtual'
   const [massAmount, setMassAmount] = useState(''); // Cantidad para operaciones masivas
   const [massCurrency, setMassCurrency] = useState('USD'); // Moneda para operaciones masivas
   const [massOperation, setMassOperation] = useState('add'); // 'add', 'subtract', 'reset'
@@ -79,14 +80,19 @@ const BalanceManagement = () => {
       const selectedUser = users.find(user => user.id === selectedUserId);
       
       if (selectedUser) {
-        const currencyField = `balance${selectedCurrency}`;
+        let currencyField = `balance${selectedCurrency}`;
+        if (selectedCurrency === 'USD' && selectedBalanceType === 'virtual') {
+          currencyField = 'virtualBalanceUSD';
+        }
+
         const currentBalance = selectedUser[currencyField] || 0;
         const newBalance = currentBalance + amount;
         
         const userRef = doc(db, 'users', selectedUserId);
         await updateDoc(userRef, { [currencyField]: newBalance });
 
-        showSuccess(`Se han añadido ${amount.toFixed(8)} ${selectedCurrency} al balance de ${selectedUser.email}. Nuevo balance: ${newBalance.toFixed(8)} ${selectedCurrency}`);
+        const balanceTypeLabel = selectedCurrency === 'USD' && selectedBalanceType === 'virtual' ? 'USD Virtual' : selectedCurrency;
+        showSuccess(`Se han añadido ${amount.toFixed(8)} ${balanceTypeLabel} al balance de ${selectedUser.email}. Nuevo balance: ${newBalance.toFixed(8)} ${balanceTypeLabel}`);
         setAmountToAdd('');
       } else {
         showError('Usuario no encontrado.');
@@ -116,10 +122,14 @@ const BalanceManagement = () => {
       const selectedUser = users.find(user => user.id === selectedUserId);
       
       if (selectedUser) {
-        const currencyField = `balance${selectedCurrency}`;
+        let currencyField = `balance${selectedCurrency}`;
+        if (selectedCurrency === 'USD' && selectedBalanceType === 'virtual') {
+          currencyField = 'virtualBalanceUSD';
+        }
+
         const currentBalance = selectedUser[currencyField] || 0;
         if (currentBalance < amount) {
-          showError(`No se puede restar una cantidad mayor al balance actual en ${selectedCurrency}.`);
+          showError(`No se puede restar una cantidad mayor al balance actual en ${selectedCurrency} ${selectedBalanceType === 'virtual' ? 'Virtual' : 'Fiat'}.`);
           return;
         }
         const newBalance = currentBalance - amount;
@@ -127,7 +137,8 @@ const BalanceManagement = () => {
         const userRef = doc(db, 'users', selectedUserId);
         await updateDoc(userRef, { [currencyField]: newBalance });
 
-        showSuccess(`Se han restado ${amount.toFixed(8)} ${selectedCurrency} del balance de ${selectedUser.email}. Nuevo balance: ${newBalance.toFixed(8)} ${selectedCurrency}`);
+        const balanceTypeLabel = selectedCurrency === 'USD' && selectedBalanceType === 'virtual' ? 'USD Virtual' : selectedCurrency;
+        showSuccess(`Se han restado ${amount.toFixed(8)} ${balanceTypeLabel} del balance de ${selectedUser.email}. Nuevo balance: ${newBalance.toFixed(8)} ${balanceTypeLabel}`);
         setAmountToAdd('');
       } else {
         showError('Usuario no encontrado.');
@@ -166,11 +177,15 @@ const BalanceManagement = () => {
           continue;
         }
 
-        const currencyField = `balance${massCurrency}`;
+        // Para operaciones masivas, necesitamos una forma de seleccionar si es fiat o virtual.
+        // Por ahora, asumiremos que las operaciones masivas de USD afectan el saldo fiat por defecto.
+        // Si se necesita afectar el saldo virtual de forma masiva, se debe añadir un selector en la UI.
+        let currencyField = `balance${massCurrency}`; 
+        
         let newBalance = 0;
 
         if (massOperation === 'reset') {
-          newBalance = 0;
+          newBalance = 0; // Por defecto resetea el saldo fiat, para virtual se necesitaría un selector
         } else {
           const currentBalance = userDoc[currencyField] || 0;
           if (massOperation === 'add') {
@@ -240,8 +255,22 @@ const BalanceManagement = () => {
               <option value="DOGE">DOGE</option>
             </select>
           </div>
+          {selectedCurrency === 'USD' && (
+            <div>
+              <label htmlFor="balanceTypeAdd" className="block text-sm font-medium mb-1">Tipo de Saldo (USD):</label>
+              <select
+                id="balanceTypeAdd"
+                value={selectedBalanceType}
+                onChange={(e) => setSelectedBalanceType(e.target.value)}
+                className={`${theme.inputBackground} ${theme.text} border-gray-600 rounded-md shadow-sm sm:text-sm p-2 w-full`}
+              >
+                <option value="fiat">Fiat (Real)</option>
+                <option value="virtual">Virtual</option>
+              </select>
+            </div>
+          )}
           <div>
-            <label htmlFor="amountToAdd" className="block text-sm font-medium mb-1">Cantidad a Añadir ({selectedCurrency}):</label>
+            <label htmlFor="amountToAdd" className="block text-sm font-medium mb-1">Cantidad a Añadir ({selectedCurrency} {selectedCurrency === 'USD' ? (selectedBalanceType === 'virtual' ? 'Virtual' : 'Fiat') : ''}):</label>
             <input
               type="number"
               id="amountToAdd"
@@ -295,8 +324,22 @@ const BalanceManagement = () => {
               <option value="DOGE">DOGE</option>
             </select>
           </div>
+          {selectedCurrency === 'USD' && (
+            <div>
+              <label htmlFor="balanceTypeSubtract" className="block text-sm font-medium mb-1">Tipo de Saldo (USD):</label>
+              <select
+                id="balanceTypeSubtract"
+                value={selectedBalanceType}
+                onChange={(e) => setSelectedBalanceType(e.target.value)}
+                className={`${theme.inputBackground} ${theme.text} border-gray-600 rounded-md shadow-sm sm:text-sm p-2 w-full`}
+              >
+                <option value="fiat">Fiat (Real)</option>
+                <option value="virtual">Virtual</option>
+              </select>
+            </div>
+          )}
           <div>
-            <label htmlFor="amountToSubtract" className="block text-sm font-medium mb-1">Cantidad a Restar ({selectedCurrency}):</label>
+            <label htmlFor="amountToSubtract" className="block text-sm font-medium mb-1">Cantidad a Restar ({selectedCurrency} {selectedCurrency === 'USD' ? (selectedBalanceType === 'virtual' ? 'Virtual' : 'Fiat') : ''}):</label>
             <input
               type="number"
               id="amountToSubtract"
@@ -400,7 +443,8 @@ const BalanceManagement = () => {
                 </th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Email de Usuario</th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>ID de Usuario (UID)</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance (USD)</th>
+                <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance USD (Fiat)</th>
+                <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance USD (Virtual)</th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance (BTC)</th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance (LTC)</th>
                 <th className={`px-6 py-3 text-left text-xs font-medium ${theme.textSoft} uppercase tracking-wider`}>Balance (DOGE)</th>
@@ -421,6 +465,9 @@ const BalanceManagement = () => {
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme.textSoft}`}>{user.id}</td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme.textSoft}`}>
                     ${(user.balanceUSD || 0).toFixed(2)}
+                  </td>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme.textSoft}`}>
+                    ${(user.virtualBalanceUSD || 0).toFixed(2)}
                   </td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme.textSoft}`}>
                     {(user.balanceBTC || 0).toFixed(8)} BTC
