@@ -169,6 +169,8 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
     { id: 'USDT', name: 'Tether (USDT)' },
     { id: 'BTC', name: 'Bitcoin (BTC)' },
     { id: 'ETH', name: 'Ethereum (ETH)' },
+    { id: 'LTC', name: 'Litecoin (LTC)' }, // Añadir LTC
+    { id: 'DOGE', name: 'Dogecoin (DOGE)' }, // Añadir DOGE
   ];
 
   const commonFiatCurrencies = [
