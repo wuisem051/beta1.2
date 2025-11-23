@@ -22,6 +22,8 @@ const UserManagement = () => {
   const [editBalanceDOGE, setEditBalanceDOGE] = useState(0);
   const [editBalanceUSDT, setEditBalanceUSDT] = useState(0); // Nuevo estado para USDT
   const [editBalanceVES, setEditBalanceVES] = useState(0); // Nuevo estado para VES
+  const [addUSDTAmount, setAddUSDTAmount] = useState(''); // Estado para añadir/restar USDT
+  const [addVESAmount, setAddVESAmount] = useState(''); // Estado para añadir/restar VES
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Nuevo estado para selección masiva
 
 
@@ -129,6 +131,8 @@ const UserManagement = () => {
     setEditBalanceDOGE(user.balanceDOGE || 0);
     setEditBalanceUSDT(user.balanceUSDT || 0); // Inicializar USDT
     setEditBalanceVES(user.balanceVES || 0); // Inicializar VES
+    setAddUSDTAmount(''); // Resetear al abrir edición
+    setAddVESAmount(''); // Resetear al abrir edición
   };
 
   const handleUpdateUser = async (e) => {
@@ -144,8 +148,8 @@ const UserManagement = () => {
         balanceBTC: parseFloat(editBalanceBTC),
         balanceLTC: parseFloat(editBalanceLTC),
         balanceDOGE: parseFloat(editBalanceDOGE),
-        balanceUSDT: parseFloat(editBalanceUSDT), // Actualizar USDT
-        balanceVES: parseFloat(editBalanceVES), // Actualizar VES
+        balanceUSDT: parseFloat(editBalanceUSDT) + (addUSDTAmount !== '' ? parseFloat(addUSDTAmount) : 0), // Actualizar USDT
+        balanceVES: parseFloat(editBalanceVES) + (addVESAmount !== '' ? parseFloat(addVESAmount) : 0), // Actualizar VES
       });
 
       // Actualizar email en Firebase Authentication
@@ -415,7 +419,7 @@ const UserManagement = () => {
             </div>
             {/* Campos de Edición de Balances */}
             <div>
-              <label htmlFor="editBalanceUSD" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance USD:</label>
+              <label htmlFor="editBalanceUSD" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance Actual USD:</label>
               <input
                 type="number"
                 id="editBalanceUSD"
@@ -423,61 +427,31 @@ const UserManagement = () => {
                 value={editBalanceUSD}
                 onChange={(e) => setEditBalanceUSD(e.target.value)}
                 step="any"
+                readOnly
               />
             </div>
             <div>
-              <label htmlFor="editBalanceBTC" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance BTC:</label>
+              <label htmlFor="addUSDTAmount" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Añadir/Restar Saldo USDT (actual: {editingUser.balanceUSDT || 0}):</label>
               <input
                 type="number"
-                id="editBalanceBTC"
+                id="addUSDTAmount"
                 className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceBTC}
-                onChange={(e) => setEditBalanceBTC(e.target.value)}
+                value={addUSDTAmount}
+                onChange={(e) => setAddUSDTAmount(e.target.value)}
                 step="any"
+                placeholder="Ej: 100 para añadir, -50 para restar"
               />
             </div>
             <div>
-              <label htmlFor="editBalanceLTC" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance LTC:</label>
+              <label htmlFor="addVESAmount" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Añadir/Restar Saldo VES (actual: {editingUser.balanceVES || 0}):</label>
               <input
                 type="number"
-                id="editBalanceLTC"
+                id="addVESAmount"
                 className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceLTC}
-                onChange={(e) => setEditBalanceLTC(e.target.value)}
+                value={addVESAmount}
+                onChange={(e) => setAddVESAmount(e.target.value)}
                 step="any"
-              />
-            </div>
-            <div>
-              <label htmlFor="editBalanceDOGE" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance DOGE:</label>
-              <input
-                type="number"
-                id="editBalanceDOGE"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceDOGE}
-                onChange={(e) => setEditBalanceDOGE(e.target.value)}
-                step="any"
-              />
-            </div>
-            <div>
-              <label htmlFor="editBalanceUSDT" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance USDT:</label>
-              <input
-                type="number"
-                id="editBalanceUSDT"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceUSDT}
-                onChange={(e) => setEditBalanceUSDT(e.target.value)}
-                step="any"
-              />
-            </div>
-            <div>
-              <label htmlFor="editBalanceVES" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance VES:</label>
-              <input
-                type="number"
-                id="editBalanceVES"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceVES}
-                onChange={(e) => setEditBalanceVES(e.target.value)}
-                step="any"
+                placeholder="Ej: 100 para añadir, -50 para restar"
               />
             </div>
             <div className="flex justify-end mt-4">

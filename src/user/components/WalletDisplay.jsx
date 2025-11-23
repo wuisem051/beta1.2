@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { doc, onSnapshot, getFirestore, setDoc } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
+import { useError } from '../../context/ErrorContext'; // Importar useError para mostrar mensajes
 
 const WalletDisplay = ({ currentUser }) => {
   const { theme, darkMode } = useContext(ThemeContext);
+  const { showSuccess } = useError(); // Usar el contexto de errores
   const [userPortfolio, setUserPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -79,6 +81,48 @@ const WalletDisplay = ({ currentUser }) => {
         }
       }, [currentUser, db]);
 
+  const [usdToUsdtAmount, setUsdToUsdtAmount] = useState('');
+  const [exchangeLoading, setExchangeLoading] = useState(false);
+
+  const handleExchange = async () => {
+    setError(null);
+    if (!currentUser?.uid) {
+      setError('Debes iniciar sesión para realizar intercambios.');
+      return;
+    }
+
+    const amountToExchange = parseFloat(usdToUsdtAmount);
+    if (isNaN(amountToExchange) || amountToExchange <= 0) {
+      setError('Por favor, introduce una cantidad válida para intercambiar.');
+      return;
+    }
+
+    if (userPortfolio.fiatBalanceUSD < amountToExchange) {
+      setError('Fondos insuficientes en USD para realizar el intercambio.');
+      return;
+    }
+
+    setExchangeLoading(true);
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const newFiatBalanceUSD = userPortfolio.fiatBalanceUSD - amountToExchange;
+      const newBalanceUSDT = userPortfolio.holdings.USDT + amountToExchange; // Asumiendo 1:1
+
+      await setDoc(userDocRef, {
+        balanceUSD: newFiatBalanceUSD,
+        balanceUSDT: newBalanceUSDT,
+      }, { merge: true });
+
+      setUsdToUsdtAmount('');
+      showSuccess('Intercambio de USD a USDT realizado con éxito!');
+    } catch (err) {
+      console.error("Error al realizar el intercambio:", err);
+      setError(`Fallo al realizar el intercambio: ${err.message}`);
+    } finally {
+      setExchangeLoading(false);
+    }
+  };
+
       if (loading) {
         return (
           <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
@@ -132,6 +176,33 @@ const WalletDisplay = ({ currentUser }) => {
             </div>
         </div>
         {/* Aquí se podrían añadir otras monedas fiat si el esquema de datos lo permite */}
+
+        {/* Sección de Intercambio USD a USDT */}
+        <div className="mt-8 p-4 rounded-md border border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800">
+          <h3 className="text-xl font-semibold mb-4 text-center">Intercambiar USD a USDT (1:1)</h3>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <input
+              type="number"
+              value={usdToUsdtAmount}
+              onChange={(e) => setUsdToUsdtAmount(e.target.value)}
+              placeholder="Cantidad de USD"
+              className={`p-2 border rounded-md ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-white border-gray-300 text-gray-900'}`}
+              step="0.01"
+              min="0"
+              disabled={exchangeLoading}
+            />
+            <button
+              onClick={handleExchange}
+              className={`px-4 py-2 rounded-md font-bold transition-colors duration-200 ${
+                exchangeLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+              disabled={exchangeLoading}
+            >
+              {exchangeLoading ? 'Cambiando...' : 'Cambiar USD a USDT'}
+            </button>
+          </div>
+          {error && <p className="text-red-500 text-center mt-2">{error}</p>}
+        </div>
       </div>
 
       {/* Sección de Saldos de Criptomonedas */}
