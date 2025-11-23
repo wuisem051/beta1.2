@@ -54,7 +54,7 @@ const WalletDisplay = ({ currentUser }) => {
   if (!userPortfolio) {
     return (
       <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-        <p className="text-center text-red-400">No se pudo cargar la información de tu wallet. Asegúrate de que tu portfolio esté inicializado.</p>
+        <p className="text-center text-gray-400">No se encontró información de tu wallet. Los balances aparecerán aquí después de realizar depósitos o transacciones P2P.</p>
       </div>
     );
   }

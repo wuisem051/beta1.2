@@ -1695,9 +1695,10 @@ const UserPanel = () => {
           balanceDOGE: userData.balanceDOGE || 0,
         });
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
+        console.log(`UserPanel: Datos de usuario y direcciones de pago cargados para ${currentUser.uid}.`);
       } else {
-        console.log("UserPanel: Documento de usuario no existe en Firestore. Creando uno nuevo...");
-        try { // <-- Añadimos el bloque try-catch completo
+        console.log(`UserPanel: Documento de usuario no existe en Firestore (${currentUser.uid}). Creando uno nuevo...`);
+        try { // Añadimos el bloque try-catch completo
           await setDoc(userDocRef, {
             balanceUSD: 0,
             balanceBTC: 0,
@@ -1708,17 +1709,7 @@ const UserPanel = () => {
             paymentAddresses: {}, // Inicializar paymentAddresses
           });
 
-          // Crear el portfolio por defecto para el nuevo usuario
-          const defaultPortfolioRef = doc(db, `users/${currentUser.uid}/portfolios/default`);
-          await setDoc(defaultPortfolioRef, {
-            virtualBalance: 10000.00,
-            holdings: {},
-            totalValue: 10000.00,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-
-          console.log("UserPanel: Documento de usuario y portfolio por defecto creado exitosamente en Firestore.");
+          console.log(`UserPanel: Documento de usuario creado exitosamente en Firestore para ${currentUser.uid}.`);
           setUserBalances({
             balanceUSD: 0,
             balanceBTC: 0,
@@ -1727,11 +1718,11 @@ const UserPanel = () => {
           });
           setUserPaymentAddresses({});
         } catch (insertError) {
-          console.error("UserPanel: Error al crear el documento de usuario o portfolio en Firestore:", insertError);
+          console.error(`UserPanel: Error al crear el documento de usuario en Firestore para ${currentUser.uid}:`, insertError);
         }
       }
     }, (error) => {
-      console.error("UserPanel: Error en la suscripción de balances del usuario:", error);
+      console.error(`UserPanel: Error en la suscripción de balances del usuario para ${currentUser.uid}:`, error);
     });
     return () => unsubscribe();
   }, [currentUser, db]);
