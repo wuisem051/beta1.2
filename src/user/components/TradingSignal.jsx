@@ -1,68 +1,16 @@
-import React, { useContext, useEffect, useState, useRef, useCallback } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { SolidSectionStyled, CardStyled } from '../styles/StyledComponents';
 import { db } from '../../services/firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useError } from '../../context/ErrorContext';
 import styles from '../pages/UserPanel.module.css'; // Reutilizar estilos del UserPanel
-import * as LightweightCharts from 'lightweight-charts'; // Importar todo como un objeto
 
 const TradingSignal = () => {
   const { darkMode } = useContext(ThemeContext);
   const { showError } = useError();
   const [signals, setSignals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const chartContainerRef = useRef(null);
-  const chartRef = useRef(null); // Referencia al objeto del gráfico
-  const seriesRef = useRef(null); // Referencia a la serie de líneas
-  const currentSymbolRef = useRef("BTC"); // Símbolo actual del gráfico (solo el activo, sin prefijo de exchange)
-
-  // Datos de velas de ejemplo (OHLCV) para inicializar el gráfico
-  // En una aplicación real, esto provendría de una API.
-  const sampleCandleData = [
-    { time: '2018-12-19', open: 14.70, high: 14.73, low: 14.61, close: 14.67 },
-    { time: '2018-12-20', open: 14.65, high: 14.73, low: 14.49, close: 14.61 },
-    { time: '2018-12-21', open: 14.67, high: 14.75, low: 14.46, close: 14.58 },
-    { time: '2018-12-24', open: 14.50, high: 14.62, low: 14.34, close: 14.47 },
-    { time: '2018-12-26', open: 14.50, high: 14.55, low: 14.15, close: 14.28 },
-    { time: '2018-12-27', open: 14.28, high: 14.39, low: 13.98, close: 14.00 },
-    { time: '2018-12-28', open: 14.00, high: 14.20, low: 13.79, close: 13.92 },
-    // ... más datos aquí o de tu API
-  ];
-
-  // Función para dibujar las señales en el gráfico
-  const drawSignals = useCallback(() => {
-    if (chartRef.current && seriesRef.current && signals.length > 0) {
-      // Filtrar señales por el símbolo actual
-      const filteredSignals = signals.filter(signal => signal.asset === currentSymbolRef.current);
-
-      const markers = filteredSignals.map(signal => {
-        const time = new Date(signal.createdAt).toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
-        const price = parseFloat(signal.entryPrice);
-        const takeProfit = parseFloat(signal.takeProfit);
-        const stopLoss = parseFloat(signal.stopLoss);
-        const type = signal.type; // 'Compra' o 'Venta'
-
-        // Marcador para la señal de entrada
-        const entryMarker = {
-          time: time,
-          position: type === 'Compra' ? 'belowBar' : 'aboveBar',
-          color: type === 'Compra' ? '#2196F3' : '#F44336', // Azul para compra, Rojo para venta
-          shape: type === 'Compra' ? 'arrowUp' : 'arrowDown',
-          text: `${type} ${signal.asset} @ ${price}`,
-          size: 1.5, // Tamaño del marcador
-          id: `entry-${signal.id}`
-        };
-
-        return entryMarker;
-      });
-
-      seriesRef.current.setMarkers(markers);
-    } else if (seriesRef.current) {
-      seriesRef.current.setMarkers([]); // Limpiar marcadores si no hay señales
-    }
-  }, [signals]);
-
 
   // Efecto para la suscripción a señales de Firebase
   useEffect(() => {
@@ -83,134 +31,10 @@ const TradingSignal = () => {
 
     return () => unsubscribe();
   }, [showError]);
-
-  // Efecto para la suscripción a señales de Firebase
-  useEffect(() => {
-    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedSignals = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-      }));
-      setSignals(fetchedSignals);
-      setIsLoading(false);
-    }, (err) => {
-      console.error("Error fetching trading signals:", err);
-      showError('Error al cargar las señales de trading.');
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [showError]);
-
-  // Efecto para crear y limpiar el gráfico (solo una vez al montar)
-  useEffect(() => {
-    const container = chartContainerRef.current;
-    if (!container) {
-      return;
-    }
-
-    // Opciones mínimas para el gráfico
-    const chart = LightweightCharts.createChart(container, {
-      width: container.clientWidth,
-      height: container.clientHeight,
-      layout: {
-        background: { type: LightweightCharts.ColorType.Solid, color: darkMode ? '#1a202c' : '#ffffff' },
-        textColor: darkMode ? '#ffffff' : '#1a202c',
-      },
-    });
-
-    chartRef.current = chart;
-    console.log("DEBUG: Chart object created.", chartRef.current); // Log simple
-
-    let newSeries;
-    try {
-      newSeries = chart.addCandlestickSeries({
-          upColor: '#4CAF50',
-          downColor: '#EF5350',
-          borderVisible: false,
-          wickUpColor: '#4CAF50',
-          wickDownColor: '#EF5350',
-      });
-      seriesRef.current = newSeries;
-      if (newSeries) { // Asegurarse de que newSeries no es null
-        newSeries.setData(sampleCandleData);
-      }
-      chart.timeScale().fitContent();
-    } catch (error) {
-      console.error("Error al añadir la serie de velas:", error);
-      showError("Error al inicializar el gráfico de trading: " + error.message);
-      // No retornar aquí para que el componente siga intentando renderizar otras cosas si es posible.
-      // Opcional: Podríamos re-tirar el error o manejarlo de otra forma si queremos una interrupción completa.
-    }
-
-
-    // Manejar redimensionamiento
-    const handleResize = () => {
-      if (chartRef.current && chartContainerRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight
-        });
-      }
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (chartRef.current) {
-        chartRef.current.remove();
-        chartRef.current = null;
-        seriesRef.current = null;
-      }
-    };
-  }, [darkMode, showError]);
-
-  // Efecto para redibujar señales cuando cambian las señales o el símbolo/tema
-  useEffect(() => {
-    drawSignals();
-  }, [signals, drawSignals]);
-
-  useEffect(() => {
-    // Redibujar señales cuando cambian las señales o el modo oscuro
-    drawSignals();
-  }, [signals, drawSignals]);
-
-  // Manejar el cambio de símbolo (podría implementarse con un selector de UI)
-  const handleSymbolChange = (newSymbol) => {
-    currentSymbolRef.current = newSymbol;
-    // En una implementación real, aquí se volverían a cargar los datos de velas para el nuevo símbolo
-    // seriesRef.current.setData(fetchNewSymbolData(newSymbol));
-    drawSignals(); // Redibujar señales para el nuevo símbolo
-  };
 
   return (
     <SolidSectionStyled theme={darkMode ? 'dark' : 'light'} className={styles.settingsContent}>
       <h1 className={styles.pageTitle}>Señales de Trading</h1>
-
-      {/* Selector de Símbolo (básico) */}
-      <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard} style={{ marginBottom: '20px' }}>
-        <label className={styles.formLabel} htmlFor="symbol-selector">Selecciona un Activo:</label>
-        <select
-          id="symbol-selector"
-          value={currentSymbolRef.current}
-          onChange={(e) => handleSymbolChange(e.target.value)}
-          className={styles.formSelect}
-        >
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
-          <option value="ARPA/USDT">ARPA/USDT</option> {/* Nueva opción */}
-          <option value="XRP">XRP</option>
-          {/* Añadir más opciones según los activos de tus señales */}
-        </select>
-      </CardStyled>
-
-      {/* Contenedor para el gráfico de Lightweight Charts */}
-      <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard} style={{ height: '350px', marginBottom: '20px' }}> {/* Altura ajustada */}
-        <div id="lightweight_chart_container" ref={chartContainerRef} style={{ height: '100%' }}></div>
-      </CardStyled>
-
       {isLoading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingText}>Cargando señales...</div>
@@ -222,7 +46,6 @@ const TradingSignal = () => {
         </CardStyled>
       ) : (
         <div className={styles.settingsGrid}>
-          {/* Aquí mostramos todas las señales, independientemente del símbolo del gráfico */}
           {signals.map(signal => (
             <CardStyled key={signal.id} theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard}>
               <h2 className={`${styles.sectionTitle} ${signal.type === 'Compra' ? styles.signalBuy : styles.signalSell}`}>
