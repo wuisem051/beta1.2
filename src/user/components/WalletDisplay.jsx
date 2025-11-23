@@ -12,31 +12,58 @@ const WalletDisplay = ({ currentUser }) => {
   useEffect(() => {
     if (currentUser?.uid) {
           setLoading(true);
-          const portfolioRef = doc(db, `users/${currentUser.uid}/portfolios/default`);
-          const unsubscribe = onSnapshot(portfolioRef, async (docSnap) => { // Añadir 'async' aquí
+          const userDocRef = doc(db, `users/${currentUser.uid}`);
+          const unsubscribe = onSnapshot(userDocRef, async (docSnap) => { // Ahora lee el documento principal del usuario
             if (docSnap.exists()) {
-              setUserPortfolio(docSnap.data());
+              const userData = docSnap.data();
+              // Mapear los balances del documento de usuario a la estructura de portfolio
+              const mappedPortfolio = {
+                virtualBalance: userData.balanceUSD || 0,
+                holdings: {
+                  BTC: userData.balanceBTC || 0,
+                  LTC: userData.balanceLTC || 0,
+                  DOGE: userData.balanceDOGE || 0,
+                  // Añadir otros holdings de criptomonedas si existen en userData
+                },
+                updatedAt: new Date(), // Asumimos que se actualiza con cualquier cambio
+              };
+              setUserPortfolio(mappedPortfolio);
             } else {
-              console.log("No se encontró el portfolio del usuario. Inicializando uno por defecto.");
-              // Inicializar un portfolio por defecto si no existe
-              const defaultPortfolio = {
-                virtualBalance: 0,
-                holdings: {},
-                updatedAt: new Date(),
+              console.log("No se encontró el documento del usuario. Inicializando balances por defecto.");
+              // Inicializar balances por defecto si el documento del usuario no existe
+              const defaultBalances = {
+                balanceUSD: 0,
+                balanceBTC: 0,
+                balanceLTC: 0,
+                balanceDOGE: 0,
+                role: 'user',
+                email: currentUser.email,
+                paymentAddresses: {},
+                createdAt: new Date(),
               };
               try {
-                await setDoc(portfolioRef, defaultPortfolio);
-                setUserPortfolio(defaultPortfolio); // Establecer el portfolio por defecto
-                console.log("Portfolio por defecto creado exitosamente.");
+                await setDoc(userDocRef, defaultBalances, { merge: true }); // Usar merge: true
+                // Mapear los balances del documento de usuario a la estructura de portfolio
+                const mappedPortfolio = {
+                  virtualBalance: defaultBalances.balanceUSD,
+                  holdings: {
+                    BTC: defaultBalances.balanceBTC,
+                    LTC: defaultBalances.balanceLTC,
+                    DOGE: defaultBalances.balanceDOGE,
+                  },
+                  updatedAt: new Date(),
+                };
+                setUserPortfolio(mappedPortfolio);
+                console.log("Balances por defecto creados exitosamente en el documento del usuario.");
               } catch (setDocError) {
-                console.error("Error al crear el portfolio por defecto:", setDocError);
-                setError("Error al inicializar el saldo de la wallet.");
+                console.error("Error al inicializar balances por defecto:", setDocError);
+                setError("Error al inicializar el saldo de la billetera.");
               }
             }
             setLoading(false);
           }, (err) => {
-            console.error("Error al obtener el portfolio en tiempo real:", err);
-            setError("Error al cargar el saldo de la wallet.");
+            console.error("Error al obtener balances de usuario en tiempo real:", err);
+            setError("Error al cargar el saldo de la billetera.");
             setLoading(false);
           });
           return () => unsubscribe();
