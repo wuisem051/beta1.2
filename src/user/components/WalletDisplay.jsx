@@ -73,38 +73,46 @@ const WalletDisplay = ({ currentUser }) => {
 
   return (
     <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-      <h2 className="text-3xl font-bold text-center mb-6">Mi Wallet</h2>
+      <h2 className="text-3xl font-bold text-center mb-6">Mi Billetera</h2>
 
-      <div className="mb-8 text-center">
-        <p className="text-xl">Saldo Virtual Fiat (USD):</p>
-        <p className="text-5xl font-extrabold text-green-500 mt-2">
-          ${userPortfolio.virtualBalance ? userPortfolio.virtualBalance.toFixed(2) : '0.00'}
-        </p>
+      {/* Sección de Saldos Fiat */}
+      <div className="mb-8 p-4 rounded-md border border-gray-300 dark:border-gray-600">
+        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos Fiat</h3>
+        <div className="text-center">
+          <p className="text-xl">USD:</p>
+          <p className="text-5xl font-extrabold text-green-500 mt-2">
+            ${userPortfolio.virtualBalance ? userPortfolio.virtualBalance.toFixed(2) : '0.00'}
+          </p>
+        </div>
+        {/* Aquí se podrían añadir otras monedas fiat si el esquema de datos lo permite */}
       </div>
 
-      <h3 className="text-2xl font-semibold mb-4 text-center">Tus Criptomonedas (Holdings):</h3>
-      {userPortfolio.holdings && Object.keys(userPortfolio.holdings).length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className={`min-w-full rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <thead className={`${darkMode ? 'bg-gray-600' : 'bg-gray-200'} ${theme.text}`}>
-              <tr>
-                <th className="py-3 px-4 text-left">Moneda</th>
-                <th className="py-3 px-4 text-left">Cantidad</th>
-              </tr>
-            </thead>
-            <tbody className={`${theme.text}`}>
-              {Object.entries(userPortfolio.holdings).map(([coin, qty]) => (
-                <tr key={coin} className={`${darkMode ? 'border-gray-600' : 'border-gray-300'} border-t`}>
-                  <td className="py-3 px-4">{coin.toUpperCase()}</td>
-                  <td className="py-3 px-4">{qty.toFixed(4)}</td>
+      {/* Sección de Saldos de Criptomonedas */}
+      <div className="p-4 rounded-md border border-gray-300 dark:border-gray-600">
+        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos de Criptomonedas</h3>
+        {userPortfolio.holdings && Object.keys(userPortfolio.holdings).length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className={`min-w-full rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+              <thead className={`${darkMode ? 'bg-gray-600' : 'bg-gray-200'} ${theme.text}`}>
+                <tr>
+                  <th className="py-3 px-4 text-left">Moneda</th>
+                  <th className="py-3 px-4 text-left">Cantidad</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-center text-gray-400">No tienes criptomonedas en tu wallet.</p>
-      )}
+              </thead>
+              <tbody className={`${theme.text}`}>
+                {Object.entries(userPortfolio.holdings).map(([coin, qty]) => (
+                  <tr key={coin} className={`${darkMode ? 'border-gray-600' : 'border-gray-300'} border-t`}>
+                    <td className="py-3 px-4">{coin.toUpperCase()}</td>
+                    <td className="py-3 px-4">{qty.toFixed(4)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-center text-gray-400">No tienes criptomonedas en tu billetera.</p>
+        )}
+      </div>
     </div>
   );
 };
