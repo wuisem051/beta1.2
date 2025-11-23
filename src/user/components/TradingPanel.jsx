@@ -20,21 +20,43 @@ const TradingPanel = () => {
   useEffect(() => {
     const userId = auth.currentUser?.uid;
     if (userId) {
-      const portfolioRef = doc(db, `users/${userId}/portfolios/default`);
-      const unsubscribe = onSnapshot(portfolioRef, (docSnap) => {
+      const userDocRef = doc(db, `users/${userId}`); // Ahora lee el documento principal del usuario
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          setUserPortfolio(docSnap.data());
+          const userData = docSnap.data();
+          // Mapear los balances del documento de usuario a la estructura esperada por userPortfolio
+          setUserPortfolio({
+            virtualBalance: userData.balanceUSD || 0,
+            holdings: {
+              BTC: userData.balanceBTC || 0,
+              LTC: userData.balanceLTC || 0,
+              DOGE: userData.balanceDOGE || 0,
+              USDT: userData.balanceUSDT || 0, // Incluir USDT
+              // Agrega otras criptomonedas aquí si también se gestionan en el documento del usuario
+            },
+          });
         } else {
-          console.log("No se encontró el portfolio del usuario. Considerar inicializar uno.");
-          setUserPortfolio(null);
+          console.log("No se encontró el documento del usuario. Los balances serán 0.");
+          setUserPortfolio({
+            virtualBalance: 0,
+            holdings: {
+              BTC: 0,
+              LTC: 0,
+              DOGE: 0,
+              USDT: 0,
+            },
+          });
         }
       }, (error) => {
-        console.error("Error al obtener el portfolio en tiempo real:", error);
+        console.error("Error al obtener balances de usuario en tiempo real para TradingPanel:", error);
         // Manejar error si es necesario
+        setTradeError("Error al cargar tu saldo virtual.");
       });
       return () => unsubscribe();
+    } else {
+      setUserPortfolio(null);
     }
-  }, [auth, db]);
+  }, [auth, db]); // Dependencias: auth y db
 
   const handleTrade = async (type) => {
     setTradeError(null);

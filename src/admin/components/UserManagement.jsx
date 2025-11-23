@@ -16,6 +16,11 @@ const UserManagement = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editRole, setEditRole] = useState('');
   const [editPassword, setEditPassword] = useState('');
+  const [editBalanceUSD, setEditBalanceUSD] = useState(0);
+  const [editBalanceBTC, setEditBalanceBTC] = useState(0);
+  const [editBalanceLTC, setEditBalanceLTC] = useState(0);
+  const [editBalanceDOGE, setEditBalanceDOGE] = useState(0);
+  const [editBalanceUSDT, setEditBalanceUSDT] = useState(0); // Nuevo estado para USDT
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Nuevo estado para selección masiva
 
 
@@ -116,6 +121,11 @@ const UserManagement = () => {
     setEditEmail(user.email);
     setEditRole(user.role || 'user');
     setEditPassword('');
+    setEditBalanceUSD(user.balanceUSD || 0);
+    setEditBalanceBTC(user.balanceBTC || 0);
+    setEditBalanceLTC(user.balanceLTC || 0);
+    setEditBalanceDOGE(user.balanceDOGE || 0);
+    setEditBalanceUSDT(user.balanceUSDT || 0); // Inicializar USDT
   };
 
   const handleUpdateUser = async (e) => {
@@ -127,6 +137,11 @@ const UserManagement = () => {
       await updateDoc(userRef, {
         email: editEmail,
         role: editRole,
+        balanceUSD: parseFloat(editBalanceUSD),
+        balanceBTC: parseFloat(editBalanceBTC),
+        balanceLTC: parseFloat(editBalanceLTC),
+        balanceDOGE: parseFloat(editBalanceDOGE),
+        balanceUSDT: parseFloat(editBalanceUSDT), // Actualizar USDT
       });
 
       // Actualizar email en Firebase Authentication
@@ -394,7 +409,63 @@ const UserManagement = () => {
               />
               <p className={`text-xs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>La contraseña puede ser cambiada aquí.</p>
             </div>
-            <div className="flex justify-end">
+            {/* Campos de Edición de Balances */}
+            <div>
+              <label htmlFor="editBalanceUSD" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance USD:</label>
+              <input
+                type="number"
+                id="editBalanceUSD"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceUSD}
+                onChange={(e) => setEditBalanceUSD(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div>
+              <label htmlFor="editBalanceBTC" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance BTC:</label>
+              <input
+                type="number"
+                id="editBalanceBTC"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceBTC}
+                onChange={(e) => setEditBalanceBTC(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div>
+              <label htmlFor="editBalanceLTC" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance LTC:</label>
+              <input
+                type="number"
+                id="editBalanceLTC"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceLTC}
+                onChange={(e) => setEditBalanceLTC(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div>
+              <label htmlFor="editBalanceDOGE" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance DOGE:</label>
+              <input
+                type="number"
+                id="editBalanceDOGE"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceDOGE}
+                onChange={(e) => setEditBalanceDOGE(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div>
+              <label htmlFor="editBalanceUSDT" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance USDT:</label>
+              <input
+                type="number"
+                id="editBalanceUSDT"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceUSDT}
+                onChange={(e) => setEditBalanceUSDT(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div className="flex justify-end mt-4">
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}

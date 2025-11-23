@@ -1,49 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'; // Añadir deleteDoc, doc, updateDoc
 import { db } from '../../services/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import Modal from '../../common/layout/Modal'; // Asume que tienes un componente Modal básico en common/layout
 
-const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como prop
+const P2P_Marketplace = ({ userBalances }) => {
   const { currentUser } = useAuth();
   const { theme, darkMode } = useContext(ThemeContext);
-  const [offers, setOffers] = useState([
-    // Ofertas de prueba
-    {
-      id: 'offer1',
-      type: 'sell',
-      coin: 'USDT',
-      fiatCurrency: 'VES',
-      amount: 100,
-      price: 38.5,
-      paymentMethods: ['Banco de Venezuela'],
-      ownerId: 'test_seller_id_1',
-      status: 'active',
-    },
-    {
-      id: 'offer2',
-      type: 'buy',
-      coin: 'BTC',
-      fiatCurrency: 'USD',
-      amount: 0.005,
-      price: 60000,
-      paymentMethods: ['Zelle'],
-      ownerId: 'test_buyer_id_1',
-      status: 'active',
-    },
-    {
-      id: 'offer3',
-      type: 'sell',
-      coin: 'ETH',
-      fiatCurrency: 'COP',
-      amount: 0.1,
-      price: 15000000,
-      paymentMethods: ['Mercado Pago'],
-      ownerId: 'test_seller_id_2',
-      status: 'active',
-    },
-  ]);
+  const [offers, setOffers] = useState([]);
+  const [userProfiles, setUserProfiles] = useState({}); // Para almacenar perfiles de usuarios de ofertas (incluyendo lastSeen)
   const [showCreateOfferModal, setShowCreateOfferModal] = useState(false);
   const [newOffer, setNewOffer] = useState({
     type: 'sell', // 'buy' or 'sell'
@@ -51,14 +17,14 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
     fiatCurrency: 'VES',
     amount: '',
     price: '',
-    paymentMethods: ['Banco de Venezuela'], // Valor por defecto
+    paymentMethods: ['Banco de Venezuela'],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, 'p2p_offers'), where('status', '==', 'active'));
-    const unsubscribe = onSnapshot(q,
+    const unsubscribeOffers = onSnapshot(q,
       (snapshot) => {
         const fetchedOffers = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -66,6 +32,15 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
         }));
         setOffers(fetchedOffers);
         setLoading(false);
+
+        // Recolectar UIDs de los propietarios de las ofertas para obtener su estado online
+        const ownerIds = [...new Set(fetchedOffers.map(offer => offer.ownerId))];
+        if (ownerIds.length > 0) {
+          // Crear un listener para cada perfil de usuario o usar una consulta 'where in' si es posible (limitado a 10)
+          // Para simplicidad y escalabilidad limitada, haremos un listener por cada uno o podríamos optar por no tiempo real
+          // Por ahora, para la funcionalidad sencilla, haremos lecturas individuales o no en tiempo real.
+          // Para esta tarea, nos limitaremos a una lógica de "lastSeen" en UserPanel, no en tiempo real aquí.
+        }
       },
       (err) => {
         console.error("Error fetching P2P offers:", err);
@@ -73,8 +48,36 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
         setLoading(false);
       }
     );
-    return () => unsubscribe();
-  }, [currentUser]); // Añadir currentUser como dependencia
+    return () => unsubscribeOffers();
+  }, [currentUser]);
+
+  // Efecto para obtener perfiles de usuarios de las ofertas (incluyendo lastSeen)
+  useEffect(() => {
+    if (offers.length > 0) {
+      const uniqueOwnerIds = [...new Set(offers.map(offer => offer.ownerId))];
+      const unsubscribes = [];
+
+      // Limpiar listeners antiguos antes de establecer nuevos
+      setUserProfiles({});
+
+      uniqueOwnerIds.forEach(ownerId => {
+        const userRef = doc(db, 'users', ownerId);
+        const unsubscribe = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setUserProfiles(prev => ({
+              ...prev,
+              [ownerId]: docSnap.data(),
+            }));
+          } else {
+            setUserProfiles(prev => ({ ...prev, [ownerId]: null }));
+          }
+        });
+        unsubscribes.push(unsubscribe);
+      });
+
+      return () => unsubscribes.forEach(unsub => unsub());
+    }
+  }, [offers, db]); // Depende de las ofertas para reaccionar a nuevos propietarios
 
   const handleCreateOfferChange = (e) => {
     const { name, value } = e.target;
@@ -110,10 +113,7 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
       }
     } else if (newOffer.type === 'buy') { // Comprar cripto, el usuario necesita fiat
       const totalFiatCost = offerAmount * offerPrice;
-      // Asumiendo que newOffer.fiatCurrency se refiere a la moneda fiat que el usuario va a "gastar"
-      // Si solo manejamos balanceUSD en el perfil del usuario, la validación se hace contra USD
-      // Si el fiatCurrency no es USD, la lógica sería más compleja (conversión, otros campos de balance fiat)
-      if (newOffer.fiatCurrency !== 'USD') {
+      if (newOffer.fiatCurrency !== 'USD') { // Asumiendo que 'USD' es la moneda fiat para comprar
         alert(`Actualmente solo se soporta la compra/venta de cripto usando USD como moneda fiat. Tu oferta usa ${newOffer.fiatCurrency}.`);
         return;
       }
@@ -127,8 +127,8 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
     try {
       await addDoc(collection(db, 'p2p_offers'), {
         ...newOffer,
-        amount: offerAmount, // Usar parseFloat
-        price: offerPrice,   // Usar parseFloat
+        amount: offerAmount,
+        price: offerPrice,
         ownerId: currentUser.uid,
         status: 'active',
         createdAt: serverTimestamp(),
@@ -150,6 +150,31 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
     }
   };
 
+  const handleCancelOffer = async (offerId) => {
+    if (!currentUser) {
+      alert("Debes iniciar sesión para cancelar una oferta.");
+      return;
+    }
+    const offerToCancel = offers.find(offer => offer.id === offerId);
+    if (!offerToCancel || offerToCancel.ownerId !== currentUser.uid) {
+      alert("No tienes permiso para cancelar esta oferta.");
+      return;
+    }
+
+    if (window.confirm("¿Estás seguro de que quieres cancelar esta oferta?")) {
+      try {
+        await updateDoc(doc(db, 'p2p_offers', offerId), {
+          status: 'cancelled',
+          updatedAt: serverTimestamp(),
+        });
+        alert("Oferta cancelada exitosamente.");
+      } catch (err) {
+        console.error("Error al cancelar la oferta:", err);
+        alert("Error al cancelar la oferta: " + err.message);
+      }
+    }
+  };
+
   const handleInitiateTrade = (offer) => {
     if (!currentUser) {
       alert("Debes iniciar sesión para iniciar un intercambio.");
@@ -159,10 +184,16 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
       alert("No puedes iniciar un intercambio con tu propia oferta.");
       return;
     }
-    // Aquí se implementaría la lógica para iniciar un trade
-    // Por ahora, solo una alerta
     alert(`Iniciando ${offer.type === 'buy' ? 'compra' : 'venta'} de ${offer.amount} ${offer.coin} a ${offer.price} ${offer.fiatCurrency} con ${offer.ownerId}`);
     console.log("Iniciar Trade:", offer);
+  };
+
+  const isUserOnline = (ownerId) => {
+    const profile = userProfiles[ownerId];
+    if (!profile || !profile.lastSeen) return false;
+    const lastSeenTime = profile.lastSeen.toDate(); // Asume que lastSeen es un Timestamp de Firestore
+    const twentyMinutesAgo = new Date(Date.now() - 20 * 60 * 1000); // 20 minutos de inactividad
+    return lastSeenTime > twentyMinutesAgo;
   };
 
   const commonCurrencies = [
@@ -236,18 +267,32 @@ const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como pro
                   <td className="py-3 px-4">{offer.amount.toFixed(2)}</td>
                   <td className="py-3 px-4">{offer.price.toFixed(2)}</td>
                   <td className="py-3 px-4">{offer.paymentMethods.join(', ')}</td>
-                  <td className="py-3 px-4 truncate">{offer.ownerId.substring(0, 8)}...</td>
+                  <td className="py-3 px-4 truncate flex items-center">
+                    {offer.ownerId.substring(0, 8)}...
+                    {userProfiles[offer.ownerId] && (
+                      <span className={`ml-2 w-3 h-3 rounded-full ${isUserOnline(offer.ownerId) ? 'bg-green-500' : 'bg-gray-500'}`} title={isUserOnline(offer.ownerId) ? 'En línea' : 'Fuera de línea'}></span>
+                    )}
+                  </td>
                   <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => handleInitiateTrade(offer)}
-                      className={`font-bold py-1.5 px-3 rounded-md text-sm transition duration-300 ${
-                        offer.type === 'sell'
-                          ? 'bg-green-600 hover:bg-green-700 text-white' // Botón "Comprar" para ofertas de venta
-                          : 'bg-red-600 hover:bg-red-700 text-white'   // Botón "Vender" para ofertas de compra
-                      }`}
-                    >
-                      {offer.type === 'sell' ? 'Comprar' : 'Vender'}
-                    </button>
+                    {currentUser && currentUser.uid === offer.ownerId ? (
+                      <button
+                        onClick={() => handleCancelOffer(offer.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm transition duration-300"
+                      >
+                        Cancelar Oferta
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleInitiateTrade(offer)}
+                        className={`font-bold py-1.5 px-3 rounded-md text-sm transition duration-300 ${
+                          offer.type === 'sell'
+                            ? 'bg-green-600 hover:bg-green-700 text-white' // Botón "Comprar" para ofertas de venta
+                            : 'bg-red-600 hover:bg-red-700 text-white'   // Botón "Vender" para ofertas de compra
+                        }`}
+                      >
+                        {offer.type === 'sell' ? 'Comprar' : 'Vender'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

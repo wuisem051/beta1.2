@@ -1799,6 +1799,59 @@ const UserPanel = () => {
     }
   }, [location.pathname]);
 
+  // Efecto para actualizar lastSeen del usuario
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+
+    const userDocRef = doc(db, 'users', currentUser.uid);
+
+    // Función para actualizar lastSeen
+    const updateLastSeen = async () => {
+      try {
+        await updateDoc(userDocRef, {
+          lastSeen: new Date(), // Usar un objeto Date estándar o serverTimestamp
+        });
+        console.log("lastSeen actualizado para:", currentUser.uid);
+      } catch (error) {
+        console.error("Error al actualizar lastSeen:", error);
+      }
+    };
+
+    // Actualizar lastSeen inmediatamente al cargar el componente
+    updateLastSeen();
+
+    // Establecer un intervalo para actualizar lastSeen periódicamente (ej. cada 5 minutos)
+    const intervalId = setInterval(updateLastSeen, 5 * 60 * 1000); // 5 minutos
+
+    // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(intervalId);
+  }, [currentUser?.uid, db]);
+
+  // Efecto para manejar la actualización de lastSeen cuando el usuario cierra la pestaña o navega fuera
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+    const userDocRef = doc(db, 'users', currentUser.uid);
+
+    const handleBeforeUnload = async () => {
+      // Intentar actualizar lastSeen justo antes de que la página se descargue
+      // Nota: Esto es un "best effort" y no siempre funciona de forma confiable en todos los navegadores.
+      // Firebase serverTimestamp es más robusto para estados de sesión.
+      try {
+        await updateDoc(userDocRef, {
+          lastSeen: new Date(), // Se enviará con la hora de cierre
+        });
+        console.log("lastSeen actualizado al cerrar/navegar para:", currentUser.uid);
+      } catch (error) {
+        console.error("Error al actualizar lastSeen en beforeunload:", error);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentUser?.uid, db]);
 
   async function handleLogout() {
     try {
