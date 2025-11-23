@@ -5,10 +5,45 @@ import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import Modal from '../../common/layout/Modal'; // Asume que tienes un componente Modal básico en common/layout
 
-const P2P_Marketplace = () => {
+const P2P_Marketplace = ({ userBalances }) => { // Aceptar userBalances como prop
   const { currentUser } = useAuth();
   const { theme, darkMode } = useContext(ThemeContext);
-  const [offers, setOffers] = useState([]);
+  const [offers, setOffers] = useState([
+    // Ofertas de prueba
+    {
+      id: 'offer1',
+      type: 'sell',
+      coin: 'USDT',
+      fiatCurrency: 'VES',
+      amount: 100,
+      price: 38.5,
+      paymentMethods: ['Banco de Venezuela'],
+      ownerId: 'test_seller_id_1',
+      status: 'active',
+    },
+    {
+      id: 'offer2',
+      type: 'buy',
+      coin: 'BTC',
+      fiatCurrency: 'USD',
+      amount: 0.005,
+      price: 60000,
+      paymentMethods: ['Zelle'],
+      ownerId: 'test_buyer_id_1',
+      status: 'active',
+    },
+    {
+      id: 'offer3',
+      type: 'sell',
+      coin: 'ETH',
+      fiatCurrency: 'COP',
+      amount: 0.1,
+      price: 15000000,
+      paymentMethods: ['Mercado Pago'],
+      ownerId: 'test_seller_id_2',
+      status: 'active',
+    },
+  ]);
   const [showCreateOfferModal, setShowCreateOfferModal] = useState(false);
   const [newOffer, setNewOffer] = useState({
     type: 'sell', // 'buy' or 'sell'
@@ -52,16 +87,48 @@ const P2P_Marketplace = () => {
       alert("Debes iniciar sesión para crear una oferta.");
       return;
     }
-    if (parseFloat(newOffer.amount) <= 0 || parseFloat(newOffer.price) <= 0) {
+    const offerAmount = parseFloat(newOffer.amount);
+    const offerPrice = parseFloat(newOffer.price);
+
+    if (offerAmount <= 0 || offerPrice <= 0) {
       alert("La cantidad y el precio deben ser mayores que cero.");
       return;
+    }
+
+    // Validación de saldo
+    const userFiatBalance = userBalances.balanceUSD; // Asumiendo que 'USD' es la moneda fiat principal
+    const userCryptoHoldings = userBalances.holdings;
+
+    if (newOffer.type === 'sell') { // Vender cripto, el usuario necesita la cripto
+      const cryptoToSell = newOffer.coin;
+      const amountToSell = offerAmount;
+      const userHasCrypto = userCryptoHoldings && userCryptoHoldings[cryptoToSell];
+
+      if (!userHasCrypto || userCryptoHoldings[cryptoToSell] < amountToSell) {
+        alert(`Saldo insuficiente de ${cryptoToSell}. Tienes ${userHasCrypto ? userCryptoHoldings[cryptoToSell].toFixed(4) : '0.0000'} ${cryptoToSell}.`);
+        return;
+      }
+    } else if (newOffer.type === 'buy') { // Comprar cripto, el usuario necesita fiat
+      const totalFiatCost = offerAmount * offerPrice;
+      // Asumiendo que newOffer.fiatCurrency se refiere a la moneda fiat que el usuario va a "gastar"
+      // Si solo manejamos balanceUSD en el perfil del usuario, la validación se hace contra USD
+      // Si el fiatCurrency no es USD, la lógica sería más compleja (conversión, otros campos de balance fiat)
+      if (newOffer.fiatCurrency !== 'USD') {
+        alert(`Actualmente solo se soporta la compra/venta de cripto usando USD como moneda fiat. Tu oferta usa ${newOffer.fiatCurrency}.`);
+        return;
+      }
+      
+      if (userFiatBalance < totalFiatCost) {
+        alert(`Saldo fiat insuficiente para comprar. Necesitas $${totalFiatCost.toFixed(2)} USD y tienes $${userFiatBalance.toFixed(2)} USD.`);
+        return;
+      }
     }
 
     try {
       await addDoc(collection(db, 'p2p_offers'), {
         ...newOffer,
-        amount: parseFloat(newOffer.amount),
-        price: parseFloat(newOffer.price),
+        amount: offerAmount, // Usar parseFloat
+        price: offerPrice,   // Usar parseFloat
         ownerId: currentUser.uid,
         status: 'active',
         createdAt: serverTimestamp(),
@@ -71,7 +138,7 @@ const P2P_Marketplace = () => {
       setNewOffer({
         type: 'sell',
         coin: 'USDT',
-        fiatCurrency: 'VES',
+        fiatCurrency: 'VES', // Mantener VES o cambiar a USD si es la única soportada
         amount: '',
         price: '',
         paymentMethods: ['Banco de Venezuela'],
