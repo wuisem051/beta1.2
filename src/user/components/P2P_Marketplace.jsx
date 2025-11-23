@@ -39,7 +39,7 @@ const P2P_Marketplace = () => {
       }
     );
     return () => unsubscribe();
-  }, []);
+  }, [currentUser]); // Añadir currentUser como dependencia
 
   const handleCreateOfferChange = (e) => {
     const { name, value } = e.target;
