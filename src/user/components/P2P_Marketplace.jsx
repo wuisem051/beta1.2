@@ -100,15 +100,15 @@ const P2P_Marketplace = ({ userBalances }) => {
 
     // Validación de saldo
     const userFiatBalance = userBalances[`balance${newOffer.fiatCurrency}`] || 0; // Obtener el saldo fiat dinámicamente
-    const userCryptoHoldings = userBalances.holdings;
 
     if (newOffer.type === 'sell') { // Vender cripto, el usuario necesita la cripto
       const cryptoToSell = newOffer.coin;
       const amountToSell = offerAmount;
-      const userHasCrypto = userCryptoHoldings && userCryptoHoldings[cryptoToSell];
+      // Acceder directamente al balance de la criptomoneda desde userBalances
+      const userCryptoBalance = userBalances[`balance${cryptoToSell}`] || 0;
 
-      if (!userHasCrypto || userCryptoHoldings[cryptoToSell] < amountToSell) {
-        alert(`Saldo insuficiente de ${cryptoToSell}. Tienes ${userHasCrypto ? userCryptoHoldings[cryptoToSell].toFixed(4) : '0.0000'} ${cryptoToSell}.`);
+      if (userCryptoBalance < amountToSell) {
+        alert(`Saldo insuficiente de ${cryptoToSell}. Tienes ${userCryptoBalance.toFixed(4)} ${cryptoToSell}.`);
         return;
       }
     } else if (newOffer.type === 'buy') { // Comprar cripto, el usuario necesita fiat

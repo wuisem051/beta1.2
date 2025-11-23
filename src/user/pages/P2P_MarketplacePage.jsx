@@ -12,6 +12,8 @@ const P2P_MarketplacePage = () => {
     balanceBTC: 0,
     balanceLTC: 0,
     balanceDOGE: 0,
+    balanceUSDT: 0, // Añadir USDT
+    balanceVES: 0, // Añadir VES
   });
   const db = getFirestore();
 
@@ -26,6 +28,8 @@ const P2P_MarketplacePage = () => {
             balanceBTC: userData.balanceBTC || 0,
             balanceLTC: userData.balanceLTC || 0,
             balanceDOGE: userData.balanceDOGE || 0,
+            balanceUSDT: userData.balanceUSDT || 0, // Incluir USDT
+            balanceVES: userData.balanceVES || 0, // Incluir VES
           });
         } else {
           setUserBalances({
@@ -33,6 +37,8 @@ const P2P_MarketplacePage = () => {
             balanceBTC: 0,
             balanceLTC: 0,
             balanceDOGE: 0,
+            balanceUSDT: 0, // Incluir USDT
+            balanceVES: 0, // Incluir VES
           });
         }
       }, (error) => {

@@ -178,8 +178,8 @@ const WalletDisplay = ({ currentUser }) => {
         {/* Aquí se podrían añadir otras monedas fiat si el esquema de datos lo permite */}
 
         {/* Sección de Intercambio USD a USDT */}
-        <div className="mt-8 p-4 rounded-md border border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold mb-4 text-center">Intercambiar USD a USDT (1:1)</h3>
+        <div className={`mt-8 p-4 rounded-md border ${darkMode ? 'border-dark_border bg-dark_bg' : 'border-gray-300 bg-gray-50'}`}>
+          <h3 className={`text-xl font-semibold mb-4 text-center ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>Intercambiar USD a USDT (1:1)</h3>
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <input
               type="number"

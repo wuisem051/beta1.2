@@ -1910,7 +1910,7 @@ const UserPanel = () => {
           <Route path="trading-signal/*" element={<TradingSignal />} /> {/* Nueva ruta para Señal Trading */}
           <Route path="trading-panel/*" element={<TradingPanel />} /> {/* Nueva ruta para el Panel de Trading */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
-          <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage />} /> {/* Nueva ruta para el Mercado P2P */}
+          <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
