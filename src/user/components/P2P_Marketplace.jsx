@@ -99,7 +99,7 @@ const P2P_Marketplace = ({ userBalances }) => {
     }
 
     // Validación de saldo
-    const userFiatBalance = userBalances.balanceUSD; // Asumiendo que 'USD' es la moneda fiat principal
+    const userFiatBalance = userBalances[`balance${newOffer.fiatCurrency}`] || 0; // Obtener el saldo fiat dinámicamente
     const userCryptoHoldings = userBalances.holdings;
 
     if (newOffer.type === 'sell') { // Vender cripto, el usuario necesita la cripto
@@ -113,13 +113,9 @@ const P2P_Marketplace = ({ userBalances }) => {
       }
     } else if (newOffer.type === 'buy') { // Comprar cripto, el usuario necesita fiat
       const totalFiatCost = offerAmount * offerPrice;
-      if (newOffer.fiatCurrency !== 'USD') { // Asumiendo que 'USD' es la moneda fiat para comprar
-        alert(`Actualmente solo se soporta la compra/venta de cripto usando USD como moneda fiat. Tu oferta usa ${newOffer.fiatCurrency}.`);
-        return;
-      }
       
       if (userFiatBalance < totalFiatCost) {
-        alert(`Saldo fiat insuficiente para comprar. Necesitas $${totalFiatCost.toFixed(2)} USD y tienes $${userFiatBalance.toFixed(2)} USD.`);
+        alert(`Saldo fiat insuficiente para comprar. Necesitas ${totalFiatCost.toFixed(2)} ${newOffer.fiatCurrency} y tienes ${userFiatBalance.toFixed(2)} ${newOffer.fiatCurrency}.`);
         return;
       }
     }

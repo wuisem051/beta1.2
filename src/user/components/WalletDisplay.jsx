@@ -19,6 +19,7 @@ const WalletDisplay = ({ currentUser }) => {
               // Mapear los balances del documento de usuario a la estructura de portfolio
               const mappedPortfolio = {
                 fiatBalanceUSD: userData.balanceUSD || 0, // Saldo Fiat USD
+                fiatBalanceVES: userData.balanceVES || 0, // Saldo Fiat VES
                 virtualBalanceUSD: userData.virtualBalanceUSD || 0, // Nuevo Saldo Virtual USD
                 holdings: {
                   BTC: userData.balanceBTC || 0,
@@ -33,6 +34,7 @@ const WalletDisplay = ({ currentUser }) => {
               console.log("No se encontró el documento del usuario. Inicializando balances por defecto.");
               const defaultBalances = {
                 balanceUSD: 0,
+                balanceVES: 0, // Inicializar balanceVES
                 virtualBalanceUSD: 0, // Inicializar saldo virtual
                 balanceBTC: 0,
                 balanceLTC: 0,
@@ -47,6 +49,7 @@ const WalletDisplay = ({ currentUser }) => {
                 await setDoc(userDocRef, defaultBalances, { merge: true });
                 const mappedPortfolio = {
                   fiatBalanceUSD: defaultBalances.balanceUSD,
+                  fiatBalanceVES: defaultBalances.balanceVES, // Mapear saldo VES
                   virtualBalanceUSD: defaultBalances.virtualBalanceUSD, // Mapear saldo virtual
                   holdings: {
                     BTC: defaultBalances.balanceBTC,
@@ -107,12 +110,18 @@ const WalletDisplay = ({ currentUser }) => {
 
       {/* Sección de Saldos Fiat */}
       <div className="mb-8 p-4 rounded-md border border-gray-300 dark:border-gray-600">
-        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos USD</h3>
+        <h3 className="text-2xl font-semibold mb-4 text-center">Saldos Fiat</h3>
         <div className="flex flex-col md:flex-row justify-around items-center gap-4">
             <div className="text-center">
                 <p className="text-xl">USD (Fiat):</p>
                 <p className="text-4xl font-extrabold text-green-500 mt-2">
                     ${userPortfolio.fiatBalanceUSD ? userPortfolio.fiatBalanceUSD.toFixed(2) : '0.00'}
+                </p>
+            </div>
+            <div className="text-center">
+                <p className="text-xl">VES (Fiat):</p>
+                <p className="text-4xl font-extrabold text-purple-500 mt-2">
+                    Bs.{userPortfolio.fiatBalanceVES ? userPortfolio.fiatBalanceVES.toFixed(2) : '0.00'}
                 </p>
             </div>
             <div className="text-center">

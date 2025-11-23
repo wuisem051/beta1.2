@@ -292,7 +292,7 @@ const MiningInfoContent = ({ currentUser, userMiners, setUserMiners, styles }) =
               <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+                </svg>
             ) : (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             )}
@@ -485,6 +485,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
     balanceBTC: 0,
     balanceLTC: 0,
     balanceDOGE: 0,
+    balanceVES: 0, // Añadir balanceVES
   });
   const [withdrawalsHistory, setWithdrawalsHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
@@ -531,6 +532,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
           balanceBTC: 0,
           balanceLTC: 0,
           balanceDOGE: 0,
+          balanceVES: 0,
         });
         return;
       }
@@ -546,6 +548,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
               balanceBTC: userData.balanceBTC || 0,
               balanceLTC: userData.balanceLTC || 0,
               balanceDOGE: userData.balanceDOGE || 0,
+              balanceVES: userData.balanceVES || 0, // Añadir balanceVES
             });
           }
         }, (err) => {
@@ -714,6 +717,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
                 <option value="DOGE">Dogecoin (DOGE)</option>
                 <option value="LTC">Litecoin (LTC)</option>
                 <option value="USD">USD</option>
+                <option value="VES">Bolívar Soberano (VES)</option> {/* Añadir VES */}
               </select>
             </div>
 
@@ -1125,7 +1129,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                   <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                </svg>
                 ) : 'Enviar Respuesta'}
               </button>
             </div>
@@ -1167,7 +1171,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                   <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                </svg>
                 ) : 'Enviar Nueva Consulta'}
               </button>
             </form>
@@ -1202,6 +1206,7 @@ const SettingsContent = ({ styles }) => {
     DOGE: '',
     LTC: '',
     USD: '', // Añadir USD si se permite guardar direcciones para USD
+    VES: '', // Añadir VES
   });
   const [receivePaymentNotifications, setReceivePaymentNotifications] = useState(false);
   const [receiveLoginAlerts, setReceiveLoginAlerts] = useState(false);
@@ -1216,7 +1221,7 @@ const SettingsContent = ({ styles }) => {
           const docSnap = await getDoc(userDocRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            setPaymentAddresses(userData.paymentAddresses || { BTC: '', DOGE: '', LTC: '', USD: '' });
+            setPaymentAddresses(userData.paymentAddresses || { BTC: '', DOGE: '', LTC: '', USD: '', VES: '' });
             setReceivePaymentNotifications(userData.receivePaymentNotifications || false);
             setReceiveLoginAlerts(userData.receiveLoginAlerts || false);
             setTwoFactorAuthEnabled(userData.twoFactorAuthEnabled || false);
@@ -1487,6 +1492,18 @@ const SettingsContent = ({ styles }) => {
               placeholder="Email o ID de Binance para USD"
             />
           </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="ves-address" className={styles.formLabel}>Bolívar Soberano (VES) (Binance Pay ID/Email)</label>
+            <input
+              type="text"
+              id="ves-address"
+              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+              value={paymentAddresses.VES}
+              onChange={(e) => handlePaymentAddressChange('VES', e.target.value)}
+              disabled={isLoading}
+              placeholder="Email o ID de Binance para VES"
+            />
+          </div>
           <button
             onClick={handleSaveAddresses}
             className={styles.submitButton}
@@ -1496,7 +1513,7 @@ const SettingsContent = ({ styles }) => {
               <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+                </svg>
             ) : 'Guardar Direcciones'}
           </button>
 
@@ -1535,7 +1552,7 @@ const SettingsContent = ({ styles }) => {
               <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+                </svg>
             ) : 'Guardar Preferencias'}
           </button>
         </div>
@@ -1557,6 +1574,7 @@ const UserPanel = () => {
     balanceBTC: 0,
     balanceLTC: 0,
     balanceDOGE: 0,
+    balanceVES: 0, // Añadir balanceVES
   });
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
@@ -1565,6 +1583,7 @@ const UserPanel = () => {
     DOGE: 100,
     LTC: 0.01,
     USD: 10,
+    VES: 1, // Añadir umbral para VES
   });
   const [totalHashratePool, setTotalHashratePool] = useState(0); // Nuevo estado para el hashrate total de la pool
   const [activeMinersAllUsers, setActiveMinersAllUsers] = useState(0); // Nuevo estado para mineros activos de la pool
@@ -1669,6 +1688,7 @@ const UserPanel = () => {
         balanceBTC: 0,
         balanceLTC: 0,
         balanceDOGE: 0,
+        balanceVES: 0,
       });
       return;
     }
@@ -1682,6 +1702,7 @@ const UserPanel = () => {
           balanceBTC: userData.balanceBTC || 0,
           balanceLTC: userData.balanceLTC || 0,
           balanceDOGE: userData.balanceDOGE || 0,
+          balanceVES: userData.balanceVES || 0, // Añadir balanceVES
         });
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario y direcciones de pago cargados para ${currentUser.uid}.`);
@@ -1693,6 +1714,7 @@ const UserPanel = () => {
             balanceBTC: 0,
             balanceLTC: 0,
             balanceDOGE: 0,
+            balanceVES: 0, // Añadir balanceVES
             role: 'user',
             email: currentUser.email,
             paymentAddresses: {}, // Inicializar paymentAddresses
@@ -1704,6 +1726,7 @@ const UserPanel = () => {
             balanceBTC: 0,
             balanceLTC: 0,
             balanceDOGE: 0,
+            balanceVES: 0, // Añadir balanceVES
           });
           setUserPaymentAddresses({});
         } catch (insertError) {
@@ -1742,6 +1765,7 @@ const UserPanel = () => {
         DOGE: settingsData.minPaymentThresholdDOGE || 100,
         LTC: settingsData.minPaymentThresholdLTC || 0.01,
         USD: settingsData.minPaymentThresholdUSD || 10,
+        VES: settingsData.minPaymentThresholdVES || 1, // Añadir VES
       });
     }, (error) => {
       console.error("UserPanel: Error en la suscripción de paymentConfig:", error);

@@ -21,6 +21,7 @@ const UserManagement = () => {
   const [editBalanceLTC, setEditBalanceLTC] = useState(0);
   const [editBalanceDOGE, setEditBalanceDOGE] = useState(0);
   const [editBalanceUSDT, setEditBalanceUSDT] = useState(0); // Nuevo estado para USDT
+  const [editBalanceVES, setEditBalanceVES] = useState(0); // Nuevo estado para VES
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Nuevo estado para selección masiva
 
 
@@ -93,6 +94,7 @@ const UserManagement = () => {
         balanceBTC: 0,
         balanceLTC: 0,
         balanceDOGE: 0,
+        balanceVES: 0, // Añadir balanceVES
         createdAt: new Date(),
       });
 
@@ -126,6 +128,7 @@ const UserManagement = () => {
     setEditBalanceLTC(user.balanceLTC || 0);
     setEditBalanceDOGE(user.balanceDOGE || 0);
     setEditBalanceUSDT(user.balanceUSDT || 0); // Inicializar USDT
+    setEditBalanceVES(user.balanceVES || 0); // Inicializar VES
   };
 
   const handleUpdateUser = async (e) => {
@@ -142,6 +145,7 @@ const UserManagement = () => {
         balanceLTC: parseFloat(editBalanceLTC),
         balanceDOGE: parseFloat(editBalanceDOGE),
         balanceUSDT: parseFloat(editBalanceUSDT), // Actualizar USDT
+        balanceVES: parseFloat(editBalanceVES), // Actualizar VES
       });
 
       // Actualizar email en Firebase Authentication
@@ -462,6 +466,17 @@ const UserManagement = () => {
                 className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
                 value={editBalanceUSDT}
                 onChange={(e) => setEditBalanceUSDT(e.target.value)}
+                step="any"
+              />
+            </div>
+            <div>
+              <label htmlFor="editBalanceVES" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance VES:</label>
+              <input
+                type="number"
+                id="editBalanceVES"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editBalanceVES}
+                onChange={(e) => setEditBalanceVES(e.target.value)}
                 step="any"
               />
             </div>

@@ -13,6 +13,11 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
+// Override authDomain for specific environments (e.g., Netlify preview URLs)
+if (process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE && window.location.hostname !== "localhost") {
+  firebaseConfig.authDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE;
+}
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
