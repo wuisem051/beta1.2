@@ -23,14 +23,15 @@ service cloud.firestore {
 
     // Reglas para colecciones que requieren autenticación
     match /users/{userId} {
-      allow read, update: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
+      // Un usuario autenticado puede leer, crear y actualizar su propio documento
+      allow read, create, update: if request.auth != null && request.auth.uid == userId;
+      // Los administradores tienen acceso completo a todos los documentos de usuario
       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
 
       // Subcolección para los portfolios de trading
       match /portfolios/{portfolioId} {
-        allow read, create: if request.auth != null && request.auth.uid == userId;
-        allow update: if request.auth != null && request.auth.uid == userId; // Permitir actualizar holdings y balance
+        // Un usuario autenticado puede leer, crear y actualizar su propio portfolio
+        allow read, create, update: if request.auth != null && request.auth.uid == userId;
         allow delete: if false; // Denegar eliminación de portfolios
 
         // Subcolección para las transacciones del portfolio
