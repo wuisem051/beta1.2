@@ -225,3 +225,149 @@ exports.getTradingSignals = functions.https.onRequest(async (req, res) => {
     res.status(500).json({ error: "Error al obtener las señales de trading.", details: error.message });
   }
 });
+
+// Añado las nuevas funciones buyerConfirmsPayment y sellerReleasesFunds
+exports.buyerConfirmsPayment = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'La solicitud debe estar autenticada.');
+  }
+
+  const userId = context.auth.uid;
+  const { tradeId } = data;
+
+  if (!tradeId) {
+    throw new functions.https.HttpsError('invalid-argument', 'El ID del trade es requerido.');
+  }
+
+  const tradeRef = admin.firestore().collection('p2p_trades').doc(tradeId);
+
+  try {
+    await admin.firestore().runTransaction(async (transaction) => {
+      const tradeDoc = await transaction.get(tradeRef);
+
+      if (!tradeDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Trade no encontrado.');
+      }
+
+      const tradeData = tradeDoc.data();
+
+      // Solo el comprador puede confirmar el pago
+      if (tradeData.buyerId !== userId) {
+        throw new functions.https.HttpsError('permission-denied', 'Solo el comprador puede confirmar el pago.');
+      }
+
+      // Solo se puede confirmar el pago si el estado es PENDIENTE_PAGO o EN_ESCROW
+      if (tradeData.status !== 'PENDIENTE_PAGO' && tradeData.status !== 'EN_ESCROW') {
+        throw new functions.https.HttpsError('failed-precondition', `No se puede confirmar el pago en el estado actual: ${tradeData.status}.`);
+      }
+
+      // Actualizar el estado del trade a PAGO_CONFIRMADO
+      transaction.update(tradeRef, {
+        status: 'PAGO_CONFIRMADO',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    return { success: true, message: 'Pago confirmado exitosamente. Esperando liberación del vendedor.' };
+
+  } catch (error) {
+    console.error('Error al confirmar pago:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Error interno al confirmar pago.', error.message);
+  }
+});
+
+exports.sellerReleasesFunds = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'La solicitud debe estar autenticada.');
+  }
+
+  const userId = context.auth.uid;
+  const { tradeId } = data;
+
+  if (!tradeId) {
+    throw new functions.https.HttpsError('invalid-argument', 'El ID del trade es requerido.');
+  }
+
+  const tradeRef = admin.firestore().collection('p2p_trades').doc(tradeId);
+
+  try {
+    await admin.firestore().runTransaction(async (transaction) => {
+      const tradeDoc = await transaction.get(tradeRef);
+
+      if (!tradeDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Trade no encontrado.');
+      }
+
+      const tradeData = tradeDoc.data();
+
+      // Solo el vendedor puede liberar los fondos
+      if (tradeData.sellerId !== userId) {
+        throw new functions.https.HttpsError('permission-denied', 'Solo el vendedor puede liberar los fondos.');
+      }
+
+      // Solo se pueden liberar los fondos si el estado es PAGO_CONFIRMADO
+      if (tradeData.status !== 'PAGO_CONFIRMADO') {
+        throw new functions.https.HttpsError('failed-precondition', 'Los fondos solo pueden liberarse si el comprador ha confirmado el pago.');
+      }
+
+      // Obtener el portfolio del comprador y del vendedor
+      const sellerPortfolioRef = admin.firestore().collection('users').doc(tradeData.sellerId).collection('portfolios').doc('default');
+      const buyerPortfolioRef = admin.firestore().collection('users').doc(tradeData.buyerId).collection('portfolios').doc('default');
+
+      const sellerPortfolioDoc = await transaction.get(sellerPortfolioRef);
+      const buyerPortfolioDoc = await transaction.get(buyerPortfolioRef);
+
+      if (!sellerPortfolioDoc.exists || !buyerPortfolioDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Uno o ambos portfolios no fueron encontrados.');
+      }
+
+      const sellerPortfolioData = sellerPortfolioDoc.data();
+      const buyerPortfolioData = buyerPortfolioDoc.data();
+
+      const cryptoAmount = tradeData.amount;
+      const coinId = tradeData.coin;
+
+      // Verificar si el vendedor tiene suficiente criptomoneda en su portfolio para el trade
+      if ((sellerPortfolioData.holdings[coinId] || 0) < cryptoAmount) {
+        throw new functions.https.HttpsError('failed-precondition', `El vendedor no tiene suficiente ${coinId} en sus holdings para completar el trade.`);
+      }
+
+      // Transferir la criptomoneda del vendedor al comprador
+      sellerPortfolioData.holdings[coinId] = sellerPortfolioData.holdings[coinId] - cryptoAmount;
+      buyerPortfolioData.holdings[coinId] = (buyerPortfolioData.holdings[coinId] || 0) + cryptoAmount;
+
+      // Eliminar la moneda del holding si la cantidad del vendedor llega a cero o es negativa (debería ser cero)
+      if (sellerPortfolioData.holdings[coinId] <= 0) {
+        delete sellerPortfolioData.holdings[coinId];
+      }
+
+      // Actualizar portfolios
+      transaction.update(sellerPortfolioRef, {
+        holdings: sellerPortfolioData.holdings,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      transaction.update(buyerPortfolioRef, {
+        holdings: buyerPortfolioData.holdings,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Actualizar el estado del trade a COMPLETADO
+      transaction.update(tradeRef, {
+        status: 'COMPLETADO',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    return { success: true, message: 'Fondos liberados exitosamente. Trade completado.' };
+
+  } catch (error) {
+    console.error('Error al liberar fondos:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'Error interno al liberar fondos.', error.message);
+  }
+});

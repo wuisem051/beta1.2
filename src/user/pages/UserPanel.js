@@ -11,6 +11,7 @@ import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCrede
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
 import TradingSignal from '../components/TradingSignal'; // Importar TradingSignal
 import TradingPanel from '../components/TradingPanel'; // Importar TradingPanel
+import P2P_Marketplace from '../components/P2P_Marketplace'; // Importar P2P_Marketplace
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
@@ -1683,7 +1684,7 @@ const UserPanel = () => {
     }
     console.log("UserPanel: Configurando suscripción para balances del usuario:", currentUser.uid);
     const userDocRef = doc(db, "users", currentUser.uid);
-    const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
+    const unsubscribe = onSnapshot(userDocRef, async (docSnapshot) => { // <-- Hacemos la función async aquí
       if (docSnapshot.exists()) {
         const userData = docSnapshot.data();
         setUserBalances({
@@ -1695,16 +1696,28 @@ const UserPanel = () => {
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
       } else {
         console.log("UserPanel: Documento de usuario no existe en Firestore. Creando uno nuevo...");
-        setDoc(userDocRef, {
-          balanceUSD: 0,
-          balanceBTC: 0,
-          balanceLTC: 0,
-          balanceDOGE: 0,
-          role: 'user',
-          email: currentUser.email,
-          paymentAddresses: {}, // Inicializar paymentAddresses
-        }).then(() => {
-          console.log("UserPanel: Documento de usuario creado exitosamente en Firestore.");
+        try { // <-- Añadimos el bloque try-catch completo
+          await setDoc(userDocRef, {
+            balanceUSD: 0,
+            balanceBTC: 0,
+            balanceLTC: 0,
+            balanceDOGE: 0,
+            role: 'user',
+            email: currentUser.email,
+            paymentAddresses: {}, // Inicializar paymentAddresses
+          });
+
+          // Crear el portfolio por defecto para el nuevo usuario
+          const defaultPortfolioRef = doc(db, `users/${currentUser.uid}/portfolios/default`);
+          await setDoc(defaultPortfolioRef, {
+            virtualBalance: 10000.00,
+            holdings: {},
+            totalValue: 10000.00,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+
+          console.log("UserPanel: Documento de usuario y portfolio por defecto creado exitosamente en Firestore.");
           setUserBalances({
             balanceUSD: 0,
             balanceBTC: 0,
@@ -1712,15 +1725,15 @@ const UserPanel = () => {
             balanceDOGE: 0,
           });
           setUserPaymentAddresses({});
-        }).catch((insertError) => {
-          console.error("UserPanel: Error al crear el documento de usuario en Firestore:", insertError);
-        });
+        } catch (insertError) {
+          console.error("UserPanel: Error al crear el documento de usuario o portfolio en Firestore:", insertError);
+        }
       }
     }, (error) => {
       console.error("UserPanel: Error en la suscripción de balances del usuario:", error);
     });
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [currentUser, db]);
 
   // Suscripción para configuración de la pool
   useEffect(() => {
@@ -1838,6 +1851,7 @@ const UserPanel = () => {
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
           <Route path="trading-signal/*" element={<TradingSignal />} /> {/* Nueva ruta para Señal Trading */}
           <Route path="trading-panel/*" element={<TradingPanel />} /> {/* Nueva ruta para el Panel de Trading */}
+          <Route path="p2p-marketplace/*" element={<P2P_Marketplace />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
