@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
+import { doc, onSnapshot, getFirestore, setDoc } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 
 const WalletDisplay = ({ currentUser }) => {
@@ -11,53 +11,65 @@ const WalletDisplay = ({ currentUser }) => {
 
   useEffect(() => {
     if (currentUser?.uid) {
-      setLoading(true);
-      const portfolioRef = doc(db, `users/${currentUser.uid}/portfolios/default`);
-      const unsubscribe = onSnapshot(portfolioRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setUserPortfolio(docSnap.data());
-          setLoading(false);
+          setLoading(true);
+          const portfolioRef = doc(db, `users/${currentUser.uid}/portfolios/default`);
+          const unsubscribe = onSnapshot(portfolioRef, async (docSnap) => { // Añadir 'async' aquí
+            if (docSnap.exists()) {
+              setUserPortfolio(docSnap.data());
+            } else {
+              console.log("No se encontró el portfolio del usuario. Inicializando uno por defecto.");
+              // Inicializar un portfolio por defecto si no existe
+              const defaultPortfolio = {
+                virtualBalance: 0,
+                holdings: {},
+                updatedAt: new Date(),
+              };
+              try {
+                await setDoc(portfolioRef, defaultPortfolio);
+                setUserPortfolio(defaultPortfolio); // Establecer el portfolio por defecto
+                console.log("Portfolio por defecto creado exitosamente.");
+              } catch (setDocError) {
+                console.error("Error al crear el portfolio por defecto:", setDocError);
+                setError("Error al inicializar el saldo de la wallet.");
+              }
+            }
+            setLoading(false);
+          }, (err) => {
+            console.error("Error al obtener el portfolio en tiempo real:", err);
+            setError("Error al cargar el saldo de la wallet.");
+            setLoading(false);
+          });
+          return () => unsubscribe();
         } else {
-          console.log("No se encontró el portfolio del usuario. Podría ser un nuevo usuario o un problema.");
-          // Aquí podríamos ofrecer inicializar el portfolio si es un problema en el frontend
           setUserPortfolio(null);
           setLoading(false);
         }
-      }, (err) => {
-        console.error("Error al obtener el portfolio en tiempo real:", err);
-        setError("Error al cargar el saldo de la wallet.");
-        setLoading(false);
-      });
-      return () => unsubscribe();
-    } else {
-      setUserPortfolio(null);
-      setLoading(false);
-    }
-  }, [currentUser, db]); // Dependencia actualizada: currentUser en lugar de auth
+      }, [currentUser, db]);
 
-  if (loading) {
-    return (
-      <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-        <p className="text-center text-gray-400">Cargando tu wallet...</p>
-      </div>
-    );
-  }
+      if (loading) {
+        return (
+          <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
+            <p className="text-center text-gray-400">Cargando tu billetera...</p>
+          </div>
+        );
+      }
 
-  if (error) {
-    return (
-      <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-        <p className="text-center text-red-500">{error}</p>
-      </div>
-    );
-  }
+      if (error) {
+        return (
+          <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
+            <p className="text-center text-red-500">{error}</p>
+          </div>
+        );
+      }
 
-  if (!userPortfolio) {
-    return (
-      <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-        <p className="text-center text-gray-400">No se encontró información de tu wallet. Los balances aparecerán aquí después de realizar depósitos o transacciones P2P.</p>
-      </div>
-    );
-  }
+      // Si userPortfolio es null aquí, significa que no hay currentUser o hubo un error en la inicialización
+      if (!userPortfolio) {
+        return (
+          <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
+            <p className="text-center text-gray-400">No se pudo cargar la información de tu billetera. Por favor, intenta de nuevo o contacta a soporte.</p>
+          </div>
+        );
+      }
 
   return (
     <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
