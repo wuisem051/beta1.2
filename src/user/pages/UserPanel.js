@@ -10,7 +10,7 @@ import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, a
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
-import AdViewerContent from '../components/AdViewerContent'; // Importar AdViewerContent
+import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
@@ -1887,7 +1887,7 @@ const UserPanel = () => {
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
-          <Route path="ad-viewer/*" element={<AdViewerContent />} /> {/* Nueva ruta para Ver Anuncios */}
+          <Route path="mining-portfolio/*" element={<MiningPortfolioContent />} /> {/* Nueva ruta para Portafolio de Minería */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="miners/*" element={<MinersContent styles={styles} />} /> {/* Nueva ruta para el Panel de Mineros */}
