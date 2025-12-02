@@ -103,15 +103,15 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           </li>
           <li className="mb-0.5">
             <Link
-              to={`${basePath}/ad-viewer`}
+              to={`${basePath}/bonus`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/ad-viewer`)
+                useMatch(`${basePath}/bonus`)
                   ? 'bg-accent text-white'
                   : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/ad-viewer`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-              Ver Anuncios
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/bonus`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 11V9m0 0V5m0 4h.01M12 21a9 9 0 110-18 9 9 0 010 18zm-2.75-6.25a.25.25 0 00-.25.25v1.25c0 .138.112.25.25.25h1.25a.25.25 0 00.25-.25v-1.25c0-.138-.112-.25-.25-.25H9.25zM15 11h.01M15 15h.01M9 15h.01"/></svg>
+              Bono
             </Link>
           </li>
           <li className="mb-0.5">

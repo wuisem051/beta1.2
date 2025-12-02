@@ -12,6 +12,7 @@ import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar Use
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
 import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
+import BonusContent from '../components/BonusContent'; // Importar BonusContent
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
@@ -1890,6 +1891,7 @@ const UserPanel = () => {
           <Route path="mining-portfolio/*" element={<MiningPortfolioContent />} /> {/* Nueva ruta para Portafolio de Minería */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
+          <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
           <Route path="miners/*" element={<MinersContent styles={styles} />} /> {/* Nueva ruta para el Panel de Mineros */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
