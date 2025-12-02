@@ -9,20 +9,39 @@ import { db, auth } from '../../services/firebase'; // Importar db y auth desde 
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy } from 'firebase/firestore';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
-import TradingSignal from '../components/TradingSignal'; // Importar TradingSignal
-import TradingPanel from '../components/TradingPanel'; // Importar TradingPanel
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
+import AdViewerContent from '../components/AdViewerContent'; // Importar AdViewerContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
+import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
 import StatsSection from '../components/StatsSection'; // Importar StatsSection
 import PerformanceStatsSection from '../components/PerformanceStatsSection'; // Importar PerformanceStatsSection
+import MinerDisplay from '../components/MinerDisplay'; // Importar MinerDisplay
+import HomeMinersContent from '../components/HomeMinersContent'; // Importar HomeMinersContent
 import styles from './UserPanel.module.css'; // Importar estilos CSS Modules
 import useFormValidation from '../../hooks/useFormValidation'; // Importar useFormValidation
 import { useError } from '../../context/ErrorContext'; // Importar useError
+import minersData from '../../data/miners'; // Importar la lista de mineros
 
 // Componentes de las sub-secciones
+
+const MinersContent = ({ styles }) => {
+  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
+  return (
+    <div className={`${styles.minersContent} ${darkMode ? styles.dark : styles.light}`}>
+      <h1 className={styles.pageTitle}>Tienda de Mineros</h1>
+      <p className={styles.developmentText}>Explora y adquiere los mineros más eficientes para potenciar tu ganancia.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+        {minersData.map(miner => (
+          <MinerDisplay key={miner.id} miner={miner} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, styles, totalHashrate, estimatedDailyUSD, activeMinersAllUsers, pricePerTHs }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
 
@@ -1568,7 +1587,6 @@ const UserPanel = () => {
   const navigate = useNavigate();
   const [userMiners, setUserMiners] = useState([]);
   const [unreadTicketsCount, setUnreadTicketsCount] = useState(0);
-  const [newTradingSignalsCount, setNewTradingSignalsCount] = useState(0); // Nuevo estado para el conteo de señales de trading
   const [userBalances, setUserBalances] = useState({
     balanceUSD: 0,
     balanceBTC: 0,
@@ -1595,12 +1613,6 @@ const UserPanel = () => {
 
   const handleUnreadCountChange = (count) => {
     setUnreadTicketsCount(count);
-  };
-
-  // Función para marcar las señales de trading como leídas
-  const markTradingSignalsAsRead = () => {
-    localStorage.setItem('lastViewedTradingSignals', new Date().toISOString());
-    setNewTradingSignalsCount(0);
   };
 
   const demoUser = { email: 'demo@example.com' };
@@ -1790,40 +1802,6 @@ const UserPanel = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  // Suscripción para nuevas señales de trading
-  useEffect(() => {
-    console.log("UserPanel: Configurando suscripción para señales de trading.");
-    const tradingSignalsQuery = query(collection(db, "tradingSignals"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(tradingSignalsQuery, (snapshot) => {
-      const lastViewedTimestamp = localStorage.getItem('lastViewedTradingSignals');
-      let newSignals = 0;
-      if (lastViewedTimestamp) {
-        const lastViewedDate = new Date(lastViewedTimestamp);
-        snapshot.docs.forEach(doc => {
-          const signal = doc.data();
-          if (signal.createdAt.toDate() > lastViewedDate) {
-            newSignals++;
-          }
-        });
-      } else {
-        // Si no hay marca de tiempo, todas las señales son nuevas hasta que se visiten
-        newSignals = snapshot.docs.length;
-      }
-      setNewTradingSignalsCount(newSignals);
-    }, (error) => {
-      console.error("UserPanel: Error en la suscripción de señales de trading:", error);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Efecto para marcar señales como leídas al navegar a la ruta de señales
-  const location = useLocation();
-  useEffect(() => {
-    if (location.pathname.includes('/user-panel/trading-signal')) {
-      markTradingSignalsAsRead();
-    }
-  }, [location.pathname]);
-
   // Efecto para actualizar lastSeen del usuario
   useEffect(() => {
     if (!currentUser?.uid) return;
@@ -1887,30 +1865,32 @@ const UserPanel = () => {
     }
   }
 
+  const showNavbar = [
+    '/user-panel/home-miners', // Ruta para "Hogar" (mineros adquiridos)
+    '/user-panel/miners',      // Ruta para "Minar" (panel de mineros)
+  ].some(path => location.pathname.startsWith(path));
+
   return (
     <div className={styles.userPanelContainer}>
       <Sidebar 
         unreadTicketsCount={unreadTicketsCount} 
-        newTradingSignalsCount={newTradingSignalsCount} // Pasar el conteo de nuevas señales
-        markTradingSignalsAsRead={markTradingSignalsAsRead} // Pasar la función para marcar como leídas
         displayUser={displayUser} 
       />
       <MainContent>
-        <header className={styles.mainContentHeader}>
-            <h1 className={styles.mainContentTitle}>Dashboard</h1>
-        </header>
+        {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
         
         <Routes>
           <Route path="dashboard/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
+          <Route path="home-miners/*" element={<HomeMinersContent />} /> {/* Nueva ruta para Hogar - Mineros Adquiridos */}
           <Route path="mining-info/*" element={<MiningInfoContent currentUser={currentUser} userMiners={userMiners} setUserMiners={setUserMiners} styles={styles} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
-          <Route path="trading-signal/*" element={<TradingSignal />} /> {/* Nueva ruta para Señal Trading */}
-          <Route path="trading-panel/*" element={<TradingPanel />} /> {/* Nueva ruta para el Panel de Trading */}
+          <Route path="ad-viewer/*" element={<AdViewerContent />} /> {/* Nueva ruta para Ver Anuncios */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
+          <Route path="miners/*" element={<MinersContent styles={styles} />} /> {/* Nueva ruta para el Panel de Mineros */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />

@@ -1,0 +1,135 @@
+/* src/user/components/MinerDisplay.module.css */
+
+.minerCard {
+  background-color: #1a1a1a; /* Fondo oscuro casi negro */
+  border: 2px solid #39ff14; /* Borde verde neón */
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); /* Sombra brillante verde */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Share Tech Mono', monospace; /* Fuente de estilo terminal */
+  color: #39ff14; /* Texto verde neón */
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.minerCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(57, 255, 20, 0.7);
+}
+
+.minerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(57, 255, 20, 0.1),
+      rgba(57, 255, 20, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(57, 255, 20, 0.05),
+      rgba(57, 255, 20, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.minerTitle {
+  font-size: 1.2rem; /* Tamaño de fuente más pequeño */
+  font-weight: bold;
+  color: #00ffff; /* Azul cian brillante para el título */
+  margin-bottom: 0.8rem; /* Margen inferior reducido */
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.6); /* Sombra de texto ajustada */
+  text-transform: uppercase;
+  letter-spacing: 1px; /* Espaciado de letras reducido */
+}
+
+.minerImage {
+  width: 120px; /* Ancho de imagen más pequeño */
+  height: 120px; /* Altura de imagen más pequeña */
+  object-fit: contain;
+  border: 2px solid #00ffff;
+  border-radius: 4px;
+  margin-bottom: 0.8rem; /* Margen inferior reducido */
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5); /* Sombra ajustada */
+  background-color: #0d0d0d;
+}
+
+.minerStats {
+  text-align: left; /* Alineado a la izquierda para mejor lectura */
+  font-size: 0.85rem; /* Tamaño de fuente más pequeño */
+  line-height: 1.4; /* Espaciado de línea ajustado */
+  color: #39ff14;
+  width: 100%; /* Ocupar todo el ancho */
+  padding: 0 0.5rem; /* Relleno ajustado */
+}
+
+.minerStats p {
+  margin-bottom: 0.3rem; /* Margen inferior reducido */
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0; /* Eliminar padding aquí, ya manejado por .minerStats */
+}
+
+.minerStats span:first-child {
+  font-weight: bold;
+  color: #fff;
+}
+
+.minerStats span:last-child {
+  color: #00ffff;
+}
+
+.buyButton {
+  background-color: #00ffff; /* Color del botón azul cian */
+  color: #1a1a1a; /* Texto oscuro para contraste */
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+.buyButton:hover {
+  background-color: #39ff14; /* Color verde neón al pasar el ratón */
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+  color: #1a1a1a;
+}
+
+/* Scrollbar estilo "terminal" */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a; /* Fondo del track del scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #39ff14; /* Color del thumb (barra) del scrollbar */
+  border-radius: 10px;
+  border: 2px solid #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ffff; /* Color del thumb al pasar el ratón */
+}

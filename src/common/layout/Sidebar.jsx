@@ -90,37 +90,6 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           </li>
           <li className="mb-0.5">
             <Link
-              to={`${basePath}/trading-signal`}
-              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/trading-signal`) 
-                  ? 'bg-accent text-white' 
-                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
-              }`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/trading-signal`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M18 14v4h4m-9-1V5h-2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              Señal Trading
-              {newTradingSignalsCount > 0 && (
-                <span className="ml-auto bg-red_error text-white text-xxs font-bold px-2 py-0.5 rounded-full">
-                  {newTradingSignalsCount}
-                </span>
-              )}
-            </Link>
-          </li>
-          <li className="mb-0.5">
-            <Link
-              to={`${basePath}/trading-panel`}
-              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/trading-panel`) 
-                  ? 'bg-accent text-white' 
-                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
-              }`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/trading-panel`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l-5 4V6l9-4 9 4v4l-5-4v13"/></svg>
-              Panel de Trading
-            </Link>
-          </li>
-          <li className="mb-0.5">
-            <Link
               to={`${basePath}/pool-arbitrage`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 useMatch(`${basePath}/pool-arbitrage`) 
@@ -130,6 +99,19 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             >
               <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/pool-arbitrage`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
               Pools de Arbitraje
+            </Link>
+          </li>
+          <li className="mb-0.5">
+            <Link
+              to={`${basePath}/ad-viewer`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/ad-viewer`)
+                  ? 'bg-accent text-white'
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/ad-viewer`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Ver Anuncios
             </Link>
           </li>
           <li className="mb-0.5">
@@ -149,8 +131,8 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             <Link
               to={`${basePath}/p2p-marketplace`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/p2p-marketplace`) 
-                  ? 'bg-accent text-white' 
+                useMatch(`${basePath}/p2p-marketplace`)
+                  ? 'bg-accent text-white'
                   : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
               }`}
             >
@@ -158,12 +140,39 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
               Mercado P2P
             </Link>
           </li>
+          <h3 className={`text-xs font-semibold uppercase mt-4 mb-2 px-2 ${theme.textSoft}`}>Gestión de Mineros</h3>
+          <li className="mb-0.5">
+            <Link
+              to={`${basePath}/miners`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/miners`)
+                  ? 'bg-accent text-white'
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/miners`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Tienda de Mineros
+            </Link>
+          </li>
+          <li className="mb-0.5">
+            <Link
+              to={`${basePath}/home-miners`}
+              className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                useMatch(`${basePath}/home-miners`)
+                  ? 'bg-accent text-white'
+                  : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 mr-2 ${useMatch(`${basePath}/home-miners`) ? 'text-white' : theme.textSoft}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              Mis Mineros
+            </Link>
+          </li>
           <li className="mb-0.5">
             <Link
               to={`${basePath}/settings`}
               className={`flex items-center py-1.5 px-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                useMatch(`${basePath}/settings`) 
-                  ? 'bg-accent text-white' 
+                useMatch(`${basePath}/settings`)
+                  ? 'bg-accent text-white'
                   : `${theme.textSoft} hover:${theme.background} hover:${theme.text}`
               }`}
             >
