@@ -11,7 +11,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notificaciones
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
-  const [miners, setMiners] = useState([]);
+  const [miners, setMiners] = useState([]); // Mantener la lista combinada
+  const [userMiners, setUserMiners] = useState([]); // Mineros asignados a usuarios
+  const [storeMiners, setStoreMiners] = useState([]); // Mineros de la tienda
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMiner, setEditingMiner] = useState(null);
@@ -19,6 +21,15 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
   const [newMinerWorkerName, setNewMinerWorkerName] = useState('');
   const [newMinerHashrate, setNewMinerHashrate] = useState(0);
   const [newMinerStatus, setNewMinerStatus] = useState('inactivo');
+
+  // Estados para añadir nuevo minero de la tienda
+  const [newStoreMinerName, setNewStoreMinerName] = useState('');
+  const [newStoreMinerImageUrl, setNewStoreMinerImageUrl] = useState('');
+  const [newStoreMinerCost, setNewStoreMinerCost] = useState(0);
+  const [newStoreMinerHashrate, setNewStoreMinerHashrate] = useState(''); // String como en src/data/miners.js
+  const [newStoreMinerPowerConsumption, setNewStoreMinerPowerConsumption] = useState('');
+  const [newStoreMinerProfitability, setNewStoreMinerProfitability] = useState('');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,20 +41,23 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
     console.log("MinerManagement: useEffect ejecutado. Configurando suscripción para 'miners'.");
     const fetchMinersAndSubscribe = async () => {
       try {
-        const initialMinersSnapshot = await getDocs(collection(db, 'miners'));
-        const initialMiners = initialMinersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setMiners(initialMiners);
-        previousMinersCount.current = initialMiners.length;
-
         const unsubscribe = onSnapshot(collection(db, 'miners'), (snapshot) => {
           console.log("MinerManagement: Firebase suscripción - Evento recibido.");
           const updatedMiners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+          const fetchedUserMiners = updatedMiners.filter(miner => miner.type === 'user');
+          const fetchedStoreMiners = updatedMiners.filter(miner => miner.type === 'store');
+
+          setUserMiners(fetchedUserMiners);
+          setStoreMiners(fetchedStoreMiners);
+          setMiners(updatedMiners); // Mantener la lista combinada para la búsqueda general
+
+          // Para notificar sobre nuevos mineros en general, independientemente del tipo
           if (updatedMiners.length > previousMinersCount.current && onNewMinerAdded) {
             const newMinersCount = updatedMiners.length - previousMinersCount.current;
             onNewMinerAdded(newMinersCount);
           }
           previousMinersCount.current = updatedMiners.length;
-          setMiners(updatedMiners);
         }, (error) => {
           console.error("MinerManagement: Error subscribing to miners collection:", error);
           showError('Error al cargar los mineros.');
@@ -88,30 +102,135 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
   const handleEditClick = (miner) => {
     console.log("MinerManagement: Editando minero:", miner);
     setEditingMiner({ ...miner });
-    setNewMinerUserId(miner.userId); // Cargar el userId del minero
-    setNewMinerWorkerName(miner.workerName); // Cargar el workerName del minero
-    setNewMinerHashrate(miner.currentHashrate || 0); // Cargar el hashrate del minero
-    setNewMinerStatus(miner.status || 'inactivo'); // Cargar el estado del minero
+
+    if (miner.type === 'user') {
+      setNewMinerUserId(miner.userId);
+      setNewMinerWorkerName(miner.workerName);
+      setNewMinerHashrate(miner.currentHashrate || 0);
+      setNewMinerStatus(miner.status || 'inactivo');
+      // Limpiar estados de minero de tienda al editar un minero de usuario
+      setNewStoreMinerName('');
+      setNewStoreMinerImageUrl('');
+      setNewStoreMinerCost(0);
+      setNewStoreMinerHashrate('');
+      setNewStoreMinerPowerConsumption('');
+      setNewStoreMinerProfitability('');
+    } else if (miner.type === 'store') {
+      setNewStoreMinerName(miner.name || '');
+      setNewStoreMinerImageUrl(miner.imageUrl || '');
+      setNewStoreMinerCost(miner.cost || 0);
+      setNewStoreMinerHashrate(miner.hashrate || '');
+      setNewStoreMinerPowerConsumption(miner.powerConsumption || '');
+      setNewStoreMinerProfitability(miner.profitability || '');
+      // Limpiar estados de minero de usuario al editar un minero de tienda
+      setNewMinerUserId('');
+      setNewMinerWorkerName('');
+      setNewMinerHashrate(0);
+      setNewMinerStatus('inactivo');
+    }
     setIsModalOpen(true);
   };
 
   // Manejar cambios en el formulario de edición del minero
   const handleMinerEditChange = (e) => {
     const { name, value } = e.target;
-    console.log(`MinerManagement: Cambiando campo ${name} a ${value}`);
-    if (name === "userId") {
-      setNewMinerUserId(value);
-    } else if (name === "workerName") {
-      setNewMinerWorkerName(value);
-    } else if (name === "currentHashrate") {
-      setNewMinerHashrate(parseFloat(value) || 0);
-    } else if (name === "status") {
-      setNewMinerStatus(value);
+    console.log(`MinerManagement: Cambiando campo '${name}' a '${value}'`);
+
+    if (editingMiner.type === 'user') {
+      if (name === "userId") {
+        setNewMinerUserId(value);
+      } else if (name === "workerName") {
+        setNewMinerWorkerName(value);
+      } else if (name === "currentHashrate") {
+        setNewMinerHashrate(parseFloat(value) || 0);
+      } else if (name === "status") {
+        setNewMinerStatus(value);
+      }
+    } else if (editingMiner.type === 'store') {
+      if (name === "name") {
+        setNewStoreMinerName(value);
+      } else if (name === "imageUrl") {
+        setNewStoreMinerImageUrl(value);
+      } else if (name === "cost") {
+        setNewStoreMinerCost(parseFloat(value) || 0);
+      } else if (name === "hashrate") {
+        setNewStoreMinerHashrate(value);
+      } else if (name === "powerConsumption") {
+        setNewStoreMinerPowerConsumption(value);
+      } else if (name === "profitability") {
+        setNewStoreMinerProfitability(value);
+      }
     }
     setEditingMiner((prevMiner) => ({
       ...prevMiner,
       [name]: value,
+      // Asegurarse de que los valores de hashrate, cost, etc. se actualicen correctamente en editingMiner
+      ...(name === "currentHashrate" && { currentHashrate: parseFloat(value) || 0 }),
+      ...(name === "cost" && { cost: parseFloat(value) || 0 }),
+      ...(name === "hashrate" && { hashrate: value }),
+      ...(name === "powerConsumption" && { powerConsumption: value }),
+      ...(name === "profitability" && { profitability: value }),
+      ...(name === "name" && { name: value }),
+      ...(name === "imageUrl" && { imageUrl: value }),
     }));
+  };
+
+  const handleAddMiner = async (minerData, type) => {
+    try {
+      const dataToSave = { ...minerData, type, createdAt: new Date() };
+      const docRef = await addDoc(collection(db, 'miners'), dataToSave);
+      showSuccess(`${type === 'user' ? 'Minero de usuario' : 'Minero de la tienda'} añadido exitosamente.`);
+      console.log(`${type === 'user' ? 'Minero de usuario' : 'Minero de la tienda'} añadido a Firebase con ID:`, docRef.id);
+      return true; // Éxito al añadir
+    } catch (error) {
+      console.error(`Error al añadir ${type === 'user' ? 'minero de usuario' : 'minero de la tienda'}:`, error);
+      showError(`Error al añadir ${type === 'user' ? 'minero de usuario' : 'minero de la tienda'}: ${error.message}`);
+      return false; // Fallo al añadir
+    }
+  };
+
+  const handleAddNewUserMiner = async () => {
+    if (!newMinerUserId.trim() || !newMinerWorkerName.trim()) {
+      showError('El ID de usuario y el nombre del worker no pueden estar vacíos.');
+      return;
+    }
+    const minerData = {
+      userId: newMinerUserId,
+      workerName: newMinerWorkerName,
+      currentHashrate: newMinerHashrate,
+      status: newMinerStatus,
+    };
+    const success = await handleAddMiner(minerData, 'user');
+    if (success) {
+      setNewMinerUserId('');
+      setNewMinerWorkerName('');
+      setNewMinerHashrate(0);
+      setNewMinerStatus('inactivo');
+    }
+  };
+
+  const handleAddNewStoreMiner = async () => {
+    if (!newStoreMinerName.trim() || !newStoreMinerImageUrl.trim() || !newStoreMinerHashrate.trim() || newStoreMinerCost <= 0) {
+      showError('Todos los campos de Nombre, URL de Imagen, Hashrate y Costo (mayor a 0) son obligatorios para un minero de la tienda.');
+      return;
+    }
+    const minerData = {
+      name: newStoreMinerName,
+      imageUrl: newStoreMinerImageUrl,
+      cost: newStoreMinerCost,
+      hashrate: newStoreMinerHashrate,
+      powerConsumption: newStoreMinerPowerConsumption,
+      profitability: newStoreMinerProfitability,
+    };
+    const success = await handleAddMiner(minerData, 'store');
+    if (success) {
+      setNewStoreMinerName('');
+      setNewStoreMinerImageUrl('');
+      setNewStoreMinerCost(0);
+      setNewStoreMinerHashrate('');
+      setNewStoreMinerPowerConsumption('');
+      setNewStoreMinerProfitability('');
+    }
   };
 
   const handleDeleteMiner = async (minerId) => {
@@ -129,63 +248,53 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
   };
 
   const handleSaveChanges = async () => {
-    console.log("MinerManagement: Guardando cambios para minero:", editingMiner.id);
-    console.log("MinerManagement: Nuevos valores - userId:", newMinerUserId, "workerName:", newMinerWorkerName, "hashrate:", newMinerHashrate, "status:", newMinerStatus);
-    try {
-      const minerRef = doc(db, 'miners', editingMiner.id);
-      await updateDoc(minerRef, {
-        userId: newMinerUserId,
-        workerName: newMinerWorkerName,
-        currentHashrate: newMinerHashrate,
-        status: newMinerStatus
-      });
-      setIsModalOpen(false);
-      setEditingMiner(null);
-      setNewMinerUserId('');
-      setNewMinerWorkerName('');
-      setNewMinerHashrate(0);
-      setNewMinerStatus('inactivo');
-      showSuccess('Minero actualizado exitosamente.');
-      console.log("MinerManagement: Minero actualizado exitosamente.");
-    } catch (error) {
-      console.error("MinerManagement: Error updating miner: ", error);
-      showError(`Error al actualizar minero: ${error.message}`);
+    if (editingMiner.type === 'user') { // Es un minero asignado a un usuario
+      console.log("MinerManagement: Guardando cambios para minero de usuario:", editingMiner.id);
+      console.log("MinerManagement: Nuevos valores - userId:", newMinerUserId, "workerName:", newMinerWorkerName, "hashrate:", newMinerHashrate, "status:", newMinerStatus);
+      try {
+        const minerRef = doc(db, 'miners', editingMiner.id);
+        await updateDoc(minerRef, {
+          userId: newMinerUserId,
+          workerName: newMinerWorkerName,
+          currentHashrate: newMinerHashrate,
+          status: newMinerStatus
+        });
+        setIsModalOpen(false);
+        setEditingMiner(null);
+        showSuccess('Minero de usuario actualizado exitosamente.');
+        console.log("MinerManagement: Minero de usuario actualizado exitosamente.");
+      } catch (error) {
+        console.error("MinerManagement: Error updating user miner: ", error);
+        showError(`Error al actualizar minero de usuario: ${error.message}`);
+      }
+    } else if (editingMiner.type === 'store') { // Es un minero de la tienda
+      console.log("MinerManagement: Guardando cambios para minero de la tienda:", editingMiner.id);
+      console.log("MinerManagement: Nuevos valores - name:", newStoreMinerName, "imageUrl:", newStoreMinerImageUrl, "cost:", newStoreMinerCost, "hashrate:", newStoreMinerHashrate, "powerConsumption:", newStoreMinerPowerConsumption, "profitability:", newStoreMinerProfitability);
+      try {
+        const minerRef = doc(db, 'miners', editingMiner.id);
+        await updateDoc(minerRef, {
+          name: newStoreMinerName,
+          imageUrl: newStoreMinerImageUrl,
+          cost: newStoreMinerCost,
+          hashrate: newStoreMinerHashrate,
+          powerConsumption: newStoreMinerPowerConsumption,
+          profitability: newStoreMinerProfitability,
+        });
+        setIsModalOpen(false);
+        setEditingMiner(null);
+        showSuccess('Minero de la tienda actualizado exitosamente.');
+        console.log("MinerManagement: Minero de la tienda actualizado exitosamente.");
+      } catch (error) {
+        console.error("MinerManagement: Error updating store miner: ", error);
+        showError(`Error al actualizar minero de la tienda: ${error.message}`);
+      }
     }
   };
 
-  const handleAddNewMiner = async () => {
-    if (!newMinerUserId.trim() || !newMinerWorkerName.trim()) {
-      showError('El ID de usuario y el nombre del worker no pueden estar vacíos.');
-      console.log("MinerManagement: Intento de añadir minero fallido: campos vacíos.");
-      return;
-    }
-
-    console.log("MinerManagement: Añadiendo nuevo minero con userId:", newMinerUserId, "workerName:", newMinerWorkerName, "hashrate:", newMinerHashrate, "status:", newMinerStatus);
-    try {
-      const newMinerData = {
-        userId: newMinerUserId,
-        workerName: newMinerWorkerName,
-        currentHashrate: newMinerHashrate,
-        status: newMinerStatus,
-        createdAt: new Date()
-      };
-      const docRef = await addDoc(collection(db, 'miners'), newMinerData);
-      console.log("MinerManagement: Minero añadido a Firebase con ID:", docRef.id);
-      setNewMinerUserId('');
-      setNewMinerWorkerName('');
-      setNewMinerHashrate(0);
-      setNewMinerStatus('inactivo');
-      showSuccess('Minero añadido exitosamente.');
-    } catch (error) {
-      console.error("MinerManagement: Error adding miner: ", error);
-      showError(`Error al añadir minero: ${error.message}`);
-    }
-  };
-
-  // Lógica de paginación
+  // Lógica de paginación para mineros de usuario
   const indexOfLastMiner = currentPage * minersPerPage;
   const indexOfFirstMiner = indexOfLastMiner - minersPerPage;
-  const currentMiners = miners
+  const currentUserMiners = userMiners
     .filter(miner => {
       const matchesSearch = searchTerm === '' || 
                             miner.workerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -195,13 +304,13 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
     })
     .slice(indexOfFirstMiner, indexOfLastMiner);
 
-  const totalPages = Math.ceil(miners.length / minersPerPage);
+  const totalPages = Math.ceil(userMiners.length / minersPerPage); // Paginación solo para mineros de usuario
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSelectAllMiners = (e) => {
     if (e.target.checked) {
-      const allMinerIds = currentMiners.map(miner => miner.id);
+      const allMinerIds = currentUserMiners.map(miner => miner.id);
       setSelectedMiners(allMinerIds);
     } else {
       setSelectedMiners([]);
@@ -233,13 +342,13 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
   };
 
   // Datos para la gráfica de estado de mineros
-  const minerStatusData = miners.reduce((acc, miner) => {
-    acc[miner.status] = (acc[miner.status] || 0) + 1;
+  const minerStatusData = userMiners.reduce((acc, miner) => {
+    acc[miner.status] = (acc[miner.status] || 0) + 1; // Solo mineros de usuario para la gráfica de estado
     return acc;
   }, {});
 
   const chartData = {
-    labels: Object.keys(minerStatusData),
+    labels: Object.keys(minerStatusData).length > 0 ? Object.keys(minerStatusData) : ["No hay mineros"],
     datasets: [{
       label: 'Mineros por Estado',
       data: Object.values(minerStatusData),
@@ -249,15 +358,15 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
     }],
   };
 
-  console.log("Mineros filtrados y paginados (currentMiners):", currentMiners); // Log para depuración
+  console.log("Mineros de usuario filtrados y paginados (currentUserMiners):", currentUserMiners); // Log para depuración
 
   return (
     <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-white'} p-6 rounded-lg`}>
       <h2 className="text-2xl font-semibold mb-4">Gestión de Mineros</h2>
       
-      {/* Formulario para añadir nuevo minero */}
-      {/* Formulario para añadir nuevo minero */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Formulario para añadir nuevo minero de usuario */}
+      <h3 className="text-xl font-semibold mb-3">Añadir Minero de Usuario</h3>
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 border p-4 rounded-lg shadow-sm">
         <div>
           <label htmlFor="newMinerUserId" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID de Usuario:</label>
           <select
@@ -310,10 +419,90 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
         </div>
         <div className="md:col-span-4 flex justify-end">
           <button
-            onClick={handleAddNewMiner}
+            onClick={handleAddNewUserMiner}
             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
           >
-            Añadir Minero
+            Añadir Minero de Usuario
+          </button>
+        </div>
+      </div>
+
+      {/* Formulario para añadir nuevo minero de la tienda */}
+      <h3 className="text-xl font-semibold mb-3 mt-8">Añadir Minero a la Tienda</h3>
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border p-4 rounded-lg shadow-sm">
+        <div>
+          <label htmlFor="newStoreMinerName" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Minero:</label>
+          <input
+            type="text"
+            id="newStoreMinerName"
+            value={newStoreMinerName}
+            onChange={(e) => setNewStoreMinerName(e.target.value)}
+            placeholder="Ej: Limerminer 17M"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div>
+          <label htmlFor="newStoreMinerImageUrl" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>URL de la Imagen:</label>
+          <input
+            type="text"
+            id="newStoreMinerImageUrl"
+            value={newStoreMinerImageUrl}
+            onChange={(e) => setNewStoreMinerImageUrl(e.target.value)}
+            placeholder="https://example.com/miner.gif"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div>
+          <label htmlFor="newStoreMinerCost" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Costo:</label>
+          <input
+            type="number"
+            id="newStoreMinerCost"
+            value={newStoreMinerCost}
+            onChange={(e) => setNewStoreMinerCost(parseFloat(e.target.value))}
+            placeholder="0"
+            step="1"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div>
+          <label htmlFor="newStoreMinerHashrate" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate:</label>
+          <input
+            type="text"
+            id="newStoreMinerHashrate"
+            value={newStoreMinerHashrate}
+            onChange={(e) => setNewStoreMinerHashrate(e.target.value)}
+            placeholder="Ej: 17 MH/s o 5 TH/s"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div>
+          <label htmlFor="newStoreMinerPowerConsumption" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Consumo de Energía (W):</label>
+          <input
+            type="text"
+            id="newStoreMinerPowerConsumption"
+            value={newStoreMinerPowerConsumption}
+            onChange={(e) => setNewStoreMinerPowerConsumption(e.target.value)}
+            placeholder="Ej: 60W"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div>
+          <label htmlFor="newStoreMinerProfitability" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rentabilidad (BTC/día):</label>
+          <input
+            type="text"
+            id="newStoreMinerProfitability"
+            value={newStoreMinerProfitability}
+            onChange={(e) => setNewStoreMinerProfitability(e.target.value)}
+            placeholder="Ej: 0.00000005 BTC/día"
+            className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+          />
+        </div>
+        <div className="md:col-span-3 flex justify-end">
+          <button
+            onClick={handleAddNewStoreMiner}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+          >
+            Añadir Minero a la Tienda
           </button>
         </div>
       </div>
@@ -322,7 +511,7 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <input
           type="text"
-          placeholder="Buscar por nombre de worker o ID de usuario..."
+          placeholder="Buscar por nombre de worker, ID de usuario o nombre de minero..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`w-full md:w-2/3 rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
@@ -339,6 +528,67 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
         </select>
       </div>
 
+      {/* Tabla de Gestión de Mineros de la Tienda */}
+      <h3 className="text-xl font-semibold mt-8 mb-4">Mineros de la Tienda</h3>
+      <div className="overflow-x-auto rounded-lg shadow-md mb-8">
+        <table className={`min-w-full divide-y ${darkMode ? 'divide-dark_border' : 'divide-gray-700'}`}>
+          <thead className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
+            <tr>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre</th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Imagen</th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Costo</th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate</th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Consumo</th>
+              <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rentabilidad</th>
+              <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody className={`${darkMode ? 'bg-dark_card divide-dark_border' : 'bg-gray-800 divide-gray-700'} divide-y`}>
+            {storeMiners.filter(miner => 
+                searchTerm === '' || 
+                miner.name.toLowerCase().includes(searchTerm.toLowerCase())
+            ).map((miner) => (
+              <tr key={miner.id} className={`${darkMode ? 'hover:bg-dark_border' : 'hover:bg-gray-700'} transition-colors duration-200`}>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{miner.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <img src={miner.imageUrl} alt={miner.name} className="h-10 w-10 object-cover rounded-full" />
+                </td>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{miner.cost}</td>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{miner.hashrate}</td>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{miner.powerConsumption}</td>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{miner.profitability}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => handleEditClick(miner)}
+                    className="text-indigo-400 hover:text-indigo-600 mr-3 transition-colors duration-200"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteMiner(miner.id)}
+                    className="text-red-400 hover:text-red-600 transition-colors duration-200"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {storeMiners.filter(miner => 
+                searchTerm === '' || 
+                miner.name.toLowerCase().includes(searchTerm.toLowerCase())
+            ).length === 0 && (
+              <tr>
+                <td colSpan="7" className={`px-6 py-4 text-center text-sm ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>No se encontraron mineros de la tienda.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Sección de Gestión de Mineros de Usuario */}
+      <h3 className="text-xl font-semibold mt-8 mb-4">Mineros Asignados a Usuarios</h3>
+
+      {/* Tabla de Gestión de Mineros */}
       <div className="overflow-x-auto rounded-lg shadow-md">
         <table className={`min-w-full divide-y ${darkMode ? 'divide-dark_border' : 'divide-gray-700'}`}>
           <thead className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
@@ -348,7 +598,7 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
                   onChange={handleSelectAllMiners}
-                  checked={currentMiners.length > 0 && selectedMiners.length === currentMiners.length}
+                  checked={currentUserMiners.length > 0 && selectedMiners.length === currentUserMiners.length}
                 />
               </th>
               <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Usuario (Email)</th>
@@ -359,7 +609,7 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
             </tr>
           </thead>
           <tbody className={`${darkMode ? 'bg-dark_card divide-dark_border' : 'bg-gray-800 divide-gray-700'} divide-y`}>
-            {currentMiners.map((miner) => (
+            {currentUserMiners.map((miner) => (
               <tr key={miner.id} className={`${darkMode ? 'hover:bg-dark_border' : 'hover:bg-gray-700'} transition-colors duration-200`}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
@@ -399,7 +649,7 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
                 </td>
               </tr>
             ))}
-            {currentMiners.length === 0 && (
+            {currentUserMiners.length === 0 && (
               <tr>
                 <td colSpan="6" className={`px-6 py-4 text-center text-sm ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>No se encontraron mineros.</td>
               </tr>
@@ -432,7 +682,7 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
                   currentPage === number + 1
                     ? 'bg-blue-600 text-white'
                     : (darkMode ? 'bg-dark_bg border-dark_border text-light_text hover:bg-dark_border' : 'bg-gray-700 border-gray-700 text-gray-300 hover:bg-gray-600')
-                } transition-colors duration-200`}
+                }`}
               >
                 {number + 1}
               </button>
@@ -443,12 +693,12 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
 
       {/* Gráfica de Estado de Mineros */}
       <div className={`mt-8 p-6 rounded-lg shadow-md ${darkMode ? 'bg-dark_card' : 'bg-gray-800'}`}>
-        <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Estado de Mineros</h3>
+        <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Estado de Mineros de Usuario</h3>
         <div className="h-64">
-          {miners.length > 0 ? (
+          {userMiners.length > 0 ? (
             <Bar data={chartData} options={{ maintainAspectRatio: false, responsive: true }} />
           ) : (
-            <p className={`${darkMode ? 'text-light_text' : 'text-gray-400'} text-center py-8`}>No hay datos de mineros para mostrar en la gráfica.</p>
+            <p className={`${darkMode ? 'text-light_text' : 'text-gray-400'} text-center py-8`}>No hay datos de mineros de usuario para mostrar en la gráfica.</p>
           )}
         </div>
       </div>
@@ -458,60 +708,91 @@ const MinerManagement = ({ onNewMinerAdded }) => { // Aceptar prop para notifica
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-white'} p-8 rounded-lg shadow-xl w-full max-w-md`}>
             <h2 className="text-2xl font-bold mb-4">Editar Minero</h2>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="editMinerUserId" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID de Usuario</label>
-                <select
-                  id="editMinerUserId"
-                  name="userId"
-                  value={newMinerUserId}
-                  onChange={handleMinerEditChange}
-                  className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                >
-                  <option value="">Selecciona un Usuario</option>
-                  {users.map(user => (
-                    <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
-                  ))}
-                </select>
+            {editingMiner.type === 'user' ? (
+              <div className="space-y-4">
+                {/* Campos para mineros de usuario */}
+                <div>
+                  <label htmlFor="editMinerUserId" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID de Usuario</label>
+                  <select
+                    id="editMinerUserId"
+                    name="userId"
+                    value={newMinerUserId}
+                    onChange={handleMinerEditChange}
+                    className={`w-full rounded-md shadow-sm sm:text-sm p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                  >
+                    <option value="">Selecciona un Usuario</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>{user.email} (ID: {user.id})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="editWorkerName" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Worker</label>
+                  <input
+                    type="text"
+                    name="workerName"
+                    id="editWorkerName"
+                    value={newMinerWorkerName}
+                    onChange={handleMinerEditChange}
+                    className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editCurrentHashrate" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate (TH/s)</label>
+                  <input
+                    type="number"
+                    name="currentHashrate"
+                    id="editCurrentHashrate"
+                    value={newMinerHashrate}
+                    onChange={handleMinerEditChange}
+                    step="0.01"
+                    className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editStatus" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Estado</label>
+                  <select
+                    name="status"
+                    id="editStatus"
+                    value={newMinerStatus}
+                    onChange={handleMinerEditChange}
+                    className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                  >
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label htmlFor="editWorkerName" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Worker</label>
-                <input
-                  type="text"
-                  name="workerName"
-                  id="editWorkerName"
-                  value={newMinerWorkerName}
-                  onChange={handleMinerEditChange}
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                />
+            ) : editingMiner.type === 'store' ? (
+              <div className="space-y-4">
+                {/* Campos para mineros de la tienda */}
+                <div>
+                  <label htmlFor="editStoreMinerName" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nombre del Minero</label>
+                  <input type="text" name="name" id="editStoreMinerName" value={newStoreMinerName} onChange={handleMinerEditChange} className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
+                <div>
+                  <label htmlFor="editStoreMinerImageUrl" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>URL de la Imagen</label>
+                  <input type="text" name="imageUrl" id="editStoreMinerImageUrl" value={newStoreMinerImageUrl} onChange={handleMinerEditChange} className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
+                <div>
+                  <label htmlFor="editStoreMinerCost" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Costo</label>
+                  <input type="number" name="cost" id="editStoreMinerCost" value={newStoreMinerCost} onChange={handleMinerEditChange} step="1" className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
+                <div>
+                  <label htmlFor="editStoreMinerHashrate" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate (MH/s o TH/s)</label>
+                  <input type="text" name="hashrate" id="editStoreMinerHashrate" value={newStoreMinerHashrate} onChange={handleMinerEditChange} className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
+                <div>
+                  <label htmlFor="editStoreMinerPowerConsumption" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Consumo de Energía (W)</label>
+                  <input type="text" name="powerConsumption" id="editStoreMinerPowerConsumption" value={newStoreMinerPowerConsumption} onChange={handleMinerEditChange} className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
+                <div>
+                  <label htmlFor="editStoreMinerProfitability" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rentabilidad (BTC/día)</label>
+                  <input type="text" name="profitability" id="editStoreMinerProfitability" value={newStoreMinerProfitability} onChange={handleMinerEditChange} className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`} />
+                </div>
               </div>
-              <div>
-                <label htmlFor="editCurrentHashrate" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Hashrate (TH/s)</label>
-                <input
-                  type="number"
-                  name="currentHashrate"
-                  id="editCurrentHashrate"
-                  value={newMinerHashrate}
-                  onChange={handleMinerEditChange}
-                  step="0.01"
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                />
-              </div>
-              <div>
-                <label htmlFor="editStatus" className={`block text-sm font-medium ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Estado</label>
-                <select
-                  name="status"
-                  id="editStatus"
-                  value={newMinerStatus}
-                  onChange={handleMinerEditChange}
-                  className={`mt-1 block w-full rounded-md p-2 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-                >
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
-                  <option value="offline">Offline</option>
-                </select>
-              </div>
-            </div>
+            ) : null}
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setIsModalOpen(false)}

@@ -62,7 +62,7 @@ const AdminPanel = () => {
                 }`}
                 onClick={handleClearMinerNotification} // Limpiar notificación al hacer clic
               >
-                Gestión de Mineros
+                Gestión de Mineros (Usuario y Tienda)
                 {unreadMinersCount > 0 && (
                   <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     {unreadMinersCount}
@@ -256,7 +256,7 @@ const AdminPanel = () => {
           <Route path="site-settings" element={<SiteSettingsContent />} /> {/* Nueva ruta para Configuración del Sitio */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
-            <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-gray-300'} p-6 rounded-lg`}>
+            <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-gray-300'}`}>
               <h2 className="text-2xl font-semibold mb-4">Bienvenido al Panel de Administración</h2>
               <p>Selecciona una opción del menú lateral para empezar a administrar el sitio.</p>
             </div>
