@@ -1,0 +1,91 @@
+.navbarContainer {
+  width: 100%;
+  background-color: var(--background-secondary); /* Color de fondo */
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+  top: 0;
+  left: 0;
+}
+
+.navbarContainer.dark {
+  background-color: var(--dark-background-secondary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--dark-border-color);
+}
+
+.navList {
+  display: flex;
+  justify-content: flex-start; /* Alinear a la izquierda */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem; /* Espacio entre los elementos de navegación */
+}
+
+.navItem {
+  position: relative;
+}
+
+.navLink {
+  color: var(--text-color);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+  white-space: nowrap; /* Evitar que el texto se rompa */
+}
+
+.navLink:hover {
+  color: var(--accent-color);
+}
+
+.navLink.activeLink {
+  color: var(--accent-color);
+  font-weight: 600;
+  position: relative;
+}
+
+.navLink.activeLink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+  border-radius: 1px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navList {
+    overflow-x: auto; /* Permitir scroll horizontal */
+    justify-content: flex-start;
+    padding-bottom: 5px; /* Espacio para la barra de scroll */
+    -webkit-overflow-scrolling: touch; /* Suavizar el scroll en iOS */
+  }
+
+  .navList::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .navList::-webkit-scrollbar-track {
+    background: var(--background-primary);
+    border-radius: 2px;
+  }
+
+  .navList::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 2px;
+  }
+
+  .navItem {
+    flex-shrink: 0; /* Evitar que los ítems se encojan */
+  }
+
+  .navbarContainer {
+    padding: 0.8rem 1rem;
+  }
+}

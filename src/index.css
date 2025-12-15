@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definición de variables CSS para temas claro y oscuro */
+:root {
+  --light-bg: #F9FAFB;
+  --light-card: #FFFFFF;
+  --dark-text: #1F2937;
+  --light-text: #F9FAFB;
+  --dark-bg: #0A0A0A; /* Negro mate para el fondo oscuro */
+  --dark-card: #1F2937;
+  --accent: #F59E0B;
+  --green-check: #10B981;
+  --gray-border: #E5E7EB;
+  --dark-border: #374151;
+  --gray-text: #6B7280;
+  --blue-link: #3B82F6;
+  --red-error: #EF4444;
+}
+
+/* Estilos base para el cuerpo */
+body {
+  font-family: 'Inter', sans-serif;
+  /* Por defecto, usa el tema claro */
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+}
+
+/* Aplicar estilos del modo oscuro cuando la clase 'dark' está en el body */
+body.dark {
+  background-color: var(--dark-bg);
+  color: var(--light-text);
+}
+
+/* Animaciones para el Home Futurista */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 0.6s;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 0.9s;
+}
+
+.animate-fade-in-delay-4 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 1.2s;
+}
+
+.animate-fade-in-delay-5 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 1.5s;
+}
+
+.animate-fade-in-delay-6 {
+  animation: fadeInUp 1s ease-out forwards;
+  animation-delay: 1.8s;
+}

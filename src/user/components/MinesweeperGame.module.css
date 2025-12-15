@@ -1,0 +1,140 @@
+.minesweeperContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.minesweeperContainer.light {
+  background-color: var(--light-card);
+  color: var(--dark-text);
+}
+
+.minesweeperContainer.dark {
+  background-color: var(--dark-card);
+  color: var(--light-text);
+}
+
+.gameTitle {
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: var(--blue-link); /* Usar variable CSS de color */
+}
+
+.minesweeperContainer.dark .gameTitle {
+  color: #61dafb; /* Color brillante para título en modo oscuro */
+}
+
+.gameDescription {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 600px;
+}
+
+.gameStateMessage {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.winMessage {
+  color: var(--green-check);
+}
+
+.loseMessage {
+  color: var(--red-error);
+}
+
+.resetButton {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.resetButton:hover {
+  background-color: #e6a000; /* Un poco más oscuro que var(--accent) */
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 30px); /* 10 columnas, 30px de ancho */
+  grid-template-rows: repeat(10, 30px);    /* 10 filas, 30px de alto */
+  border: 2px solid var(--gray-border);
+}
+
+.minesweeperContainer.dark .board {
+  border: 2px solid var(--dark-border);
+}
+
+.row {
+  display: contents; /* Permite que los hijos de .row se comporten como celdas de la cuadrícula principal */
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--gray-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: var(--light-bg); /* Usar un color de fondo secundario */
+  transition: background-color 0.1s ease;
+}
+
+.minesweeperContainer.dark .cell {
+  background-color: #333; /* Un color un poco más claro que dark-card */
+  border: 1px solid var(--dark-border);
+}
+
+.cell:hover:not(.revealed) {
+  background-color: #e0e0e0; /* Hover más claro */
+}
+
+.minesweeperContainer.dark .cell:hover:not(.revealed) {
+  background-color: #555;
+}
+
+.cell.revealed {
+  background-color: var(--light-card);
+  cursor: default;
+}
+
+.minesweeperContainer.dark .cell.revealed {
+  background-color: #222; /* Un color más oscuro para celdas reveladas en modo oscuro */
+}
+
+.cell.revealed.mine {
+  background-color: var(--red-error);
+  color: white;
+}
+
+.cell.flagged {
+  color: #ffa500; /* Naranja para la bandera, se podría definir una variable */
+}
+
+/* Estilos específicos para los números de minas adyacentes */
+.cell[data-value="1"] { color: blue; }
+.cell[data-value="2"] { color: green; }
+.cell[data-value="3"] { color: red; }
+.cell[data-value="4"] { color: purple; }
+.cell[data-value="5"] { color: maroon; }
+.cell[data-value="6"] { color: turquoise; }
+.cell[data-value="7"] { color: black; }
+.cell[data-value="8"] { color: gray; }
