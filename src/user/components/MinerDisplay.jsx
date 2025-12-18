@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -56,7 +55,7 @@ const MinerDisplay = ({ miner, onMinerPurchased }) => {
         cost: miner.cost,
         imageUrl: miner.imageUrl,
         workerName: `worker-${Math.random().toString(36).substring(2, 8)}`, // Generar un nombre de worker único
-        currentHashrate: miner.hashrate.split(' ')[0], // Asumir que el hashrate viene como "X TH/s"
+        currentHashrate: parseFloat(miner.hashrate.split(' ')[0]), // Asumir que el hashrate viene como "X TH/s" y convertir a número
         status: 'activo',
         createdAt: new Date(),
       });
@@ -73,14 +72,6 @@ const MinerDisplay = ({ miner, onMinerPurchased }) => {
       setIsLoading(false);
     }
   };
-=======
-import React, { useContext } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
-import styles from './MinerDisplay.module.css'; // Importar los estilos CSS Modules
-
-const MinerDisplay = ({ miner }) => {
-  const { darkMode } = useContext(ThemeContext);
->>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
 
   return (
     <div className={`${styles.minerCard} ${darkMode ? styles.dark : styles.light}`}>
@@ -92,7 +83,6 @@ const MinerDisplay = ({ miner }) => {
         <p><span>Consumo:</span> <span>{miner.powerConsumption}</span></p>
         <p><span>Rentabilidad:</span> <span>{miner.profitability}</span></p>
       </div>
-<<<<<<< HEAD
       <button
         className={styles.buyButton}
         onClick={handleBuy}
@@ -100,9 +90,6 @@ const MinerDisplay = ({ miner }) => {
       >
         {isLoading ? 'Comprando...' : 'Comprar'}
       </button>
-=======
-      <button className={styles.buyButton}>Comprar</button>
->>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
     </div>
   );
 };
