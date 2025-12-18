@@ -12,7 +12,10 @@ import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar Use
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
 import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
+<<<<<<< HEAD
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
+=======
+>>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
@@ -31,6 +34,7 @@ import minersData from '../../data/miners'; // Importar la lista de mineros
 
 const MinersContent = ({ styles }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
+<<<<<<< HEAD
 
   // Esta función no necesita hacer nada específico aquí, ya que las suscripciones de Firestore
   // en UserPanel ya manejan la actualización de los balances y la lista de mineros.
@@ -38,13 +42,19 @@ const MinersContent = ({ styles }) => {
     console.log("Minero comprado. Las suscripciones de Firestore se encargarán de las actualizaciones.");
   };
 
+=======
+>>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
   return (
     <div className={`${styles.minersContent} ${darkMode ? styles.dark : styles.light}`}>
       <h1 className={styles.pageTitle}>Tienda de Mineros</h1>
       <p className={styles.developmentText}>Explora y adquiere los mineros más eficientes para potenciar tu ganancia.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
         {minersData.map(miner => (
+<<<<<<< HEAD
           <MinerDisplay key={miner.id} miner={miner} onMinerPurchased={handleMinerPurchased} />
+=======
+          <MinerDisplay key={miner.id} miner={miner} />
+>>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
         ))}
       </div>
     </div>
@@ -1899,7 +1909,10 @@ const UserPanel = () => {
           <Route path="mining-portfolio/*" element={<MiningPortfolioContent />} /> {/* Nueva ruta para Portafolio de Minería */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
+<<<<<<< HEAD
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
+=======
+>>>>>>> f21d6214dde34bc3b4911118a2fbab4c84f8670a
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
           <Route path="miners/*" element={<MinersContent styles={styles} />} /> {/* Nueva ruta para el Panel de Mineros */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
