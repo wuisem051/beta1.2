@@ -89,6 +89,8 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       throw error;
+    } finally {
+      setLoading(false); // Asegurarse de que loading se establezca en false después de un intento de inicio de sesión
     }
   };
 
@@ -98,7 +100,8 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
-    loginAdmin
+    loginAdmin,
+    loading // Exportar el estado de carga
   };
 
   return (
