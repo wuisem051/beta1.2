@@ -8,31 +8,51 @@ import { useContext } from 'react'; // Importar useContext
 
 const Signup = () => {
   const emailRef = useRef();
+  const payeerAccountRef = useRef(); // Nuevo ref para Payeer
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup } = useAuth();
+  const { signup, signupWithPayeer } = useAuth(); // Añadir signupWithPayeer
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext); // Usar ThemeContext
 
+  const validatePayeerAccount = (account) => {
+    return /^P\d{8}$/.test(account);
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Sanitizar las entradas antes de usarlas
     const sanitizedEmail = sanitizeInput(emailRef.current.value);
-    const sanitizedPassword = sanitizeInput(sanitizeInput(passwordRef.current.value));
+    const sanitizedPayeerAccount = sanitizeInput(payeerAccountRef.current.value);
+    const sanitizedPassword = sanitizeInput(passwordRef.current.value);
     const sanitizedPasswordConfirm = sanitizeInput(passwordConfirmRef.current.value);
 
     if (sanitizedPassword !== sanitizedPasswordConfirm) {
       return showError('Las contraseñas no coinciden');
     }
 
+    // Lógica para determinar si se usa Payeer o Email
+    let authPromise;
+    if (sanitizedPayeerAccount) {
+      if (!validatePayeerAccount(sanitizedPayeerAccount)) {
+        return showError('Formato de número de cuenta Payeer inválido. Debe empezar con P seguido de 8 dígitos.');
+      }
+      // Usar el número Payeer como parte del 'email' para Firebase Auth
+      const payeerEmail = `${sanitizedPayeerAccount}@payeer.com`;
+      authPromise = signupWithPayeer(payeerEmail, sanitizedPassword, sanitizedPayeerAccount);
+    } else if (sanitizedEmail) {
+      authPromise = signup(sanitizedEmail, sanitizedPassword);
+    } else {
+      return showError('Por favor, ingresa un correo electrónico o un número de cuenta Payeer.');
+    }
+
     try {
       showError(null); // Limpiar errores previos
       showSuccess(null); // Limpiar mensajes de éxito previos
       setLoading(true);
-      await signup(sanitizedEmail, sanitizedPassword);
+      await authPromise;
       showSuccess('Cuenta creada exitosamente. Por favor, inicia sesión.');
       // navigate('/login'); // Redirigir a login después del registro
     } catch (e) {
@@ -60,9 +80,18 @@ const Signup = () => {
                 id="email-address" 
                 name="email" 
                 type="email" 
-                required 
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-t-md focus:outline-none focus:ring-accent focus:border-accent`} 
-                placeholder="Correo electrónico" 
+                placeholder="Correo electrónico (opcional)" 
+              />
+            </div>
+            <div>
+              <input 
+                ref={payeerAccountRef} 
+                id="payeer-account" 
+                name="payeer-account" 
+                type="text" 
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} focus:outline-none focus:ring-accent focus:border-accent`} 
+                placeholder="Número de cuenta Payeer (ej. P12345678) (opcional)" 
               />
             </div>
             <div>
@@ -88,6 +117,9 @@ const Signup = () => {
               />
             </div>
           </div>
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+            O regístrate con Payeer
+          </div>
           <div>
             <button 
               type="submit" 
@@ -102,5 +134,3 @@ const Signup = () => {
     </div>
   );
 };
-
-export default Signup;
