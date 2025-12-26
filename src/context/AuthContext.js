@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { auth } from '../services/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore'; // Importar setDoc
 import { db } from '../services/firebase'; // Importar db desde firebase.js
@@ -43,8 +43,34 @@ export function AuthProvider({ children }) {
     return userCredential;
   }
 
-  async function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async function login(identifier, password) {
+    let emailToSignIn = identifier;
+
+    // Check if the identifier is a Payeer account number
+    const isPayeerAccount = /^P\d{8}$/.test(identifier);
+    if (isPayeerAccount) {
+      emailToSignIn = `${identifier}@payeer.com`;
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, emailToSignIn, password);
+      const user = userCredential.user;
+
+      // Verify if the user exists in Firestore (important for consistency with onAuthStateChanged)
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // If user document doesn't exist, it means this account was not properly registered.
+        // Log out the user and throw an error.
+        await signOut(auth);
+        throw new Error('No se encontró el perfil de usuario. Por favor, regístrate.');
+      }
+      return userCredential;
+    } catch (error) {
+      console.error("Error during login:", error);
+      throw error;
+    }
   }
 
   async function logout() {
