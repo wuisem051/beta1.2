@@ -6,7 +6,7 @@ import {
   signOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore'; // Para obtener roles de usuario desde Firestore
+import { doc, getDoc, setDoc } from 'firebase/firestore'; // Importar setDoc
 import { db } from '../services/firebase'; // Importar db desde firebase.js
 
 const AuthContext = React.createContext();
@@ -21,7 +21,26 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   async function signup(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Crear documento de usuario en Firestore después del registro con email/password
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      email: userCredential.user.email,
+      role: 'user', // Rol por defecto
+      // Otros campos iniciales si son necesarios
+    });
+    return userCredential;
+  }
+
+  async function signupWithPayeer(email, password, payeerAccount) {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Crear documento de usuario en Firestore después del registro con Payeer
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      payeerAccount: payeerAccount,
+      email: email, // Guardamos el email generado para referencia
+      role: 'user', // Rol por defecto
+      // Otros campos iniciales si son necesarios
+    });
+    return userCredential;
   }
 
   async function login(email, password) {
@@ -99,9 +118,10 @@ export function AuthProvider({ children }) {
     isAdmin,
     login,
     signup,
+    signupWithPayeer, // Exportar la nueva función
     logout,
     loginAdmin,
-    loading // Exportar el estado de carga
+    loading
   };
 
   return (
