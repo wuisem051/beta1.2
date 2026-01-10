@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
-import { db } from '../../services/firebase';
+import { db, storage } from '../../services/firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useError } from '../../context/ErrorContext';
 import { useAuth } from '../../context/AuthContext'; // Importar useAuth
 import { SolidSectionStyled, CardStyled, InputStyled, SelectStyled, TextareaStyled } from '../../user/styles/StyledComponents'; // Reutilizar componentes estilizados
@@ -22,6 +23,7 @@ const TradingSignalManagement = () => {
   const [takeProfit, setTakeProfit] = useState('');
   const [stopLoss, setStopLoss] = useState('');
   const [notes, setNotes] = useState('');
+  const [imageFile, setImageFile] = useState(null); // Nuevo estado para archivo de imagen
 
   // Estados para la edición
   const [editingSignalId, setEditingSignalId] = useState(null);
@@ -86,6 +88,13 @@ const TradingSignalManagement = () => {
     }
 
     try {
+      let imageUrl = '';
+      if (imageFile) {
+        const storageRef = ref(storage, `trading-signals/${Date.now()}_${imageFile.name}`);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
       await addDoc(collection(db, 'tradingSignals'), {
         asset,
         type,
@@ -93,6 +102,7 @@ const TradingSignalManagement = () => {
         takeProfit: parseFloat(takeProfit),
         stopLoss: parseFloat(stopLoss),
         notes,
+        imageUrl, // Guardar URL de la imagen
         createdAt: new Date(),
       });
       showSuccess('Señal de trading añadida exitosamente.');
@@ -103,6 +113,10 @@ const TradingSignalManagement = () => {
       setTakeProfit('');
       setStopLoss('');
       setNotes('');
+      setImageFile(null);
+      // Resetear el input de archivo manualmente si es necesario
+      const fileInput = document.getElementById('signalImage');
+      if (fileInput) fileInput.value = '';
     } catch (err) {
       console.error("Error adding trading signal:", err);
       showError(`Fallo al añadir señal: ${err.message}`);
@@ -280,6 +294,17 @@ const TradingSignalManagement = () => {
               disabled={isSubmitting}
             ></TextareaStyled>
           </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="signalImage" className={styles.formLabel}>Captura de Pantalla/Imagen (Opcional)</label>
+            <input
+              type="file"
+              id="signalImage"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files[0])}
+              className={`w-full p-2 rounded ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-white border-gray-300'}`}
+              disabled={isSubmitting}
+            />
+          </div>
           <button
             type="submit"
             className={styles.submitButton}
@@ -311,6 +336,7 @@ const TradingSignalManagement = () => {
                   <th className={styles.tableHeader}>Take Profit</th>
                   <th className={styles.tableHeader}>Stop Loss</th>
                   <th className={styles.tableHeader}>Notas</th>
+                  <th className={styles.tableHeader}>Imagen</th> {/* Nueva columna para la imagen */}
                   <th className={styles.tableHeader}>Fecha</th>
                   <th className={styles.tableHeader}>%</th> {/* Nueva columna para el porcentaje */}
                   <th className={styles.tableHeader}>Acciones</th>
@@ -342,6 +368,9 @@ const TradingSignalManagement = () => {
                         <td className={styles.tableCell}>
                           <TextareaStyled theme={darkMode ? 'dark' : 'light'} rows="1" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} disabled={isSubmitting} />
                         </td>
+                        <td className={styles.tableCell}>
+                          {signal.imageUrl && <img src={signal.imageUrl} alt="preview" className="h-10 w-10 object-cover rounded" />}
+                        </td>
                         <td className={styles.tableCell}>{signal.createdAt.toLocaleDateString()}</td>
                         <td className={styles.tableCell}>
                           {calculatePercentage(editType, editEntryPrice, editTakeProfit)}
@@ -359,6 +388,13 @@ const TradingSignalManagement = () => {
                         <td className={styles.tableCell}>{signal.takeProfit}</td>
                         <td className={styles.tableCell}>{signal.stopLoss}</td>
                         <td className={styles.tableCell}>{signal.notes}</td>
+                        <td className={styles.tableCell}>
+                          {signal.imageUrl ? (
+                            <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
+                              <img src={signal.imageUrl} alt="signal" className="h-10 w-10 object-cover rounded hover:scale-150 transition-transform cursor-pointer" />
+                            </a>
+                          ) : 'Sin imagen'}
+                        </td>
                         <td className={styles.tableCell}>{signal.createdAt.toLocaleDateString()}</td>
                         <td className={styles.tableCell}>
                           {calculatePercentage(signal.type, signal.entryPrice, signal.takeProfit)}

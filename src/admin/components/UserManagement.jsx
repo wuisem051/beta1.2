@@ -24,6 +24,8 @@ const UserManagement = () => {
   const [editBalanceVES, setEditBalanceVES] = useState(0); // Nuevo estado para VES
   const [addUSDTAmount, setAddUSDTAmount] = useState(''); // Estado para añadir/restar USDT
   const [addVESAmount, setAddVESAmount] = useState(''); // Estado para añadir/restar VES
+  const [editVipStatus, setEditVipStatus] = useState(''); // Nuevo estado para VIP Status
+  const [editVipExpiry, setEditVipExpiry] = useState(''); // Nuevo estado para VIP Expiry
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Nuevo estado para selección masiva
 
 
@@ -133,6 +135,8 @@ const UserManagement = () => {
     setEditBalanceVES(user.balanceVES || 0); // Inicializar VES
     setAddUSDTAmount(''); // Resetear al abrir edición
     setAddVESAmount(''); // Resetear al abrir edición
+    setEditVipStatus(user.vipStatus || 'none');
+    setEditVipExpiry(user.vipExpiry ? (user.vipExpiry.toDate ? user.vipExpiry.toDate().toISOString().substring(0, 10) : user.vipExpiry.substring(0, 10)) : '');
   };
 
   const handleUpdateUser = async (e) => {
@@ -150,6 +154,8 @@ const UserManagement = () => {
         balanceDOGE: parseFloat(editBalanceDOGE),
         balanceUSDT: parseFloat(editBalanceUSDT) + (addUSDTAmount !== '' ? parseFloat(addUSDTAmount) : 0), // Actualizar USDT
         balanceVES: parseFloat(editBalanceVES) + (addVESAmount !== '' ? parseFloat(addVESAmount) : 0), // Actualizar VES
+        vipStatus: editVipStatus,
+        vipExpiry: editVipExpiry ? new Date(editVipExpiry) : null,
       });
 
       // Actualizar email en Firebase Authentication
@@ -338,6 +344,7 @@ const UserManagement = () => {
                     <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email</th>
                     <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID</th>
                     <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rol</th>
+                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>VIP Status</th>
                     <th className={`px-4 py-2 text-right text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Acciones</th>
                   </tr>
                 </thead>
@@ -355,6 +362,13 @@ const UserManagement = () => {
                       <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.email}</td>
                       <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.id}</td>
                       <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.role || 'user'}</td>
+                      <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
+                        {user.vipStatus && user.vipStatus !== 'none' ? (
+                          <span className="bg-accent text-white px-2 py-0.5 rounded text-xs">
+                            {user.vipStatus} ({user.vipExpiry ? (user.vipExpiry.toDate ? user.vipExpiry.toDate().toLocaleDateString() : new Date(user.vipExpiry).toLocaleDateString()) : 'N/A'})
+                          </span>
+                        ) : 'Ninguno'}
+                      </td>
                       <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleEditClick(user)}
@@ -452,6 +466,30 @@ const UserManagement = () => {
                 onChange={(e) => setAddVESAmount(e.target.value)}
                 step="any"
                 placeholder="Ej: 100 para añadir, -50 para restar"
+              />
+            </div>
+            <div>
+              <label htmlFor="editVipStatus" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Plan VIP:</label>
+              <select
+                id="editVipStatus"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editVipStatus}
+                onChange={(e) => setEditVipStatus(e.target.value)}
+              >
+                <option value="none">Ninguno</option>
+                <option value="vip-standard">VIP Bronze</option>
+                <option value="vip-gold">VIP Gold</option>
+                <option value="vip-diamond">VIP Diamond</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="editVipExpiry" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Expiración VIP:</label>
+              <input
+                type="date"
+                id="editVipExpiry"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                value={editVipExpiry}
+                onChange={(e) => setEditVipExpiry(e.target.value)}
               />
             </div>
             <div className="flex justify-end mt-4">

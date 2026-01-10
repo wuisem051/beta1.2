@@ -10,7 +10,7 @@ import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, a
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
-import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent
+import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent (ahora TradingPortfolioContent)
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
@@ -18,35 +18,136 @@ import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
-import StatsSection from '../components/StatsSection'; // Importar StatsSection
 import PerformanceStatsSection from '../components/PerformanceStatsSection'; // Importar PerformanceStatsSection
-import MinerDisplay from '../components/MinerDisplay'; // Importar MinerDisplay
-import HomeMinersContent from '../components/HomeMinersContent'; // Importar HomeMinersContent
+import StatsSection from '../components/StatsSection'; // Importar StatsSection
 import styles from './UserPanel.module.css'; // Importar estilos CSS Modules
 import useFormValidation from '../../hooks/useFormValidation'; // Importar useFormValidation
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
+import vipPlans from '../../data/vipPlans';
+import VIPPlanDisplay from '../components/VIPPlanDisplay';
 
 // Componentes de las sub-secciones
 
-const MinersContent = ({ styles }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
+const CopyTraderContent = ({ styles, userBalances }) => {
+  const { darkMode } = useContext(ThemeContext);
+  const [signals, setSignals] = useState([]);
+  const [isLoadingSignals, setIsLoadingSignals] = useState(false);
 
-  // Esta función no necesita hacer nada específico aquí, ya que las suscripciones de Firestore
-  // en UserPanel ya manejan la actualización de los balances y la lista de mineros.
-  const handleMinerPurchased = () => {
-    console.log("Minero comprado. Las suscripciones de Firestore se encargarán de las actualizaciones.");
+  const isVIP = useMemo(() => {
+    if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
+    if (!userBalances.vipExpiry) return false;
+
+    const now = new Date();
+    const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
+    return expiry > now;
+  }, [userBalances]);
+
+  useEffect(() => {
+    if (!isVIP) return;
+
+    setIsLoadingSignals(true);
+    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedSignals = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate(),
+      }));
+      setSignals(fetchedSignals);
+      setIsLoadingSignals(false);
+    }, (err) => {
+      console.error("Error fetching signals for user:", err);
+      setIsLoadingSignals(false);
+    });
+
+    return () => unsubscribe();
+  }, [isVIP]);
+
+  const handlePlanPurchased = () => {
+    console.log("Plan VIP adquirido. Las suscripciones de Firestore se encargarán de las actualizaciones.");
   };
 
   return (
     <div className={`${styles.minersContent} ${darkMode ? styles.dark : styles.light}`}>
-      <h1 className={styles.pageTitle}>Tienda de Mineros</h1>
-      <p className={styles.developmentText}>Explora y adquiere los mineros más eficientes para potenciar tu ganancia.</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-        {minersData.map(miner => (
-          <MinerDisplay key={miner.id} miner={miner} onMinerPurchased={handleMinerPurchased} />
+      <h1 className={styles.pageTitle}>Copy Trader</h1>
+      <p className={styles.developmentText}>Suscríbete a nuestros cupos VIP para seguir las operaciones en tiempo real.</p>
+
+      <h2 className="text-xl font-bold mt-12 mb-6 border-l-4 border-accent pl-4">Cupos VIP Mensuales</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {vipPlans.map(plan => (
+          <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
         ))}
       </div>
+
+      <h2 className="text-xl font-bold mt-16 mb-6 border-l-4 border-accent pl-4">Señales de Trading (Binance)</h2>
+
+      {!isVIP ? (
+        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} p-8 text-center`}>
+          <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <p className="text-lg font-medium">Contenido exclusivo para miembros VIP</p>
+            <p className="max-w-md">Aquí aparecerán mis entradas de Binance (Spot y Margen). Adquiere un cupo VIP arriba para desbloquear esta sección.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {isLoadingSignals ? (
+            <div className="text-center p-8 opacity-60">Cargando señales en tiempo real...</div>
+          ) : signals.length === 0 ? (
+            <div className="text-center p-8 opacity-60">No hay señales activas en este momento. Esté atento a las notificaciones.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {signals.map(signal => (
+                <div key={signal.id} className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} overflow-hidden border-t-4 ${signal.type === 'Compra' ? 'border-green-500' : 'border-red-500'}`}>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold">{signal.asset}</h3>
+                        <span className={`text-xs font-bold uppercase ${signal.type === 'Compra' ? 'text-green-500' : 'text-red-500'}`}>
+                          {signal.type}
+                        </span>
+                      </div>
+                      <span className="text-xs opacity-60">{signal.createdAt.toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="bg-opacity-10 bg-gray-500 p-2 rounded">
+                        <p className="text-[10px] uppercase opacity-60">Entrada</p>
+                        <p className="font-bold text-sm">{signal.entryPrice}</p>
+                      </div>
+                      <div className="bg-opacity-10 bg-green-500 p-2 rounded">
+                        <p className="text-[10px] uppercase opacity-60">T. Profit</p>
+                        <p className="font-bold text-sm text-green-500">{signal.takeProfit}</p>
+                      </div>
+                      <div className="bg-opacity-10 bg-red-500 p-2 rounded">
+                        <p className="text-[10px] uppercase opacity-60">S. Loss</p>
+                        <p className="font-bold text-sm text-red-500">{signal.stopLoss}</p>
+                      </div>
+                    </div>
+
+                    {signal.notes && (
+                      <p className="text-sm italic mb-4 opacity-80 border-l-2 border-accent pl-3">
+                        {signal.notes}
+                      </p>
+                    )}
+
+                    {signal.imageUrl && (
+                      <div className="mt-4 rounded-lg overflow-hidden border border-white border-opacity-10">
+                        <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
+                          <img src={signal.imageUrl} alt="Analysis" className="w-full h-48 object-cover hover:scale-105 transition-transform" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -89,7 +190,7 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
           <h3 className={styles.statTitle}>Tu Hashrate</h3>
           <p className={styles.statValueBlue}>{totalHashrate.toFixed(2)} TH/s</p>
           <div className={styles.statIconBlue}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue_link" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue_link" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
         </div>
         {/* Ganancia Estimada Diaria */}
@@ -97,7 +198,7 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
           <h3 className={styles.statTitle}>Ganancia Estimada Diaria</h3>
           <p className={styles.statValueGreen}>${estimatedDailyUSD.toFixed(2)}</p>
           <div className={styles.statIconGreen}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green_check" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V3a1 1 0 00-1-1H4a1 1 0 00-1 1v18a1 1 0 001 1h12a1 1 0 001-1v-5m-1-10v4m-4 0h4"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green_check" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V3a1 1 0 00-1-1H4a1 1 0 00-1 1v18a1 1 0 001 1h12a1 1 0 001-1v-5m-1-10v4m-4 0h4" /></svg>
           </div>
         </div>
         {/* Tasa de Pago */}
@@ -105,7 +206,7 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
           <h3 className={styles.statTitle}>Tasa de Pago</h3>
           <p className={styles.statValueAccent}>${paymentRate.toFixed(2)}/TH/s</p>
           <div className={styles.statIconAccent}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
           </div>
         </div>
       </div>
@@ -145,267 +246,6 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
   );
 };
 
-const MiningInfoContent = ({ currentUser, userMiners, setUserMiners, styles }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
-  const { showError, showSuccess } = useError(); // Usar el contexto de errores
-  const [poolUrl, setPoolUrl] = useState('stratum+tcp://bitcoinpool.com:4444');
-  const [port, setPort] = useState('4444');
-  const [defaultWorkerName, setDefaultWorkerName] = useState('worker1');
-  const miningPassword = 'x';
-  const [isLoading, setIsLoading] = useState(false); // Estado de carga
-
-  const initialMinerState = {
-    newMinerThs: '',
-  };
-
-  const validateMinerForm = (values) => {
-    const errors = {};
-    if (!values.newMinerThs) {
-      errors.newMinerThs = 'El poder de minado es requerido.';
-    } else if (isNaN(parseFloat(values.newMinerThs)) || parseFloat(values.newMinerThs) <= 0) {
-      errors.newMinerThs = 'Por favor, introduce una cantidad válida de TH/s.';
-    }
-    return errors;
-  };
-
-  const {
-    values: minerValues,
-    handleChange: handleMinerChange,
-    handleSubmit: handleMinerSubmit,
-    errors: minerErrors,
-    isSubmitting: isMinerSubmitting,
-    setValues: setMinerValues,
-    setErrors: setMinerErrors,
-    setSubmitting: setMinerSubmitting,
-  } = useFormValidation(initialMinerState, validateMinerForm);
-
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text);
-    showSuccess('Copiado al portapapeles!');
-  };
-
-  useEffect(() => {
-    const fetchPoolConfigAndMiners = async () => {
-      try {
-        // Cargar configuración del Pool desde Firebase
-        const poolConfigRef = doc(db, 'settings', 'poolConfig');
-        const poolConfigSnap = await getDoc(poolConfigRef);
-        if (poolConfigSnap.exists()) {
-          const poolConfigData = poolConfigSnap.data();
-          setPoolUrl(poolConfigData.url || 'stratum+tcp://bitcoinpool.com:4444');
-          setPort(poolConfigData.port || '4444');
-          setDefaultWorkerName(poolConfigData.defaultWorkerName || 'worker1');
-        }
-
-        // Escuchar cambios en los mineros del usuario
-        if (currentUser && currentUser.uid) {
-          const q = query(collection(db, 'miners'), where('userId', '==', currentUser.uid));
-          const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedMiners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setUserMiners(fetchedMiners);
-          }, (err) => {
-            console.error("Error fetching mining info from Firebase:", err);
-            showError('Fallo al cargar la información de minería.');
-          });
-
-          return () => {
-            unsubscribe();
-          };
-        } else {
-          setUserMiners([]);
-        }
-      } catch (err) {
-        console.error("Error fetching mining info:", err);
-        showError('Fallo al cargar la información de minería.');
-      }
-    };
-    fetchPoolConfigAndMiners();
-  }, [currentUser, setUserMiners, showError]);
-
-  useEffect(() => {
-    if (isMinerSubmitting) {
-      if (Object.keys(minerErrors).length === 0) {
-        handleAddMinerSubmit();
-      }
-      setMinerSubmitting(false);
-    }
-  }, [isMinerSubmitting, minerErrors]);
-
-  const handleAddMinerSubmit = async () => {
-    setIsLoading(true);
-
-    if (!currentUser || !currentUser.uid) {
-      showError('Debes iniciar sesión para añadir un minero.');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const newMinerRef = await addDoc(collection(db, 'miners'), {
-        userId: currentUser.uid,
-        workerName: defaultWorkerName || `worker-${Math.random().toString(36).substring(2, 8)}`,
-        currentHashrate: parseFloat(minerValues.newMinerThs),
-        status: 'activo',
-        createdAt: new Date(),
-      });
-
-      console.log("Minero añadido a Firebase:", newMinerRef.id);
-      showSuccess('Minero añadido exitosamente!');
-      setMinerValues(initialMinerState); // Limpiar el formulario
-      setMinerErrors({}); // Limpiar errores
-    } catch (err) {
-      console.error("Error al añadir minero:", err);
-      showError(`Fallo al añadir minero: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteMiner = async (minerId) => {
-    if (!currentUser || !currentUser.uid) {
-      showError('Debes iniciar sesión para eliminar un minero.');
-      return;
-    }
-    if (window.confirm('¿Estás seguro de que quieres eliminar este minero?')) {
-      setIsLoading(true);
-      try {
-        await deleteDoc(doc(db, 'miners', minerId));
-        showSuccess('Minero eliminado exitosamente.');
-      } catch (err) {
-        console.error("Error al eliminar minero:", err);
-        showError(`Fallo al eliminar minero: ${err.message}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  return (
-    <div className={styles.miningInfoContent}>
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingText}>Procesando...</div>
-        </div>
-      )}
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
-
-      {/* Sección: Añadir Nuevo Minero */}
-      <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-        <h2 className={styles.sectionTitle}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Añadir Nuevo Minero
-        </h2>
-        <form onSubmit={handleMinerSubmit} className={styles.form}>
-          <div>
-            <label htmlFor="newMinerThs" className={styles.formLabel}>Poder de Minado (TH/s):</label>
-            <input
-              type="number"
-              id="newMinerThs"
-              name="newMinerThs"
-              value={minerValues.newMinerThs}
-              onChange={handleMinerChange}
-              step="0.01"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              placeholder="Ej: 100.5"
-              required
-            />
-            {minerErrors.newMinerThs && <p className={styles.errorText}>{minerErrors.newMinerThs}</p>}
-          </div>
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={isLoading || isMinerSubmitting}
-          >
-            {isLoading || isMinerSubmitting ? (
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            )}
-            {isLoading || isMinerSubmitting ? 'Añadiendo...' : 'Añadir Minero'}
-          </button>
-        </form>
-      </div>
-
-      {/* Sección: Mineros Activos */}
-      <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-        <h2 className={styles.sectionTitle}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-green_check" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-          Mis Mineros Activos
-        </h2>
-        {userMiners.length === 0 ? (
-          <p className={styles.noMinersText}>No tienes mineros activos. ¡Añade uno para empezar a minar!</p>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead className={`${darkMode ? styles.darkTableHead : styles.lightTableHead}`}>
-                <tr>
-                  <th className={styles.tableHeader}>Nombre del Worker</th>
-                  <th className={styles.tableHeader}>TH/s</th>
-                  <th className={styles.tableHeader}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody className={`${darkMode ? styles.darkTableBody : styles.lightTableBody}`}>
-                {userMiners.map((miner) => (
-                  <tr key={miner.id}>
-                    <td className={styles.tableCell}>
-                      <div className={styles.workerNameContainer}>
-                        <input type="text" value={miner.workerName} readOnly className={`${styles.workerNameInput} ${darkMode ? styles.darkInput : styles.lightInput}`} />
-                        <button onClick={() => handleCopy(miner.workerName)} className={styles.copyButton}>📋</button>
-                      </div>
-                    </td>
-                    <td className={styles.tableCell}>{(miner.currentHashrate || 0).toFixed(2)}</td>
-                    <td className={styles.tableCellActions}>
-                      <button
-                        onClick={() => handleDeleteMiner(miner.id)}
-                        className={styles.deleteButton}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Eliminando...' : 'Eliminar'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Instrucciones de Configuración del Pool Estándar */}
-      <div className={`${styles.poolConfigSection} ${darkMode ? styles.dark : styles.light}`}>
-        <h3 className={styles.poolConfigTitle}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue_link" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          Instrucciones de Conexión (Pool Estándar)
-        </h3>
-        <p className={styles.poolConfigDescription}>Usa esta información para configurar tu minero con nuestra pool principal.</p>
-        <div className={styles.poolConfigGrid}>
-          <div>
-            <h4 className={styles.poolConfigSubtitle}>Detalles de Conexión:</h4>
-            <ul className={styles.poolConfigList}>
-              <li>URL del Pool: {poolUrl} <button onClick={() => handleCopy(poolUrl)} className={styles.copyButton}>📋</button></li>
-              <li>Puerto: {port} <button onClick={() => handleCopy(port)} className={styles.copyButton}>📋</button></li>
-              <li>Contraseña de Minería: {miningPassword} <button onClick={() => handleCopy(miningPassword)} className={styles.copyButton}>📋</button></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className={styles.poolConfigSubtitle}>Ejemplo de Configuración:</h4>
-            <pre className={`${styles.codeBlock} ${darkMode ? styles.darkCodeBlock : styles.lightCodeBlock}`}>
-              <code>
-                URL: {poolUrl} <br />
-                Usuario: {defaultWorkerName} <br />
-                Contraseña: {miningPassword}
-              </code>
-            </pre>
-            <p className={styles.workerNameHint}>El nombre de worker por defecto es: {defaultWorkerName}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const PaymentsContent = ({ currentUser, styles }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -479,11 +319,10 @@ const PaymentsContent = ({ currentUser, styles }) => {
                       {payment.currency}
                     </td>
                     <td className={styles.tableCell}>
-                      <span className={`${styles.statusBadge} ${
-                        payment.status === 'Pendiente' ? styles.statusPending :
+                      <span className={`${styles.statusBadge} ${payment.status === 'Pendiente' ? styles.statusPending :
                         payment.status === 'Completado' ? styles.statusCompleted :
-                        styles.statusError
-                      }`}>
+                          styles.statusError
+                        }`}>
                         {payment.status}
                       </span>
                     </td>
@@ -869,11 +708,10 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
                         {withdrawal.currency}
                       </td>
                       <td className={styles.tableCell}>
-                        <span className={`${styles.statusBadge} ${
-                          withdrawal.status === 'Pendiente' ? styles.statusPending :
+                        <span className={`${styles.statusBadge} ${withdrawal.status === 'Pendiente' ? styles.statusPending :
                           withdrawal.status === 'Completado' ? styles.statusCompleted :
-                          styles.statusError
-                        }`}>
+                            styles.statusError
+                          }`}>
                           {withdrawal.status}
                         </span>
                       </td>
@@ -1034,12 +872,12 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
   };
 
   const handleNewTicket = () => {
-      setSelectedTicket(null);
-      setSubject('');
-      setMessageContent('');
-      // Limpiar mensajes de error/éxito al crear un nuevo ticket
-      showError(null);
-      showSuccess(null);
+    setSelectedTicket(null);
+    setSubject('');
+    setMessageContent('');
+    // Limpiar mensajes de error/éxito al crear un nuevo ticket
+    showError(null);
+    showSuccess(null);
   };
 
   const getStatusColor = (status) => {
@@ -1080,11 +918,10 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             {tickets.map(ticket => (
               <li
                 key={ticket.id}
-                className={`${styles.ticketListItem} ${
-                  selectedTicket && selectedTicket.id === ticket.id
-                    ? styles.selectedTicket
-                    : (darkMode ? styles.darkListItem : styles.lightListItem)
-                }`}
+                className={`${styles.ticketListItem} ${selectedTicket && selectedTicket.id === ticket.id
+                  ? styles.selectedTicket
+                  : (darkMode ? styles.darkListItem : styles.lightListItem)
+                  }`}
                 onClick={() => handleSelectTicket(ticket)}
               >
                 <p className={styles.ticketSubject}>{ticket.subject}</p>
@@ -1124,9 +961,8 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             <div className={`${styles.conversationHistory} ${darkMode ? styles.darkInnerCard : styles.lightInnerCard}`}>
               {selectedTicket.conversation.map((msg, index) => (
                 <div key={index} className={`${styles.messageContainer} ${msg.sender === 'admin' ? styles.adminMessage : styles.userMessage}`}>
-                  <span className={`${styles.messageBubble} ${
-                    msg.sender === 'admin' ? styles.adminBubble : (darkMode ? styles.darkUserBubble : styles.lightUserBubble)
-                  }`}>
+                  <span className={`${styles.messageBubble} ${msg.sender === 'admin' ? styles.adminBubble : (darkMode ? styles.darkUserBubble : styles.lightUserBubble)
+                    }`}>
                     {msg.text}
                   </span>
                   <p className={styles.messageMeta}>
@@ -1157,7 +993,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                   <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                  </svg>
                 ) : 'Enviar Respuesta'}
               </button>
             </div>
@@ -1199,7 +1035,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                   <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                  </svg>
                 ) : 'Enviar Nueva Consulta'}
               </button>
             </form>
@@ -1541,7 +1377,7 @@ const SettingsContent = ({ styles }) => {
               <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+              </svg>
             ) : 'Guardar Direcciones'}
           </button>
 
@@ -1553,7 +1389,7 @@ const SettingsContent = ({ styles }) => {
                 type="checkbox"
                 className={`${styles.checkbox} ${styles.disabledCheckbox}`}
                 checked={false} // Siempre false ya que está en desarrollo
-                onChange={() => {}} // No permitir cambios
+                onChange={() => { }} // No permitir cambios
                 disabled={true || isLoading} // Deshabilitar el checkbox
               />
               <span className={styles.developmentTextSmall}>Recibir notificaciones de pagos por email (En Desarrollo)</span>
@@ -1565,7 +1401,7 @@ const SettingsContent = ({ styles }) => {
                 type="checkbox"
                 className={`${styles.checkbox} ${styles.disabledCheckbox}`}
                 checked={false} // Siempre false ya que está en desarrollo
-                onChange={() => {}} // No permitir cambios
+                onChange={() => { }} // No permitir cambios
                 disabled={true || isLoading} // Deshabilitar el checkbox
               />
               <span className={styles.developmentTextSmall}>Recibir alertas de inicio de sesión (En Desarrollo)</span>
@@ -1580,7 +1416,7 @@ const SettingsContent = ({ styles }) => {
               <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+              </svg>
             ) : 'Guardar Preferencias'}
           </button>
         </div>
@@ -1875,23 +1711,20 @@ const UserPanel = () => {
   }
 
   const showNavbar = [
-    '/user-panel/home-miners', // Ruta para "Hogar" (mineros adquiridos)
-    '/user-panel/miners',      // Ruta para "Minar" (panel de mineros)
+    '/user-panel/miners',      // Ruta para "Miner" (vía CopyTrader)
   ].some(path => location.pathname.startsWith(path));
 
   return (
     <div className={styles.userPanelContainer}>
-      <Sidebar 
-        unreadTicketsCount={unreadTicketsCount} 
-        displayUser={displayUser} 
+      <Sidebar
+        unreadTicketsCount={unreadTicketsCount}
+        displayUser={displayUser}
       />
       <MainContent>
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
-        
+
         <Routes>
           <Route path="dashboard/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
-          <Route path="home-miners/*" element={<HomeMinersContent />} /> {/* Nueva ruta para Hogar - Mineros Adquiridos */}
-          <Route path="mining-info/*" element={<MiningInfoContent currentUser={currentUser} userMiners={userMiners} setUserMiners={setUserMiners} styles={styles} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
@@ -1901,7 +1734,7 @@ const UserPanel = () => {
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
-          <Route path="miners/*" element={<MinersContent styles={styles} />} /> {/* Nueva ruta para el Panel de Mineros */}
+          <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
