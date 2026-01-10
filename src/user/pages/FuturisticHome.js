@@ -10,6 +10,22 @@ const FuturisticHome = () => {
     siteName: 'MaxiOS Pool',
     homeText: 'Maximiza tus ganancias replicando a los mejores traders en tiempo real.',
     heroTitle: 'El Futuro del Trading está aquí',
+    heroBadge: 'Trading de Nueva Generación',
+    f1Title: 'Copy Trading VIP',
+    f1Desc: 'Replica las estrategias de traders expertos de Binance de forma 100% automática y transparente.',
+    f2Title: 'Ganancias Pasivas',
+    f2Desc: 'Genera rendimientos diarios sin necesidad de conocimientos técnicos. Tu capital trabaja para ti.',
+    f3Title: 'Seguridad de Elite',
+    f3Desc: 'Protección multicapa para tus fondos y datos personales con cifrado de grado institucional.',
+    hiwTitle: 'Control Total sobre tus Ganancias',
+    s1Title: 'Crea tu Perfil',
+    s1Desc: 'Regístrate en menos de un minuto y configura tu billetera segura.',
+    s2Title: 'Activa un Cupo VIP',
+    s2Desc: 'Elige entre Bronze, Gold o Diamond para empezar a recibir operaciones.',
+    s3Title: 'Monitorea en Real-Time',
+    s3Desc: 'Observa cada operación ganadora reflejada en tu historial instantáneamente.',
+    ctaTitle: '¿Listo para Operar?',
+    ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.'
   });
 
   useEffect(() => {
@@ -18,7 +34,8 @@ const FuturisticHome = () => {
         const docRef = doc(db, 'settings', 'siteConfig');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setSiteConfig(docSnap.data());
+          const data = docSnap.data();
+          setSiteConfig(prev => ({ ...prev, ...data }));
         }
       } catch (err) {
         console.error("Error fetching site config:", err);
@@ -32,7 +49,6 @@ const FuturisticHome = () => {
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden">
-        {/* Animated Background Gradients */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-6xl pointer-events-none opacity-30">
           <div className="absolute top-10 left-10 w-72 h-72 bg-blue-600 rounded-full blur-[120px] animate-pulse"></div>
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
@@ -44,7 +60,7 @@ const FuturisticHome = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
             </span>
-            Trading de Nueva Generación
+            {siteConfig.heroBadge}
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] animate-fade-in-up">
@@ -76,20 +92,20 @@ const FuturisticHome = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.29 7 12 12 20.71 7" /><line x1="12" y1="22" x2="12" y2="12" /></svg>}
-              title="Copy Trading VIP"
-              description="Replica las estrategias de traders expertos de Binance de forma 100% automática y transparente."
+              title={siteConfig.f1Title}
+              description={siteConfig.f1Desc}
               color="blue"
             />
             <FeatureCard
               icon={<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
-              title="Ganancias Pasivas"
-              description="Genera rendimientos diarios sin necesidad de conocimientos técnicos. Tu capital trabaja para ti."
+              title={siteConfig.f2Title}
+              description={siteConfig.f2Desc}
               color="green"
             />
             <FeatureCard
               icon={<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>}
-              title="Seguridad de Elite"
-              description="Protección multicapa para tus fondos y datos personales con cifrado de grado institucional."
+              title={siteConfig.f3Title}
+              description={siteConfig.f3Desc}
               color="accent"
             />
           </div>
@@ -102,29 +118,28 @@ const FuturisticHome = () => {
           <div className="flex flex-col lg:flex-row items-center gap-20">
             <div className="lg:w-1/2">
               <h2 className="text-4xl md:text-6xl font-black mb-10 leading-tight tracking-tighter">
-                Control Total sobre tus <span className="text-accent">Ganancias</span>
+                {siteConfig.hiwTitle}
               </h2>
               <div className="space-y-12">
                 <StepItem
                   number="01"
-                  title="Crea tu Perfil"
-                  description="Regístrate en menos de un minuto y configura tu billetera segura."
+                  title={siteConfig.s1Title}
+                  description={siteConfig.s1Desc}
                 />
                 <StepItem
                   number="02"
-                  title="Activa un Cupo VIP"
-                  description="Elige entre Bronze, Gold o Diamond para empezar a recibir operaciones."
+                  title={siteConfig.s2Title}
+                  description={siteConfig.s2Desc}
                 />
                 <StepItem
                   number="03"
-                  title="Monitorea en Real-Time"
-                  description="Observa cada operación ganadora reflejada en tu historial instantáneamente."
+                  title={siteConfig.s3Title}
+                  description={siteConfig.s3Desc}
                 />
               </div>
             </div>
 
             <div className="lg:w-1/2 relative">
-              {/* Mock UI Card */}
               <div className="relative z-10 p-1 bg-gradient-to-br from-white/20 to-transparent rounded-[2.5rem] shadow-2xl backdrop-blur-xl">
                 <div className={`p-8 rounded-[2.3rem] ${darkMode ? 'bg-slate-900/90' : 'bg-white'}`}>
                   <div className="flex justify-between items-center mb-10">
@@ -152,7 +167,6 @@ const FuturisticHome = () => {
                   </div>
                 </div>
               </div>
-              {/* Floating blobs */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 rounded-full blur-[100px] -z-10"></div>
             </div>
           </div>
@@ -165,9 +179,9 @@ const FuturisticHome = () => {
           <div className="relative group p-1 bg-gradient-to-r from-blue-500 via-accent to-blue-500 rounded-[3rem] overflow-hidden">
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className={`relative z-10 p-16 md:p-24 rounded-[2.9rem] text-center ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
-              <h2 className="text-4xl md:text-7xl font-black mb-8 tracking-tighter">¿Listo para Operar?</h2>
+              <h2 className="text-4xl md:text-7xl font-black mb-8 tracking-tighter">{siteConfig.ctaTitle}</h2>
               <p className="text-xl md:text-2xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium">
-                Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.
+                {siteConfig.ctaText}
               </p>
               <Link to="/signup" className="inline-block px-12 py-6 bg-accent text-white rounded-2xl font-black text-2xl shadow-2xl shadow-orange-500/30 hover:scale-105 transition-transform">
                 Crear Cuenta Gratis

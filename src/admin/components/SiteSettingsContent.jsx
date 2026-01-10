@@ -9,10 +9,32 @@ const SiteSettingsContent = () => {
   const [siteName, setSiteName] = useState('');
   const [homeText, setHomeText] = useState('');
   const [heroTitle, setHeroTitle] = useState('');
+  const [heroBadge, setHeroBadge] = useState('');
   const [siteDomain, setSiteDomain] = useState('');
   const [faviconUrl, setFaviconUrl] = useState('');
-  const [faviconFile, setFaviconFile] = useState(null); // Mantener para la UI, pero no se usará para subir directamente
+  const [faviconFile, setFaviconFile] = useState(null);
   const [footerText, setFooterText] = useState('');
+
+  // Features
+  const [f1Title, setF1Title] = useState('');
+  const [f1Desc, setF1Desc] = useState('');
+  const [f2Title, setF2Title] = useState('');
+  const [f2Desc, setF2Desc] = useState('');
+  const [f3Title, setF3Title] = useState('');
+  const [f3Desc, setF3Desc] = useState('');
+
+  // How it works
+  const [hiwTitle, setHiwTitle] = useState('');
+  const [s1Title, setS1Title] = useState('');
+  const [s1Desc, setS1Desc] = useState('');
+  const [s2Title, setS2Title] = useState('');
+  const [s2Desc, setS2Desc] = useState('');
+  const [s3Title, setS3Title] = useState('');
+  const [s3Desc, setS3Desc] = useState('');
+
+  // CTA
+  const [ctaTitle, setCtaTitle] = useState('');
+  const [ctaText, setCtaText] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -33,9 +55,28 @@ const SiteSettingsContent = () => {
           setSiteName(data.siteName || '');
           setHomeText(data.homeText || '');
           setHeroTitle(data.heroTitle || '');
+          setHeroBadge(data.heroBadge || '');
           setSiteDomain(data.siteDomain || '');
           setFaviconUrl(data.faviconUrl || '');
           setFooterText(data.footerText || '');
+
+          setF1Title(data.f1Title || '');
+          setF1Desc(data.f1Desc || '');
+          setF2Title(data.f2Title || '');
+          setF2Desc(data.f2Desc || '');
+          setF3Title(data.f3Title || '');
+          setF3Desc(data.f3Desc || '');
+
+          setHiwTitle(data.hiwTitle || '');
+          setS1Title(data.s1Title || '');
+          setS1Desc(data.s1Desc || '');
+          setS2Title(data.s2Title || '');
+          setS2Desc(data.s2Desc || '');
+          setS3Title(data.s3Title || '');
+          setS3Desc(data.s3Desc || '');
+
+          setCtaTitle(data.ctaTitle || '');
+          setCtaText(data.ctaText || '');
         } else {
           // Si no existe, crear con valores por defecto
           try {
@@ -93,9 +134,13 @@ const SiteSettingsContent = () => {
         siteName: siteName,
         homeText: homeText,
         heroTitle: heroTitle,
+        heroBadge: heroBadge,
         siteDomain: siteDomain,
         faviconUrl: updatedFaviconUrl,
         footerText: footerText,
+        f1Title, f1Desc, f2Title, f2Desc, f3Title, f3Desc,
+        hiwTitle, s1Title, s1Desc, s2Title, s2Desc, s3Title, s3Desc,
+        ctaTitle, ctaText
       };
 
       const docRef = doc(db, 'settings', 'siteConfig');
@@ -179,6 +224,78 @@ const SiteSettingsContent = () => {
             placeholder="Ej: Minando el futuro, un bloque a la vez."
             required
           ></textarea>
+        </div>
+
+        <div className="pt-6 border-t border-gray-700">
+          <h3 className="text-lg font-bold mb-4 text-accent">Sección Hero & Badge</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Hero Badge (Texto pequeño superior)</label>
+              <input type="text" value={heroBadge} onChange={(e) => setHeroBadge(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} placeholder="Ej: Trading de Nueva Generación" />
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-700">
+          <h3 className="text-lg font-bold mb-4 text-accent">Sección Características (Features)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm underline">Feature 1</h4>
+              <input type="text" value={f1Title} onChange={(e) => setF1Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
+              <textarea value={f1Desc} onChange={(e) => setF1Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm underline">Feature 2</h4>
+              <input type="text" value={f2Title} onChange={(e) => setF2Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
+              <textarea value={f2Desc} onChange={(e) => setF2Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm underline">Feature 3</h4>
+              <input type="text" value={f3Title} onChange={(e) => setF3Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
+              <textarea value={f3Desc} onChange={(e) => setF3Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-700">
+          <h3 className="text-lg font-bold mb-4 text-accent">Sección Cómo Funciona</h3>
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Título de la Sección</label>
+              <input type="text" value={hiwTitle} onChange={(e) => setHiwTitle(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <h4 className="font-bold text-xs uppercase opacity-60">Paso 01</h4>
+                <input type="text" value={s1Title} onChange={(e) => setS1Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
+                <textarea value={s1Desc} onChange={(e) => setS1Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-bold text-xs uppercase opacity-60">Paso 02</h4>
+                <input type="text" value={s2Title} onChange={(e) => setS2Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
+                <textarea value={s2Desc} onChange={(e) => setS2Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-bold text-xs uppercase opacity-60">Paso 03</h4>
+                <input type="text" value={s3Title} onChange={(e) => setS3Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
+                <textarea value={s3Desc} onChange={(e) => setS3Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-gray-700">
+          <h3 className="text-lg font-bold mb-4 text-accent">Sección CTA Final</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Título Invitación</label>
+              <input type="text" value={ctaTitle} onChange={(e) => setCtaTitle(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+            </div>
+            <div>
+              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Texto Invitación</label>
+              <textarea value={ctaText} onChange={(e) => setCtaText(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} rows="3"></textarea>
+            </div>
+          </div>
         </div>
         <div>
           <label htmlFor="siteDomain" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Dominio del Sitio Web</label>
