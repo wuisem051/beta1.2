@@ -8,6 +8,7 @@ import './App.css';
 import { db } from './services/firebase'; // Importar db desde firebase.js
 import { doc, getDoc } from 'firebase/firestore';
 import { ThemeContext } from './context/ThemeContext'; // Importar ThemeContext
+import { ColorPaletteProvider } from './context/ColorPaletteContext'; // Importar ColorPaletteProvider
 import { useContext, useEffect } from 'react'; // Importar useContext y useEffect
 
 // Carga perezosa de componentes de página
@@ -68,39 +69,41 @@ function App() {
       <div className="flex flex-col min-h-screen"> {/* Eliminar clases de tema globales */}
         <Header />
         <main className="flex-grow">
-          <AuthProvider>
-            <Suspense fallback={<div>Cargando...</div>}> {/* Mostrar un mensaje de carga mientras los componentes se cargan */}
-              <Routes>
-                <Route path="/" element={<FuturisticHome />} /> {/* Usar el nuevo Home futurista */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                {/* Ruta temporal para acceso de prueba a la configuración del usuario */}
-                <Route 
-                  path="/test-user-settings/*" 
-                  element={
-                    <ProtectedRoute>
-                      <UserPanel />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/user/*" 
-                  element={
-                    <ProtectedRoute>
-                      <UserPanel />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route
-                  path="/admin/*"
-                  element={<AdminPanel />}
-                />
-                <Route path="/admin-login" element={<AdminLogin />} /> {/* Nueva ruta para el login de administrador */}
-                <Route path="/news" element={<AllNewsPage />} /> {/* Nueva ruta para todas las noticias */}
-                <Route path="/calculator" element={<ProfitabilityCalculatorPage />} /> {/* Ruta para la calculadora de rentabilidad */}
-              </Routes>
-            </Suspense>
-          </AuthProvider>
+          <ColorPaletteProvider>
+            <AuthProvider>
+              <Suspense fallback={<div>Cargando...</div>}> {/* Mostrar un mensaje de carga mientras los componentes se cargan */}
+                <Routes>
+                  <Route path="/" element={<FuturisticHome />} /> {/* Usar el nuevo Home futurista */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  {/* Ruta temporal para acceso de prueba a la configuración del usuario */}
+                  <Route
+                    path="/test-user-settings/*"
+                    element={
+                      <ProtectedRoute>
+                        <UserPanel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/user/*"
+                    element={
+                      <ProtectedRoute>
+                        <UserPanel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/*"
+                    element={<AdminPanel />}
+                  />
+                  <Route path="/admin-login" element={<AdminLogin />} /> {/* Nueva ruta para el login de administrador */}
+                  <Route path="/news" element={<AllNewsPage />} /> {/* Nueva ruta para todas las noticias */}
+                  <Route path="/calculator" element={<ProfitabilityCalculatorPage />} /> {/* Ruta para la calculadora de rentabilidad */}
+                </Routes>
+              </Suspense>
+            </AuthProvider>
+          </ColorPaletteProvider>
         </main>
         <Footer />
       </div>

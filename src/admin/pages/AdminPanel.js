@@ -8,6 +8,7 @@ import Backup from '../components/Backup';
 import NewsManagement from '../components/NewsManagement';
 import ContactRequestsManagement from '../components/ContactRequestsManagement';
 import SiteSettingsContent from '../components/SiteSettingsContent';
+import ColorPaletteSettings from '../components/ColorPaletteSettings';
 import TradingSignalManagement from '../components/TradingSignalManagement';
 import WithdrawalRequestsManagement from '../components/WithdrawalRequestsManagement';
 import BalanceManagement from '../../user/components/BalanceManagement';
@@ -175,6 +176,17 @@ const AdminPanel = () => {
                 Configuración del Sitio
               </Link>
             </li>
+            <li className="mb-0.5"> {/* Nuevo enlace para Paletas de Colores */}
+              <Link
+                to="/admin/color-palettes"
+                className={`flex items-center py-1.5 rounded-lg text-sm font-medium ${location.pathname === '/admin/color-palettes'
+                  ? 'bg-accent text-white'
+                  : (darkMode ? 'text-light_text hover:bg-dark_border' : 'text-gray-300 hover:bg-gray-700')
+                  }`}
+              >
+                🎨 Paletas de Colores
+              </Link>
+            </li>
           </ul>
         </nav>
       </aside >
@@ -202,6 +214,7 @@ const AdminPanel = () => {
           <Route path="balance-management" element={<BalanceManagement />} />
           <Route path="trading-signal-management" element={<TradingSignalManagement />} /> {/* Nueva ruta para Gestión de Señales de Trading */}
           <Route path="site-settings" element={<SiteSettingsContent />} /> {/* Nueva ruta para Configuración del Sitio */}
+          <Route path="color-palettes" element={<ColorPaletteSettings />} /> {/* Nueva ruta para Paletas de Colores */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
             <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-gray-300'}`}>
