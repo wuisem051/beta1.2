@@ -8,12 +8,11 @@ import { countMinersByUser } from '../../utils/miners';
 import { db, auth } from '../../services/firebase'; // Importar db y auth desde firebase.js
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy } from 'firebase/firestore';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import UserPoolArbitrage from '../components/UserPoolArbitrage'; // Importar UserPoolArbitrage
-import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
-import MiningPortfolioContent from '../components/MiningPortfolioContent'; // Importar MiningPortfolioContent (ahora TradingPortfolioContent)
-import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
+import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
+import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
+import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
@@ -69,79 +68,75 @@ const CopyTraderContent = ({ styles, userBalances }) => {
   };
 
   return (
-    <div className={`${styles.minersContent} ${darkMode ? styles.dark : styles.light}`}>
-      <h1 className={styles.pageTitle}>Copy Trader</h1>
-      <p className={styles.developmentText}>Suscríbete a nuestros cupos VIP para seguir las operaciones en tiempo real.</p>
+    <div className={styles.dashboardContent}>
+      <h1 className={styles.mainContentTitle}>Copy Trader</h1>
+      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>Suscríbete a nuestros cupos VIP para seguir las operaciones en tiempo real.</p>
 
-      <h2 className="text-xl font-bold mt-12 mb-6 border-l-4 border-accent pl-4">Cupos VIP Mensuales</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Cupos VIP Mensuales</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
         {vipPlans.map(plan => (
           <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
         ))}
       </div>
 
-      <h2 className="text-xl font-bold mt-16 mb-6 border-l-4 border-accent pl-4">Señales de Trading (Binance)</h2>
+      <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Señales de Trading (Binance)</h2>
 
       {!isVIP ? (
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} p-8 text-center`}>
+        <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <p className="text-lg font-medium">Contenido exclusivo para miembros VIP</p>
-            <p className="max-w-md">Aquí aparecerán mis entradas de Binance (Spot y Margen). Adquiere un cupo VIP arriba para desbloquear esta sección.</p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+            <p className="text-xl font-bold" style={{ color: 'var(--dark-text)' }}>Contenido exclusivo para miembros VIP</p>
+            <p className={styles.statTitle}>Aquí aparecerán mis entradas de Binance (Spot y Margen). Adquiere un cupo VIP arriba para desbloquear esta sección.</p>
           </div>
         </div>
       ) : (
         <div className="space-y-6">
           {isLoadingSignals ? (
-            <div className="text-center p-8 opacity-60">Cargando señales en tiempo real...</div>
+            <div className={styles.noDataText}>Cargando señales en tiempo real...</div>
           ) : signals.length === 0 ? (
-            <div className="text-center p-8 opacity-60">No hay señales activas en este momento. Esté atento a las notificaciones.</div>
+            <div className={styles.noDataText}>No hay señales activas en este momento. Esté atento a las notificaciones.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {signals.map(signal => (
-                <div key={signal.id} className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} overflow-hidden border-t-4 ${signal.type === 'Compra' ? 'border-green-500' : 'border-red-500'}`}>
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold">{signal.asset}</h3>
-                        <span className={`text-xs font-bold uppercase ${signal.type === 'Compra' ? 'text-green-500' : 'text-red-500'}`}>
-                          {signal.type}
-                        </span>
-                      </div>
-                      <span className="text-xs opacity-60">{signal.createdAt.toLocaleDateString()}</span>
+                <div key={signal.id} className={styles.signalCard} style={{ borderColor: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className={styles.statsTitle}>{signal.asset}</h3>
+                      <span className={styles.statusBadge} style={{ background: signal.type === 'Compra' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
+                        {signal.type}
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="bg-opacity-10 bg-gray-500 p-2 rounded">
-                        <p className="text-[10px] uppercase opacity-60">Entrada</p>
-                        <p className="font-bold text-sm">{signal.entryPrice}</p>
-                      </div>
-                      <div className="bg-opacity-10 bg-green-500 p-2 rounded">
-                        <p className="text-[10px] uppercase opacity-60">T. Profit</p>
-                        <p className="font-bold text-sm text-green-500">{signal.takeProfit}</p>
-                      </div>
-                      <div className="bg-opacity-10 bg-red-500 p-2 rounded">
-                        <p className="text-[10px] uppercase opacity-60">S. Loss</p>
-                        <p className="font-bold text-sm text-red-500">{signal.stopLoss}</p>
-                      </div>
-                    </div>
-
-                    {signal.notes && (
-                      <p className="text-sm italic mb-4 opacity-80 border-l-2 border-accent pl-3">
-                        {signal.notes}
-                      </p>
-                    )}
-
-                    {signal.imageUrl && (
-                      <div className="mt-4 rounded-lg overflow-hidden border border-white border-opacity-10">
-                        <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
-                          <img src={signal.imageUrl} alt="Analysis" className="w-full h-48 object-cover hover:scale-105 transition-transform" />
-                        </a>
-                      </div>
-                    )}
+                    <span className={styles.statTitle}>{signal.createdAt.toLocaleDateString()}</span>
                   </div>
+
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className={styles.summaryCard} style={{ padding: '0.75rem' }}>
+                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>Entrada</p>
+                      <p className={styles.statsTitle} style={{ marginBottom: 0 }}>{signal.entryPrice}</p>
+                    </div>
+                    <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)' }}>
+                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>T. Profit</p>
+                      <p className={styles.statsValueGreen} style={{ marginBottom: 0 }}>{signal.takeProfit}</p>
+                    </div>
+                    <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.05)' }}>
+                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>S. Loss</p>
+                      <p className={styles.statsValueRed} style={{ marginBottom: 0 }}>{signal.stopLoss}</p>
+                    </div>
+                  </div>
+
+                  {signal.notes && (
+                    <p className={styles.statTitle} style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '1rem', fontStyle: 'italic' }}>
+                      {signal.notes}
+                    </p>
+                  )}
+
+                  {signal.imageUrl && (
+                    <div className="mt-4 rounded-xl overflow-hidden border border-white border-opacity-10">
+                      <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={signal.imageUrl} alt="Analysis" className="w-full h-48 object-cover hover:scale-105 transition-transform duration-500" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -152,92 +147,103 @@ const CopyTraderContent = ({ styles, userBalances }) => {
   );
 };
 
-const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, styles, totalHashrate, estimatedDailyUSD, activeMinersAllUsers, pricePerTHs }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD }) => {
+  const { darkMode } = useContext(ThemeContext);
 
-  console.log("DashboardContent: Renderizando con props:", { userMiners, chartData, userBalances, paymentRate, btcToUsdRate, totalHashratePool, poolCommission, paymentsHistory, withdrawalsHistory, totalHashrate, estimatedDailyUSD });
+  const vipStatusLabel = useMemo(() => {
+    const status = userBalances.vipStatus || 'none';
+    if (status === 'none') return 'Sin Plan';
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }, [userBalances.vipStatus]);
 
-  const estimatedDailyBTC = useMemo(() => {
-    return btcToUsdRate > 0 ? estimatedDailyUSD / btcToUsdRate : 0;
-  }, [estimatedDailyUSD, btcToUsdRate]);
+  const lastTransactionInfo = useMemo(() => {
+    const lastPayment = paymentsHistory.length > 0 ? paymentsHistory[0] : null;
+    const lastWithdrawal = withdrawalsHistory.length > 0 ? withdrawalsHistory[0] : null;
 
-  const userPercentageOfPool = useMemo(() => {
-    return totalHashratePool > 0 ? (totalHashrate / totalHashratePool) * 100 : 0;
-  }, [totalHashrate, totalHashratePool]);
-
-  // Obtener el último pago o retiro
-  const lastPayment = paymentsHistory.length > 0 ? paymentsHistory[0] : null;
-  const lastWithdrawal = withdrawalsHistory.length > 0 ? withdrawalsHistory[0] : null;
-
-  let lastTransactionInfo = "No hay historial";
-  if (lastPayment && lastWithdrawal) {
-    if (lastPayment.createdAt > lastWithdrawal.createdAt) {
-      lastTransactionInfo = `Pago: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency} (${lastPayment.createdAt.toLocaleDateString()})`;
-    } else {
-      lastTransactionInfo = `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency} (${lastWithdrawal.createdAt.toLocaleDateString()})`;
+    if (lastPayment && lastWithdrawal) {
+      return lastPayment.createdAt > lastWithdrawal.createdAt
+        ? `Recibido: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency}`
+        : `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency}`;
+    } else if (lastPayment) {
+      return `Recibido: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency}`;
+    } else if (lastWithdrawal) {
+      return `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency}`;
     }
-  } else if (lastPayment) {
-    lastTransactionInfo = `Pago: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency} (${lastPayment.createdAt.toLocaleDateString()})`;
-  } else if (lastWithdrawal) {
-    lastTransactionInfo = `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency} (${lastWithdrawal.createdAt.toLocaleDateString()})`;
-  }
+    return "Sin actividad";
+  }, [paymentsHistory, withdrawalsHistory]);
 
   return (
     <div className={styles.dashboardContent}>
       <div className={styles.statsGrid}>
-        {/* Tu Hashrate */}
-        <div className={`${styles.statCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.statTitle}>Tu Hashrate</h3>
-          <p className={styles.statValueBlue}>{totalHashrate.toFixed(2)} TH/s</p>
+        {/* Miembro VIP */}
+        <div className={styles.statCard}>
           <div className={styles.statIconBlue}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue_link" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>
           </div>
+          <h3 className={styles.statTitle}>Nivel de Cuenta</h3>
+          <p className={styles.statValueBlue}>{vipStatusLabel}</p>
         </div>
-        {/* Ganancia Estimada Diaria */}
-        <div className={`${styles.statCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.statTitle}>Ganancia Estimada Diaria</h3>
-          <p className={styles.statValueGreen}>${estimatedDailyUSD.toFixed(2)}</p>
+        {/* Rendimiento Estimado */}
+        <div className={styles.statCard}>
           <div className={styles.statIconGreen}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green_check" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V3a1 1 0 00-1-1H4a1 1 0 00-1 1v18a1 1 0 001 1h12a1 1 0 001-1v-5m-1-10v4m-4 0h4" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
           </div>
+          <h3 className={styles.statTitle}>Retorno Estimado</h3>
+          <p className={styles.statValueGreen}>${estimatedDailyUSD.toFixed(2)}</p>
         </div>
-        {/* Tasa de Pago */}
-        <div className={`${styles.statCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.statTitle}>Tasa de Pago</h3>
-          <p className={styles.statValueAccent}>${paymentRate.toFixed(2)}/TH/s</p>
+        {/* Señales Recientes */}
+        <div className={styles.statCard}>
           <div className={styles.statIconAccent}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
           </div>
+          <h3 className={styles.statTitle}>Señales de Trading</h3>
+          <p className={styles.statValueAccent}>Activas</p>
         </div>
       </div>
 
-      <PerformanceStatsSection /> {/* Añadir PerformanceStatsSection */}
-      <StatsSection totalHashrate={totalHashratePool} activeMiners={activeMinersAllUsers} pricePerTHs={pricePerTHs} /> {/* Añadir StatsSection */}
-
       <div className={styles.chartAndStatsGrid}>
         {/* Rendimiento Histórico */}
-        <div className={`${styles.chartCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.chartTitle}>Rendimiento Histórico</h3>
+        <div className={styles.chartCard}>
+          <h3 className={styles.chartTitle}>Rendimiento de Mercado</h3>
           <div className={styles.chartContainer}>
-            {userMiners.length > 0 ? (
-              <Bar data={chartData} options={{ maintainAspectRatio: false }} />
-            ) : (
-              <p className={styles.noDataText}>No hay datos de rendimiento disponibles.</p>
-            )}
+            <Bar
+              data={chartData}
+              options={{
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+                    titleColor: darkMode ? '#f1f5f9' : '#0f172a',
+                    bodyColor: darkMode ? '#f1f5f9' : '#0f172a',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                  }
+                },
+                scales: {
+                  y: { grid: { color: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
+                  x: { grid: { display: false } }
+                }
+              }}
+            />
           </div>
         </div>
 
-        {/* Estadísticas de la Pool */}
-        <div className={`${styles.statsCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h3 className={styles.statsTitle}>Estadísticas de la Pool</h3>
+        {/* Estado de Cuenta */}
+        <div className={styles.statsCard}>
+          <h3 className={styles.statsTitle}>Estado de Cuenta</h3>
           <div className={styles.statsList}>
             <div className={styles.statsItem}>
-              <span>Comisión de la Pool:</span>
-              <span className={styles.statsValueRed}>{poolCommission.toFixed(1)}%</span>
+              <span>Balance USD:</span>
+              <span className={styles.statsValueGreen}>${userBalances.balanceUSD.toFixed(2)}</span>
             </div>
             <div className={styles.statsItem}>
-              <span>Última Transacción:</span>
-              <span className={styles.statsValueGreen}>{lastTransactionInfo}</span>
+              <span>Último Movimiento:</span>
+              <span className={styles.statsValueBlue}>{lastTransactionInfo}</span>
+            </div>
+            <div className={styles.statsItem} style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--dark-border)' }}>
+              <span>Cuenta Verificada</span>
+              <span style={{ color: 'var(--green-check)' }}>Similare</span>
             </div>
           </div>
         </div>
@@ -248,8 +254,8 @@ const DashboardContent = ({ userMiners, chartData, userBalances, paymentRate, bt
 
 
 const PaymentsContent = ({ currentUser, styles }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
-  const { showError } = useError(); // Usar el contexto de errores
+  const { darkMode } = useContext(ThemeContext);
+  const { showError } = useError();
   const [paymentsHistory, setPaymentsHistory] = useState([]);
 
   useEffect(() => {
@@ -281,24 +287,21 @@ const PaymentsContent = ({ currentUser, styles }) => {
       showError('Error al suscribirse al historial de pagos.');
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [currentUser, showError]);
 
   return (
-    <div className={styles.paymentsContent}>
-      <h1 className={styles.pageTitle}>Historial de Pagos</h1>
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
+    <div className={styles.dashboardContent}>
+      <h1 className={styles.mainContentTitle}>Historial de Pagos</h1>
 
-      <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
+      <div className={styles.sectionCard}>
         <h2 className={styles.sectionTitle}>Pagos Recibidos</h2>
         {paymentsHistory.length === 0 ? (
           <p className={styles.noDataText}>No hay pagos registrados.</p>
         ) : (
           <div className={styles.tableContainer}>
             <table className={styles.table}>
-              <thead className={`${darkMode ? styles.darkTableHead : styles.lightTableHead}`}>
+              <thead>
                 <tr>
                   <th className={styles.tableHeader}>Fecha</th>
                   <th className={styles.tableHeader}>Cantidad</th>
@@ -306,13 +309,13 @@ const PaymentsContent = ({ currentUser, styles }) => {
                   <th className={styles.tableHeader}>Estado</th>
                 </tr>
               </thead>
-              <tbody className={`${darkMode ? styles.darkTableBody : styles.lightTableBody}`}>
+              <tbody>
                 {paymentsHistory.map((payment) => (
                   <tr key={payment.id}>
                     <td className={styles.tableCell}>
                       {payment.createdAt.toLocaleDateString()}
                     </td>
-                    <td className={styles.tableCell}>
+                    <td className={styles.tableCell} style={{ fontWeight: '700' }}>
                       {payment.amount.toFixed(8)} {payment.currency}
                     </td>
                     <td className={styles.tableCell}>
@@ -338,8 +341,8 @@ const PaymentsContent = ({ currentUser, styles }) => {
 };
 
 const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
-  const { showError, showSuccess } = useError(); // Usar el contexto de errores
+  const { darkMode } = useContext(ThemeContext);
+  const { showError, showSuccess } = useError();
   const { currentUser } = useAuth();
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('BTC');
@@ -352,13 +355,12 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
     balanceBTC: 0,
     balanceLTC: 0,
     balanceDOGE: 0,
-    balanceVES: 0, // Añadir balanceVES
+    balanceVES: 0,
   });
   const [withdrawalsHistory, setWithdrawalsHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // Estado de carga
-  const [selectedAddress, setSelectedAddress] = useState(''); // Nuevo estado para la dirección seleccionada
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
 
-  // Efecto para inicializar y actualizar la dirección seleccionada y los campos manuales
   useEffect(() => {
     const balanceKey = `balance${currency}`;
     setAvailableBalance(userBalances[balanceKey] || 0);
@@ -366,12 +368,10 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
     const savedAddressForCurrency = userPaymentAddresses[currency];
 
     if (selectedAddress === 'new') {
-      // Si se selecciona "Ingresar nueva dirección", limpiar los campos
       setWalletAddress('');
       setBinanceId('');
       setUseBinancePay(currency === 'USD');
     } else if (savedAddressForCurrency && selectedAddress === savedAddressForCurrency) {
-      // Si hay una dirección guardada y está seleccionada
       if (currency === 'USD') {
         setBinanceId(savedAddressForCurrency);
         setWalletAddress('');
@@ -382,7 +382,6 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
         setUseBinancePay(false);
       }
     } else {
-      // Si no hay dirección guardada o la seleccionada no coincide, establecer "new"
       setSelectedAddress('new');
       setWalletAddress('');
       setBinanceId('');
@@ -404,55 +403,42 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
         return;
       }
 
-      try {
-        // Cargar balances del usuario desde Firebase
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        const unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            setUserBalances({
-              balanceUSD: userData.balanceUSD || 0,
-              balanceBTC: userData.balanceBTC || 0,
-              balanceLTC: userData.balanceLTC || 0,
-              balanceDOGE: userData.balanceDOGE || 0,
-              balanceVES: userData.balanceVES || 0, // Añadir balanceVES
-            });
-          }
-        }, (err) => {
-          console.error("Error subscribing to user balances:", err);
-          showError('Error al configurar el listener de balances.');
-        });
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setUserBalances({
+            balanceUSD: userData.balanceUSD || 0,
+            balanceBTC: userData.balanceBTC || 0,
+            balanceLTC: userData.balanceLTC || 0,
+            balanceDOGE: userData.balanceDOGE || 0,
+            balanceVES: userData.balanceVES || 0,
+          });
+        }
+      });
 
-        // Cargar historial de retiros del usuario desde Firebase
-        const q = query(
-          collection(db, 'withdrawals'),
-          where('userId', '==', currentUser.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const unsubscribeWithdrawals = onSnapshot(q, (snapshot) => {
-          const fetchedWithdrawals = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt.toDate(),
-          }));
-          setWithdrawalsHistory(fetchedWithdrawals);
-        }, (err) => {
-          console.error("Error subscribing to withdrawals:", err);
-          showError('Error al configurar el listener de retiros.');
-        });
+      const q = query(
+        collection(db, 'withdrawals'),
+        where('userId', '==', currentUser.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const unsubscribeWithdrawals = onSnapshot(q, (snapshot) => {
+        const fetchedWithdrawals = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt.toDate(),
+        }));
+        setWithdrawalsHistory(fetchedWithdrawals);
+      });
 
-        return () => {
-          unsubscribeUser();
-          unsubscribeWithdrawals();
-        };
-      } catch (err) {
-        console.error("Error setting up listeners:", err);
-        showError('Error al configurar los listeners de datos.');
-      }
+      return () => {
+        unsubscribeUser();
+        unsubscribeWithdrawals();
+      };
     };
 
     fetchWithdrawalData();
-  }, [currentUser, showError]); // Eliminado 'currency' de las dependencias para evitar bucles con el useEffect de arriba
+  }, [currentUser, showError]);
 
   const handleSubmitWithdrawal = async (e) => {
     e.preventDefault();
@@ -487,11 +473,9 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
     let addressOrId = '';
 
     if (selectedAddress && selectedAddress !== 'new') {
-      // Usar la dirección seleccionada de las guardadas
       addressOrId = selectedAddress;
       method = (currency === 'USD' && useBinancePay) ? 'Binance Pay' : 'Wallet';
     } else {
-      // Usar la dirección ingresada manualmente
       if (useBinancePay) {
         if (!binanceId.trim()) {
           showError('Por favor, introduce tu Email o ID de Binance.');
@@ -523,82 +507,63 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
         createdAt: new Date(),
       });
 
-      // Actualizar el balance del usuario en la tabla 'users'
       const balanceKey = `balance${currency}`;
       const newBalance = currentBalanceForCurrency - withdrawalAmount;
 
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, { [balanceKey]: newBalance });
 
-      showSuccess('Solicitud de retiro enviada exitosamente. Será procesada a la brevedad.');
+      showSuccess('Solicitud de retiro enviada exitosamente.');
       setAmount('');
-      setWalletAddress('');
-      setBinanceId('');
-      setUseBinancePay(false);
     } catch (err) {
-      console.error("Error submitting withdrawal:", err);
-      showError(`Fallo al enviar la solicitud de retiro: ${err.message}`);
+      showError(`Fallo al enviar el retiro: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={styles.withdrawalsContent}>
-      <h1 className={styles.pageTitle}>Retiros</h1>
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingText}>Procesando...</div>
-        </div>
-      )}
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
+    <div className={styles.dashboardContent}>
+      <h1 className={styles.mainContentTitle}>Retiros</h1>
 
       <div className={styles.withdrawalGrid}>
-        {/* Solicitar Retiro */}
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
+        <div className={styles.sectionCard}>
           <h2 className={styles.sectionTitle}>Solicitar Retiro</h2>
-          <form onSubmit={handleSubmitWithdrawal}>
+          <form onSubmit={handleSubmitWithdrawal} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="amount" className={styles.formLabel}>Cantidad</label>
+              <label className={styles.formLabel}>Cantidad</label>
               <input
                 type="number"
-                id="amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 step="any"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                className={styles.formInput}
                 placeholder="0.00000000"
                 required
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="currency" className={styles.formLabel}>Moneda</label>
+              <label className={styles.formLabel}>Moneda</label>
               <select
-                id="currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className={`${styles.formSelect} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                className={styles.formSelect}
               >
                 <option value="BTC">Bitcoin (BTC)</option>
                 <option value="DOGE">Dogecoin (DOGE)</option>
                 <option value="LTC">Litecoin (LTC)</option>
                 <option value="USD">USD</option>
-                <option value="VES">Bolívar Soberano (VES)</option> {/* Añadir VES */}
+                <option value="VES">VES</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="savedAddress" className={styles.formLabel}>Dirección de Retiro ({currency})</label>
+              <label className={styles.formLabel}>Dirección Guardada</label>
               <select
-                id="savedAddress"
                 value={selectedAddress}
-                onChange={(e) => {
-                  const newSelectedAddress = e.target.value;
-                  setSelectedAddress(newSelectedAddress);
-                }}
-                className={`${styles.formSelect} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                disabled={isLoading}
+                onChange={(e) => setSelectedAddress(e.target.value)}
+                className={styles.formSelect}
               >
                 {userPaymentAddresses[currency] && (
                   <option value={userPaymentAddresses[currency]}>
@@ -609,110 +574,79 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
               </select>
             </div>
 
-            {/* Campos de entrada manual */}
-            <div className={styles.formGroup}>
-              <label htmlFor="walletAddress" className={styles.formLabel}>Dirección de Wallet (Manual)</label>
-              <input
-                type="text"
-                id="walletAddress"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                placeholder={currency === 'BTC' ? 'bc1q...' : currency === 'LTC' ? 'ltc1q...' : currency === 'DOGE' ? 'D...' : ''}
-                disabled={isLoading || selectedAddress !== 'new' || useBinancePay}
-                required={selectedAddress === 'new' && !useBinancePay}
-              />
+            {selectedAddress === 'new' && (
+              <>
+                <div className={styles.checkboxGroup}>
+                  <input
+                    type="checkbox"
+                    checked={useBinancePay}
+                    onChange={(e) => setUseBinancePay(e.target.checked)}
+                    className={styles.checkbox}
+                  />
+                  <label className={styles.checkboxLabel}>Usar Binance Pay</label>
+                </div>
+
+                {!useBinancePay ? (
+                  <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Dirección de Wallet</label>
+                    <input
+                      type="text"
+                      value={walletAddress}
+                      onChange={(e) => setWalletAddress(e.target.value)}
+                      className={styles.formInput}
+                      placeholder=" bc1q..."
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>Email o ID de Binance</label>
+                    <input
+                      type="text"
+                      value={binanceId}
+                      onChange={(e) => setBinanceId(e.target.value)}
+                      className={styles.formInput}
+                      placeholder="ejemplo@binance.com"
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className={styles.summaryCard} style={{ margin: '1rem 0', background: 'rgba(0,0,0,0.02)' }}>
+              <div className="flex justify-between text-xs font-semibold">
+                <span>Disponible:</span>
+                <span className={styles.statsValueGreen}>{availableBalance.toFixed(currency === 'USD' ? 2 : 8)} {currency}</span>
+              </div>
             </div>
 
-            <div className={styles.orSeparator}>O usar Binance Pay</div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="binanceId" className={styles.formLabel}>Email o ID de Binance (Manual)</label>
-              <input
-                type="text"
-                id="binanceId"
-                value={binanceId}
-                onChange={(e) => setBinanceId(e.target.value)}
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                placeholder="ejemplo@binance.com o 123456789"
-                disabled={isLoading || selectedAddress !== 'new' || !useBinancePay}
-                required={selectedAddress === 'new' && useBinancePay}
-              />
-            </div>
-            <div className={styles.checkboxGroup}>
-              <input
-                type="checkbox"
-                id="useBinancePay"
-                checked={useBinancePay}
-                onChange={(e) => {
-                  setUseBinancePay(e.target.checked);
-                  // Limpiar el otro campo cuando se cambia el método
-                  if (e.target.checked) {
-                    setWalletAddress('');
-                  } else {
-                    setBinanceId('');
-                  }
-                }}
-                className={styles.checkbox}
-                disabled={isLoading || selectedAddress !== 'new'}
-              />
-              <label htmlFor="useBinancePay" className={styles.checkboxLabel}>Usar Binance Pay en lugar de dirección de wallet</label>
-            </div>
-
-            <div className={styles.balanceInfo}>
-              <span>Balance disponible: {availableBalance.toFixed(currency === 'USD' ? 2 : 8)} {currency}</span>
-              <span>Umbral mínimo: {(minPaymentThresholds[currency] || 0).toFixed(currency === 'USD' ? 2 : 8)} {currency}</span>
-            </div>
-
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : 'Solicitar Retiro'}
+            <button type="submit" className={styles.submitButton} disabled={isLoading}>
+              {isLoading ? 'Procesando...' : 'Solicitar Retiro'}
             </button>
           </form>
         </div>
 
-        {/* Historial de Retiros */}
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h2 className={styles.sectionTitle}>Historial de Retiros</h2>
+        <div className={styles.sectionCard}>
+          <h2 className={styles.sectionTitle}>Historial</h2>
           {withdrawalsHistory.length === 0 ? (
-            <p className={styles.noDataText}>No hay retiros registrados.</p>
+            <p className={styles.noDataText}>No hay retiros.</p>
           ) : (
             <div className={styles.tableContainer}>
               <table className={styles.table}>
-                <thead className={`${darkMode ? styles.darkTableHead : styles.lightTableHead}`}>
+                <thead>
                   <tr>
                     <th className={styles.tableHeader}>Fecha</th>
                     <th className={styles.tableHeader}>Cantidad</th>
-                    <th className={styles.tableHeader}>Método</th>
                     <th className={styles.tableHeader}>Estado</th>
                   </tr>
                 </thead>
-                <tbody className={`${darkMode ? styles.darkTableBody : styles.lightTableBody}`}>
-                  {withdrawalsHistory.map((withdrawal) => (
-                    <tr key={withdrawal.id}>
+                <tbody>
+                  {withdrawalsHistory.map((w) => (
+                    <tr key={w.id}>
+                      <td className={styles.tableCell}>{w.createdAt.toLocaleDateString()}</td>
+                      <td className={styles.tableCell}>{w.amount.toFixed(8)} {w.currency}</td>
                       <td className={styles.tableCell}>
-                        {withdrawal.createdAt.toLocaleDateString()}
-                      </td>
-                      <td className={styles.tableCell}>
-                        {withdrawal.amount.toFixed(8)} {withdrawal.currency}
-                      </td>
-                      <td className={styles.tableCell}>
-                        {withdrawal.currency}
-                      </td>
-                      <td className={styles.tableCell}>
-                        <span className={`${styles.statusBadge} ${withdrawal.status === 'Pendiente' ? styles.statusPending :
-                          withdrawal.status === 'Completado' ? styles.statusCompleted :
-                            styles.statusError
-                          }`}>
-                          {withdrawal.status}
+                        <span className={`${styles.statusBadge} ${w.status === 'Pendiente' ? styles.statusPending : styles.statusCompleted}`}>
+                          {w.status}
                         </span>
                       </td>
                     </tr>
@@ -1724,12 +1658,11 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
-          <Route path="pool-arbitrage/*" element={<UserPoolArbitrage />} />
-          <Route path="mining-portfolio/*" element={<MiningPortfolioContent />} /> {/* Nueva ruta para Portafolio de Minería */}
+          <Route path="mining-portfolio/*" element={<TradingPortfolioContent />} /> {/* Nueva ruta para Portafolio de Trading */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
@@ -1737,7 +1670,7 @@ const UserPanel = () => {
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent userMiners={userMiners} chartData={chartData} userBalances={userBalances} paymentRate={paymentRate} btcToUsdRate={btcToUsdRate} totalHashratePool={totalHashratePool} poolCommission={poolCommission} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} styles={styles} totalHashrate={totalHashrate} estimatedDailyUSD={estimatedDailyUSD} activeMinersAllUsers={activeMinersAllUsers} pricePerTHs={paymentRate} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} />} />
         </Routes>
       </MainContent>
     </div>

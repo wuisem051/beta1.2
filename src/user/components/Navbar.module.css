@@ -1,27 +1,22 @@
 .navbarContainer {
   width: 100%;
-  background-color: var(--background-secondary); /* Color de fondo */
-  padding: 1rem 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid var(--border-color);
-  z-index: 10;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  padding: 0.75rem 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 50;
+  position: sticky;
   top: 0;
-  left: 0;
-}
-
-.navbarContainer.dark {
-  background-color: var(--dark-background-secondary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid var(--dark-border-color);
+  transition: all 0.3s ease;
 }
 
 .navList {
   display: flex;
-  justify-content: flex-start; /* Alinear a la izquierda */
+  justify-content: center;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 1.5rem; /* Espacio entre los elementos de navegación */
+  gap: 2rem;
 }
 
 .navItem {
@@ -29,63 +24,55 @@
 }
 
 .navLink {
-  color: var(--text-color);
+  color: var(--dark-text);
+  opacity: 0.6;
   text-decoration: none;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 700;
   padding: 0.5rem 0;
-  transition: color 0.3s ease;
-  white-space: nowrap; /* Evitar que el texto se rompa */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
 }
 
 .navLink:hover {
-  color: var(--accent-color);
+  opacity: 1;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .navLink.activeLink {
-  color: var(--accent-color);
-  font-weight: 600;
-  position: relative;
+  opacity: 1;
+  color: var(--accent);
 }
 
 .navLink.activeLink::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background-color: var(--accent-color);
-  border-radius: 1px;
+  left: 50%;
+  bottom: -4px;
+  width: 4px;
+  height: 4px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px var(--accent);
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .navList {
-    overflow-x: auto; /* Permitir scroll horizontal */
+    gap: 1rem;
+    overflow-x: auto;
     justify-content: flex-start;
-    padding-bottom: 5px; /* Espacio para la barra de scroll */
-    -webkit-overflow-scrolling: touch; /* Suavizar el scroll en iOS */
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .navList::-webkit-scrollbar {
-    height: 4px;
+    display: none;
   }
 
-  .navList::-webkit-scrollbar-track {
-    background: var(--background-primary);
-    border-radius: 2px;
-  }
-
-  .navList::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 2px;
-  }
-
-  .navItem {
-    flex-shrink: 0; /* Evitar que los ítems se encojan */
-  }
-
-  .navbarContainer {
-    padding: 0.8rem 1rem;
+  .navLink {
+    font-size: 0.75rem;
   }
 }

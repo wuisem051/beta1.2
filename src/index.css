@@ -4,19 +4,25 @@
 
 /* Definición de variables CSS para temas claro y oscuro */
 :root {
-  --light-bg: #F9FAFB;
-  --light-card: #FFFFFF;
-  --dark-text: #1F2937;
-  --light-text: #F9FAFB;
-  --dark-bg: #0A0A0A; /* Negro mate para el fondo oscuro */
-  --dark-card: #1F2937;
-  --accent: #F59E0B;
-  --green-check: #10B981;
-  --gray-border: #E5E7EB;
-  --dark-border: #374151;
-  --gray-text: #6B7280;
-  --blue-link: #3B82F6;
-  --red-error: #EF4444;
+  --light-bg: #f8fafc;
+  --light-card: rgba(255, 255, 255, 0.9);
+  --dark-text: #0f172a;
+  --light-text: #f1f5f9;
+  --dark-bg: #020617;
+  --dark-card: rgba(30, 41, 59, 0.7);
+  --accent: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.2);
+  --green-check: #10b981;
+  --gray-border: #e2e8f0;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --gray-text: #64748b;
+  --blue-link: #3b82f6;
+  --red-error: #ef4444;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 /* Estilos base para el cuerpo */
