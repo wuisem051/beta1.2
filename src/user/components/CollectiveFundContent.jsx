@@ -34,7 +34,7 @@ const CollectiveFundContent = () => {
       legend: {
         position: 'bottom',
         labels: {
-          color: darkMode ? '#94a3b8' : '#64748b',
+          color: '#e2e8f0', // Slate 200 for high contrast legend
           padding: 20,
           usePointStyle: true,
           pointStyle: 'circle',

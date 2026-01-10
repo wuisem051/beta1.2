@@ -85,7 +85,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
         <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-            <p className="text-xl font-bold" style={{ color: 'var(--dark-text)' }}>Contenido exclusivo para miembros VIP</p>
+            <p className="text-xl font-bold" style={{ color: '#f1f5f9' }}>Contenido exclusivo para miembros VIP</p>
             <p className={styles.statTitle}>Aquí aparecerán mis entradas de Binance (Spot y Margen). Adquiere un cupo VIP arriba para desbloquear esta sección.</p>
           </div>
         </div>

@@ -29,8 +29,9 @@
   font-size: 1.875rem;
   font-weight: 800;
   letter-spacing: -0.025em;
-  color: var(--dark-text);
-  background: linear-gradient(to right, var(--blue-link), var(--accent));
+  color: white;
+  background: linear-gradient(to right, #60a5fa, var(--accent));
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -79,7 +80,8 @@
 .statTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--gray-text);
+  color: rgba(255, 255, 255, 0.7);
+  /* Light gray for high contrast labels */
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
@@ -160,12 +162,8 @@
   font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: var(--dark-text);
-}
-
-body.dark .chartTitle,
-body.dark .statsTitle {
-  color: var(--light-text);
+  color: #f1f5f9;
+  /* Slate 100 for high visibility */
 }
 
 .chartContainer {
@@ -187,13 +185,13 @@ body.dark .statsTitle {
 }
 
 .tableHeader {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.05);
   padding: 1rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--gray-text);
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
-  border-bottom: 1px solid var(--gray-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 body.dark .tableHeader {
@@ -204,13 +202,8 @@ body.dark .tableHeader {
 .tableCell {
   padding: 1rem;
   font-size: 0.875rem;
-  color: var(--dark-text);
-  border-bottom: 1px solid var(--gray-border);
-}
-
-body.dark .tableCell {
-  color: var(--light-text);
-  border-bottom: 1px solid var(--dark-border);
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Sections */
@@ -225,11 +218,7 @@ body.dark .tableCell {
   font-size: 1.5rem;
   font-weight: 800;
   margin-bottom: 1.5rem;
-  color: var(--dark-text);
-}
-
-body.dark .sectionTitle {
-  color: var(--light-text);
+  color: #ffffff;
 }
 
 /* Forms */
@@ -290,11 +279,26 @@ body.dark .sectionTitle {
   }
 }
 
+.statsItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  color: #e2e8f0;
+  /* Default text color for stats items */
+}
+
+.statsItem>span:first-child {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
 .summaryCard {
   composes: glassBase;
   padding: 1.25rem;
   border-radius: 1rem;
   text-align: center;
+  color: white;
 }
 
 /* Badges */
