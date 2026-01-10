@@ -81,3 +81,7 @@ Desktop.ini
 
 # Build artifacts
 build/
+
+# Scripts with credentials (keep local only)
+scripts/
+
