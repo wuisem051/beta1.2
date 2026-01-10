@@ -20,7 +20,6 @@ const UserPanel = lazy(() => import('./user/pages/UserPanel'));
 const AdminPanel = lazy(() => import('./admin/pages/AdminPanel'));
 const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
 const AllNewsPage = lazy(() => import('./user/pages/AllNewsPage')); // Nueva página para todas las noticias
-const ProfitabilityCalculatorPage = lazy(() => import('./user/pages/ProfitabilityCalculatorPage')); // Página de la calculadora de rentabilidad
 
 function App() {
   const { darkMode, theme } = useContext(ThemeContext); // Usar ThemeContext
@@ -108,7 +107,6 @@ function AppContent() {
                 />
                 <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/news" element={<AllNewsPage />} />
-                <Route path="/calculator" element={<ProfitabilityCalculatorPage />} />
               </Routes>
             </Suspense>
           </AuthProvider>

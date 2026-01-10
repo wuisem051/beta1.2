@@ -47,7 +47,7 @@ const Header = () => {
   };
 
   return (
-    <header className={`shadow-md ${theme.backgroundAlt} ${theme.text}`}> {/* Aplicar clases de tema */}
+    <header className={`shadow-md ${theme.text}`} style={{ backgroundColor: 'var(--bg-main)' }}> {/* Aplicar clases de tema y fondo dinámico */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo y botón de modo dev */}
@@ -74,86 +74,69 @@ const Header = () => {
               <>
                 <Link
                   to="/admin"
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/admin')
-                      ? 'bg-red-600 text-white' // Color distintivo para admin dev
-                      : `text-red-400 hover:bg-red-800 hover:text-white`
-                  }`}
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname.startsWith('/admin')
+                    ? 'bg-red-600 text-white' // Color distintivo para admin dev
+                    : `text-red-400 hover:bg-red-800 hover:text-white`
+                    }`}
                 >
                   Admin (Dev)
                 </Link>
                 <Link
                   to="/user/dashboard"
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/user')
-                      ? 'bg-blue-600 text-white' // Color distintivo para user dev
-                      : `text-blue-400 hover:bg-blue-800 hover:text-white`
-                  }`}
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname.startsWith('/user')
+                    ? 'bg-blue-600 text-white' // Color distintivo para user dev
+                    : `text-blue-400 hover:bg-blue-800 hover:text-white`
+                    }`}
                 >
                   Usuario (Dev)
                 </Link>
               </>
             )}
-            <Link 
-              to="/" 
-              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                location.pathname === '/' && location.hash === '' 
-                  ? 'bg-accent text-white' 
-                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-              }`}
+            <Link
+              to="/"
+              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname === '/' && location.hash === ''
+                ? 'bg-accent text-white'
+                : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                }`}
             >
               Estadísticas
             </Link>
-            <Link 
-              to="/calculator" 
-              className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                location.pathname === '/calculator' 
-                  ? 'bg-accent text-white' 
-                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-              }`}
-            >
-              Calculadora
-            </Link>
             {currentUser ? (
               <>
-                <Link 
-                  to="/user/dashboard" 
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/user') 
-                      ? 'bg-accent text-white' 
-                      : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
+                <Link
+                  to="/user/dashboard"
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname.startsWith('/user')
+                    ? 'bg-accent text-white'
+                    : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                    }`}
                 >
                   Panel de Usuario
                 </Link>
-                <button 
-                  onClick={handleLogout} 
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
+                <button
+                  onClick={handleLogout}
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${`${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                    }`}
                 >
                   Cerrar Sesión
                 </button>
               </>
             ) : (
               <>
-                <Link 
-                  to="/signup" 
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    location.pathname === '/signup' 
-                      ? 'bg-accent text-white' 
-                      : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
+                <Link
+                  to="/signup"
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname === '/signup'
+                    ? 'bg-accent text-white'
+                    : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                    }`}
                 >
                   Registrarse
                 </Link>
-                <Link 
-                  to="/login" 
-                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-                    location.pathname === '/login' 
-                      ? 'bg-accent text-white' 
-                      : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
+                <Link
+                  to="/login"
+                  className={`px-2 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${location.pathname === '/login'
+                    ? 'bg-accent text-white'
+                    : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                    }`}
                 >
                   Iniciar Sesión
                 </Link>
@@ -166,9 +149,8 @@ const Header = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               type="button"
-              className={`inline-flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${
-                `${theme.textSoft} hover:${theme.backgroundAlt} focus:ring-${theme.text}`
-              }`}
+              className={`inline-flex items-center justify-center p-2 rounded-md transition-colors duration-200 ${`${theme.textSoft} hover:${theme.backgroundAlt} focus:ring-${theme.text}`
+                }`}
               aria-controls="mobile-menu"
               aria-expanded="false"
             >
@@ -188,102 +170,87 @@ const Header = () => {
       </div>
 
       {/* Menú móvil */}
-      {isOpen && (
-        <div className={`md:hidden ${theme.backgroundAlt}`} id="mobile-menu"> {/* Aplicar clases de tema */}
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {process.env.NODE_ENV === 'development' && (
-              <>
-                <Link
-                  to="/admin"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/admin')
+      {
+        isOpen && (
+          <div className={`md:hidden ${theme.backgroundAlt}`} id="mobile-menu"> {/* Aplicar clases de tema */}
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              {process.env.NODE_ENV === 'development' && (
+                <>
+                  <Link
+                    to="/admin"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname.startsWith('/admin')
                       ? 'bg-red-600 text-white'
                       : `text-red-400 hover:bg-red-800 hover:text-white`
-                  }`}
-                >
-                  Admin (Dev)
-                </Link>
-                <Link
-                  to="/user/dashboard"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/user')
+                      }`}
+                  >
+                    Admin (Dev)
+                  </Link>
+                  <Link
+                    to="/user/dashboard"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname.startsWith('/user')
                       ? 'bg-blue-600 text-white'
                       : `text-blue-400 hover:bg-blue-800 hover:text-white`
-                  }`}
-                >
-                  Usuario (Dev)
-                </Link>
-              </>
-            )}
-            <Link 
-              to="/" 
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                location.pathname === '/' && location.hash === '' 
-                  ? 'bg-accent text-white' 
+                      }`}
+                  >
+                    Usuario (Dev)
+                  </Link>
+                </>
+              )}
+              <Link
+                to="/"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname === '/' && location.hash === ''
+                  ? 'bg-accent text-white'
                   : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-              }`}
-            >
-              Estadísticas
-            </Link>
-            <Link 
-              to="/calculator" 
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                location.pathname === '/calculator' 
-                  ? 'bg-accent text-white' 
-                  : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-              }`}
-            >
-              Calculadora
-            </Link>
-            {currentUser ? (
-              <>
-                <Link 
-                  to="/user/dashboard" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    location.pathname.startsWith('/user') 
-                      ? 'bg-accent text-white' 
+                  }`}
+              >
+                Estadísticas
+              </Link>
+              {currentUser ? (
+                <>
+                  <Link
+                    to="/user/dashboard"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname.startsWith('/user')
+                      ? 'bg-accent text-white'
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
-                >
-                  Panel de Usuario
-                </Link>
-                <button 
-                  onClick={handleLogout} 
-                  className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200 ${
-                    `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
-                >
-                  Cerrar Sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/signup" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    location.pathname === '/signup' 
-                      ? 'bg-accent text-white' 
+                      }`}
+                  >
+                    Panel de Usuario
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200 ${`${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
+                      }`}
+                  >
+                    Cerrar Sesión
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/signup"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname === '/signup'
+                      ? 'bg-accent text-white'
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
-                >
-                  Registrarse
-                </Link>
-                <Link 
-                  to="/login" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    location.pathname === '/login' 
-                      ? 'bg-accent text-white' 
+                      }`}
+                  >
+                    Registrarse
+                  </Link>
+                  <Link
+                    to="/login"
+                    className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${location.pathname === '/login'
+                      ? 'bg-accent text-white'
                       : `${theme.textSoft} hover:${theme.backgroundAlt} hover:${theme.text}`
-                  }`}
-                >
-                  Iniciar Sesión
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </header>
+                      }`}
+                  >
+                    Iniciar Sesión
+                  </Link>
+                </>
+              )}
+            </div>
+          </div >
+        )
+      }
+    </header >
   );
 };
 

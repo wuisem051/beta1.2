@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import sanitizeInput from '../../utils/sanitizeInput'; // Importar la función de sanitización
+import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
+import { useContext } from 'react'; // Importar useContext
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +13,7 @@ const AdminLogin = () => {
   const { loginAdmin } = useAuth();
   const { showError } = useError(); // Usar el contexto de errores
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext); // Usar ThemeContext
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,9 +35,9 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Iniciar Sesión como Administrador</h2>
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-main)' }}>
+      <div className={`p-8 rounded-lg shadow-md w-full max-w-md border border-white border-opacity-10`} style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
+        <h2 className={`text-2xl font-bold ${theme.text} mb-6 text-center`}>Iniciar Sesión como Administrador</h2>
         {/* El mensaje de error ahora se maneja globalmente */}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

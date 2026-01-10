@@ -29,7 +29,7 @@ const Footer = () => {
   const { theme } = useContext(ThemeContext); // Usar ThemeContext
 
   return (
-    <footer className={`${theme.backgroundAlt} border-t ${theme.borderColor}`}> {/* Aplicar clases de tema */}
+    <footer className={`border-t ${theme.borderColor}`} style={{ backgroundColor: 'var(--bg-main)' }}> {/* Aplicar clases de tema y fondo dinámico */}
       <div className={`container mx-auto py-6 px-4 text-center ${theme.textSoft}`}> {/* Aplicar clases de tema */}
         <p>{footerText} <Link to="/admin-login" className={`${theme.textSoft}`}>dev</Link></p> {/* Aplicar clases de tema */}
       </div>

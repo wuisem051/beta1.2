@@ -35,8 +35,8 @@ const Login = () => {
   }
 
   return (
-    <div className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${theme.background}`}>
-      <div className={`max-w-md w-full space-y-8 p-10 rounded-xl shadow-lg ${theme.backgroundAlt}`}>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'var(--bg-main)' }}>
+      <div className={`max-w-md w-full space-y-8 p-10 rounded-xl shadow-lg border border-white border-opacity-10`} style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
         <div>
           <h2 className={`mt-6 text-center text-3xl font-extrabold ${theme.text}`}>
             Inicia sesión en tu cuenta

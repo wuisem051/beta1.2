@@ -64,8 +64,8 @@ const Signup = () => {
   }
 
   return (
-    <div className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${theme.background}`}>
-      <div className={`max-w-md w-full space-y-8 p-10 rounded-xl shadow-lg ${theme.backgroundAlt}`}>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'var(--bg-main)' }}>
+      <div className={`max-w-md w-full space-y-8 p-10 rounded-xl shadow-lg border border-white border-opacity-10`} style={{ background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)' }}>
         <div>
           <h2 className={`mt-6 text-center text-3xl font-extrabold ${theme.text}`}>
             Crear una cuenta
@@ -75,45 +75,45 @@ const Signup = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <input 
-                ref={emailRef} 
-                id="email-address" 
-                name="email" 
-                type="email" 
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-t-md focus:outline-none focus:ring-accent focus:border-accent`} 
-                placeholder="Correo electrónico (opcional)" 
+              <input
+                ref={emailRef}
+                id="email-address"
+                name="email"
+                type="email"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-t-md focus:outline-none focus:ring-accent focus:border-accent`}
+                placeholder="Correo electrónico (opcional)"
               />
             </div>
             <div>
-              <input 
-                ref={payeerAccountRef} 
-                id="payeer-account" 
-                name="payeer-account" 
-                type="text" 
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} focus:outline-none focus:ring-accent focus:border-accent`} 
-                placeholder="Número de cuenta Payeer (ej. P12345678) (opcional)" 
+              <input
+                ref={payeerAccountRef}
+                id="payeer-account"
+                name="payeer-account"
+                type="text"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} focus:outline-none focus:ring-accent focus:border-accent`}
+                placeholder="Número de cuenta Payeer (ej. P12345678) (opcional)"
               />
             </div>
             <div>
-              <input 
-                ref={passwordRef} 
-                id="password" 
-                name="password" 
-                type="password" 
-                required 
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} focus:outline-none focus:ring-accent focus:border-accent`} 
-                placeholder="Contraseña" 
+              <input
+                ref={passwordRef}
+                id="password"
+                name="password"
+                type="password"
+                required
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} focus:outline-none focus:ring-accent focus:border-accent`}
+                placeholder="Contraseña"
               />
             </div>
             <div>
-              <input 
-                ref={passwordConfirmRef} 
-                id="password-confirm" 
-                name="password-confirm" 
-                type="password" 
-                required 
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-b-md focus:outline-none focus:ring-accent focus:border-accent`} 
-                placeholder="Confirmar contraseña" 
+              <input
+                ref={passwordConfirmRef}
+                id="password-confirm"
+                name="password-confirm"
+                type="password"
+                required
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-b-md focus:outline-none focus:ring-accent focus:border-accent`}
+                placeholder="Confirmar contraseña"
               />
             </div>
           </div>
@@ -121,9 +121,9 @@ const Signup = () => {
             O regístrate con Payeer
           </div>
           <div>
-            <button 
-              type="submit" 
-              disabled={loading} 
+            <button
+              type="submit"
+              disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-accent hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
             >
               {loading ? 'Creando cuenta...' : 'Registrarse'}
