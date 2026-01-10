@@ -1649,7 +1649,7 @@ const UserPanel = () => {
   ].some(path => location.pathname.startsWith(path));
 
   return (
-    <div className={styles.userPanelContainer}>
+    <div className={styles.userPanelContainer} style={{ backgroundColor: 'var(--bg-main)' }}>
       <Sidebar
         unreadTicketsCount={unreadTicketsCount}
         displayUser={displayUser}
