@@ -10,8 +10,8 @@ export const ThemeProvider = ({ children }) => {
   }, [darkMode]);
 
   const theme = {
-    background: darkMode ? 'bg-black' : 'bg-white', // Fondo negro puro para el modo oscuro
-    backgroundAlt: darkMode ? 'bg-zinc-900' : 'bg-gray-100', // Un tono ligeramente diferente para elementos alternativos
+    background: 'var(--bg-main)', // Usar variable de la paleta dinámica
+    backgroundAlt: 'var(--bg-sidebar)', // Usar variable para elementos secundarios o sidebar
     text: darkMode ? 'text-white' : 'text-gray-900',
     textSoft: darkMode ? 'text-gray-300' : 'text-gray-600',
     inputBackground: darkMode ? 'bg-gray-700' : 'bg-gray-50',

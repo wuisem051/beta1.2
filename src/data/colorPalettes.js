@@ -24,6 +24,10 @@ export const colorPalettes = {
         green: '#10b981',
         purple: '#8b5cf6',
         red: '#ef4444',
+
+        // Fondos
+        bgMain: '#020617',
+        bgSidebar: 'rgba(15, 23, 42, 0.95)',
     },
 
     ocean: {
@@ -47,6 +51,10 @@ export const colorPalettes = {
         green: '#14b8a6',
         purple: '#6366f1',
         red: '#f43f5e',
+
+        // Fondos (Tonos Azulados)
+        bgMain: '#040d1a',
+        bgSidebar: 'rgba(7, 20, 38, 0.95)',
     },
 
     forest: {
@@ -70,6 +78,10 @@ export const colorPalettes = {
         green: '#22c55e',
         purple: '#84cc16',
         red: '#f59e0b',
+
+        // Fondos (Tonos Verdosos)
+        bgMain: '#02120b',
+        bgSidebar: 'rgba(4, 25, 16, 0.95)',
     },
 
     purple: {
@@ -93,6 +105,10 @@ export const colorPalettes = {
         green: '#10b981',
         purple: '#d946ef',
         red: '#ec4899',
+
+        // Fondos (Tonos Púrpuras)
+        bgMain: '#0b0214',
+        bgSidebar: 'rgba(20, 4, 38, 0.95)',
     },
 
     gold: {
@@ -116,6 +132,10 @@ export const colorPalettes = {
         green: '#84cc16',
         purple: '#f97316',
         red: '#ef4444',
+
+        // Fondos (Elegante Oscuro)
+        bgMain: '#09090b',
+        bgSidebar: 'rgba(18, 18, 22, 0.95)',
     },
 
     ruby: {
@@ -139,6 +159,10 @@ export const colorPalettes = {
         green: '#f59e0b',
         purple: '#a855f7',
         red: '#f43f5e',
+
+        // Fondos (Tonos Rojizos)
+        bgMain: '#0c0101',
+        bgSidebar: 'rgba(25, 4, 4, 0.95)',
     },
 };
 

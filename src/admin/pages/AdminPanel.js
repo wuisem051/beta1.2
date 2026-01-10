@@ -44,9 +44,9 @@ const AdminPanel = () => {
   console.log("AdminPanel: Renderizando. unreadMinersCount:", unreadMinersCount);
 
   return (
-    <div className={`flex h-screen ${darkMode ? 'bg-dark_bg text-light_text' : 'bg-gray-900 text-white'}`}>
+    <div className={`flex h-screen ${darkMode ? 'text-light_text' : 'text-white'}`} style={{ backgroundColor: 'var(--bg-main)' }}>
       {/* Sidebar de Navegación */}
-      <aside className={`w-64 p-2 shadow-lg ${darkMode ? 'bg-dark_card' : 'bg-gray-800'}`}>
+      <aside className={`w-64 p-2 shadow-lg`} style={{ backgroundColor: 'var(--bg-sidebar)' }}>
         <div className={`text-xl font-bold text-yellow-500 mb-6 ${darkMode ? 'text-accent' : 'text-yellow-500'}`}>Admin Dashboard (Actualizado)</div> {/* Título actualizado */}
         <nav>
           <ul>
@@ -217,7 +217,7 @@ const AdminPanel = () => {
           <Route path="color-palettes" element={<ColorPaletteSettings />} /> {/* Nueva ruta para Paletas de Colores */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
-            <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-gray-300'}`}>
+            <div className={`p-6 rounded-2xl shadow-xl`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <h2 className="text-2xl font-semibold mb-4">Bienvenido al Panel de Administración</h2>
               <p>Selecciona una opción del menú lateral para empezar a administrar el sitio.</p>
             </div>

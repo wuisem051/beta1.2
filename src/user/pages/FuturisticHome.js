@@ -25,7 +25,14 @@ const FuturisticHome = () => {
     s3Title: 'Monitorea en Real-Time',
     s3Desc: 'Observa cada operación ganadora reflejada en tu historial instantáneamente.',
     ctaTitle: '¿Listo para Operar?',
-    ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.'
+    ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.',
+    ctaBtnText: 'Crear Cuenta Gratis',
+    heroBtn1Text: 'Empezar Ahora',
+    heroBtn2Text: 'Explorar Panel',
+    footerLink1Text: 'Legal',
+    footerLink2Text: 'Privacidad',
+    footerLink3Text: 'Seguridad',
+    footerLink4Text: 'Twitter'
   });
 
   useEffect(() => {
@@ -45,7 +52,7 @@ const FuturisticHome = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-[#020617] text-slate-200' : 'bg-slate-50 text-slate-900'} transition-colors duration-500 font-sans`}>
+    <div className={`min-h-screen transition-colors duration-500 font-sans ${darkMode ? 'text-slate-200' : 'text-slate-900'}`} style={{ backgroundColor: 'var(--bg-main)' }}>
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden">
@@ -76,11 +83,11 @@ const FuturisticHome = () => {
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <Link to="/signup" className="group relative px-10 py-5 bg-accent text-white rounded-2xl font-black text-xl shadow-2xl shadow-orange-500/40 transition-all hover:scale-105 hover:shadow-orange-500/60">
-              Empezar Ahora
+              {siteConfig.heroBtn1Text}
               <svg xmlns="http://www.w3.org/2000/svg" className="inline-block ml-2 w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </Link>
             <Link to="/user/dashboard" className="px-10 py-5 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-2xl font-black text-xl hover:bg-opacity-10 transition-all backdrop-blur-md">
-              Explorar Panel
+              {siteConfig.heroBtn2Text}
             </Link>
           </div>
         </div>
@@ -178,13 +185,13 @@ const FuturisticHome = () => {
         <div className="container mx-auto px-6">
           <div className="relative group p-1 bg-gradient-to-r from-blue-500 via-accent to-blue-500 rounded-[3rem] overflow-hidden">
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className={`relative z-10 p-16 md:p-24 rounded-[2.9rem] text-center ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
+            <div className={`relative z-10 p-16 md:p-24 rounded-[2.9rem] text-center`} style={{ backgroundColor: 'var(--bg-main)' }}>
               <h2 className="text-4xl md:text-7xl font-black mb-8 tracking-tighter">{siteConfig.ctaTitle}</h2>
               <p className="text-xl md:text-2xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium">
                 {siteConfig.ctaText}
               </p>
               <Link to="/signup" className="inline-block px-12 py-6 bg-accent text-white rounded-2xl font-black text-2xl shadow-2xl shadow-orange-500/30 hover:scale-105 transition-transform">
-                Crear Cuenta Gratis
+                {siteConfig.ctaBtnText}
               </Link>
             </div>
           </div>
@@ -198,10 +205,10 @@ const FuturisticHome = () => {
               <span className="text-accent">{siteConfig.siteName.charAt(0)}</span>{siteConfig.siteName.substring(1)}
             </div>
             <div className="flex gap-10 text-slate-500 font-bold text-sm">
-              <a href="#" className="hover:text-accent transition-colors">Legal</a>
-              <a href="#" className="hover:text-accent transition-colors">Privacidad</a>
-              <a href="#" className="hover:text-accent transition-colors">Seguridad</a>
-              <a href="#" className="hover:text-accent transition-colors">Twitter</a>
+              <a href="#" className="hover:text-accent transition-colors">{siteConfig.footerLink1Text}</a>
+              <a href="#" className="hover:text-accent transition-colors">{siteConfig.footerLink2Text}</a>
+              <a href="#" className="hover:text-accent transition-colors">{siteConfig.footerLink3Text}</a>
+              <a href="#" className="hover:text-accent transition-colors">{siteConfig.footerLink4Text}</a>
             </div>
             <div className="text-slate-600 text-xs font-medium">
               © 2026 {siteConfig.siteName}. All rights reserved.

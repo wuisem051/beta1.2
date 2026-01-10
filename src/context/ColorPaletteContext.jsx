@@ -39,6 +39,10 @@ export const ColorPaletteProvider = ({ children }) => {
         root.style.setProperty('--green-check', palette.green);
         root.style.setProperty('--purple-accent', palette.purple);
         root.style.setProperty('--red-error', palette.red);
+
+        // Fondos dinámicos
+        root.style.setProperty('--bg-main', palette.bgMain);
+        root.style.setProperty('--bg-sidebar', palette.bgSidebar);
     };
 
     // Cargar paleta desde Firebase

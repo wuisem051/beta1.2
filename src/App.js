@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'; // Importar lazy y Suspense
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import Header from './common/layout/Header';
 import Footer from './common/layout/Footer';
@@ -66,48 +66,56 @@ function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="flex flex-col min-h-screen"> {/* Eliminar clases de tema globales */}
-        <Header />
-        <main className="flex-grow">
-          <ColorPaletteProvider>
-            <AuthProvider>
-              <Suspense fallback={<div>Cargando...</div>}> {/* Mostrar un mensaje de carga mientras los componentes se cargan */}
-                <Routes>
-                  <Route path="/" element={<FuturisticHome />} /> {/* Usar el nuevo Home futurista */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  {/* Ruta temporal para acceso de prueba a la configuración del usuario */}
-                  <Route
-                    path="/test-user-settings/*"
-                    element={
-                      <ProtectedRoute>
-                        <UserPanel />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/user/*"
-                    element={
-                      <ProtectedRoute>
-                        <UserPanel />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/*"
-                    element={<AdminPanel />}
-                  />
-                  <Route path="/admin-login" element={<AdminLogin />} /> {/* Nueva ruta para el login de administrador */}
-                  <Route path="/news" element={<AllNewsPage />} /> {/* Nueva ruta para todas las noticias */}
-                  <Route path="/calculator" element={<ProfitabilityCalculatorPage />} /> {/* Ruta para la calculadora de rentabilidad */}
-                </Routes>
-              </Suspense>
-            </AuthProvider>
-          </ColorPaletteProvider>
-        </main>
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        <ColorPaletteProvider>
+          <AuthProvider>
+            <Suspense fallback={<div>Cargando...</div>}>
+              <Routes>
+                <Route path="/" element={<FuturisticHome />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route
+                  path="/test-user-settings/*"
+                  element={
+                    <ProtectedRoute>
+                      <UserPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/user/*"
+                  element={
+                    <ProtectedRoute>
+                      <UserPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/*"
+                  element={<AdminPanel />}
+                />
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/news" element={<AllNewsPage />} />
+                <Route path="/calculator" element={<ProfitabilityCalculatorPage />} />
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </ColorPaletteProvider>
+      </main>
+      {!isHomePage && <Footer />}
+    </div>
   );
 }
 

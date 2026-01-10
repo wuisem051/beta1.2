@@ -21,7 +21,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const isContactSupportActive = useMatch(`${basePath}/contact-support`);
 
   return (
-    <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)' }}>
+    <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--bg-sidebar)', backdropFilter: 'var(--glass-blur)' }}>
       <div className="flex flex-col items-center text-center border-b border-white border-opacity-10 pb-6 mb-6">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #1e40af 100%)' }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>

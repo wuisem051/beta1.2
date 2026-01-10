@@ -35,6 +35,18 @@ const SiteSettingsContent = () => {
   // CTA
   const [ctaTitle, setCtaTitle] = useState('');
   const [ctaText, setCtaText] = useState('');
+  const [ctaBtnText, setCtaBtnText] = useState('');
+
+  // Buttons
+  const [heroBtn1Text, setHeroBtn1Text] = useState('');
+  const [heroBtn2Text, setHeroBtn2Text] = useState('');
+
+  // Footer Links
+  const [footerLink1Text, setFooterLink1Text] = useState('');
+  const [footerLink2Text, setFooterLink2Text] = useState('');
+  const [footerLink3Text, setFooterLink3Text] = useState('');
+  const [footerLink4Text, setFooterLink4Text] = useState('');
+
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -77,6 +89,15 @@ const SiteSettingsContent = () => {
 
           setCtaTitle(data.ctaTitle || '');
           setCtaText(data.ctaText || '');
+          setCtaBtnText(data.ctaBtnText || 'Crear Cuenta Gratis');
+
+          setHeroBtn1Text(data.heroBtn1Text || 'Empezar Ahora');
+          setHeroBtn2Text(data.heroBtn2Text || 'Explorar Panel');
+
+          setFooterLink1Text(data.footerLink1Text || 'Legal');
+          setFooterLink2Text(data.footerLink2Text || 'Privacidad');
+          setFooterLink3Text(data.footerLink3Text || 'Seguridad');
+          setFooterLink4Text(data.footerLink4Text || 'Twitter');
         } else {
           // Si no existe, crear con valores por defecto
           try {
@@ -103,7 +124,14 @@ const SiteSettingsContent = () => {
               s3Title: 'Monitorea en Real-Time',
               s3Desc: 'Observa cada operación ganadora reflejada en tu historial instantáneamente.',
               ctaTitle: '¿Listo para Operar?',
-              ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.'
+              ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.',
+              ctaBtnText: 'Crear Cuenta Gratis',
+              heroBtn1Text: 'Empezar Ahora',
+              heroBtn2Text: 'Explorar Panel',
+              footerLink1Text: 'Legal',
+              footerLink2Text: 'Privacidad',
+              footerLink3Text: 'Seguridad',
+              footerLink4Text: 'Twitter'
             });
             setSiteName('MaxiOS');
             setHomeText('Maximiza tus ganancias replicando a los mejores traders en tiempo real.');
@@ -156,7 +184,9 @@ const SiteSettingsContent = () => {
         footerText: footerText,
         f1Title, f1Desc, f2Title, f2Desc, f3Title, f3Desc,
         hiwTitle, s1Title, s1Desc, s2Title, s2Desc, s3Title, s3Desc,
-        ctaTitle, ctaText
+        ctaTitle, ctaText, ctaBtnText,
+        heroBtn1Text, heroBtn2Text,
+        footerLink1Text, footerLink2Text, footerLink3Text, footerLink4Text
       };
 
       const docRef = doc(db, 'settings', 'siteConfig');
@@ -249,6 +279,16 @@ const SiteSettingsContent = () => {
               <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Hero Badge (Texto pequeño superior)</label>
               <input type="text" value={heroBadge} onChange={(e) => setHeroBadge(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} placeholder="Ej: Trading de Nueva Generación" />
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón Principal Hero</label>
+                <input type="text" value={heroBtn1Text} onChange={(e) => setHeroBtn1Text(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+              </div>
+              <div>
+                <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón Secundario Hero</label>
+                <input type="text" value={heroBtn2Text} onChange={(e) => setHeroBtn2Text(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -311,6 +351,10 @@ const SiteSettingsContent = () => {
               <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Texto Invitación</label>
               <textarea value={ctaText} onChange={(e) => setCtaText(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} rows="3"></textarea>
             </div>
+            <div>
+              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón CTA</label>
+              <input type="text" value={ctaBtnText} onChange={(e) => setCtaBtnText(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+            </div>
           </div>
         </div>
         <div>
@@ -337,14 +381,13 @@ const SiteSettingsContent = () => {
           {faviconUrl && (
             <p className={`${theme.textSoft} text-sm mt-2`}>Favicon actual: <a href={faviconUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ver Favicon</a></p>
           )}
-          <label htmlFor="faviconUpload" className={`block ${theme.textSoft} text-sm font-medium mb-2 mt-4`}>Subir Favicon (.ico, .png) - (Funcionalidad de subida directa no disponible en esta migración)</label>
+          <label htmlFor="faviconUpload" className={`block ${theme.textSoft} text-sm font-medium mb-2 mt-4`}>Subir Favicon (.ico, .png)</label>
           <input
             type="file"
             id="faviconUpload"
             accept=".ico,.png"
             onChange={handleFileChange}
             className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100`}
-            disabled // Deshabilitar la subida directa de archivos
           />
         </div>
         <div>
@@ -358,6 +401,15 @@ const SiteSettingsContent = () => {
             placeholder="Ej: © 2023 Mi Sitio. Todos los derechos reservados."
             required
           ></textarea>
+        </div>
+        <div className="pt-6 border-t border-gray-700">
+          <h3 className="text-lg font-bold mb-4 text-accent">Enlaces del Footer (Home)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" value={footerLink1Text} onChange={(e) => setFooterLink1Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 1" />
+            <input type="text" value={footerLink2Text} onChange={(e) => setFooterLink2Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 2" />
+            <input type="text" value={footerLink3Text} onChange={(e) => setFooterLink3Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 3" />
+            <input type="text" value={footerLink4Text} onChange={(e) => setFooterLink4Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 4" />
+          </div>
         </div>
         <button
           type="submit"
