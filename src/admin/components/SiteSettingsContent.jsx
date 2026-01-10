@@ -81,20 +81,36 @@ const SiteSettingsContent = () => {
           // Si no existe, crear con valores por defecto
           try {
             await setDoc(docRef, {
-              siteName: 'BitcoinPool',
-              homeText: 'Minando el futuro, un bloque a la vez.',
-              heroTitle: 'Bienvenido a nuestra Pool de Minería Bitcoin',
+              siteName: 'MaxiOS',
+              homeText: 'Maximiza tus ganancias replicando a los mejores traders en tiempo real.',
+              heroTitle: 'El Futuro del Trading está aquí',
               performanceStatsResetDate: null,
               siteDomain: '',
               faviconUrl: '',
-              footerText: `© ${new Date().getFullYear()} BitcoinPool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`,
+              footerText: `© ${new Date().getFullYear()} MaxiOS. Todos los derechos reservados. Versión del proyecto 1.0 Beta`,
+              heroBadge: 'Trading de Nueva Generación',
+              f1Title: 'Copy Trading VIP',
+              f1Desc: 'Replica las estrategias de traders expertos de Binance de forma 100% automática y transparente.',
+              f2Title: 'Ganancias Pasivas',
+              f2Desc: 'Genera rendimientos diarios sin necesidad de conocimientos técnicos. Tu capital trabaja para ti.',
+              f3Title: 'Seguridad de Elite',
+              f3Desc: 'Protección multicapa para tus fondos y datos personales con cifrado de grado institucional.',
+              hiwTitle: 'Control Total sobre tus Ganancias',
+              s1Title: 'Crea tu Perfil',
+              s1Desc: 'Regístrate en menos de un minuto y configura tu billetera segura.',
+              s2Title: 'Activa un Cupo VIP',
+              s2Desc: 'Elige entre Bronze, Gold o Diamond para empezar a recibir operaciones.',
+              s3Title: 'Monitorea en Real-Time',
+              s3Desc: 'Observa cada operación ganadora reflejada en tu historial instantáneamente.',
+              ctaTitle: '¿Listo para Operar?',
+              ctaText: 'Únete a la plataforma de Copy Trading más avanzada y transparente del mercado.'
             });
-            setSiteName('BitcoinPool');
-            setHomeText('Minando el futuro, un bloque a la vez.');
-            setHeroTitle('Bienvenido a nuestra Pool de Minería Bitcoin');
+            setSiteName('MaxiOS');
+            setHomeText('Maximiza tus ganancias replicando a los mejores traders en tiempo real.');
+            setHeroTitle('El Futuro del Trading está aquí');
             setSiteDomain('');
             setFaviconUrl('');
-            setFooterText(`© ${new Date().getFullYear()} BitcoinPool. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
+            setFooterText(`© ${new Date().getFullYear()} MaxiOS. Todos los derechos reservados. Versión del proyecto 1.0 Beta`);
           } catch (createError) {
             console.error("Error creating default site settings in Firebase:", createError);
             showError('Error al crear la configuración por defecto del sitio.');

@@ -342,3 +342,593 @@ body.dark .formSelect {
   border-radius: 1.25rem;
   border-left: 4px solid var(--accent);
 }
+
+/* ============================================ */
+/* SUPPORT SECTION - PREMIUM STYLES */
+/* ============================================ */
+
+.contactSupportContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .contactSupportContainer {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+/* Loading Overlay */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loadingText {
+  background: var(--light-card);
+  padding: 2rem 3rem;
+  border-radius: 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  box-shadow: var(--shadow-lg);
+}
+
+body.dark .loadingText {
+  background: var(--dark-card);
+  color: var(--light-text);
+}
+
+/* Ticket List Panel */
+.ticketListPanel {
+  background: var(--light-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--gray-border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  height: fit-content;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 100px;
+}
+
+body.dark .ticketListPanel {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+}
+
+.ticketListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--gray-border);
+}
+
+body.dark .ticketListHeader {
+  border-bottom-color: var(--dark-border);
+}
+
+.ticketListTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--dark-text);
+}
+
+body.dark .ticketListTitle {
+  color: var(--light-text);
+}
+
+.newTicketButton {
+  padding: 0.5rem 1rem;
+  background: var(--gradient-blue);
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.newTicketButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.newTicketButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ticket List Items */
+.ticketListItem {
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.lightListItem {
+  composes: ticketListItem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.darkListItem {
+  composes: ticketListItem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ticketListItem:hover {
+  transform: translateX(4px);
+  border-color: var(--blue-link);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.selectedTicket {
+  composes: ticketListItem;
+  background: var(--gradient-blue) !important;
+  color: white;
+  border-color: var(--blue-link);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.ticketSubject {
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticketLastMessage {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+}
+
+.ticketMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  flex-wrap: wrap;
+}
+
+.noTicketsText {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray-text);
+  font-size: 0.875rem;
+}
+
+/* Ticket Detail Panel */
+.ticketDetailPanel {
+  background: var(--light-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--gray-border);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  min-height: 600px;
+}
+
+body.dark .ticketDetailPanel {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+}
+
+.ticketDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--gray-border);
+}
+
+body.dark .ticketDetailHeader {
+  border-bottom-color: var(--dark-border);
+}
+
+.ticketDetailTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--dark-text);
+}
+
+body.dark .ticketDetailTitle {
+  color: var(--light-text);
+}
+
+.ticketDetailDate {
+  font-size: 0.875rem;
+  color: var(--gray-text);
+  margin-bottom: 1.5rem;
+}
+
+/* Conversation History */
+.conversationHistory {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark .conversationHistory {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lightInnerCard {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.darkInnerCard {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.messageContainer {
+  margin-bottom: 1.5rem;
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.userMessage {
+  composes: messageContainer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.adminMessage {
+  composes: messageContainer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.messageBubble {
+  padding: 0.875rem 1.25rem;
+  border-radius: 1rem;
+  max-width: 80%;
+  word-wrap: break-word;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.lightUserBubble {
+  composes: messageBubble;
+  background: var(--gradient-blue);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.darkUserBubble {
+  composes: messageBubble;
+  background: var(--gradient-blue);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.adminBubble {
+  composes: messageBubble;
+  background: var(--gradient-green);
+  color: white;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.messageMeta {
+  font-size: 0.7rem;
+  color: var(--gray-text);
+  margin-top: 0.25rem;
+}
+
+/* Reply Section */
+.replySection {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark .replySection {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.replyTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--dark-text);
+}
+
+body.dark .replyTitle {
+  color: var(--light-text);
+}
+
+.replyTextarea {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid var(--gray-border);
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: all 0.2s ease;
+  background: var(--light-bg);
+  color: var(--dark-text);
+}
+
+body.dark .replyTextarea {
+  background: var(--dark-bg);
+  color: var(--light-text);
+  border-color: var(--dark-border);
+}
+
+.replyTextarea:focus {
+  outline: none;
+  border-color: var(--blue-link);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.lightInput {
+  background: var(--light-bg);
+  color: var(--dark-text);
+  border-color: var(--gray-border);
+}
+
+.darkInput {
+  background: var(--dark-bg);
+  color: var(--light-text);
+  border-color: var(--dark-border);
+}
+
+/* New Ticket Form */
+.newTicketFormContainer {
+  padding: 2rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark .newTicketFormContainer {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.newTicketFormTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: var(--dark-text);
+}
+
+body.dark .newTicketFormTitle {
+  color: var(--light-text);
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--gray-text);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Status Badges */
+.statusOpen {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.statusResponded {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.statusClosed {
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: white;
+  box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+}
+
+.statusDefault {
+  background: var(--gray-border);
+  color: var(--gray-text);
+}
+
+.newBadge {
+  background: var(--gradient-accent);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Withdrawal Grid */
+.withdrawalGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .withdrawalGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  cursor: pointer;
+}
+
+body.dark .checkboxLabel {
+  color: var(--light-text);
+}
+
+.noDataText {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray-text);
+  font-size: 0.875rem;
+}
+
+/* Settings */
+.settingsContent {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .settingsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 2rem;
+  background: var(--gradient-blue);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.twoFactorAuth {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+body.dark .twoFactorAuth {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.twoFactorAuthLabel {
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+body.dark .twoFactorAuthLabel {
+  color: var(--light-text);
+}
+
+.twoFactorAuthControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.developmentTextSmall {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.disabledButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lightDisabledButton {
+  composes: disabledButton;
+  background: var(--gray-border);
+  color: var(--gray-text);
+}
+
+.darkDisabledButton {
+  composes: disabledButton;
+  background: var(--dark-border);
+  color: var(--gray-text);
+}
+
+/* Referrals */
+.referralsContent {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.developmentText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.developmentSubText {
+  font-size: 1rem;
+  color: var(--gray-text);
+}

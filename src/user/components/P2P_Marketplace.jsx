@@ -4,6 +4,7 @@ import { db } from '../../services/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import Modal from '../../common/layout/Modal'; // Asume que tienes un componente Modal básico en common/layout
+import styles from './P2PMarketplace.module.css'; // Importar estilos premium
 
 const P2P_Marketplace = ({ userBalances }) => {
   const { currentUser } = useAuth();
@@ -113,7 +114,7 @@ const P2P_Marketplace = ({ userBalances }) => {
       }
     } else if (newOffer.type === 'buy') { // Comprar cripto, el usuario necesita fiat
       const totalFiatCost = offerAmount * offerPrice;
-      
+
       if (userFiatBalance < totalFiatCost) {
         alert(`Saldo fiat insuficiente para comprar. Necesitas ${totalFiatCost.toFixed(2)} ${newOffer.fiatCurrency} y tienes ${userFiatBalance.toFixed(2)} ${newOffer.fiatCurrency}.`);
         return;
@@ -215,87 +216,87 @@ const P2P_Marketplace = ({ userBalances }) => {
   ];
 
   return (
-    <div className={`p-6 rounded-lg shadow-xl max-w-7xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-      <h2 className="text-3xl font-bold text-center mb-6">Mercado P2P</h2>
-
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      {loading && <p className="text-center text-gray-400 mb-4">Cargando ofertas...</p>}
-
-      <div className="flex justify-end mb-4">
+    <div className={styles.marketplaceContainer}>
+      <div className={styles.marketplaceHeader}>
+        <h2 className={styles.marketplaceTitle}>Mercado P2P</h2>
         <button
           onClick={() => setShowCreateOfferModal(true)}
-          className="bg-accent hover:bg-accent-dark text-white font-bold py-2 px-4 rounded-md transition duration-300"
+          className={styles.createOfferButton}
         >
-          Crear Nueva Oferta
+          + Crear Nueva Oferta
         </button>
       </div>
 
-      <h3 className="text-2xl font-semibold mb-4">Ofertas Activas</h3>
-      {offers.length === 0 && !loading && <p className="text-center text-gray-400">No hay ofertas activas en este momento.</p>}
+      {error && <p className={styles.errorText}>{error}</p>}
+      {loading && <p className={styles.loadingText}>Cargando ofertas...</p>}
 
-      {offers.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className={`min-w-full rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <thead className={`${darkMode ? 'bg-gray-600' : 'bg-gray-200'} ${theme.text}`}>
-              <tr>
-                <th className="py-3 px-4 text-left">Tipo</th>
-                <th className="py-3 px-4 text-left">Moneda Crypto</th>
-                <th className="py-3 px-4 text-left">Moneda Fiat</th>
-                <th className="py-3 px-4 text-left">Cantidad</th>
-                <th className="py-3 px-4 text-left">Precio por unidad</th>
-                <th className="py-3 px-4 text-left">Métodos de Pago</th>
-                <th className="py-3 px-4 text-left">Vendedor/Comprador</th>
-                <th className="py-3 px-4 text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody className={`${theme.text}`}>
-              {offers.map((offer) => (
-                <tr key={offer.id} className={`${darkMode ? 'border-gray-600' : 'border-gray-300'} border-t`}>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      offer.type === 'sell' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                    }`}>
-                      {offer.type === 'sell' ? 'Venta' : 'Compra'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">{offer.coin}</td>
-                  <td className="py-3 px-4">{offer.fiatCurrency}</td>
-                  <td className="py-3 px-4">{offer.amount.toFixed(2)}</td>
-                  <td className="py-3 px-4">{offer.price.toFixed(2)}</td>
-                  <td className="py-3 px-4">{offer.paymentMethods.join(', ')}</td>
-                  <td className="py-3 px-4 truncate flex items-center">
-                    {offer.ownerId.substring(0, 8)}...
-                    {userProfiles[offer.ownerId] && (
-                      <span className={`ml-2 w-3 h-3 rounded-full ${isUserOnline(offer.ownerId) ? 'bg-green-500' : 'bg-gray-500'}`} title={isUserOnline(offer.ownerId) ? 'En línea' : 'Fuera de línea'}></span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {currentUser && currentUser.uid === offer.ownerId ? (
-                      <button
-                        onClick={() => handleCancelOffer(offer.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm transition duration-300"
-                      >
-                        Cancelar Oferta
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleInitiateTrade(offer)}
-                        className={`font-bold py-1.5 px-3 rounded-md text-sm transition duration-300 ${
-                          offer.type === 'sell'
-                            ? 'bg-green-600 hover:bg-green-700 text-white' // Botón "Comprar" para ofertas de venta
-                            : 'bg-red-600 hover:bg-red-700 text-white'   // Botón "Vender" para ofertas de compra
-                        }`}
-                      >
-                        {offer.type === 'sell' ? 'Comprar' : 'Vender'}
-                      </button>
-                    )}
-                  </td>
+      <div className={styles.offersSection}>
+        <h3 className={styles.offersTitle}>Ofertas Activas</h3>
+        {offers.length === 0 && !loading && <p className={styles.noOffersText}>No hay ofertas activas en este momento.</p>}
+
+        {offers.length > 0 && (
+          <div className={styles.tableWrapper}>
+            <table className={styles.offersTable}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th className={styles.tableHeader}>Tipo</th>
+                  <th className={styles.tableHeader}>Moneda Crypto</th>
+                  <th className={styles.tableHeader}>Moneda Fiat</th>
+                  <th className={styles.tableHeader}>Cantidad</th>
+                  <th className={styles.tableHeader}>Precio por unidad</th>
+                  <th className={styles.tableHeader}>Métodos de Pago</th>
+                  <th className={styles.tableHeader}>Vendedor/Comprador</th>
+                  <th className={styles.tableHeader}>Acción</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {offers.map((offer) => (
+                  <tr key={offer.id} className={styles.tableRow}>
+                    <td className={styles.tableCell}>
+                      <span className={offer.type === 'sell' ? styles.typeBadgeSell : styles.typeBadgeBuy}>
+                        {offer.type === 'sell' ? 'Venta' : 'Compra'}
+                      </span>
+                    </td>
+                    <td className={styles.tableCell}>{offer.coin}</td>
+                    <td className={styles.tableCell}>{offer.fiatCurrency}</td>
+                    <td className={styles.tableCell}>{offer.amount.toFixed(2)}</td>
+                    <td className={styles.tableCell}>{offer.price.toFixed(2)}</td>
+                    <td className={styles.tableCell}>{offer.paymentMethods.join(', ')}</td>
+                    <td className={styles.tableCell}>
+                      <div className={styles.userCell}>
+                        <span>{offer.ownerId.substring(0, 8)}...</span>
+                        {userProfiles[offer.ownerId] && (
+                          <span
+                            className={isUserOnline(offer.ownerId) ? styles.onlineIndicatorActive : styles.onlineIndicatorInactive}
+                            title={isUserOnline(offer.ownerId) ? 'En línea' : 'Fuera de línea'}
+                          ></span>
+                        )}
+                      </div>
+                    </td>
+                    <td className={styles.tableCell}>
+                      {currentUser && currentUser.uid === offer.ownerId ? (
+                        <button
+                          onClick={() => handleCancelOffer(offer.id)}
+                          className={styles.cancelButton}
+                        >
+                          Cancelar Oferta
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleInitiateTrade(offer)}
+                          className={offer.type === 'sell' ? styles.buyButton : styles.sellButton}
+                        >
+                          {offer.type === 'sell' ? 'Comprar' : 'Vender'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Modal para Crear Nueva Oferta */}
       <Modal show={showCreateOfferModal} onClose={() => setShowCreateOfferModal(false)} title="Crear Nueva Oferta P2P">

@@ -1,0 +1,422 @@
+/* P2P Marketplace Premium Styles */
+
+.marketplaceContainer {
+    padding: 2rem 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.marketplaceHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.marketplaceTitle {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.createOfferButton {
+    padding: 0.875rem 2rem;
+    background: var(--gradient-accent);
+    color: white;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.createOfferButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.createOfferButton:active {
+    transform: translateY(0);
+}
+
+/* Offers Section */
+.offersSection {
+    background: var(--light-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--gray-border);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+body.dark .offersSection {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+}
+
+.offersTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--dark-text);
+}
+
+body.dark .offersTitle {
+    color: var(--light-text);
+}
+
+/* Table Styles */
+.tableWrapper {
+    overflow-x: auto;
+    border-radius: 1rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.offersTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+}
+
+.tableHead {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark .tableHead {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tableHeader {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-text);
+    border-bottom: 2px solid var(--gray-border);
+    white-space: nowrap;
+}
+
+body.dark .tableHeader {
+    border-bottom-color: var(--dark-border);
+}
+
+.tableRow {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--gray-border);
+}
+
+body.dark .tableRow {
+    border-bottom-color: var(--dark-border);
+}
+
+.tableRow:hover {
+    background: rgba(245, 158, 11, 0.05);
+    transform: scale(1.005);
+}
+
+.tableCell {
+    padding: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    vertical-align: middle;
+}
+
+body.dark .tableCell {
+    color: var(--light-text);
+}
+
+/* Type Badges */
+.typeBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 8px currentColor;
+}
+
+.typeBadgeSell {
+    composes: typeBadge;
+    background: var(--gradient-green);
+    color: white;
+}
+
+.typeBadgeBuy {
+    composes: typeBadge;
+    background: var(--gradient-red);
+    color: white;
+}
+
+/* Online Status */
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.onlineIndicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.onlineIndicatorActive {
+    composes: onlineIndicator;
+    background: var(--green-check);
+    animation: pulse-glow 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--green-check);
+}
+
+.onlineIndicatorInactive {
+    composes: onlineIndicator;
+    background: var(--gray-text);
+    opacity: 0.5;
+}
+
+/* Action Buttons */
+.actionButton {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.buyButton {
+    composes: actionButton;
+    background: var(--gradient-green);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.buyButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.sellButton {
+    composes: actionButton;
+    background: var(--gradient-red);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.sellButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.cancelButton {
+    composes: actionButton;
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: white;
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+}
+
+.cancelButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modalContent {
+    background: var(--light-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--gray-border);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    animation: fade-in-scale 0.3s ease-out forwards;
+}
+
+body.dark .modalContent {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--dark-text);
+}
+
+body.dark .modalTitle {
+    color: var(--light-text);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gray-text);
+    transition: color 0.2s ease;
+    padding: 0.25rem;
+}
+
+.closeButton:hover {
+    color: var(--red-error);
+}
+
+/* Form Styles */
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.formLabel {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--gray-text);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.formInput,
+.formSelect {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--gray-border);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--light-bg);
+    color: var(--dark-text);
+    transition: all 0.2s ease;
+}
+
+body.dark .formInput,
+body.dark .formSelect {
+    background: var(--dark-bg);
+    color: var(--light-text);
+    border-color: var(--dark-border);
+}
+
+.formInput:focus,
+.formSelect:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+}
+
+.submitButton {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: var(--gradient-accent);
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    margin-top: 1rem;
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.submitButton:active {
+    transform: translateY(0);
+}
+
+/* Loading & Error States */
+.loadingText,
+.errorText {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.loadingText {
+    color: var(--gray-text);
+}
+
+.errorText {
+    color: var(--red-error);
+}
+
+.noOffersText {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray-text);
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .marketplaceHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .marketplaceTitle {
+        font-size: 2rem;
+    }
+
+    .createOfferButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tableWrapper {
+        margin: 0 -2rem;
+        padding: 0 2rem;
+    }
+}
