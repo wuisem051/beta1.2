@@ -167,7 +167,8 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                     </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)' }}>
                       <p className={styles.statTitle} style={{ fontSize: '10px' }}>T. Profit</p>
-                      <p className={styles.statsValueGreen} style={{ marginBottom: 0 }}>{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}</p>
+                      <p className={styles.statsValueGreen} style={{ marginBottom: 0, fontSize: '13px' }}>{signal.takeProfit}</p>
+                      <p className={styles.statsValueGreen} style={{ marginBottom: 0, fontSize: '11px', marginTop: '2px' }}>({calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)})</p>
                     </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.05)' }}>
                       <p className={styles.statTitle} style={{ fontSize: '10px' }}>S. Loss ({signal.stopLossPercentage || 0}%)</p>
