@@ -125,9 +125,14 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className={styles.statsTitle}>{signal.asset}</h3>
-                      <span className={styles.statusBadge} style={{ background: signal.type === 'Compra' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
-                        {signal.type}
-                      </span>
+                      <div className="flex gap-2 items-center">
+                        <span className={styles.statusBadge} style={{ background: signal.type === 'Compra' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
+                          {signal.type}
+                        </span>
+                        <span className={styles.statusBadge} style={{ background: 'rgba(255, 191, 0, 0.1)', color: 'var(--accent)', border: '1px solid rgba(255, 191, 0, 0.2)', fontSize: '10px', fontWeight: 'bold' }}>
+                          VIP EXCLUSIVO
+                        </span>
+                      </div>
                     </div>
                     <span className={styles.statTitle}>{signal.createdAt.toLocaleDateString()}</span>
                   </div>
@@ -266,8 +271,17 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
             </div>
             <div className={styles.statsItem} style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--dark-border)' }}>
               <span>Cuenta Verificada</span>
-              <span style={{ color: 'var(--green-check)' }}>Similare</span>
+              <span style={{ color: 'var(--green-check)' }}>Sí</span>
             </div>
+            {userBalances.vipStatus !== 'none' && (
+              <div className={styles.statsItem} style={{ borderTop: '1px solid var(--dark-border)', paddingTop: '1rem', marginTop: '1rem' }}>
+                <span className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="var(--accent)" strokeWidth="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                  Beneficios VIP:
+                </span>
+                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>Activos</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1394,7 +1408,9 @@ const UserPanel = () => {
     balanceBTC: 0,
     balanceLTC: 0,
     balanceDOGE: 0,
-    balanceVES: 0, // Añadir balanceVES
+    balanceVES: 0,
+    vipStatus: 'none',
+    vipExpiry: null,
   });
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
@@ -1516,7 +1532,9 @@ const UserPanel = () => {
           balanceBTC: userData.balanceBTC || 0,
           balanceLTC: userData.balanceLTC || 0,
           balanceDOGE: userData.balanceDOGE || 0,
-          balanceVES: userData.balanceVES || 0, // Añadir balanceVES
+          balanceVES: userData.balanceVES || 0,
+          vipStatus: userData.vipStatus || 'none',
+          vipExpiry: userData.vipExpiry || null,
         });
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario y direcciones de pago cargados para ${currentUser.uid}.`);
