@@ -35,6 +35,8 @@ const TradingSignalManagement = () => {
   const [editTakeProfit, setEditTakeProfit] = useState('');
   const [editStopLoss, setEditStopLoss] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [editMaxInvestment, setEditMaxInvestment] = useState('');
+  const [editStopLossPercentage, setEditStopLossPercentage] = useState('');
 
   // Función para calcular el porcentaje de ganancia/pérdida
   const calculatePercentage = (type, entry, takeProfit) => {
@@ -166,6 +168,8 @@ const TradingSignalManagement = () => {
     setEditTakeProfit(signal.takeProfit);
     setEditStopLoss(signal.stopLoss);
     setEditNotes(signal.notes);
+    setEditMaxInvestment(signal.maxInvestment || '');
+    setEditStopLossPercentage(signal.stopLossPercentage || '');
   };
 
   const handleUpdateSignal = async (e) => {
@@ -192,6 +196,8 @@ const TradingSignalManagement = () => {
         entryPrice: parseFloat(editEntryPrice),
         takeProfit: parseFloat(editTakeProfit),
         stopLoss: parseFloat(editStopLoss),
+        stopLossPercentage: parseFloat(editStopLossPercentage) || 0,
+        maxInvestment: parseFloat(editMaxInvestment) || 0,
         notes: editNotes,
       });
       showSuccess('Señal de trading actualizada exitosamente.');
@@ -463,13 +469,31 @@ const TradingSignalManagement = () => {
                           </SelectStyled>
                         </td>
                         <td className={styles.tableCell}>
-                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editEntryPrice} onChange={(e) => setEditEntryPrice(e.target.value)} disabled={isSubmitting} />
+                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editEntryPrice} onChange={(e) => {
+                            setEditEntryPrice(e.target.value);
+                            const slPrice = calculateSLPrice(editType, e.target.value, editStopLossPercentage);
+                            setEditStopLoss(slPrice);
+                          }} disabled={isSubmitting} />
+                        </td>
+                        <td className={styles.tableCell}>
+                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" value={editMaxInvestment} onChange={(e) => setEditMaxInvestment(e.target.value)} disabled={isSubmitting} />
+                        </td>
+                        <td className={styles.tableCell}>
+                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" value={editStopLossPercentage} onChange={(e) => {
+                            setEditStopLossPercentage(e.target.value);
+                            const slPrice = calculateSLPrice(editType, editEntryPrice, e.target.value);
+                            setEditStopLoss(slPrice);
+                          }} disabled={isSubmitting} />
                         </td>
                         <td className={styles.tableCell}>
                           <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editTakeProfit} onChange={(e) => setEditTakeProfit(e.target.value)} disabled={isSubmitting} />
                         </td>
                         <td className={styles.tableCell}>
-                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editStopLoss} onChange={(e) => setEditStopLoss(e.target.value)} disabled={isSubmitting} />
+                          <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editStopLoss} onChange={(e) => {
+                            setEditStopLoss(e.target.value);
+                            const slPerc = calculateSLPercentage(editType, editEntryPrice, e.target.value);
+                            setEditStopLossPercentage(slPerc);
+                          }} disabled={isSubmitting} />
                         </td>
                         <td className={styles.tableCell}>
                           <TextareaStyled theme={darkMode ? 'dark' : 'light'} rows="1" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} disabled={isSubmitting} />
