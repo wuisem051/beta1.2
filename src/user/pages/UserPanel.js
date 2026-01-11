@@ -84,6 +84,25 @@ const CopyTraderContent = ({ styles, userBalances }) => {
     console.log("Plan VIP adquirido. Las suscripciones de Firestore se encargarán de las actualizaciones.");
   };
 
+  // Función para calcular el porcentaje de ganancia potencial
+  const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
+    const entry = parseFloat(entryPrice);
+    const tp = parseFloat(takeProfit);
+
+    if (isNaN(entry) || isNaN(tp) || entry === 0) {
+      return 'N/A';
+    }
+
+    let percentage;
+    if (type === 'Compra') {
+      percentage = ((tp - entry) / entry) * 100;
+    } else { // Venta
+      percentage = ((entry - tp) / entry) * 100;
+    }
+
+    return percentage.toFixed(2) + '%';
+  };
+
   return (
     <div className={styles.dashboardContent}>
       <h1 className={styles.mainContentTitle}>Copy Trader</h1>
@@ -148,7 +167,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                     </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)' }}>
                       <p className={styles.statTitle} style={{ fontSize: '10px' }}>T. Profit</p>
-                      <p className={styles.statsValueGreen} style={{ marginBottom: 0 }}>{signal.takeProfit}</p>
+                      <p className={styles.statsValueGreen} style={{ marginBottom: 0 }}>{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}</p>
                     </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.05)' }}>
                       <p className={styles.statTitle} style={{ fontSize: '10px' }}>S. Loss ({signal.stopLossPercentage || 0}%)</p>
