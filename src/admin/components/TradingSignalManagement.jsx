@@ -431,28 +431,28 @@ const TradingSignalManagement = () => {
       </div>
 
       {/* Lista de Señales Existentes */}
-      <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
-        <h2 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
-          <span className="bg-blue-500/10 p-2 rounded-lg">📊</span> Señales de Trading Existentes
+      <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 shadow-lg">
+        <h2 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
+          <span className="bg-blue-500/10 p-1.5 rounded-lg text-sm">📊</span> Señales de Trading Existentes
         </h2>
         {signals.length === 0 && !isLoading ? (
-          <p className="text-center text-slate-500 py-8">No hay señales de trading registradas.</p>
+          <p className="text-center text-slate-500 py-6 text-sm">No hay señales de trading registradas.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-slate-700">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-slate-900/50">
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Activo</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Tipo</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Entrada</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Max Inv</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">SL %</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Take Profit</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Stop Loss</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Imagen</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">% Potencial</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Acciones</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Activo</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Tipo</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Entrada</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Max Inv</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">SL %</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Take Profit</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Stop Loss</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Imagen</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">% Potencial</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -460,62 +460,62 @@ const TradingSignalManagement = () => {
                   <tr key={signal.id} className="hover:bg-slate-700/30 transition-colors">
                     {editingSignalId === signal.id ? (
                       <>
-                        <td className="px-4 py-4">
-                          <input type="text" value={editAsset} onChange={(e) => setEditAsset(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                        <td className="px-2 py-2">
+                          <input type="text" value={editAsset} onChange={(e) => setEditAsset(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4">
-                          <select value={editType} onChange={(e) => setEditType(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting}>
+                        <td className="px-2 py-2">
+                          <select value={editType} onChange={(e) => setEditType(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting}>
                             <option value="Compra">Compra</option>
                             <option value="Venta">Venta</option>
                           </select>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-2 py-2">
                           <input type="number" step="any" value={editEntryPrice} onChange={(e) => {
                             setEditEntryPrice(e.target.value);
                             const slPrice = calculateSLPrice(editType, e.target.value, editStopLossPercentage);
                             setEditStopLoss(slPrice);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4">
-                          <input type="number" value={editMaxInvestment} onChange={(e) => setEditMaxInvestment(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                        <td className="px-2 py-2">
+                          <input type="number" value={editMaxInvestment} onChange={(e) => setEditMaxInvestment(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-2 py-2">
                           <input type="number" value={editStopLossPercentage} onChange={(e) => {
                             setEditStopLossPercentage(e.target.value);
                             const slPrice = calculateSLPrice(editType, editEntryPrice, e.target.value);
                             setEditStopLoss(slPrice);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4">
-                          <input type="number" step="any" value={editTakeProfit} onChange={(e) => setEditTakeProfit(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                        <td className="px-2 py-2">
+                          <input type="number" step="any" value={editTakeProfit} onChange={(e) => setEditTakeProfit(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-2 py-2">
                           <input type="number" step="any" value={editStopLoss} onChange={(e) => {
                             setEditStopLoss(e.target.value);
                             const slPerc = calculateSLPercentage(editType, editEntryPrice, e.target.value);
                             setEditStopLossPercentage(slPerc);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" disabled={isSubmitting} />
+                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-4 py-4" colSpan="3"></td>
-                        <td className="px-4 py-4 space-x-2">
-                          <button onClick={handleUpdateSignal} className="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-sm transition-colors" disabled={isSubmitting}>Sincronizar</button>
-                          <button onClick={() => setEditingSignalId(null)} className="bg-slate-600 hover:bg-slate-500 text-white px-3 py-1 rounded text-sm transition-colors" disabled={isSubmitting}>Anular</button>
+                        <td className="px-2 py-2" colSpan="3"></td>
+                        <td className="px-2 py-2 space-x-1">
+                          <button onClick={handleUpdateSignal} className="bg-green-600 hover:bg-green-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✓</button>
+                          <button onClick={() => setEditingSignalId(null)} className="bg-slate-600 hover:bg-slate-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✕</button>
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="px-4 py-4 font-medium text-white">{signal.asset}</td>
-                        <td className="px-4 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${signal.type === 'Compra' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                        <td className="px-2 py-2 font-medium text-white text-xs">{signal.asset}</td>
+                        <td className="px-2 py-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${signal.type === 'Compra' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                             {signal.type}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-slate-300 font-mono">{signal.entryPrice}</td>
-                        <td className="px-4 py-4 text-white font-semibold">${signal.maxInvestment || 0}</td>
-                        <td className="px-4 py-4 text-red-500 font-bold">{signal.stopLossPercentage || 0}%</td>
-                        <td className="px-4 py-4 text-green-500 font-mono font-bold">{signal.takeProfit}</td>
-                        <td className="px-4 py-4 text-red-500 font-mono">{signal.stopLoss}</td>
-                        <td className="px-4 py-4 text-slate-400 max-w-xs">{signal.notes}</td>
+                        <td className="px-2 py-2 text-slate-300 font-mono text-xs">{signal.entryPrice}</td>
+                        <td className="px-2 py-2 text-white font-semibold text-xs">${signal.maxInvestment || 0}</td>
+                        <td className="px-2 py-2 text-red-500 font-bold text-xs">{signal.stopLossPercentage || 0}%</td>
+                        <td className="px-2 py-2 text-green-500 font-mono font-bold text-xs">{signal.takeProfit}</td>
+                        <td className="px-2 py-2 text-red-500 font-mono text-xs">{signal.stopLoss}</td>
+                        <td className="px-2 py-2 text-slate-400 max-w-xs text-xs truncate">{signal.notes}</td>
                         <td className="px-4 py-4">
                           {signal.imageUrl ? (
                             <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
