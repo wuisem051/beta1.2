@@ -28,6 +28,7 @@ export const colorPalettes = {
         // Fondos
         bgMain: '#020617',
         bgSidebar: 'rgba(15, 23, 42, 0.95)',
+        bgCard: 'rgba(30, 41, 59, 0.4)',
     },
 
     ocean: {
@@ -55,6 +56,7 @@ export const colorPalettes = {
         // Fondos (Tonos Azulados)
         bgMain: '#040d1a',
         bgSidebar: 'rgba(7, 20, 38, 0.95)',
+        bgCard: 'rgba(15, 35, 60, 0.4)',
     },
 
     forest: {
@@ -82,6 +84,7 @@ export const colorPalettes = {
         // Fondos (Tonos Verdosos)
         bgMain: '#02120b',
         bgSidebar: 'rgba(4, 25, 16, 0.95)',
+        bgCard: 'rgba(10, 40, 25, 0.4)',
     },
 
     purple: {
@@ -109,6 +112,7 @@ export const colorPalettes = {
         // Fondos (Tonos Púrpuras)
         bgMain: '#0b0214',
         bgSidebar: 'rgba(20, 4, 38, 0.95)',
+        bgCard: 'rgba(35, 15, 60, 0.4)',
     },
 
     gold: {
@@ -136,6 +140,7 @@ export const colorPalettes = {
         // Fondos (Elegante Oscuro)
         bgMain: '#09090b',
         bgSidebar: 'rgba(18, 18, 22, 0.95)',
+        bgCard: 'rgba(35, 35, 40, 0.4)',
     },
 
     ruby: {
@@ -163,6 +168,7 @@ export const colorPalettes = {
         // Fondos (Tonos Rojizos)
         bgMain: '#0c0101',
         bgSidebar: 'rgba(25, 4, 4, 0.95)',
+        bgCard: 'rgba(50, 10, 10, 0.4)',
     },
 
     midnight: {
@@ -189,6 +195,7 @@ export const colorPalettes = {
 
         bgMain: '#0f0716',
         bgSidebar: 'rgba(24, 12, 35, 0.95)',
+        bgCard: 'rgba(40, 20, 60, 0.4)',
     },
 
     matrix: {
@@ -215,6 +222,7 @@ export const colorPalettes = {
 
         bgMain: '#000000',
         bgSidebar: 'rgba(0, 0, 0, 0.98)',
+        bgCard: 'rgba(5, 40, 5, 0.6)',
     },
 
     steel: {
@@ -241,6 +249,7 @@ export const colorPalettes = {
 
         bgMain: '#1e293b',
         bgSidebar: 'rgba(30, 41, 59, 0.98)',
+        bgCard: 'rgba(50, 70, 90, 0.4)',
     },
 
     arctic: {
@@ -267,6 +276,7 @@ export const colorPalettes = {
 
         bgMain: '#f8fafc',
         bgSidebar: 'rgba(255, 255, 255, 0.98)',
+        bgCard: 'rgba(255, 255, 255, 0.7)',
     },
 
     emerald_night: {
@@ -293,6 +303,7 @@ export const colorPalettes = {
 
         bgMain: '#022c22',
         bgSidebar: 'rgba(6, 78, 59, 0.98)',
+        bgCard: 'rgba(10, 80, 60, 0.4)',
     },
 
     carbon: {
@@ -319,6 +330,7 @@ export const colorPalettes = {
 
         bgMain: '#0a0a0a',
         bgSidebar: 'rgba(18, 18, 18, 0.98)',
+        bgCard: 'rgba(40, 40, 40, 0.4)',
     },
 };
 

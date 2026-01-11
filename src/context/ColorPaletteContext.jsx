@@ -43,6 +43,7 @@ export const ColorPaletteProvider = ({ children }) => {
         // Fondos dinámicos
         root.style.setProperty('--bg-main', palette.bgMain);
         root.style.setProperty('--bg-sidebar', palette.bgSidebar);
+        root.style.setProperty('--bg-card', palette.bgCard || 'rgba(30, 41, 59, 0.7)');
     };
 
     // Cargar paleta desde Firebase

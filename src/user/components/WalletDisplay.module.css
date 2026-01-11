@@ -32,17 +32,17 @@
 .fiatSection {
     margin-bottom: 3rem;
     padding: 2rem;
-    background: var(--light-card);
+    background: var(--bg-card);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--gray-border);
+    border: 1px solid var(--dark-border);
     border-radius: 1.5rem;
     box-shadow: var(--shadow-lg);
     transition: all 0.3s ease;
 }
 
 body.dark .fiatSection {
-    background: var(--dark-card);
+    background: var(--bg-card);
     border: 1px solid var(--dark-border);
 }
 
@@ -116,17 +116,17 @@ body.dark .balanceCard {
 
 .balanceCardUSD {
     composes: balanceCard;
-    color: #10b981;
+    color: var(--green-check);
 }
 
 .balanceCardVES {
     composes: balanceCard;
-    color: #8b5cf6;
+    color: var(--purple-accent);
 }
 
 .balanceCardVirtual {
     composes: balanceCard;
-    color: #3b82f6;
+    color: var(--blue-link);
 }
 
 .balanceLabel {
@@ -248,16 +248,16 @@ body.dark .exchangeInput {
 /* Crypto Section */
 .cryptoSection {
     padding: 2rem;
-    background: var(--light-card);
+    background: var(--bg-card);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--gray-border);
+    border: 1px solid var(--dark-border);
     border-radius: 1.5rem;
     box-shadow: var(--shadow-lg);
 }
 
 body.dark .cryptoSection {
-    background: var(--dark-card);
+    background: var(--bg-card);
     border: 1px solid var(--dark-border);
 }
 
