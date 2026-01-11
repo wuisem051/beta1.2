@@ -1,7 +1,7 @@
 /* WalletDisplay Premium Styles */
 
 .walletContainer {
-    composes: glassBase;
+    composes: glassBase from '../pages/UserPanel.module.css';
     background-color: var(--bg-main);
     padding: 2rem 1.5rem;
     max-width: 1400px;
@@ -9,7 +9,7 @@
 }
 
 .walletHeader {
-    composes: glassBase;
+    composes: glassBase from '../pages/UserPanel.module.css';
     text-align: center;
     margin-bottom: 3rem;
 }
