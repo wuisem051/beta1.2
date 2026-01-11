@@ -10,29 +10,32 @@ const TradingPortfolioContent = () => {
     const { currentUser } = useAuth();
     const [loading, setLoading] = useState(true);
 
-    // Mock data for trading operations (In a real app, this would come from Firestore)
-    const mockOperations = [
-        { id: '1', date: '2023-11-20', pair: 'BTC/USDT', type: 'Long', result: 'Exitosa', profit: '+150.50', status: 'completed' },
-        { id: '2', date: '2023-11-21', pair: 'ETH/USDT', type: 'Short', result: 'Fallida', profit: '-45.20', status: 'failed' },
-        { id: '3', date: '2023-11-22', pair: 'SOL/USDT', type: 'Long', result: 'Exitosa', profit: '+89.00', status: 'completed' },
-        { id: '4', date: '2023-11-23', pair: 'BNB/USDT', type: 'Long', result: 'Exitosa', profit: '+210.15', status: 'completed' },
-        { id: '5', date: '2023-11-24', pair: 'ADA/USDT', type: 'Short', result: 'Fallida', profit: '-30.00', status: 'failed' },
-    ];
+    const [operations, setOperations] = useState([]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const q = query(collection(db, 'tradingHistory'), orderBy('date', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setOperations(data);
             setLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
+        }, (err) => {
+            console.error("Error fetching trading history:", err);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const stats = useMemo(() => {
-        const total = mockOperations.length;
-        const successful = mockOperations.filter(op => op.result === 'Exitosa').length;
-        const profit = mockOperations.reduce((sum, op) => sum + parseFloat(op.profit), 0);
+        const total = operations.length;
+        const successful = operations.filter(op => op.result === 'Exitosa').length;
+        const profit = operations.reduce((sum, op) => sum + (parseFloat(op.profit) || 0), 0);
         const successRate = total > 0 ? (successful / total) * 100 : 0;
         return { total, profit, successRate };
-    }, [mockOperations]);
+    }, [operations]);
 
     if (loading) {
         return (
@@ -97,7 +100,7 @@ const TradingPortfolioContent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {mockOperations.map((op) => (
+                            {operations.map((op) => (
                                 <tr key={op.id}>
                                     <td className={styles.tableCell}>{op.date}</td>
                                     <td className={styles.tableCell} style={{ fontWeight: 'bold' }}>{op.pair}</td>

@@ -13,6 +13,7 @@ import TradingSignalManagement from '../components/TradingSignalManagement';
 import WithdrawalRequestsManagement from '../components/WithdrawalRequestsManagement';
 import BalanceManagement from '../../user/components/BalanceManagement';
 import VIPPlansManagement from '../components/VIPPlansManagement';
+import TradingHistoryManagement from '../components/TradingHistoryManagement';
 
 const AdminPanel = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -168,6 +169,28 @@ const AdminPanel = () => {
             </li>
             <li className="mb-0.5">
               <Link
+                to="/admin/trading-history"
+                className={`flex items-center py-1.5 rounded-lg text-sm font-medium ${location.pathname === '/admin/trading-history'
+                  ? 'bg-accent text-white'
+                  : (darkMode ? 'text-light_text hover:bg-dark_border' : 'text-gray-300 hover:bg-gray-700')
+                  }`}
+              >
+                Historial de Operaciones
+              </Link>
+            </li>
+            <li className="mb-0.5">
+              <Link
+                to="/admin/trading-signal-management"
+                className={`flex items-center py-1.5 rounded-lg text-sm font-medium ${location.pathname === '/admin/trading-signal-management'
+                  ? 'bg-accent text-white'
+                  : (darkMode ? 'text-light_text hover:bg-dark_border' : 'text-gray-300 hover:bg-gray-700')
+                  }`}
+              >
+                Enviar Señales VIP
+              </Link>
+            </li>
+            <li className="mb-0.5">
+              <Link
                 to="/admin/vip-plans"
                 className={`flex items-center py-1.5 rounded-lg text-sm font-medium ${location.pathname === '/admin/vip-plans'
                   ? 'bg-accent text-white'
@@ -216,6 +239,7 @@ const AdminPanel = () => {
           <Route path="trading-signal-management" element={<TradingSignalManagement />} /> {/* Nueva ruta para Gestión de Señales de Trading */}
           <Route path="site-settings" element={<SiteSettingsContent />} /> {/* Nueva ruta para Configuración del Sitio */}
           <Route path="vip-plans" element={<VIPPlansManagement />} />
+          <Route path="trading-history" element={<TradingHistoryManagement />} />
           <Route path="color-palettes" element={<ColorPaletteSettings />} /> {/* Nueva ruta para Paletas de Colores */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
