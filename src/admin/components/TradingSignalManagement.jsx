@@ -36,6 +36,8 @@ const TradingSignalManagement = () => {
   const [editNotes, setEditNotes] = useState('');
   const [editMaxInvestment, setEditMaxInvestment] = useState('');
   const [editStopLossPercentage, setEditStopLossPercentage] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
+  const [editCreatedAt, setEditCreatedAt] = useState('');
 
   // Función para calcular el porcentaje de ganancia/pérdida
   const calculatePercentage = (type, entry, takeProfit) => {
@@ -169,6 +171,8 @@ const TradingSignalManagement = () => {
     setEditNotes(signal.notes);
     setEditMaxInvestment(signal.maxInvestment || '');
     setEditStopLossPercentage(signal.stopLossPercentage || '');
+    setEditImageUrl(signal.imageUrl || '');
+    setEditCreatedAt(signal.createdAt.toISOString().split('T')[0]);
   };
 
   const handleUpdateSignal = async (e) => {
@@ -198,6 +202,8 @@ const TradingSignalManagement = () => {
         stopLossPercentage: parseFloat(editStopLossPercentage) || 0,
         maxInvestment: parseFloat(editMaxInvestment) || 0,
         notes: editNotes,
+        imageUrl: editImageUrl,
+        createdAt: new Date(editCreatedAt),
       });
       showSuccess('Señal de trading actualizada exitosamente.');
       setEditingSignalId(null); // Salir del modo edición
@@ -496,7 +502,15 @@ const TradingSignalManagement = () => {
                             setEditStopLossPercentage(slPerc);
                           }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
-                        <td className="px-2 py-2" colSpan="3"></td>
+                        <td className="px-2 py-2">
+                          <input type="text" value={editImageUrl} onChange={(e) => setEditImageUrl(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" placeholder="URL de imagen" disabled={isSubmitting} />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input type="date" value={editCreatedAt} onChange={(e) => setEditCreatedAt(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
+                        </td>
+                        <td className="px-2 py-2 text-blue-400 font-bold text-xs">
+                          {calculatePercentage(editType, editEntryPrice, editTakeProfit)}
+                        </td>
                         <td className="px-2 py-2 space-x-1">
                           <button onClick={handleUpdateSignal} className="bg-green-600 hover:bg-green-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✓</button>
                           <button onClick={() => setEditingSignalId(null)} className="bg-slate-600 hover:bg-slate-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✕</button>
