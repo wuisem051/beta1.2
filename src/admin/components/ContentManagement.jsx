@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import React, { useState, useEffect } from 'react'; // Importar React y hooks necesarios
 import { db } from '../../services/firebase';
 import { doc, getDocs, setDoc, query, collection, where } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const ContentManagement = () => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess, error } = useError(); // Usar el contexto de errores
   const [aboutContent, setAboutContent] = useState('');
   const [termsContent, setTermsContent] = useState('');
@@ -57,9 +56,9 @@ const ContentManagement = () => {
         // Para este caso, buscaremos el documento y si no existe, lo crearemos con un ID específico 'content_settings'
         // o simplemente lo actualizaremos si ya existe.
         // Usaremos 'content_settings' como ID fijo para el documento de configuración de contenido.
-        docId = 'content_settings'; 
+        docId = 'content_settings';
       }
-      
+
       await setDoc(doc(db, 'settings', docId), contentData, { merge: true });
       showSuccess('Contenido guardado exitosamente.');
     } catch (err) {
@@ -69,55 +68,67 @@ const ContentManagement = () => {
   };
 
   return (
-    <div className={`p-6 min-h-screen ${darkMode ? 'bg-dark_bg text-light_text' : 'bg-gray-900 text-white'}`}>
-      <h1 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-light_text' : 'text-white'}`}>Gestión de Contenido</h1>
-      {message && <div className="bg-green-500 text-white p-3 rounded mb-4">{message}</div>}
-      {error && <div className="bg-red-500 text-white p-3 rounded mb-4">{error}</div>}
+    <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+        <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg text-lg">📝</span>
+          Gestión de Contenido
+        </h2>
+      </div>
 
-      <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
-        <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Gestión de Contenido</h2>
-        
-        <div className="mb-6">
-          <label htmlFor="aboutContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Sección "Acerca de"</label>
-          <textarea
-            id="aboutContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={aboutContent}
-            onChange={(e) => setAboutContent(e.target.value)}
-            placeholder="Escribe aquí el contenido de la sección 'Acerca de'..."
-          ></textarea>
-        </div>
+      <div className="bg-slate-800/50 rounded-2xl p-8 border border-slate-700 shadow-lg space-y-8">
+        <div className="grid grid-cols-1 gap-8">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="bg-blue-500/10 p-2 rounded-lg text-sm">ℹ️</span>
+              <label htmlFor="aboutContent" className="text-sm font-bold text-slate-300 uppercase tracking-wider">Sección "Acerca de"</label>
+            </div>
+            <textarea
+              id="aboutContent"
+              rows="6"
+              className="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed"
+              value={aboutContent}
+              onChange={(e) => setAboutContent(e.target.value)}
+              placeholder="Escribe la historia o información general de la plataforma..."
+            ></textarea>
+          </div>
 
-        <div className="mb-6">
-          <label htmlFor="termsContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Términos y Condiciones</label>
-          <textarea
-            id="termsContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={termsContent}
-            onChange={(e) => setTermsContent(e.target.value)}
-            placeholder="Términos y condiciones del servicio..."
-          ></textarea>
-        </div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="bg-blue-500/10 p-2 rounded-lg text-sm">⚖️</span>
+              <label htmlFor="termsContent" className="text-sm font-bold text-slate-300 uppercase tracking-wider">Términos y Condiciones</label>
+            </div>
+            <textarea
+              id="termsContent"
+              rows="6"
+              className="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed"
+              value={termsContent}
+              onChange={(e) => setTermsContent(e.target.value)}
+              placeholder="Define los términos legales del servicio..."
+            ></textarea>
+          </div>
 
-        <div className="mb-6">
-          <label htmlFor="privacyContent" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Política de Privacidad</label>
-          <textarea
-            id="privacyContent"
-            rows="6"
-            className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
-            value={privacyContent}
-            onChange={(e) => setPrivacyContent(e.target.value)}
-            placeholder="Política de privacidad..."
-          ></textarea>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🛡️</span>
+              <label htmlFor="privacyContent" className="text-sm font-bold text-slate-300 uppercase tracking-wider">Política de Privacidad</label>
+            </div>
+            <textarea
+              id="privacyContent"
+              rows="6"
+              className="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed"
+              value={privacyContent}
+              onChange={(e) => setPrivacyContent(e.target.value)}
+              placeholder="Detalla cómo manejas los datos de los usuarios..."
+            ></textarea>
+          </div>
         </div>
 
         <button
           onClick={handleSaveContent}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md w-full"
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-3 text-lg"
         >
-          Guardar Contenido
+          💾 Guardar Todo el Contenido
         </button>
       </div>
     </div>

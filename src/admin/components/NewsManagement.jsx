@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import React, { useState, useEffect } from 'react'; // Importar React y hooks necesarios
 import { db } from '../../services/firebase'; // Importar Firebase Firestore
 import { collection, getDocs, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const NewsManagement = () => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const [news, setNews] = useState([]);
   const [title, setTitle] = useState('');
@@ -102,30 +101,39 @@ const NewsManagement = () => {
   };
 
   return (
-    <div className={`p-6 min-h-screen ${darkMode ? 'bg-dark_bg text-light_text' : 'bg-gray-900 text-white'}`}>
-      <h1 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-light_text' : 'text-white'}`}>Noticias</h1>
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
+    <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+        <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg text-lg">📰</span>
+          Gestión de Noticias
+        </h2>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Añadir Nueva Noticia */}
-        <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
-          <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>{editingNews ? 'Editar Noticia' : 'Añadir Nueva Noticia'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="title" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Título</label>
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg flex flex-col h-fit">
+          <h3 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">{editingNews ? '✏️' : '➕'}</span>
+            {editingNews ? 'Editar Noticia' : 'Añadir Nueva Noticia'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="title" className="text-sm font-medium text-slate-400">Título de la Noticia</label>
               <input
                 type="text"
                 id="title"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ingrese el titular..."
+                required
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="category" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Categoría</label>
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-medium text-slate-400">Categoría</label>
               <select
                 id="category"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -135,66 +143,108 @@ const NewsManagement = () => {
                 <option value="Eventos">Eventos</option>
               </select>
             </div>
-            <div className="mb-4">
-              <label htmlFor="content" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Contenido</label>
+            <div className="space-y-2">
+              <label htmlFor="content" className="text-sm font-medium text-slate-400">Contenido del Artículo</label>
               <textarea
                 id="content"
-                rows="5"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-700 border-gray-600 text-white'}`}
+                rows="6"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600 resize-none"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                placeholder="Escriba el cuerpo de la noticia de forma clara..."
+                required
               ></textarea>
             </div>
-            <div className="mb-6">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className={`form-checkbox h-5 w-5 text-blue-600 rounded ${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-700 border-gray-600'}`}
-                  checked={isFeatured}
-                  onChange={(e) => setIsFeatured(e.target.checked)}
-                />
-                <span className={`ml-2 text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Noticia destacada</span>
+            <div className="flex items-center gap-3 p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                className="form-checkbox h-5 w-5 text-blue-500 bg-slate-900 border-slate-700 rounded transition-all cursor-pointer"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+              />
+              <label htmlFor="isFeatured" className="text-sm font-bold text-blue-400 cursor-pointer select-none">
+                🌟 Marcar como Noticia Destacada
               </label>
             </div>
-            <button
-              type="submit"
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md w-full"
-            >
-              {editingNews ? 'Guardar Cambios' : 'Publicar Noticia'}
-            </button>
+            <div className="flex gap-3 pt-2">
+              {editingNews && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingNews(null);
+                    setTitle('');
+                    setCategory('General');
+                    setContent('');
+                    setIsFeatured(false);
+                  }}
+                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                type="submit"
+                className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"
+              >
+                {editingNews ? '💾 Guardar Cambios' : '🚀 Publicar Ahora'}
+              </button>
+            </div>
           </form>
         </div>
 
         {/* Noticias Publicadas */}
-        <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-800'} p-6 rounded-lg shadow-md border`}>
-          <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Noticias Publicadas</h2>
-          {news.length > 0 ? (
-            <div className="space-y-4">
-              {news.map((item) => (
-                <div key={item.id} className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-700'} p-4 rounded-md shadow-sm`}>
-                  <h3 className={`text-lg font-semibold ${darkMode ? 'text-light_text' : 'text-white'}`}>{item.title}</h3>
-                  <p className={`text-sm mb-2 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>Categoría: {item.category} {item.isFeatured && <span className={`${darkMode ? 'text-accent' : 'text-yellow-400'}`}>(Destacada)</span>}</p>
-                  <p className={`text-sm line-clamp-3 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{item.content}</p>
-                  <div className="mt-3 flex space-x-2">
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg flex flex-col h-[700px]">
+          <h3 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">📜</span>
+            Noticias Publicadas
+          </h3>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+            {news.length > 0 ? (
+              news.map((item) => (
+                <div key={item.id} className="bg-slate-900/50 border border-slate-700 p-5 rounded-2xl hover:border-slate-500 transition-all group relative overflow-hidden">
+                  {item.isFeatured && (
+                    <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-tighter shadow-lg">
+                      🌟 Destacada
+                    </div>
+                  )}
+                  <div className="flex justify-between items-start mb-2 pr-12">
+                    <h4 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">{item.title}</h4>
+                  </div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="bg-slate-700/50 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-slate-600">
+                      {item.category}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      {item.createdAt.toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-400 line-clamp-3 leading-relaxed mb-4">
+                    {item.content}
+                  </p>
+                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/50 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-indigo-400 hover:text-indigo-600 text-sm"
+                      className="text-blue-400 hover:text-blue-300 text-xs font-bold uppercase tracking-wider underline-offset-4 hover:underline"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="text-red-400 hover:text-red-600 text-sm"
+                      className="text-red-400 hover:text-red-300 text-xs font-bold uppercase tracking-wider underline-offset-4 hover:underline"
                     >
                       Eliminar
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className={`${darkMode ? 'text-light_text' : 'text-gray-400'} text-center py-6`}>No hay noticias publicadas.</p>
-          )}
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-4 opacity-50 italic py-12">
+                <span className="text-4xl italic font-serif">Empty</span>
+                <p>No hay noticias publicadas en el sistema.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

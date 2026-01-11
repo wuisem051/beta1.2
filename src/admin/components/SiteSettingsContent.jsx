@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebase'; // Importar la instancia de Firebase Firestore
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { useTheme } from '../../context/ThemeContext';
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const SiteSettingsContent = () => {
@@ -224,211 +223,296 @@ const SiteSettingsContent = () => {
     }
   };
 
-  const { theme } = useTheme();
-
   return (
-    <div className={`${theme.background} ${theme.text} p-6 rounded-lg shadow-md`}>
-      <h2 className="text-2xl font-bold mb-6">Configuración del Sitio</h2>
+    <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+        <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg text-lg">⚙️</span>
+          Configuración Personalizada del Sitio
+        </h2>
+      </div>
 
-      {loading && <p className={`${theme.textSoft} mb-4`}>Cargando configuración...</p>}
-      {error && <div className="bg-red-500 text-white p-3 rounded mb-4">{error}</div>}
-      {message && <div className="bg-green-500 text-white p-3 rounded mb-4">{message}</div>}
+      <form onSubmit={handleSaveSettings} className="space-y-8">
+        {/* Sección General */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🌐</span>
+            Identidad Visual y General
+          </h3>
 
-      <form onSubmit={handleSaveSettings} className="space-y-6">
-        <div>
-          <label htmlFor="siteName" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Nombre del Sitio</label>
-          <input
-            type="text"
-            id="siteName"
-            value={siteName}
-            onChange={(e) => setSiteName(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: Mi Plataforma de Minería"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="heroTitle" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Título Principal (Hero)</label>
-          <input
-            type="text"
-            id="heroTitle"
-            value={heroTitle}
-            onChange={(e) => setHeroTitle(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: Bienvenido a nuestra Pool de Minería Bitcoin"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="homeText" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Texto de la Página de Inicio (Home)</label>
-          <textarea
-            id="homeText"
-            rows="4"
-            value={homeText}
-            onChange={(e) => setHomeText(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: Minando el futuro, un bloque a la vez."
-            required
-          ></textarea>
-        </div>
-
-        <div className="pt-6 border-t border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-accent">Sección Hero & Badge</h3>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Hero Badge (Texto pequeño superior)</label>
-              <input type="text" value={heroBadge} onChange={(e) => setHeroBadge(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} placeholder="Ej: Trading de Nueva Generación" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="siteName" className="text-sm font-medium text-slate-400">Nombre de la Plataforma</label>
+              <input
+                type="text"
+                id="siteName"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                placeholder="Ej: MaxiOS Trading"
+                required
+              />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón Principal Hero</label>
-                <input type="text" value={heroBtn1Text} onChange={(e) => setHeroBtn1Text(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
-              </div>
-              <div>
-                <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón Secundario Hero</label>
-                <input type="text" value={heroBtn2Text} onChange={(e) => setHeroBtn2Text(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="siteDomain" className="text-sm font-medium text-slate-400">Dominio Principal</label>
+              <input
+                type="text"
+                id="siteDomain"
+                value={siteDomain}
+                onChange={(e) => setSiteDomain(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                placeholder="www.tusitio.com"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="faviconUrl" className="text-sm font-medium text-slate-400">URL del Favicon (Manual)</label>
+              <input
+                type="text"
+                id="faviconUrl"
+                value={faviconUrl}
+                onChange={(e) => setFaviconUrl(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                placeholder="https://..."
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="faviconUpload" className="text-sm font-medium text-slate-400">Subir Nuevo Favicon</label>
+              <input
+                type="file"
+                id="faviconUpload"
+                accept=".ico,.png"
+                onChange={handleFileChange}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-slate-400 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500"
+              />
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-accent">Sección Características (Features)</h3>
+        {/* Sección Hero */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🚀</span>
+            Sección Principal (Hero)
+          </h3>
+
+          <div className="space-y-2">
+            <label htmlFor="heroBadge" className="text-sm font-bold text-slate-500 uppercase tracking-widest">Badge Superior (Texto Destacado)</label>
+            <input
+              type="text"
+              id="heroBadge"
+              value={heroBadge}
+              onChange={(e) => setHeroBadge(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="heroTitle" className="text-sm font-bold text-slate-500 uppercase tracking-widest">Título Principal H1</label>
+            <input
+              type="text"
+              id="heroTitle"
+              value={heroTitle}
+              onChange={(e) => setHeroTitle(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="homeText" className="text-sm font-bold text-slate-500 uppercase tracking-widest">Subtítulo Descriptivo</label>
+            <textarea
+              id="homeText"
+              rows="3"
+              value={homeText}
+              onChange={(e) => setHomeText(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all resize-none"
+              required
+            ></textarea>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-400">Texto Botón Primario</label>
+              <input type="text" value={heroBtn1Text} onChange={(e) => setHeroBtn1Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-400">Texto Botón Secundario</label>
+              <input type="text" value={heroBtn2Text} onChange={(e) => setHeroBtn2Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" />
+            </div>
+          </div>
+        </div>
+
+        {/* Sección Características */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">✨</span>
+            Módulos de Características (Features)
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Feature 1 */}
+            <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-800 px-2 py-0.5 rounded">Módulo 01</span>
+              </div>
+              <input type="text" value={f1Title} onChange={(e) => setF1Title(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-bold" placeholder="Título" />
+              <textarea value={f1Desc} onChange={(e) => setF1Desc(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs resize-none" placeholder="Descripción corta" rows="3"></textarea>
+            </div>
+            {/* Feature 2 */}
+            <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-800 px-2 py-0.5 rounded">Módulo 02</span>
+              </div>
+              <input type="text" value={f2Title} onChange={(e) => setF2Title(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-bold" placeholder="Título" />
+              <textarea value={f2Desc} onChange={(e) => setF2Desc(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs resize-none" placeholder="Descripción corta" rows="3"></textarea>
+            </div>
+            {/* Feature 3 */}
+            <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter bg-slate-800 px-2 py-0.5 rounded">Módulo 03</span>
+              </div>
+              <input type="text" value={f3Title} onChange={(e) => setF3Title(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-bold" placeholder="Título" />
+              <textarea value={f3Desc} onChange={(e) => setF3Desc(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs resize-none" placeholder="Descripción corta" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección Cómo Funciona */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🛠️</span>
+            Sección "Cómo Funciona"
+          </h3>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400">Título de la Sección</label>
+            <input type="text" value={hiwTitle} onChange={(e) => setHiwTitle(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-4 bg-slate-900/30 rounded-2xl border border-slate-700/30 space-y-3">
+              <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">PASO 01</span>
+              <input type="text" value={s1Title} onChange={(e) => setS1Title(e.target.value)} className="w-full bg-transparent border-b border-slate-700 py-1 text-white font-bold text-sm outline-none focus:border-blue-500 transition-colors" placeholder="Título" />
+              <textarea value={s1Desc} onChange={(e) => setS1Desc(e.target.value)} className="w-full bg-transparent p-2 text-slate-400 text-xs resize-none outline-none leading-relaxed" placeholder="Descripción del paso..." rows="3"></textarea>
+            </div>
+            <div className="p-4 bg-slate-900/30 rounded-2xl border border-slate-700/30 space-y-3">
+              <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">PASO 02</span>
+              <input type="text" value={s2Title} onChange={(e) => setS2Title(e.target.value)} className="w-full bg-transparent border-b border-slate-700 py-1 text-white font-bold text-sm outline-none focus:border-blue-500 transition-colors" placeholder="Título" />
+              <textarea value={s2Desc} onChange={(e) => setS2Desc(e.target.value)} className="w-full bg-transparent p-2 text-slate-400 text-xs resize-none outline-none leading-relaxed" placeholder="Descripción del paso..." rows="3"></textarea>
+            </div>
+            <div className="p-4 bg-slate-900/30 rounded-2xl border border-slate-700/30 space-y-3">
+              <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">PASO 03</span>
+              <input type="text" value={s3Title} onChange={(e) => setS3Title(e.target.value)} className="w-full bg-transparent border-b border-slate-700 py-1 text-white font-bold text-sm outline-none focus:border-blue-500 transition-colors" placeholder="Título" />
+              <textarea value={s3Desc} onChange={(e) => setS3Desc(e.target.value)} className="w-full bg-transparent p-2 text-slate-400 text-xs resize-none outline-none leading-relaxed" placeholder="Descripción del paso..." rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección CTA Final */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🎯</span>
+            Llamado a la Acción Final (CTA)
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h4 className="font-bold text-sm underline">Feature 1</h4>
-              <input type="text" value={f1Title} onChange={(e) => setF1Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
-              <textarea value={f1Desc} onChange={(e) => setF1Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-400">Título del CTA</label>
+                <input type="text" value={ctaTitle} onChange={(e) => setCtaTitle(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-400">Texto del Botón Final</label>
+                <input type="text" value={ctaBtnText} onChange={(e) => setCtaBtnText(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white" />
+              </div>
             </div>
-            <div className="space-y-4">
-              <h4 className="font-bold text-sm underline">Feature 2</h4>
-              <input type="text" value={f2Title} onChange={(e) => setF2Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
-              <textarea value={f2Desc} onChange={(e) => setF2Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-bold text-sm underline">Feature 3</h4>
-              <input type="text" value={f3Title} onChange={(e) => setF3Title(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Título" />
-              <textarea value={f3Desc} onChange={(e) => setF3Desc(e.target.value)} className={`w-full p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Descripción" rows="2"></textarea>
+            <div className="space-y-2 flex flex-col">
+              <label className="text-sm font-medium text-slate-400">Descripción del CTA</label>
+              <textarea value={ctaText} onChange={(e) => setCtaText(e.target.value)} className="flex-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white resize-none" rows="4"></textarea>
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-accent">Sección Cómo Funciona</h3>
-          <div className="grid grid-cols-1 gap-6">
-            <div>
-              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Título de la Sección</label>
-              <input type="text" value={hiwTitle} onChange={(e) => setHiwTitle(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
+        {/* Footer Settings */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">⚓</span>
+            Configuración del Pie de Página (Footer)
+          </h3>
+
+          <div className="space-y-2">
+            <label htmlFor="footerText" className="text-sm font-medium text-slate-400">Texto Legal / Copyright</label>
+            <textarea
+              id="footerText"
+              rows="2"
+              value={footerText}
+              onChange={(e) => setFooterText(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white resize-none"
+              required
+            ></textarea>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 px-1">LINK 1</label>
+              <input type="text" value={footerLink1Text} onChange={(e) => setFooterLink1Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-bold text-xs uppercase opacity-60">Paso 01</h4>
-                <input type="text" value={s1Title} onChange={(e) => setS1Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
-                <textarea value={s1Desc} onChange={(e) => setS1Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-bold text-xs uppercase opacity-60">Paso 02</h4>
-                <input type="text" value={s2Title} onChange={(e) => setS2Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
-                <textarea value={s2Desc} onChange={(e) => setS2Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-bold text-xs uppercase opacity-60">Paso 03</h4>
-                <input type="text" value={s3Title} onChange={(e) => setS3Title(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-sm`} placeholder="Título" />
-                <textarea value={s3Desc} onChange={(e) => setS3Desc(e.target.value)} className={`w-full p-2 rounded bg-opacity-10 bg-white border border-white/10 ${theme.text} text-xs`} placeholder="Descripción" rows="2"></textarea>
-              </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 px-1">LINK 2</label>
+              <input type="text" value={footerLink2Text} onChange={(e) => setFooterLink2Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 px-1">LINK 3</label>
+              <input type="text" value={footerLink3Text} onChange={(e) => setFooterLink3Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-500 px-1">LINK 4</label>
+              <input type="text" value={footerLink4Text} onChange={(e) => setFooterLink4Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs" />
             </div>
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-accent">Sección CTA Final</h3>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Título Invitación</label>
-              <input type="text" value={ctaTitle} onChange={(e) => setCtaTitle(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
-            </div>
-            <div>
-              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Texto Invitación</label>
-              <textarea value={ctaText} onChange={(e) => setCtaText(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} rows="3"></textarea>
-            </div>
-            <div>
-              <label className={`block ${theme.textSoft} text-xs font-bold mb-2 uppercase`}>Botón CTA</label>
-              <input type="text" value={ctaBtnText} onChange={(e) => setCtaBtnText(e.target.value)} className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`} />
-            </div>
-          </div>
+        {/* Botón Guardar Flotante / Final */}
+        <div className="sticky bottom-6 flex justify-center pt-4">
+          <button
+            type="submit"
+            className="w-full md:w-2/3 bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-10 rounded-2xl shadow-2xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3 text-xl uppercase tracking-widest disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Sincronizando...
+              </>
+            ) : (
+              <>💾 Aplicar Cambios Globales</>
+            )}
+          </button>
         </div>
-        <div>
-          <label htmlFor="siteDomain" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Dominio del Sitio Web</label>
-          <input
-            type="text"
-            id="siteDomain"
-            value={siteDomain}
-            onChange={(e) => setSiteDomain(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: www.tusitio.com"
-          />
-        </div>
-        <div>
-          <label htmlFor="faviconUrl" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>URL del Favicon</label>
-          <input
-            type="text"
-            id="faviconUrl"
-            value={faviconUrl}
-            onChange={(e) => setFaviconUrl(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: https://tusitio.com/favicon.ico"
-          />
-          {faviconUrl && (
-            <p className={`${theme.textSoft} text-sm mt-2`}>Favicon actual: <a href={faviconUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ver Favicon</a></p>
-          )}
-          <label htmlFor="faviconUpload" className={`block ${theme.textSoft} text-sm font-medium mb-2 mt-4`}>Subir Favicon (.ico, .png)</label>
-          <input
-            type="file"
-            id="faviconUpload"
-            accept=".ico,.png"
-            onChange={handleFileChange}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100`}
-          />
-        </div>
-        <div>
-          <label htmlFor="footerText" className={`block ${theme.textSoft} text-sm font-medium mb-2`}>Texto del Pie de Página (Footer)</label>
-          <textarea
-            id="footerText"
-            rows="3"
-            value={footerText}
-            onChange={(e) => setFooterText(e.target.value)}
-            className={`w-full p-3 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-base focus:outline-none focus:border-yellow-500`}
-            placeholder="Ej: © 2023 Mi Sitio. Todos los derechos reservados."
-            required
-          ></textarea>
-        </div>
-        <div className="pt-6 border-t border-gray-700">
-          <h3 className="text-lg font-bold mb-4 text-accent">Enlaces del Footer (Home)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input type="text" value={footerLink1Text} onChange={(e) => setFooterLink1Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 1" />
-            <input type="text" value={footerLink2Text} onChange={(e) => setFooterLink2Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 2" />
-            <input type="text" value={footerLink3Text} onChange={(e) => setFooterLink3Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 3" />
-            <input type="text" value={footerLink4Text} onChange={(e) => setFooterLink4Text(e.target.value)} className={`p-2 ${theme.inputBackground} ${theme.borderColor} rounded-md ${theme.text} text-sm`} placeholder="Link 4" />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline transition duration-200"
-          disabled={loading}
-        >
-          {loading ? 'Guardando...' : 'Guardar Configuración'}
-        </button>
       </form>
 
-      <div className={`mt-8 pt-6 border-t ${theme.borderColor}`}>
-        <h3 className="text-xl font-bold mb-4">Herramientas de Administración</h3>
-        <button
-          onClick={handleResetPerformanceStats}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline transition duration-200"
-          disabled={loading}
-        >
-          Reiniciar Estadísticas de Rendimiento
-        </button>
+      {/* Herramientas de Administración Peligrosas */}
+      <div className="mt-12 pt-8 border-t border-red-900/30">
+        <h3 className="text-xl font-bold text-red-500 mb-6 flex items-center gap-2">
+          <span className="bg-red-500/10 p-2 rounded-lg text-sm">⚠️</span>
+          Zona de Peligro
+        </h3>
+        <div className="bg-red-900/5 border border-red-900/20 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-sm text-slate-400 text-center md:text-left">
+            <strong className="text-red-400 block mb-1">Reiniciar Estadísticas de Rendimiento</strong>
+            Esto borrará los datos históricos acumulados para el gráfico de operaciones. Esta acción es irreversible.
+          </div>
+          <button
+            onClick={handleResetPerformanceStats}
+            className="whitespace-nowrap bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/30 px-8 py-4 rounded-xl font-bold transition-all text-sm"
+            disabled={loading}
+          >
+            💀 Reiniciar Todo el Historial
+          </button>
+        </div>
       </div>
     </div>
   );

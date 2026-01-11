@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import React, { useState, useEffect } from 'react'; // Importar React y hooks necesarios
 import { db } from '../../services/firebase'; // Importar la instancia de Firebase Firestore
 import { collection, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const WithdrawalRequestsManagement = ({ onUnreadCountChange }) => { // Aceptar prop
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const [withdrawalRequests, setWithdrawalRequests] = useState([]);
 
@@ -80,83 +79,91 @@ const WithdrawalRequestsManagement = ({ onUnreadCountChange }) => { // Aceptar p
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Pendiente': return 'bg-yellow-100 text-yellow-800';
-      case 'Completado': return 'bg-green-100 text-green-800';
-      case 'Rechazado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Pendiente': return 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20';
+      case 'Completado': return 'bg-green-500/10 text-green-500 border border-green-500/20';
+      case 'Rechazado': return 'bg-red-500/10 text-red-500 border border-red-500/20';
+      default: return 'bg-slate-500/10 text-slate-500 border border-slate-500/20';
     }
   };
 
   return (
-    <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-white text-gray-900'} p-6 rounded-lg shadow-md`}>
-      <h2 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-gray-800'}`}>Gestión de Solicitudes de Retiro</h2>
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
+    <div className="p-6 rounded-2xl shadow-xl space-y-6" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg text-lg">💸</span>
+          Gestión de Solicitudes de Retiro
+        </h2>
+      </div>
 
       {withdrawalRequests.length === 0 ? (
-        <p className={`${darkMode ? 'text-light_text' : 'text-gray-600'} text-center py-8`}>No hay solicitudes de retiro pendientes.</p>
+        <div className="bg-slate-800/50 rounded-2xl p-12 text-center border border-slate-700 shadow-lg">
+          <p className="text-slate-500 text-lg">No hay solicitudes de retiro pendientes.</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className={`min-w-full divide-y ${darkMode ? 'divide-dark_border' : 'divide-gray-200'}`}>
-            <thead className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-50'}`}>
-              <tr>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Fecha</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Usuario (Email)</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Cantidad</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Moneda</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Método</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Dirección/ID</th>
-                <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Estado</th>
-                <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody className={`${darkMode ? 'bg-dark_card divide-dark_border' : 'bg-white divide-gray-200'} divide-y`}>
-              {withdrawalRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.createdAt.toLocaleDateString()}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.userEmail}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.amount.toFixed(8)}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.currency}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.method}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    {request.addressOrId}
-                  </td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(request.status)}`}>
-                      {request.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {request.status === 'Pendiente' && (
-                      <>
-                        <button
-                          onClick={() => handleUpdateStatus(request, 'Completado')}
-                          className="text-green-600 hover:text-green-800 mr-3"
-                        >
-                          Completar
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus(request, 'Rechazado')}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Rechazar
-                        </button>
-                      </>
-                    )}
-                  </td>
+        <div className="bg-slate-800/50 rounded-2xl border border-slate-700 shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-900/50">
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Usuario (Email)</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Cantidad</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Moneda</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Método</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Dirección/ID</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Estado</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {withdrawalRequests.map((request) => (
+                  <tr key={request.id} className="hover:bg-slate-700/30 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                      {request.createdAt.toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                      {request.userEmail}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-400">
+                      {request.amount.toFixed(8)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                      {request.currency}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                      {request.method}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 font-mono">
+                      {request.addressOrId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full border ${getStatusColor(request.status)}`}>
+                        {request.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      {request.status === 'Pendiente' && (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleUpdateStatus(request, 'Completado')}
+                            className="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-green-900/20"
+                          >
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(request, 'Rechazado')}
+                            className="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-red-900/20"
+                          >
+                            Rechazar
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

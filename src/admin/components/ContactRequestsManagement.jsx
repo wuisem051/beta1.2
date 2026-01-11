@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import React, { useState, useEffect } from 'react'; // Importar React y hooks necesarios
 import { db } from '../../services/firebase';
 import { collection, getDocs, onSnapshot, doc, updateDoc, query, orderBy, where, deleteDoc } from 'firebase/firestore';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const ContactRequestsManagement = ({ onUnreadCountChange }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -99,7 +98,7 @@ const ContactRequestsManagement = ({ onUnreadCountChange }) => {
     try {
       const closedRequestsQuery = query(collection(db, 'contactRequests'), where('status', '==', 'Cerrado'));
       const snapshot = await getDocs(closedRequestsQuery);
-      
+
       const deletePromises = snapshot.docs.map(docToDelete => deleteDoc(doc(db, 'contactRequests', docToDelete.id)));
       await Promise.all(deletePromises);
 
@@ -114,111 +113,131 @@ const ContactRequestsManagement = ({ onUnreadCountChange }) => {
   };
 
   return (
-    <div className={`flex h-full ${darkMode ? 'bg-dark_bg text-light_text' : 'bg-gray-100 text-gray-900'}`}>
+    <div className="flex flex-col md:flex-row h-[calc(100vh-160px)] gap-6" style={{ color: '#f8fafc' }}>
       {/* Lista de Solicitudes */}
-      <div className={`w-1/3 p-4 border-r overflow-y-auto ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-white border-gray-200'}`}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className={`text-xl font-bold ${darkMode ? 'text-light_text' : 'text-gray-900'}`}>Solicitudes de Contacto</h2>
+      <div className="w-full md:w-1/3 bg-slate-800/50 rounded-2xl border border-slate-700 shadow-lg flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-slate-700 bg-slate-900/50 flex justify-between items-center">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <span className="bg-blue-500/10 p-1.5 rounded-lg text-sm">📬</span>
+            Solicitudes
+          </h2>
           <button
             onClick={handleDeleteClosedRequests}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-1.5 px-3 rounded-md text-sm"
+            className="bg-red-900/30 hover:bg-red-900 text-red-400 hover:text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors border border-red-900/30"
           >
-            Eliminar Cerrados
+            Limpiar Cerrados
           </button>
         </div>
-        {requests.length === 0 ? (
-          <p className={`${darkMode ? 'text-light_text' : 'text-gray-600'}`}>No hay solicitudes de contacto.</p>
-        ) : (
-          <ul>
-            {requests.map(req => (
-              <li
-                key={req.id}
-                className={`p-3 mb-2 rounded-lg cursor-pointer ${
-                  selectedRequest && selectedRequest.id === req.id 
-                    ? (darkMode ? 'bg-accent text-white' : 'bg-yellow-200') 
-                    : (darkMode ? 'bg-dark_bg hover:bg-dark_border' : 'bg-gray-100 hover:bg-gray-200')
-                }`}
-                onClick={() => handleSelectRequest(req)}
-              >
-                <p className={`font-semibold ${darkMode ? 'text-light_text' : 'text-gray-800'}`}>{req.subject}</p>
-                <p className={`text-sm truncate ${darkMode ? 'text-light_text' : 'text-gray-600'}`}>{req.conversation[req.conversation.length - 1]?.text}</p>
-                <div className={`flex justify-between items-center text-xs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>
-                  <span>{req.userEmail}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xxs font-semibold ${
-                    req.status === 'Abierto' ? 'bg-blue-100 text-blue-800' :
-                    req.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                    req.status === 'Respondido' ? 'bg-purple-100 text-purple-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {req.status}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {requests.length === 0 ? (
+            <p className="text-slate-500 text-center py-8">No hay solicitudes.</p>
+          ) : (
+            <ul>
+              {requests.map(req => (
+                <li
+                  key={req.id}
+                  className={`p-4 mb-3 rounded-xl cursor-pointer transition-all border ${selectedRequest && selectedRequest.id === req.id
+                    ? 'bg-blue-600 border-blue-500 shadow-lg shadow-blue-900/20'
+                    : 'bg-slate-900/50 border-slate-700 hover:bg-slate-700/50'
+                    }`}
+                  onClick={() => handleSelectRequest(req)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <p className={`font-bold text-sm ${selectedRequest && selectedRequest.id === req.id ? 'text-white' : 'text-slate-100'}`}>{req.subject}</p>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${req.status === 'Abierto' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' :
+                      req.status === 'Pendiente' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
+                        req.status === 'Respondido' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' :
+                          'bg-green-500/20 text-green-400 border border-green-500/20'
+                      }`}>
+                      {req.status}
+                    </span>
+                  </div>
+                  <p className={`text-xs line-clamp-1 mb-2 ${selectedRequest && selectedRequest.id === req.id ? 'text-blue-100' : 'text-slate-400'}`}>
+                    {req.conversation[req.conversation.length - 1]?.text}
+                  </p>
+                  <div className={`flex justify-between items-center text-[10px] ${selectedRequest && selectedRequest.id === req.id ? 'text-blue-200' : 'text-slate-500'}`}>
+                    <span>{req.userEmail}</span>
+                    <span>{req.updatedAt.toLocaleDateString()}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* Detalles de la Solicitud y Conversación */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 bg-slate-800/50 rounded-2xl border border-slate-700 shadow-lg flex flex-col overflow-hidden">
         {selectedRequest ? (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className={`text-2xl font-bold ${darkMode ? 'text-light_text' : 'text-gray-800'}`}>{selectedRequest.subject}</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                selectedRequest.status === 'Abierto' ? 'bg-blue-100 text-blue-800' :
-                selectedRequest.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                selectedRequest.status === 'Respondido' ? 'bg-purple-100 text-purple-800' :
-                'bg-green-100 text-green-800'
-              }`}>
-                {selectedRequest.status}
-              </span>
+          <div className="flex flex-col h-full">
+            <div className="p-6 border-b border-slate-700 bg-slate-900/50">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold text-white">{selectedRequest.subject}</h2>
+                <div className="flex items-center gap-3">
+                  <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase border ${selectedRequest.status === 'Abierto' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20' :
+                    selectedRequest.status === 'Pendiente' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
+                      selectedRequest.status === 'Respondido' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' :
+                        'bg-green-500/20 text-green-400 border border-green-500/20'
+                    }`}>
+                    {selectedRequest.status}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <span className="font-semibold text-blue-400">{selectedRequest.userEmail}</span>
+                <span>•</span>
+                <span>Iniciado el {selectedRequest.createdAt.toLocaleDateString()}</span>
+              </div>
             </div>
-            <p className={`text-sm mb-2 ${darkMode ? 'text-light_text' : 'text-gray-600'}`}>De: {selectedRequest.userEmail} - Fecha: {selectedRequest.createdAt.toLocaleDateString()}</p>
 
             {/* Historial de Conversación */}
-            <div className={`${darkMode ? 'bg-dark_bg border-dark_border' : 'bg-gray-50'} p-4 rounded-lg shadow-inner mb-4 h-64 overflow-y-auto border`}>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-900/30">
               {selectedRequest.conversation.map((msg, index) => (
-                <div key={index} className={`mb-3 ${msg.sender === 'admin' ? 'text-right' : 'text-left'}`}>
-                  <span className={`inline-block p-2 rounded-lg text-sm ${
-                    msg.sender === 'admin' ? 'bg-blue-100 text-blue-800' : (darkMode ? 'bg-dark_border text-light_text' : 'bg-gray-200 text-gray-800')
-                  }`}>
+                <div key={index} className={`flex flex-col ${msg.sender === 'admin' ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[80%] p-4 rounded-2xl text-sm shadow-md ${msg.sender === 'admin'
+                    ? 'bg-blue-600 text-white rounded-tr-none'
+                    : 'bg-slate-700 text-slate-100 rounded-tl-none border border-slate-600'
+                    }`}>
                     {msg.text}
+                  </div>
+                  <span className="text-[10px] text-slate-500 mt-1 px-1">
+                    {new Date(msg.timestamp).toLocaleString()}
                   </span>
-                  <p className={`text-xxs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-500'}`}>{new Date(msg.timestamp).toLocaleString()}</p>
                 </div>
               ))}
             </div>
 
             {/* Área de Respuesta del Administrador */}
-            <div className={`${darkMode ? 'bg-dark_card border-dark_border' : 'bg-white'} p-4 rounded-lg shadow-md border`}>
-              <h3 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-light_text' : 'text-gray-800'}`}>Responder</h3>
+            <div className="p-6 bg-slate-900/50 border-t border-slate-700">
+              <h3 className="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Enviar Respuesta</h3>
               <textarea
                 rows="3"
-                className={`w-full p-2 rounded-md text-sm focus:outline-none focus:border-yellow-500 mb-3 ${darkMode ? 'bg-dark_bg border-dark_border text-light_text' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
-                placeholder="Escribe tu respuesta aquí..."
+                className="w-full p-4 rounded-xl text-sm bg-slate-950 border border-slate-700 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600 mb-4 resize-none"
+                placeholder="Escribe tu mensaje aquí..."
                 value={adminReply}
                 onChange={(e) => setAdminReply(e.target.value)}
               ></textarea>
-              <div className="flex justify-end space-x-2">
-                <button
-                  onClick={handleSendReply}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  Enviar Respuesta
-                </button>
+              <div className="flex justify-end gap-3">
                 <button
                   onClick={handleCloseRequest}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md"
+                  className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition-all"
                 >
-                  Cerrar Solicitud
+                  Cerrar Caso
+                </button>
+                <button
+                  onClick={handleSendReply}
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-8 rounded-xl text-sm shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2"
+                >
+                  🚀 Enviar Respuesta
                 </button>
               </div>
             </div>
           </div>
         ) : (
-          <div className={`flex items-center justify-center h-full text-lg ${darkMode ? 'text-light_text' : 'text-gray-600'}`}>
-            Selecciona una solicitud para ver los detalles.
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-4">
+            <span className="text-6xl">📬</span>
+            <p className="text-lg font-medium">Selecciona una solicitud para ver los detalles.</p>
           </div>
         )}
       </div>

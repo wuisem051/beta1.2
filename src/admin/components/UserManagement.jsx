@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'; // Importar useContext
+import React, { useState, useEffect } from 'react'; // Importar React y hooks necesarios
 import { db, auth } from '../../services/firebase'; // Importar la instancia de Firebase Firestore y Auth
 import { collection, query, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, where, getDocs } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, updateEmail, updatePassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
@@ -6,7 +6,6 @@ import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeCont
 import { useError } from '../../context/ErrorContext'; // Importar useError
 
 const UserManagement = () => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const [users, setUsers] = useState([]);
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -270,118 +269,146 @@ const UserManagement = () => {
 
 
   return (
-    <div className={`${darkMode ? 'bg-dark_card text-light_text' : 'bg-gray-800 text-white'} p-6 rounded-lg shadow-lg`}>
-      <h2 className={`text-3xl font-bold mb-6 ${darkMode ? 'text-accent' : 'text-yellow-500'}`}>Gestión de Usuarios</h2>
+    <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+        <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg text-lg">👥</span>
+          Gestión de Usuarios
+        </h2>
+      </div>
 
       {/* Formulario para Añadir Usuario */}
-      <div className={`mb-8 p-4 rounded-lg ${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
-        <h3 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Añadir Nuevo Usuario</h3>
-        <form onSubmit={handleAddUser} className="space-y-4">
-          <div>
-            <label htmlFor="newUserEmail" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email:</label>
+      <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
+        <h3 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg">👤</span>
+          Añadir Nuevo Usuario
+        </h3>
+        <form onSubmit={handleAddUser} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label htmlFor="newUserEmail" className="text-sm font-medium text-slate-400">Email</label>
             <input
               type="email"
               id="newUserEmail"
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
+              placeholder="correo@ejemplo.com"
               required
             />
           </div>
-          <div>
-            <label htmlFor="newUserPassword" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Contraseña:</label>
+          <div className="space-y-2">
+            <label htmlFor="newUserPassword" className="text-sm font-medium text-slate-400">Contraseña</label>
             <input
               type="password"
               id="newUserPassword"
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
+              placeholder="••••••••"
               required
             />
           </div>
           <button
             type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="md:col-span-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
           >
-            Añadir Usuario
+            🚀 Crear Usuario
           </button>
         </form>
       </div>
 
       {/* Lista de Usuarios */}
-      <div className="mb-8">
-        <h3 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Usuarios Existentes</h3>
+      <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
+        <h3 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+          <span className="bg-blue-500/10 p-2 rounded-lg">📋</span>
+          Usuarios Existentes
+        </h3>
         {users.length === 0 ? (
-          <p className={`${darkMode ? 'text-light_text' : 'text-gray-400'}`}>No hay usuarios registrados.</p>
+          <p className="text-center text-slate-500 py-8 italic">No hay usuarios registrados.</p>
         ) : (
           <>
             {/* Sección de Operaciones Masivas */}
-            <div className={`mb-4 p-4 rounded-lg shadow-inner flex justify-between items-center ${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
-              <p className={`text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
-                {selectedUserIds.length} usuario(s) seleccionado(s)
-              </p>
+            <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-blue-500/30">
+                  {selectedUserIds.length} usuario(s) seleccionado(s)
+                </span>
+              </div>
               <button
                 onClick={handleMassDeleteUsers}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
+                className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/30 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={selectedUserIds.length === 0}
               >
-                Eliminar Seleccionados
+                🗑️ Eliminar Seleccionados
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className={`min-w-full divide-y ${darkMode ? 'divide-dark_border' : 'divide-gray-700'}`}>
-                <thead className={`${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
-                  <tr>
-                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
+            <div className="overflow-x-auto rounded-xl border border-slate-700">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-900/50">
+                    <th className="px-6 py-4 border-b border-slate-700">
                       <input
                         type="checkbox"
-                        className={`form-checkbox h-4 w-4 text-yellow-500 rounded ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-700 border-gray-600'}`}
+                        className="form-checkbox h-4 w-4 text-blue-500 bg-slate-900 border-slate-700 rounded transition-all cursor-pointer"
                         onChange={handleSelectAllUsers}
                         checked={selectedUserIds.length === users.length && users.length > 0}
                       />
                     </th>
-                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email</th>
-                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>ID</th>
-                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rol</th>
-                    <th className={`px-4 py-2 text-left text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>VIP Status</th>
-                    <th className={`px-4 py-2 text-right text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Acciones</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Email</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">ID Usuario</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Rol</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">VIP Status</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 text-right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className={`${darkMode ? 'bg-dark_card divide-dark_border' : 'bg-gray-800 divide-gray-700'} divide-y`}>
+                <tbody className="divide-y divide-slate-700">
                   {users.map((user) => (
-                    <tr key={user.id}>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm">
+                    <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
+                      <td className="px-6 py-4">
                         <input
                           type="checkbox"
-                          className={`form-checkbox h-4 w-4 text-yellow-500 rounded ${darkMode ? 'bg-dark_card border-dark_border' : 'bg-gray-700 border-gray-600'}`}
+                          className="form-checkbox h-4 w-4 text-blue-500 bg-slate-900 border-slate-700 rounded transition-all cursor-pointer"
                           checked={selectedUserIds.includes(user.id)}
                           onChange={() => handleSelectUser(user.id)}
                         />
                       </td>
-                      <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.email}</td>
-                      <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.id}</td>
-                      <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>{user.role || 'user'}</td>
-                      <td className={`px-4 py-2 whitespace-nowrap text-sm ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>
-                        {user.vipStatus && user.vipStatus !== 'none' ? (
-                          <span className="bg-accent text-white px-2 py-0.5 rounded text-xs">
-                            {user.vipStatus} ({user.vipExpiry ? (user.vipExpiry.toDate ? user.vipExpiry.toDate().toLocaleDateString() : new Date(user.vipExpiry).toLocaleDateString()) : 'N/A'})
-                          </span>
-                        ) : 'Ninguno'}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{user.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-mono text-xs">{user.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${user.role === 'admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-700'}`}>
+                          {user.role || 'user'}
+                        </span>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEditClick(user)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded mr-2 text-xs"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user)}
-                          className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-xs"
-                        >
-                          Eliminar
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {user.vipStatus && user.vipStatus !== 'none' ? (
+                          <div className="flex flex-col">
+                            <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit">
+                              {user.vipStatus}
+                            </span>
+                            <span className="text-[10px] text-slate-500 mt-1">
+                              EXP: {user.vipExpiry ? (user.vipExpiry.toDate ? user.vipExpiry.toDate().toLocaleDateString() : new Date(user.vipExpiry).toLocaleDateString()) : 'N/A'}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-600 text-[10px] uppercase font-bold italic">Básico</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEditClick(user)}
+                            className="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold border border-blue-600/30 transition-all"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            className="bg-red-900/30 hover:bg-red-900 text-red-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -391,120 +418,129 @@ const UserManagement = () => {
           </>
         )}
       </div>
+
       {/* Formulario para Editar Usuario */}
       {editingUser && (
-        <div className={`p-4 rounded-lg ${darkMode ? 'bg-dark_bg' : 'bg-gray-700'}`}>
-          <h3 className={`text-2xl font-semibold mb-4 ${darkMode ? 'text-light_text' : 'text-white'}`}>Editar Usuario: {editingUser.email}</h3>
-          <form onSubmit={handleUpdateUser} className="space-y-4">
-            <div>
-              <label htmlFor="editEmail" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Email:</label>
+        <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-8 border border-slate-700 shadow-2xl space-y-6">
+          <div className="flex justify-between items-center border-b border-slate-700 pb-4">
+            <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+              <span className="bg-blue-500/10 p-2 rounded-lg text-lg">✏️</span>
+              Editar Usuario: <span className="text-blue-400">{editingUser.email}</span>
+            </h3>
+            <button onClick={() => setEditingUser(null)} className="text-slate-500 hover:text-white transition-colors">✕</button>
+          </div>
+
+          <form onSubmit={handleUpdateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="editEmail" className="text-sm font-medium text-slate-400">Email</label>
               <input
                 type="email"
                 id="editEmail"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
                 required
               />
             </div>
-            <div>
-              <label htmlFor="editRole" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Rol:</label>
+            <div className="space-y-2">
+              <label htmlFor="editRole" className="text-sm font-medium text-slate-400">Rol de Usuario</label>
               <select
                 id="editRole"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
                 value={editRole}
                 onChange={(e) => setEditRole(e.target.value)}
               >
-                <option value="user">Usuario</option>
-                <option value="admin">Administrador</option>
+                <option value="user">Usuario Estándar</option>
+                <option value="admin">Administrador del Sitio</option>
               </select>
             </div>
-            <div>
-              <label htmlFor="editPassword" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Nueva Contraseña (dejar en blanco para no cambiar):</label>
+            <div className="space-y-2 md:col-span-2">
+              <label htmlFor="editPassword" className="text-sm font-medium text-slate-400">Nueva Contraseña (Opcional)</label>
               <input
                 type="password"
                 id="editPassword"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
                 value={editPassword}
                 onChange={(e) => setEditPassword(e.target.value)}
-                placeholder="********"
-              />
-              <p className={`text-xs mt-1 ${darkMode ? 'text-light_text' : 'text-gray-400'}`}>La contraseña puede ser cambiada aquí.</p>
-            </div>
-            {/* Campos de Edición de Balances */}
-            <div>
-              <label htmlFor="editBalanceUSD" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Balance Actual USD:</label>
-              <input
-                type="number"
-                id="editBalanceUSD"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editBalanceUSD}
-                onChange={(e) => setEditBalanceUSD(e.target.value)}
-                step="any"
-                readOnly
+                placeholder="Dejar en blanco para mantener la actual"
               />
             </div>
-            <div>
-              <label htmlFor="addUSDTAmount" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Añadir/Restar Saldo USDT (actual: {editingUser.balanceUSDT || 0}):</label>
-              <input
-                type="number"
-                id="addUSDTAmount"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={addUSDTAmount}
-                onChange={(e) => setAddUSDTAmount(e.target.value)}
-                step="any"
-                placeholder="Ej: 100 para añadir, -50 para restar"
-              />
+
+            <div className="md:col-span-2 border-t border-slate-700 pt-6 mt-2">
+              <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Gestión de Balances y VIP</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400">Balance USD Actual</label>
+                  <input
+                    type="number"
+                    value={editBalanceUSD}
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-slate-500 cursor-not-allowed text-sm"
+                    readOnly
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addUSDTAmount" className="text-xs font-bold text-slate-400">Modificar Saldo USDT</label>
+                  <input
+                    type="number"
+                    id="addUSDTAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none transition-all text-sm"
+                    value={addUSDTAmount}
+                    onChange={(e) => setAddUSDTAmount(e.target.value)}
+                    placeholder="Ej: 50 o -25"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addVESAmount" className="text-xs font-bold text-slate-400">Modificar Saldo VES</label>
+                  <input
+                    type="number"
+                    id="addVESAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none transition-all text-sm"
+                    value={addVESAmount}
+                    onChange={(e) => setAddVESAmount(e.target.value)}
+                    placeholder="Ej: 1000"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="editVipStatus" className="text-xs font-bold text-slate-400">Plan VIP</label>
+                  <select
+                    id="editVipStatus"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all text-sm"
+                    value={editVipStatus}
+                    onChange={(e) => setEditVipStatus(e.target.value)}
+                  >
+                    <option value="none">Ninguno</option>
+                    <option value="vip-standard">VIP Bronze</option>
+                    <option value="vip-gold">VIP Gold</option>
+                    <option value="vip-diamond">VIP Diamond</option>
+                  </select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label htmlFor="editVipExpiry" className="text-xs font-bold text-slate-400">Fecha de Expiración VIP</label>
+                  <input
+                    type="date"
+                    id="editVipExpiry"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all text-sm"
+                    value={editVipExpiry}
+                    onChange={(e) => setEditVipExpiry(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label htmlFor="addVESAmount" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Añadir/Restar Saldo VES (actual: {editingUser.balanceVES || 0}):</label>
-              <input
-                type="number"
-                id="addVESAmount"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={addVESAmount}
-                onChange={(e) => setAddVESAmount(e.target.value)}
-                step="any"
-                placeholder="Ej: 100 para añadir, -50 para restar"
-              />
-            </div>
-            <div>
-              <label htmlFor="editVipStatus" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Plan VIP:</label>
-              <select
-                id="editVipStatus"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editVipStatus}
-                onChange={(e) => setEditVipStatus(e.target.value)}
-              >
-                <option value="none">Ninguno</option>
-                <option value="vip-standard">VIP Bronze</option>
-                <option value="vip-gold">VIP Gold</option>
-                <option value="vip-diamond">VIP Diamond</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="editVipExpiry" className={`block text-sm font-bold mb-2 ${darkMode ? 'text-light_text' : 'text-gray-300'}`}>Expiración VIP:</label>
-              <input
-                type="date"
-                id="editVipExpiry"
-                className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? 'bg-dark_card border-dark_border text-light_text' : 'bg-gray-900 border-gray-600 text-gray-700'}`}
-                value={editVipExpiry}
-                onChange={(e) => setEditVipExpiry(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end mt-4">
+
+            <div className="md:col-span-2 flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2"
+                className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-xl transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-10 rounded-xl shadow-lg shadow-blue-900/20 transition-all"
               >
-                Actualizar Usuario
+                💾 Guardar Cambios
               </button>
             </div>
           </form>

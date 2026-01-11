@@ -131,7 +131,6 @@ const TradingHistoryManagement = () => {
     };
 
     return (
-    return (
         <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
             <h1 className="text-3xl font-bold text-white border-b border-slate-700 pb-4">Gestión de Historial de Operaciones</h1>
 
