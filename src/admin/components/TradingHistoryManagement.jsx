@@ -8,7 +8,6 @@ import { SolidSectionStyled, CardStyled, InputStyled, SelectStyled } from '../..
 import styles from '../../user/pages/UserPanel.module.css';
 
 const TradingHistoryManagement = () => {
-    const { darkMode } = useContext(ThemeContext);
     const { showError, showSuccess } = useError();
     const { currentUser } = useAuth();
     const [history, setHistory] = useState([]);
@@ -132,103 +131,161 @@ const TradingHistoryManagement = () => {
     };
 
     return (
-        <SolidSectionStyled theme={darkMode ? 'dark' : 'light'} className={styles.settingsContent}>
-            <h1 className={styles.pageTitle}>Gestión de Historial de Operaciones</h1>
+    return (
+        <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
+            <h1 className="text-3xl font-bold text-white border-b border-slate-700 pb-4">Gestión de Historial de Operaciones</h1>
 
-            {isLoading && <div className={styles.loadingText}>Cargando historial...</div>}
+            {isLoading && (
+                <div className="flex justify-center p-8">
+                    <div className="animate-pulse text-slate-400 text-lg">Cargando historial...</div>
+                </div>
+            )}
 
-            <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard}>
-                <h2 className={styles.sectionTitle}>Añadir Nueva Operación</h2>
-                <form onSubmit={handleAddEntry} className={styles.form}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>Fecha</label>
-                            <InputStyled theme={darkMode ? 'dark' : 'light'} type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            {isSubmitting && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-slate-800 p-6 rounded-2xl shadow-2xl flex items-center gap-4 text-white">
+                        <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span className="font-medium">Procesando...</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Form for new operation */}
+            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
+                <h2 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+                    <span className="bg-blue-500/10 p-2 rounded-lg">➕</span> Añadir Nueva Operación
+                </h2>
+                <form onSubmit={handleAddEntry} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Fecha</label>
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                required
+                            />
                         </div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>Par</label>
-                            <InputStyled theme={darkMode ? 'dark' : 'light'} type="text" value={pair} onChange={(e) => setPair(e.target.value)} placeholder="Ej: BTC/USDT" required />
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Par</label>
+                            <input
+                                type="text"
+                                value={pair}
+                                onChange={(e) => setPair(e.target.value)}
+                                placeholder="Ej: BTC/USDT"
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                                required
+                            />
                         </div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>Tipo</label>
-                            <SelectStyled theme={darkMode ? 'dark' : 'light'} value={type} onChange={(e) => setType(e.target.value)}>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Tipo</label>
+                            <select
+                                value={type}
+                                onChange={(e) => setType(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                            >
                                 <option value="Long">Long</option>
                                 <option value="Short">Short</option>
-                            </SelectStyled>
+                            </select>
                         </div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>Resultado</label>
-                            <SelectStyled theme={darkMode ? 'dark' : 'light'} value={result} onChange={(e) => setResult(e.target.value)}>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">Resultado</label>
+                            <select
+                                value={result}
+                                onChange={(e) => setResult(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                            >
                                 <option value="Exitosa">Exitosa</option>
                                 <option value="Fallida">Fallida</option>
-                            </SelectStyled>
+                            </select>
                         </div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>P/L (USD)</label>
-                            <InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={profit} onChange={(e) => setProfit(e.target.value)} placeholder="Ej: 150.50" required />
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-400">P/L (USD)</label>
+                            <input
+                                type="number"
+                                step="any"
+                                value={profit}
+                                onChange={(e) => setProfit(e.target.value)}
+                                placeholder="Ej: 150.50"
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                                required
+                            />
+                        </div>
+                        <div className="flex items-end">
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Procesando...' : '🚀 Añadir al Historial'}
+                            </button>
                         </div>
                     </div>
-                    <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-                        {isSubmitting ? 'Procesando...' : 'Añadir al Historial'}
-                    </button>
                 </form>
-            </CardStyled>
+            </div>
 
-            <CardStyled theme={darkMode ? 'dark' : 'light'} className={styles.sectionCard}>
-                <h2 className={styles.sectionTitle}>Historial Existente</h2>
-                <div className={styles.tableContainer}>
-                    <table className={styles.table}>
+            {/* Table */}
+            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
+                <h2 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
+                    <span className="bg-blue-500/10 p-2 rounded-lg">📊</span> Historial Existente
+                </h2>
+                <div className="overflow-x-auto rounded-xl border border-slate-700">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th className={styles.tableHeader}>Fecha</th>
-                                <th className={styles.tableHeader}>Par</th>
-                                <th className={styles.tableHeader}>Tipo</th>
-                                <th className={styles.tableHeader}>Resultado</th>
-                                <th className={styles.tableHeader}>P/L</th>
-                                <th className={styles.tableHeader}>Acciones</th>
+                            <tr className="bg-slate-900/50">
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Par</th>
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Tipo</th>
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Resultado</th>
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">P/L</th>
+                                <th className="px-4 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-slate-700">
                             {history.map(entry => (
-                                <tr key={entry.id}>
+                                <tr key={entry.id} className="hover:bg-slate-700/30 transition-colors">
                                     {editingId === entry.id ? (
                                         <>
-                                            <td className={styles.tableCell}><InputStyled theme={darkMode ? 'dark' : 'light'} type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} /></td>
-                                            <td className={styles.tableCell}><InputStyled theme={darkMode ? 'dark' : 'light'} type="text" value={editPair} onChange={(e) => setEditPair(e.target.value)} /></td>
-                                            <td className={styles.tableCell}>
-                                                <SelectStyled theme={darkMode ? 'dark' : 'light'} value={editType} onChange={(e) => setEditType(e.target.value)}>
+                                            <td className="px-4 py-4"><input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" /></td>
+                                            <td className="px-4 py-4"><input type="text" value={editPair} onChange={(e) => setEditPair(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" /></td>
+                                            <td className="px-4 py-4">
+                                                <select value={editType} onChange={(e) => setEditType(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
                                                     <option value="Long">Long</option>
                                                     <option value="Short">Short</option>
-                                                </SelectStyled>
+                                                </select>
                                             </td>
-                                            <td className={styles.tableCell}>
-                                                <SelectStyled theme={darkMode ? 'dark' : 'light'} value={editResult} onChange={(e) => setEditResult(e.target.value)}>
+                                            <td className="px-4 py-4">
+                                                <select value={editResult} onChange={(e) => setEditResult(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
                                                     <option value="Exitosa">Exitosa</option>
                                                     <option value="Fallida">Fallida</option>
-                                                </SelectStyled>
+                                                </select>
                                             </td>
-                                            <td className={styles.tableCell}><InputStyled theme={darkMode ? 'dark' : 'light'} type="number" step="any" value={editProfit} onChange={(e) => setEditProfit(e.target.value)} /></td>
-                                            <td className={styles.tableCellActions}>
-                                                <button onClick={handleUpdateEntry} className={styles.submitButton}>Guardar</button>
-                                                <button onClick={() => setEditingId(null)} className={styles.deleteButton}>Cancelar</button>
+                                            <td className="px-4 py-4"><input type="number" step="any" value={editProfit} onChange={(e) => setEditProfit(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white" /></td>
+                                            <td className="px-4 py-4 text-right space-x-2">
+                                                <button onClick={handleUpdateEntry} className="text-green-500 hover:text-green-400 text-sm font-bold">Guardar</button>
+                                                <button onClick={() => setEditingId(null)} className="text-slate-400 hover:text-white text-sm">Cancelar</button>
                                             </td>
                                         </>
                                     ) : (
                                         <>
-                                            <td className={styles.tableCell}>{entry.date}</td>
-                                            <td className={styles.tableCell}>{entry.pair}</td>
-                                            <td className={styles.tableCell}>{entry.type}</td>
-                                            <td className={styles.tableCell}>
-                                                <span className={`${styles.statusBadge} ${entry.result === 'Exitosa' ? styles.statusCompleted : styles.statusError}`}>
+                                            <td className="px-4 py-4 text-slate-300 text-sm whitespace-nowrap">{entry.date}</td>
+                                            <td className="px-4 py-4 font-medium text-white">{entry.pair}</td>
+                                            <td className="px-4 py-4 text-slate-400">{entry.type}</td>
+                                            <td className="px-4 py-4">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${entry.result === 'Exitosa' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                                                     {entry.result}
                                                 </span>
                                             </td>
-                                            <td className={styles.tableCell} style={{ color: entry.profit >= 0 ? 'var(--green-check)' : 'var(--red-error)' }}>
+                                            <td className={`px-4 py-4 font-bold ${entry.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                                 {entry.profit >= 0 ? '+' : ''}{entry.profit}
                                             </td>
-                                            <td className={styles.tableCellActions}>
-                                                <button onClick={() => handleEditClick(entry)} className={styles.editButton}>Editar</button>
-                                                <button onClick={() => handleDeleteEntry(entry.id)} className={styles.deleteButton}>Eliminar</button>
+                                            <td className="px-4 py-4 text-right space-x-3">
+                                                <button onClick={() => handleEditClick(entry)} className="text-blue-400 hover:text-blue-300 text-sm font-medium">Editar</button>
+                                                <button onClick={() => handleDeleteEntry(entry.id)} className="text-red-400 hover:text-red-300 text-sm font-medium" disabled={isSubmitting}>Eliminar</button>
                                             </td>
                                         </>
                                     )}
@@ -237,8 +294,8 @@ const TradingHistoryManagement = () => {
                         </tbody>
                     </table>
                 </div>
-            </CardStyled>
-        </SolidSectionStyled>
+            </div>
+        </div>
     );
 };
 
