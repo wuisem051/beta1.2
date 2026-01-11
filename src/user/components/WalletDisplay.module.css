@@ -1,12 +1,15 @@
 /* WalletDisplay Premium Styles */
 
 .walletContainer {
+    composes: glassBase;
+    background-color: var(--bg-main);
     padding: 2rem 1.5rem;
     max-width: 1400px;
     margin: 0 auto;
 }
 
 .walletHeader {
+    composes: glassBase;
     text-align: center;
     margin-bottom: 3rem;
 }
