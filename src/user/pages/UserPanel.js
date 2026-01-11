@@ -137,7 +137,11 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                     <span className={styles.statTitle}>{signal.createdAt.toLocaleDateString()}</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className={styles.summaryCard} style={{ padding: '0.75rem' }}>
+                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>Inversión Máx</p>
+                      <p className={styles.statsTitle} style={{ marginBottom: 0 }}>${signal.maxInvestment || 100}</p>
+                    </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem' }}>
                       <p className={styles.statTitle} style={{ fontSize: '10px' }}>Entrada</p>
                       <p className={styles.statsTitle} style={{ marginBottom: 0 }}>{signal.entryPrice}</p>
@@ -147,7 +151,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                       <p className={styles.statsValueGreen} style={{ marginBottom: 0 }}>{signal.takeProfit}</p>
                     </div>
                     <div className={styles.summaryCard} style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.05)' }}>
-                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>S. Loss</p>
+                      <p className={styles.statTitle} style={{ fontSize: '10px' }}>S. Loss ({signal.stopLossPercentage || 0}%)</p>
                       <p className={styles.statsValueRed} style={{ marginBottom: 0 }}>{signal.stopLoss}</p>
                     </div>
                   </div>

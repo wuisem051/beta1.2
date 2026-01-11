@@ -23,7 +23,9 @@ const TradingSignalManagement = () => {
   const [takeProfit, setTakeProfit] = useState('');
   const [stopLoss, setStopLoss] = useState('');
   const [notes, setNotes] = useState('');
-  const [imageFile, setImageFile] = useState(null); // Nuevo estado para archivo de imagen
+  const [maxInvestment, setMaxInvestment] = useState('100'); // Valor por defecto solicitado
+  const [stopLossPercentage, setStopLossPercentage] = useState('');
+  const [imageFile, setImageFile] = useState(null);
 
   // Estados para la edición
   const [editingSignalId, setEditingSignalId] = useState(null);
@@ -50,6 +52,34 @@ const TradingSignalManagement = () => {
       percentage = ((entryNum - tpNum) / entryNum) * 100;
     }
     return percentage.toFixed(2) + '%';
+  };
+
+  // Función para calcular precio de SL basado en %
+  const calculateSLPrice = (type, entry, percentage) => {
+    const entryNum = parseFloat(entry);
+    const percNum = parseFloat(percentage);
+    if (isNaN(entryNum) || isNaN(percNum)) return '';
+
+    if (type === 'Compra') {
+      return (entryNum * (1 - percNum / 100)).toFixed(8);
+    } else {
+      return (entryNum * (1 + percNum / 100)).toFixed(8);
+    }
+  };
+
+  // Función para calcular % de SL basado en precio
+  const calculateSLPercentage = (type, entry, slPrice) => {
+    const entryNum = parseFloat(entry);
+    const slNum = parseFloat(slPrice);
+    if (isNaN(entryNum) || isNaN(slNum) || entryNum === 0) return '';
+
+    let percentage;
+    if (type === 'Compra') {
+      percentage = ((entryNum - slNum) / entryNum) * 100;
+    } else {
+      percentage = ((slNum - entryNum) / entryNum) * 100;
+    }
+    return Math.abs(percentage).toFixed(2);
   };
 
   useEffect(() => {
@@ -101,8 +131,11 @@ const TradingSignalManagement = () => {
         entryPrice: parseFloat(entryPrice),
         takeProfit: parseFloat(takeProfit),
         stopLoss: parseFloat(stopLoss),
+        stopLossPercentage: parseFloat(stopLossPercentage) || 0,
+        maxInvestment: parseFloat(maxInvestment) || 0,
+        status: 'Activa',
         notes,
-        imageUrl, // Guardar URL de la imagen
+        imageUrl,
         createdAt: new Date(),
       });
       showSuccess('Señal de trading añadida exitosamente.');
@@ -168,6 +201,40 @@ const TradingSignalManagement = () => {
       showError(`Fallo al actualizar señal: ${err.message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseSignal = async (signal, result) => {
+    if (!currentUser || !currentUser.uid) {
+      showError('Debes iniciar sesión.');
+      return;
+    }
+
+    const confirmMsg = `¿Cerrar esta señal como ${result}? Se moverá al historial de operaciones.`;
+    if (window.confirm(confirmMsg)) {
+      setIsSubmitting(true);
+      try {
+        // 1. Añadir al historial de operaciones
+        await addDoc(collection(db, 'tradingHistory'), {
+          date: new Date().toISOString().split('T')[0],
+          pair: signal.asset,
+          type: signal.type === 'Compra' ? 'Long' : 'Short',
+          result: result,
+          profit: result === 'Exitosa' ? parseFloat(signal.maxInvestment) * 0.15 : -parseFloat(signal.maxInvestment) * (signal.stopLossPercentage / 100), // Estimado de profit
+          createdAt: new Date(),
+          originalSignalId: signal.id
+        });
+
+        // 2. Eliminar de señales activas
+        await deleteDoc(doc(db, 'tradingSignals', signal.id));
+
+        showSuccess(`Señal cerrada como ${result} y movida al historial.`);
+      } catch (err) {
+        console.error("Error closing signal:", err);
+        showError(`Error al cerrar señal: ${err.message}`);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -266,14 +333,51 @@ const TradingSignalManagement = () => {
               disabled={isSubmitting}
             />
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={styles.formGroup}>
+              <label htmlFor="maxInvestment" className={styles.formLabel}>Inversión Máxima (USD)</label>
+              <InputStyled
+                theme={darkMode ? 'dark' : 'light'}
+                type="number"
+                id="maxInvestment"
+                value={maxInvestment}
+                onChange={(e) => setMaxInvestment(e.target.value)}
+                className={styles.formInput}
+                placeholder="Ej: 100"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="stopLossPercentage" className={styles.formLabel}>Stop Loss (%)</label>
+              <InputStyled
+                theme={darkMode ? 'dark' : 'light'}
+                type="number"
+                id="stopLossPercentage"
+                value={stopLossPercentage}
+                onChange={(e) => {
+                  setStopLossPercentage(e.target.value);
+                  const slPrice = calculateSLPrice(type, entryPrice, e.target.value);
+                  setStopLoss(slPrice);
+                }}
+                className={styles.formInput}
+                placeholder="Ej: 5"
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
           <div className={styles.formGroup}>
-            <label htmlFor="stopLoss" className={styles.formLabel}>Stop Loss</label>
+            <label htmlFor="stopLoss" className={styles.formLabel}>Precio Stop Loss</label>
             <InputStyled
               theme={darkMode ? 'dark' : 'light'}
               type="number"
               id="stopLoss"
               value={stopLoss}
-              onChange={(e) => setStopLoss(e.target.value)}
+              onChange={(e) => {
+                setStopLoss(e.target.value);
+                const slPerc = calculateSLPercentage(type, entryPrice, e.target.value);
+                setStopLossPercentage(slPerc);
+              }}
               step="any"
               className={styles.formInput}
               placeholder="Ej: 29500.00"
@@ -333,12 +437,14 @@ const TradingSignalManagement = () => {
                   <th className={styles.tableHeader}>Activo</th>
                   <th className={styles.tableHeader}>Tipo</th>
                   <th className={styles.tableHeader}>Entrada</th>
+                  <th className={styles.tableHeader}>Max Inv</th>
+                  <th className={styles.tableHeader}>SL %</th>
                   <th className={styles.tableHeader}>Take Profit</th>
                   <th className={styles.tableHeader}>Stop Loss</th>
                   <th className={styles.tableHeader}>Notas</th>
-                  <th className={styles.tableHeader}>Imagen</th> {/* Nueva columna para la imagen */}
+                  <th className={styles.tableHeader}>Imagen</th>
                   <th className={styles.tableHeader}>Fecha</th>
-                  <th className={styles.tableHeader}>%</th> {/* Nueva columna para el porcentaje */}
+                  <th className={styles.tableHeader}>% Potencial</th>
                   <th className={styles.tableHeader}>Acciones</th>
                 </tr>
               </thead>
@@ -385,6 +491,8 @@ const TradingSignalManagement = () => {
                         <td className={styles.tableCell}>{signal.asset}</td>
                         <td className={`${styles.tableCell} ${signal.type === 'Compra' ? styles.signalBuy : styles.signalSell}`}>{signal.type}</td>
                         <td className={styles.tableCell}>{signal.entryPrice}</td>
+                        <td className={styles.tableCell}>${signal.maxInvestment || 0}</td>
+                        <td className={styles.tableCell}>{signal.stopLossPercentage || 0}%</td>
                         <td className={styles.tableCell}>{signal.takeProfit}</td>
                         <td className={styles.tableCell}>{signal.stopLoss}</td>
                         <td className={styles.tableCell}>{signal.notes}</td>
@@ -400,8 +508,12 @@ const TradingSignalManagement = () => {
                           {calculatePercentage(signal.type, signal.entryPrice, signal.takeProfit)}
                         </td>
                         <td className={styles.tableCellActions}>
-                          <button onClick={() => handleEditClick(signal)} className={styles.editButton} disabled={isSubmitting}>Editar</button>
-                          <button onClick={() => handleDeleteSignal(signal.id)} className={styles.deleteButton} disabled={isSubmitting}>Eliminar</button>
+                          <div className="flex flex-col gap-1">
+                            <button onClick={() => handleCloseSignal(signal, 'Exitosa')} className={styles.editButton} style={{ backgroundColor: 'var(--green-check)', width: '100%', padding: '4px' }}>Finalizar ✓</button>
+                            <button onClick={() => handleCloseSignal(signal, 'Fallida')} className={styles.deleteButton} style={{ width: '100%', padding: '4px' }}>Finalizar ✗</button>
+                            <button onClick={() => handleEditClick(signal)} className={styles.editButton} style={{ width: '100%', padding: '4px' }}>Editar</button>
+                            <button onClick={() => handleDeleteSignal(signal.id)} className={styles.deleteButton} style={{ width: '100%', padding: '4px' }}>Eliminar</button>
+                          </div>
                         </td>
                       </>
                     )}
