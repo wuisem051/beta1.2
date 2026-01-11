@@ -42,7 +42,7 @@ body {
 
 /* Aplicar estilos del modo oscuro cuando la clase 'dark' está en el body */
 body.dark {
-  background-color: var(--dark-bg);
+  background-color: var(--bg-main);
   color: var(--light-text);
 }
 

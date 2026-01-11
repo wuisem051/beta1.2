@@ -164,6 +164,162 @@ export const colorPalettes = {
         bgMain: '#0c0101',
         bgSidebar: 'rgba(25, 4, 4, 0.95)',
     },
+
+    midnight: {
+        id: 'midnight',
+        name: 'Midnight Neon',
+        description: 'Cyberpunk style - Estilo nocturno futurista',
+        emoji: '🏙️',
+
+        accent: '#f0abfc',
+        accentDark: '#d946ef',
+        accentLight: '#f5d0fe',
+        accentGlow: 'rgba(240, 171, 252, 0.2)',
+
+        gradientAccent: 'linear-gradient(135deg, #f0abfc, #d946ef)',
+        gradientBlue: 'linear-gradient(135deg, #22d3ee, #0891b2)',
+        gradientGreen: 'linear-gradient(135deg, #34d399, #059669)',
+        gradientPurple: 'linear-gradient(135deg, #818cf8, #4f46e5)',
+        gradientRed: 'linear-gradient(135deg, #fb7185, #e11d48)',
+
+        blue: '#22d3ee',
+        green: '#34d399',
+        purple: '#818cf8',
+        red: '#fb7185',
+
+        bgMain: '#0f0716',
+        bgSidebar: 'rgba(24, 12, 35, 0.95)',
+    },
+
+    matrix: {
+        id: 'matrix',
+        name: 'The Matrix',
+        description: 'Hacker mode - Negro absoluto y verde digital',
+        emoji: '📟',
+
+        accent: '#22c55e',
+        accentDark: '#16a34a',
+        accentLight: '#4ade80',
+        accentGlow: 'rgba(34, 197, 94, 0.3)',
+
+        gradientAccent: 'linear-gradient(135deg, #22c55e, #15803d)',
+        gradientBlue: 'linear-gradient(135deg, #4d7c0f, #3f6212)',
+        gradientGreen: 'linear-gradient(135deg, #22c55e, #16a34a)',
+        gradientPurple: 'linear-gradient(135deg, #166534, #14532d)',
+        gradientRed: 'linear-gradient(135deg, #b91c1c, #991b1b)',
+
+        blue: '#4d7c0f',
+        green: '#22c55e',
+        purple: '#166534',
+        red: '#b91c1c',
+
+        bgMain: '#000000',
+        bgSidebar: 'rgba(0, 0, 0, 0.98)',
+    },
+
+    steel: {
+        id: 'steel',
+        name: 'Steel Tech',
+        description: 'Industrial y moderno - Gris acero y azul frío',
+        emoji: '🛡️',
+
+        accent: '#94a3b8',
+        accentDark: '#475569',
+        accentLight: '#cbd5e1',
+        accentGlow: 'rgba(148, 163, 184, 0.2)',
+
+        gradientAccent: 'linear-gradient(135deg, #94a3b8, #475569)',
+        gradientBlue: 'linear-gradient(135deg, #64748b, #334155)',
+        gradientGreen: 'linear-gradient(135deg, #10b981, #059669)',
+        gradientPurple: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+        gradientRed: 'linear-gradient(135deg, #ef4444, #dc2626)',
+
+        blue: '#64748b',
+        green: '#10b981',
+        purple: '#6366f1',
+        red: '#ef4444',
+
+        bgMain: '#1e293b',
+        bgSidebar: 'rgba(30, 41, 59, 0.98)',
+    },
+
+    arctic: {
+        id: 'arctic',
+        name: 'Arctic Frost',
+        description: 'Limpio y claro - Modo claro de alto contraste',
+        emoji: '❄️',
+
+        accent: '#0284c7',
+        accentDark: '#0369a1',
+        accentLight: '#0ea5e9',
+        accentGlow: 'rgba(2, 132, 199, 0.1)',
+
+        gradientAccent: 'linear-gradient(135deg, #0284c7, #0369a1)',
+        gradientBlue: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+        gradientGreen: 'linear-gradient(135deg, #10b981, #059669)',
+        gradientPurple: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+        gradientRed: 'linear-gradient(135deg, #ef4444, #dc2626)',
+
+        blue: '#0ea5e9',
+        green: '#10b981',
+        purple: '#6366f1',
+        red: '#ef4444',
+
+        bgMain: '#f8fafc',
+        bgSidebar: 'rgba(255, 255, 255, 0.98)',
+    },
+
+    emerald_night: {
+        id: 'emerald_night',
+        name: 'Emerald Night',
+        description: 'Elegante y místico - Verde profundo y oscuro',
+        emoji: '💎',
+
+        accent: '#10b981',
+        accentDark: '#047857',
+        accentLight: '#34d399',
+        accentGlow: 'rgba(16, 185, 129, 0.2)',
+
+        gradientAccent: 'linear-gradient(135deg, #10b981, #064e3b)',
+        gradientBlue: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+        gradientGreen: 'linear-gradient(135deg, #10b981, #059669)',
+        gradientPurple: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+        gradientRed: 'linear-gradient(135deg, #ef4444, #b91c1c)',
+
+        blue: '#3b82f6',
+        green: '#10b981',
+        purple: '#8b5cf6',
+        red: '#ef4444',
+
+        bgMain: '#022c22',
+        bgSidebar: 'rgba(6, 78, 59, 0.98)',
+    },
+
+    carbon: {
+        id: 'carbon',
+        name: 'Pure Carbon',
+        description: 'Minimalista y sobrio - Escala de grises perfecta',
+        emoji: '⚫',
+
+        accent: '#ffffff',
+        accentDark: '#a3a3a3',
+        accentLight: '#f5f5f5',
+        accentGlow: 'rgba(255, 255, 255, 0.1)',
+
+        gradientAccent: 'linear-gradient(135deg, #525252, #171717)',
+        gradientBlue: 'linear-gradient(135deg, #404040, #262626)',
+        gradientGreen: 'linear-gradient(135deg, #404040, #262626)',
+        gradientPurple: 'linear-gradient(135deg, #404040, #262626)',
+        gradientRed: 'linear-gradient(135deg, #dc2626, #991b1b)',
+
+        blue: '#404040',
+        green: '#404040',
+        purple: '#404040',
+        red: '#dc2626',
+
+        bgMain: '#0a0a0a',
+        bgSidebar: 'rgba(18, 18, 18, 0.98)',
+    },
 };
 
 // Función helper para obtener una paleta por ID

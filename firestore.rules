@@ -110,6 +110,14 @@ service cloud.firestore {
       // debe implementarse en las Cloud Functions, ya que las reglas de seguridad son más limitadas para eso.
     }
 
+    // Reglas para suscripciones VIP
+    match /subscriptions/{subscriptionId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // Regla general para cualquier otra colección (denegar todo)
     match /{document=**} {
       allow read, write: if false;

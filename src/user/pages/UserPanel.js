@@ -23,7 +23,6 @@ import styles from './UserPanel.module.css'; // Importar estilos CSS Modules
 import useFormValidation from '../../hooks/useFormValidation'; // Importar useFormValidation
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
-import vipPlans from '../../data/vipPlans';
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
 
 // Componentes de las sub-secciones
@@ -31,7 +30,25 @@ import VIPPlanDisplay from '../components/VIPPlanDisplay';
 const CopyTraderContent = ({ styles, userBalances }) => {
   const { darkMode } = useContext(ThemeContext);
   const [signals, setSignals] = useState([]);
+  const [vipPlans, setVipPlans] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'vipPlans'), (snapshot) => {
+      const plansData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setVipPlans(plansData);
+      setIsLoadingPlans(false);
+    }, (error) => {
+      console.error("Error fetching VIP plans for user:", error);
+      setIsLoadingPlans(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const isVIP = useMemo(() => {
     if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
@@ -74,9 +91,15 @@ const CopyTraderContent = ({ styles, userBalances }) => {
 
       <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Cupos VIP Mensuales</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
-        {vipPlans.map(plan => (
-          <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
-        ))}
+        {isLoadingPlans ? (
+          <div className={styles.noDataText}>Cargando planes VIP...</div>
+        ) : vipPlans.length === 0 ? (
+          <div className={styles.noDataText}>No hay planes VIP configurados.</div>
+        ) : (
+          vipPlans.map(plan => (
+            <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
+          ))
+        )}
       </div>
 
       <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Señales de Trading (Binance)</h2>
