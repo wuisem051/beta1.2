@@ -1,49 +1,44 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { doc, onSnapshot, getFirestore, setDoc } from 'firebase/firestore';
-import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
-import { useError } from '../../context/ErrorContext'; // Importar useError para mostrar mensajes
-import styles from './WalletDisplay.module.css'; // Importar estilos premium
-
+import { ThemeContext } from '../../context/ThemeContext';
+import { useError } from '../../context/ErrorContext';
+import styles from './WalletDisplay.module.css';
 
 const WalletDisplay = ({ currentUser }) => {
   const { theme, darkMode } = useContext(ThemeContext);
-  const { showSuccess } = useError(); // Usar el contexto de errores
-  const [userPortfolio, setUserPortfolio] = useState(null);
+  const { showSuccess, showError } = useError();
+  const [userBalances, setUserBalances] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const db = getFirestore();
 
   useEffect(() => {
     if (currentUser?.uid) {
       setLoading(true);
       const userDocRef = doc(db, `users/${currentUser.uid}`);
-      const unsubscribe = onSnapshot(userDocRef, async (docSnap) => { // Ahora lee el documento principal del usuario
+      const unsubscribe = onSnapshot(userDocRef, async (docSnap) => {
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          // Mapear los balances del documento de usuario a la estructura de portfolio
-          const mappedPortfolio = {
-            fiatBalanceUSD: userData.balanceUSD || 0, // Saldo Fiat USD
-            fiatBalanceVES: userData.balanceVES || 0, // Saldo Fiat VES
-            virtualBalanceUSD: userData.virtualBalanceUSD || 0, // Nuevo Saldo Virtual USD
-            holdings: {
-              BTC: userData.balanceBTC || 0,
-              LTC: userData.balanceLTC || 0,
-              DOGE: userData.balanceDOGE || 0,
-              USDT: userData.balanceUSDT || 0, // Incluir USDT
-            },
-            updatedAt: new Date(),
-          };
-          setUserPortfolio(mappedPortfolio);
+          setUserBalances({
+            // Criptomonedas
+            balanceBTC: userData.balanceBTC || 0,
+            balanceLTC: userData.balanceLTC || 0,
+            balanceDOGE: userData.balanceDOGE || 0,
+            balanceUSDTTRC20: userData.balanceUSDTTRC20 || 0, // USDT TRC20
+            balanceTRX: userData.balanceTRX || 0, // TRX
+            // P2P y Fiat
+            balanceVES: userData.balanceVES || 0,
+            balanceUSDTFiat: userData.balanceUSDTFiat || 0, // USDT Fiat para P2P
+          });
         } else {
-          console.log("No se encontró el documento del usuario. Inicializando balances por defecto.");
+          console.log("Inicializando balances por defecto.");
           const defaultBalances = {
-            balanceUSD: 0,
-            balanceVES: 0, // Inicializar balanceVES
-            virtualBalanceUSD: 0, // Inicializar saldo virtual
             balanceBTC: 0,
             balanceLTC: 0,
             balanceDOGE: 0,
-            balanceUSDT: 0, // Incluir balanceUSDT en la inicialización
+            balanceUSDTTRC20: 0,
+            balanceTRX: 0,
+            balanceVES: 0,
+            balanceUSDTFiat: 0,
             role: 'user',
             email: currentUser.email,
             paymentAddresses: {},
@@ -51,79 +46,25 @@ const WalletDisplay = ({ currentUser }) => {
           };
           try {
             await setDoc(userDocRef, defaultBalances, { merge: true });
-            const mappedPortfolio = {
-              fiatBalanceUSD: defaultBalances.balanceUSD,
-              fiatBalanceVES: defaultBalances.balanceVES, // Mapear saldo VES
-              virtualBalanceUSD: defaultBalances.virtualBalanceUSD, // Mapear saldo virtual
-              holdings: {
-                BTC: defaultBalances.balanceBTC,
-                LTC: defaultBalances.balanceLTC,
-                DOGE: defaultBalances.balanceDOGE,
-                USDT: defaultBalances.balanceUSDT, // Incluir USDT
-              },
-              updatedAt: new Date(),
-            };
-            setUserPortfolio(mappedPortfolio);
-            console.log("Balances por defecto creados exitosamente en el documento del usuario.");
+            setUserBalances(defaultBalances);
+            console.log("Balances por defecto creados exitosamente.");
           } catch (setDocError) {
-            console.error("Error al inicializar balances por defecto:", setDocError);
-            setError("Error al inicializar el saldo de la billetera.");
+            console.error("Error al inicializar balances:", setDocError);
+            showError("Error al inicializar el saldo de la billetera.");
           }
         }
         setLoading(false);
       }, (err) => {
-        console.error("Error al obtener balances de usuario en tiempo real:", err);
-        setError("Error al cargar el saldo de la billetera.");
+        console.error("Error al obtener balances:", err);
+        showError("Error al cargar el saldo de la billetera.");
         setLoading(false);
       });
       return () => unsubscribe();
     } else {
-      setUserPortfolio(null);
+      setUserBalances(null);
       setLoading(false);
     }
-  }, [currentUser, db]);
-
-  const [usdToUsdtAmount, setUsdToUsdtAmount] = useState('');
-  const [exchangeLoading, setExchangeLoading] = useState(false);
-
-  const handleExchange = async () => {
-    setError(null);
-    if (!currentUser?.uid) {
-      setError('Debes iniciar sesión para realizar intercambios.');
-      return;
-    }
-
-    const amountToExchange = parseFloat(usdToUsdtAmount);
-    if (isNaN(amountToExchange) || amountToExchange <= 0) {
-      setError('Por favor, introduce una cantidad válida para intercambiar.');
-      return;
-    }
-
-    if (userPortfolio.fiatBalanceUSD < amountToExchange) {
-      setError('Fondos insuficientes en USD para realizar el intercambio.');
-      return;
-    }
-
-    setExchangeLoading(true);
-    try {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const newFiatBalanceUSD = userPortfolio.fiatBalanceUSD - amountToExchange;
-      const newBalanceUSDT = userPortfolio.holdings.USDT + amountToExchange; // Asumiendo 1:1
-
-      await setDoc(userDocRef, {
-        balanceUSD: newFiatBalanceUSD,
-        balanceUSDT: newBalanceUSDT,
-      }, { merge: true });
-
-      setUsdToUsdtAmount('');
-      showSuccess('Intercambio de USD a USDT realizado con éxito!');
-    } catch (err) {
-      console.error("Error al realizar el intercambio:", err);
-      setError(`Fallo al realizar el intercambio: ${err.message}`);
-    } finally {
-      setExchangeLoading(false);
-    }
-  };
+  }, [currentUser, db, showError]);
 
   if (loading) {
     return (
@@ -133,19 +74,10 @@ const WalletDisplay = ({ currentUser }) => {
     );
   }
 
-  if (error) {
+  if (!userBalances) {
     return (
       <div className={styles.errorContainer}>
-        <p className={styles.errorText}>{error}</p>
-      </div>
-    );
-  }
-
-  // Si userPortfolio es null aquí, significa que no hay currentUser o hubo un error en la inicialización
-  if (!userPortfolio) {
-    return (
-      <div className={styles.errorContainer}>
-        <p className={styles.noDataText}>No se pudo cargar la información de tu billetera. Por favor, intenta de nuevo o contacta a soporte.</p>
+        <p className={styles.noDataText}>No se pudo cargar la información de tu billetera.</p>
       </div>
     );
   }
@@ -158,84 +90,100 @@ const WalletDisplay = ({ currentUser }) => {
         <p className={styles.walletSubtitle}>Gestiona tus fondos y criptomonedas</p>
       </div>
 
-      {/* Sección de Saldos Fiat */}
-      <div className={styles.fiatSection}>
-        <h3 className={styles.sectionTitle}>Saldos Fiat</h3>
-        <div className={styles.balanceGrid}>
-          {/* USD Fiat Card */}
-          <div className={styles.balanceCardUSD}>
-            <p className={styles.balanceLabel}>💵 USD (Fiat)</p>
-            <p className={styles.balanceAmount}>
-              ${userPortfolio.fiatBalanceUSD ? userPortfolio.fiatBalanceUSD.toFixed(2) : '0.00'}
-            </p>
-          </div>
-
-          {/* VES Fiat Card */}
-          <div className={styles.balanceCardVES}>
-            <p className={styles.balanceLabel}>💰 VES (Fiat)</p>
-            <p className={styles.balanceAmount}>
-              Bs.{userPortfolio.fiatBalanceVES ? userPortfolio.fiatBalanceVES.toFixed(2) : '0.00'}
-            </p>
-          </div>
-
-          {/* USD Virtual Card */}
-          <div className={styles.balanceCardVirtual}>
-            <p className={styles.balanceLabel}>🌐 USD (Virtual)</p>
-            <p className={styles.balanceAmount}>
-              ${userPortfolio.virtualBalanceUSD ? userPortfolio.virtualBalanceUSD.toFixed(2) : '0.00'}
-            </p>
-          </div>
+      {/* Sección de Criptomonedas */}
+      <div className={styles.cryptoSection}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={styles.sectionTitle}>🪙 Criptomonedas</h3>
+          <span className="text-xs text-slate-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+            Para compras en la plataforma
+          </span>
         </div>
 
-        {/* Sección de Intercambio USD a USDT */}
-        <div className={styles.exchangeSection}>
-          <h3 className={styles.exchangeTitle}>⚡ Intercambiar USD a USDT (1:1)</h3>
-          <form className={styles.exchangeForm} onSubmit={(e) => { e.preventDefault(); handleExchange(); }}>
-            <input
-              type="number"
-              value={usdToUsdtAmount}
-              onChange={(e) => setUsdToUsdtAmount(e.target.value)}
-              placeholder="Cantidad de USD"
-              className={styles.exchangeInput}
-              step="0.01"
-              min="0"
-              disabled={exchangeLoading}
-            />
-            <button
-              type="submit"
-              className={styles.exchangeButton}
-              disabled={exchangeLoading}
-            >
-              {exchangeLoading ? 'Cambiando...' : 'Cambiar USD a USDT'}
-            </button>
-          </form>
-          {error && <p className={styles.errorText}>{error}</p>}
+        <div className={styles.balanceGrid}>
+          {/* BTC Card */}
+          <div className={styles.balanceCardCrypto} style={{ borderLeft: '4px solid #f7931a' }}>
+            <p className={styles.balanceLabel}>₿ Bitcoin (BTC)</p>
+            <p className={styles.balanceAmount}>
+              {userBalances.balanceBTC.toFixed(8)} BTC
+            </p>
+          </div>
+
+          {/* LTC Card */}
+          <div className={styles.balanceCardCrypto} style={{ borderLeft: '4px solid #345d9d' }}>
+            <p className={styles.balanceLabel}>Ł Litecoin (LTC)</p>
+            <p className={styles.balanceAmount}>
+              {userBalances.balanceLTC.toFixed(8)} LTC
+            </p>
+          </div>
+
+          {/* DOGE Card */}
+          <div className={styles.balanceCardCrypto} style={{ borderLeft: '4px solid #c2a633' }}>
+            <p className={styles.balanceLabel}>Ð Dogecoin (DOGE)</p>
+            <p className={styles.balanceAmount}>
+              {userBalances.balanceDOGE.toFixed(4)} DOGE
+            </p>
+          </div>
+
+          {/* USDT TRC20 Card */}
+          <div className={styles.balanceCardCrypto} style={{ borderLeft: '4px solid #26a17b' }}>
+            <p className={styles.balanceLabel}>₮ USDT (TRC20)</p>
+            <p className={styles.balanceAmount}>
+              {userBalances.balanceUSDTTRC20.toFixed(2)} USDT
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Red: Tron</p>
+          </div>
+
+          {/* TRX Card */}
+          <div className={styles.balanceCardCrypto} style={{ borderLeft: '4px solid #ef0027' }}>
+            <p className={styles.balanceLabel}>🔴 Tron (TRX)</p>
+            <p className={styles.balanceAmount}>
+              {userBalances.balanceTRX.toFixed(4)} TRX
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Sección de Saldos de Criptomonedas */}
-      <div className={styles.cryptoSection}>
-        <h3 className={styles.sectionTitle}>🪙 Saldos de Criptomonedas</h3>
-        {userPortfolio.holdings && Object.keys(userPortfolio.holdings).length > 0 ? (
-          <table className={styles.cryptoTable}>
-            <thead className={styles.cryptoTableHead}>
-              <tr>
-                <th className={styles.cryptoTableHeader}>Moneda</th>
-                <th className={styles.cryptoTableHeader}>Cantidad</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(userPortfolio.holdings).map(([coin, qty]) => (
-                <tr key={coin} className={styles.cryptoTableRow}>
-                  <td className={`${styles.cryptoTableCell} ${styles.cryptoCoin}`}>{coin.toUpperCase()}</td>
-                  <td className={`${styles.cryptoTableCell} ${styles.cryptoAmount}`}>{qty.toFixed(4)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className={styles.noDataText}>No tienes criptomonedas en tu billetera.</p>
-        )}
+      {/* Sección de P2P y Fiat */}
+      <div className={styles.fiatSection}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={styles.sectionTitle}>💱 P2P y Fondos Fiat</h3>
+          <span className="text-xs text-yellow-500 bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
+            ⚠️ Solo para intercambio P2P
+          </span>
+        </div>
+
+        <div className={styles.balanceGrid}>
+          {/* VES Card */}
+          <div className={styles.balanceCardVES}>
+            <p className={styles.balanceLabel}>💰 Bolívar Soberano (VES)</p>
+            <p className={styles.balanceAmount}>
+              Bs. {userBalances.balanceVES.toFixed(2)}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Solo P2P</p>
+          </div>
+
+          {/* USDT Fiat Card */}
+          <div className={styles.balanceCardUSD}>
+            <p className={styles.balanceLabel}>💵 USDT (Fiat)</p>
+            <p className={styles.balanceAmount}>
+              ${userBalances.balanceUSDTFiat.toFixed(2)}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Solo P2P</p>
+          </div>
+        </div>
+
+        <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+          <div className="flex gap-3">
+            <span className="text-xl">ℹ️</span>
+            <div>
+              <p className="text-yellow-500 font-bold text-sm mb-1">Importante</p>
+              <p className="text-xs text-slate-300">
+                Los fondos en esta sección solo pueden ser utilizados para intercambios P2P con otros usuarios.
+                No se pueden usar para compras directas en la plataforma.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

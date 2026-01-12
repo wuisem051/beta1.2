@@ -14,6 +14,8 @@ import WithdrawalRequestsManagement from '../components/WithdrawalRequestsManage
 import BalanceManagement from '../../user/components/BalanceManagement';
 import VIPPlansManagement from '../components/VIPPlansManagement';
 import TradingHistoryManagement from '../components/TradingHistoryManagement';
+import DepositManagement from '../components/DepositManagement';
+import DepositAddressSettings from '../components/DepositAddressSettings';
 
 const AdminPanel = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -211,6 +213,28 @@ const AdminPanel = () => {
                 🎨 Paletas de Colores
               </Link>
             </li>
+            <li className="mb-0.5">
+              <Link
+                to="/admin/deposit-management"
+                className={`flex items-center py-1.5 px-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/deposit-management'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
+              >
+                💰 Gestión de Depósitos
+              </Link>
+            </li>
+            <li className="mb-0.5">
+              <Link
+                to="/admin/deposit-addresses"
+                className={`flex items-center py-1.5 px-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/deposit-addresses'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
+              >
+                🔑 Direcciones de Depósito
+              </Link>
+            </li>
           </ul>
         </nav>
       </aside >
@@ -241,6 +265,8 @@ const AdminPanel = () => {
           <Route path="vip-plans" element={<VIPPlansManagement />} />
           <Route path="trading-history" element={<TradingHistoryManagement />} />
           <Route path="color-palettes" element={<ColorPaletteSettings />} /> {/* Nueva ruta para Paletas de Colores */}
+          <Route path="deposit-management" element={<DepositManagement />} /> {/* Nueva ruta para Gestión de Depósitos */}
+          <Route path="deposit-addresses" element={<DepositAddressSettings />} /> {/* Nueva ruta para Direcciones de Depósito */}
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
             <div className={`p-6 rounded-2xl shadow-xl`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>

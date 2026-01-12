@@ -129,6 +129,11 @@ body.dark .balanceCard {
     color: var(--blue-link);
 }
 
+.balanceCardCrypto {
+    composes: balanceCard;
+    color: var(--accent);
+}
+
 .balanceLabel {
     font-size: 0.875rem;
     font-weight: 700;

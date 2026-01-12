@@ -12,6 +12,7 @@ import CollectiveFundContent from '../components/CollectiveFundContent'; // Impo
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
 import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
+import DepositContent from '../components/DepositContent'; // Importar DepositContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
@@ -147,6 +148,9 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                       <div className="flex gap-2 items-center">
                         <span className={styles.statusBadge} style={{ background: signal.type === 'Compra' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
                           {signal.type}
+                        </span>
+                        <span className={styles.statusBadge} style={{ background: signal.status === 'En espera' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: signal.status === 'En espera' ? '#f59e0b' : 'var(--green-check)', border: signal.status === 'En espera' ? '1px solid rgba(245, 158, 11, 0.2)' : 'none' }}>
+                          {signal.status || 'Activa'}
                         </span>
                         <span className={styles.statusBadge} style={{ background: 'rgba(255, 191, 0, 0.1)', color: 'var(--accent)', border: '1px solid rgba(255, 191, 0, 0.2)', fontSize: '10px', fontWeight: 'bold' }}>
                           VIP EXCLUSIVO
@@ -1729,6 +1733,7 @@ const UserPanel = () => {
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="mining-portfolio/*" element={<TradingPortfolioContent />} /> {/* Nueva ruta para Portafolio de Trading */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
+          <Route path="deposits/*" element={<DepositContent />} /> {/* Nueva ruta para Depósitos */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}

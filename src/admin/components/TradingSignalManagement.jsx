@@ -24,6 +24,7 @@ const TradingSignalManagement = () => {
   const [notes, setNotes] = useState('');
   const [maxInvestment, setMaxInvestment] = useState('100'); // Valor por defecto solicitado
   const [stopLossPercentage, setStopLossPercentage] = useState('');
+  const [status, setStatus] = useState('Activa'); // 'Activa' o 'En espera'
   const [imageFile, setImageFile] = useState(null);
 
   // Estados para la edición
@@ -37,6 +38,7 @@ const TradingSignalManagement = () => {
   const [editMaxInvestment, setEditMaxInvestment] = useState('');
   const [editStopLossPercentage, setEditStopLossPercentage] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
+  const [editStatus, setEditStatus] = useState('Activa');
   const [editCreatedAt, setEditCreatedAt] = useState('');
 
   // Función para calcular el porcentaje de ganancia/pérdida
@@ -136,7 +138,7 @@ const TradingSignalManagement = () => {
         stopLoss: parseFloat(stopLoss),
         stopLossPercentage: parseFloat(stopLossPercentage) || 0,
         maxInvestment: parseFloat(maxInvestment) || 0,
-        status: 'Activa',
+        status: status,
         notes,
         imageUrl,
         createdAt: new Date(),
@@ -172,6 +174,7 @@ const TradingSignalManagement = () => {
     setEditMaxInvestment(signal.maxInvestment || '');
     setEditStopLossPercentage(signal.stopLossPercentage || '');
     setEditImageUrl(signal.imageUrl || '');
+    setEditStatus(signal.status || 'Activa');
     setEditCreatedAt(signal.createdAt.toISOString().split('T')[0]);
   };
 
@@ -201,6 +204,7 @@ const TradingSignalManagement = () => {
         stopLoss: parseFloat(editStopLoss),
         stopLossPercentage: parseFloat(editStopLossPercentage) || 0,
         maxInvestment: parseFloat(editMaxInvestment) || 0,
+        status: editStatus,
         notes: editNotes,
         imageUrl: editImageUrl,
         createdAt: new Date(editCreatedAt),
@@ -410,7 +414,20 @@ const TradingSignalManagement = () => {
               disabled={isSubmitting}
             ></textarea>
           </div>
-          <div className="space-y-2 col-span-full">
+          <div className="space-y-2">
+            <label htmlFor="status" className="text-sm font-medium text-slate-400">Estado de la Señal</label>
+            <select
+              id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+              disabled={isSubmitting}
+            >
+              <option value="Activa">Activa</option>
+              <option value="En espera">En espera</option>
+            </select>
+          </div>
+          <div className="space-y-2">
             <label htmlFor="signalImage" className="text-sm font-medium text-slate-400">Captura de Pantalla/Imagen (Opcional)</label>
             <input
               type="file"
@@ -458,6 +475,7 @@ const TradingSignalManagement = () => {
                   <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Imagen</th>
                   <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
                   <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">% Potencial</th>
+                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Estado</th>
                   <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Acciones</th>
                 </tr>
               </thead>
@@ -506,6 +524,12 @@ const TradingSignalManagement = () => {
                           <input type="text" value={editImageUrl} onChange={(e) => setEditImageUrl(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" placeholder="URL de imagen" disabled={isSubmitting} />
                         </td>
                         <td className="px-2 py-2">
+                          <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting}>
+                            <option value="Activa">Activa</option>
+                            <option value="En espera">En espera</option>
+                          </select>
+                        </td>
+                        <td className="px-2 py-2">
                           <input type="date" value={editCreatedAt} onChange={(e) => setEditCreatedAt(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
                         </td>
                         <td className="px-2 py-2 text-blue-400 font-bold text-xs">
@@ -540,6 +564,11 @@ const TradingSignalManagement = () => {
                         <td className="px-4 py-4 text-slate-400 text-sm whitespace-nowrap">{signal.createdAt.toLocaleDateString()}</td>
                         <td className="px-4 py-4 text-blue-400 font-bold">
                           {calculatePercentage(signal.type, signal.entryPrice, signal.takeProfit)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${signal.status === 'En espera' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : 'bg-green-500/10 text-green-500 border border-green-500/20'}`}>
+                            {signal.status || 'Activa'}
+                          </span>
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-col gap-2">
