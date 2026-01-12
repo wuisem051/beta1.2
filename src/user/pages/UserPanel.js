@@ -438,6 +438,8 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
     balanceLTC: 0,
     balanceDOGE: 0,
     balanceVES: 0,
+    balanceUSDTTRC20: 0,
+    balanceTRX: 0,
   });
   const [withdrawalsHistory, setWithdrawalsHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -495,6 +497,8 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
             balanceLTC: userData.balanceLTC || 0,
             balanceDOGE: userData.balanceDOGE || 0,
             balanceVES: userData.balanceVES || 0,
+            balanceUSDTTRC20: userData.balanceUSDTTRC20 || 0,
+            balanceTRX: userData.balanceTRX || 0,
           });
         }
       });
@@ -635,6 +639,8 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
                 <option value="BTC">Bitcoin (BTC)</option>
                 <option value="DOGE">Dogecoin (DOGE)</option>
                 <option value="LTC">Litecoin (LTC)</option>
+                <option value="USDTTRC20">USDT (TRC20)</option>
+                <option value="TRX">Tron (TRX)</option>
                 <option value="USD">USD</option>
                 <option value="VES">VES</option>
               </select>
@@ -697,7 +703,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
             <div className={styles.summaryCard} style={{ margin: '1rem 0', background: 'rgba(0,0,0,0.02)' }}>
               <div className="flex justify-between text-xs font-semibold">
                 <span>Disponible:</span>
-                <span className={styles.statsValueGreen}>{availableBalance.toFixed(currency === 'USD' ? 2 : 8)} {currency}</span>
+                <span className={styles.statsValueGreen}>{availableBalance.toFixed((currency === 'USD' || currency === 'USDTTRC20') ? 2 : 8)} {currency}</span>
               </div>
             </div>
 
@@ -725,7 +731,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
                   {withdrawalsHistory.map((w) => (
                     <tr key={w.id}>
                       <td className={styles.tableCell}>{w.createdAt.toLocaleDateString()}</td>
-                      <td className={styles.tableCell}>{w.amount.toFixed(8)} {w.currency}</td>
+                      <td className={styles.tableCell}>{w.amount.toFixed((w.currency === 'USD' || w.currency === 'USDTTRC20') ? 2 : 8)} {w.currency}</td>
                       <td className={styles.tableCell}>
                         <span className={`${styles.statusBadge} ${w.status === 'Pendiente' ? styles.statusPending : styles.statusCompleted}`}>
                           {w.status}
@@ -1454,6 +1460,8 @@ const UserPanel = () => {
     balanceLTC: 0,
     balanceDOGE: 0,
     balanceVES: 0,
+    balanceUSDTTRC20: 0,
+    balanceTRX: 0,
     vipStatus: 'none',
     vipExpiry: null,
   });
@@ -1581,6 +1589,8 @@ const UserPanel = () => {
           balanceLTC: userData.balanceLTC || 0,
           balanceDOGE: userData.balanceDOGE || 0,
           balanceVES: userData.balanceVES || 0,
+          balanceUSDTTRC20: userData.balanceUSDTTRC20 || 0,
+          balanceTRX: userData.balanceTRX || 0,
           vipStatus: userData.vipStatus || 'none',
           vipExpiry: userData.vipExpiry || null,
         });
@@ -1607,6 +1617,8 @@ const UserPanel = () => {
             balanceLTC: 0,
             balanceDOGE: 0,
             balanceVES: 0, // Añadir balanceVES
+            balanceUSDTTRC20: 0,
+            balanceTRX: 0,
           });
           setUserPaymentAddresses({});
         } catch (insertError) {

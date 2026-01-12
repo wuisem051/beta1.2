@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, where } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, where } from 'firebase/firestore';
 import { useError } from '../../context/ErrorContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -66,9 +66,9 @@ const DepositManagement = () => {
             const userRef = doc(db, 'users', deposit.userId);
             const balanceField = `balance${deposit.currency.replace('-', '')}`;
 
-            // Obtener balance actual y sumar
-            const userDoc = await db.collection('users').doc(deposit.userId).get();
-            const currentBalance = userDoc.data()?.[balanceField] || 0;
+            // Obtener balance actual y sumar (Usando sintaxis modular de Firebase v9)
+            const userSnap = await getDoc(userRef);
+            const currentBalance = userSnap.exists() ? (userSnap.data()[balanceField] || 0) : 0;
 
             await updateDoc(userRef, {
                 [balanceField]: currentBalance + deposit.amount
@@ -140,8 +140,8 @@ const DepositManagement = () => {
                             key={status}
                             onClick={() => setFilter(status)}
                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${filter === status
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                                 }`}
                         >
                             {status}
