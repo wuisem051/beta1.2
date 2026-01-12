@@ -25,7 +25,13 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const isPlanTradingActive = useMatch(`${basePath}/plan-trading`);
   const isVIPChatActive = useMatch(`${basePath}/vip-chat`);
 
-  const isVIP = displayUser?.vipStatus === 'monthly' || displayUser?.vipStatus === 'yearly' || displayUser?.vipStatus === 'active';
+  const isVIP = useMemo(() => {
+    if (!displayUser?.vipStatus || displayUser.vipStatus === 'none') return false;
+    if (!displayUser.vipExpiry) return false;
+    const now = new Date();
+    const expiry = displayUser.vipExpiry.toDate ? displayUser.vipExpiry.toDate() : new Date(displayUser.vipExpiry);
+    return expiry > now;
+  }, [displayUser.vipStatus, displayUser.vipExpiry]);
 
   const handleVIPChatClick = (e) => {
     if (!isVIP) {
@@ -50,7 +56,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           {displayUser?.displayName || displayUser?.username || displayUser?.email || 'Usuario'}
         </h2>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: isVIP ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: isVIP ? '#10b981' : 'var(--accent)' }}>
+          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: isVIP ? 'rgba(234, 179, 8, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: isVIP ? '#eab308' : 'var(--accent)' }}>
             {isVIP ? 'VIP Member' : 'Pro Trader'}
           </span>
         </div>

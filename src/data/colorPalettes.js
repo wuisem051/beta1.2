@@ -323,9 +323,9 @@ export const colorPalettes = {
         gradientPurple: 'linear-gradient(135deg, #404040, #262626)',
         gradientRed: 'linear-gradient(135deg, #dc2626, #991b1b)',
 
-        blue: '#404040',
-        green: '#404040',
-        purple: '#404040',
+        blue: '#ffffff',
+        green: '#ffffff',
+        purple: '#ffffff',
         red: '#dc2626',
 
         bgMain: '#0a0a0a',

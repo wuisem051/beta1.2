@@ -19,10 +19,15 @@ const UserManagement = () => {
   const [editBalanceBTC, setEditBalanceBTC] = useState(0);
   const [editBalanceLTC, setEditBalanceLTC] = useState(0);
   const [editBalanceDOGE, setEditBalanceDOGE] = useState(0);
-  const [editBalanceUSDT, setEditBalanceUSDT] = useState(0); // Nuevo estado para USDT
+  const [editBalanceUSDTTRC20, setEditBalanceUSDTTRC20] = useState(0); // Corregido a balanceUSDTTRC20
+  const [editBalanceTRX, setEditBalanceTRX] = useState(0); // Añadido TRX
   const [editBalanceVES, setEditBalanceVES] = useState(0); // Nuevo estado para VES
   const [addUSDTAmount, setAddUSDTAmount] = useState(''); // Estado para añadir/restar USDT
+  const [addTRXAmount, setAddTRXAmount] = useState(''); // Estado para añadir/restar TRX
   const [addVESAmount, setAddVESAmount] = useState(''); // Estado para añadir/restar VES
+  const [addBTCAmount, setAddBTCAmount] = useState('');
+  const [addLTCAmount, setAddLTCAmount] = useState('');
+  const [addDOGEAmount, setAddDOGEAmount] = useState('');
   const [editVipStatus, setEditVipStatus] = useState(''); // Nuevo estado para VIP Status
   const [editVipExpiry, setEditVipExpiry] = useState(''); // Nuevo estado para VIP Expiry
   const [selectedUserIds, setSelectedUserIds] = useState([]); // Nuevo estado para selección masiva
@@ -93,11 +98,12 @@ const UserManagement = () => {
       await setDoc(doc(db, 'users', firebaseUser.uid), {
         email: newUserEmail,
         role: newUserRole,
-        balanceUSD: 0,
         balanceBTC: 0,
         balanceLTC: 0,
         balanceDOGE: 0,
-        balanceVES: 0, // Añadir balanceVES
+        balanceVES: 0,
+        balanceUSDTTRC20: 0,
+        balanceTRX: 0,
         createdAt: new Date(),
       });
 
@@ -130,10 +136,15 @@ const UserManagement = () => {
     setEditBalanceBTC(user.balanceBTC || 0);
     setEditBalanceLTC(user.balanceLTC || 0);
     setEditBalanceDOGE(user.balanceDOGE || 0);
-    setEditBalanceUSDT(user.balanceUSDT || 0); // Inicializar USDT
+    setEditBalanceUSDTTRC20(user.balanceUSDTTRC20 || 0); // Corregido field name
+    setEditBalanceTRX(user.balanceTRX || 0); // Inicializar TRX
     setEditBalanceVES(user.balanceVES || 0); // Inicializar VES
     setAddUSDTAmount(''); // Resetear al abrir edición
+    setAddTRXAmount(''); // Resetear al abrir edición
     setAddVESAmount(''); // Resetear al abrir edición
+    setAddBTCAmount('');
+    setAddLTCAmount('');
+    setAddDOGEAmount('');
     setEditVipStatus(user.vipStatus || 'none');
     setEditVipExpiry(user.vipExpiry ? (user.vipExpiry.toDate ? user.vipExpiry.toDate().toISOString().substring(0, 10) : user.vipExpiry.substring(0, 10)) : '');
   };
@@ -147,12 +158,12 @@ const UserManagement = () => {
       await updateDoc(userRef, {
         email: editEmail,
         role: editRole,
-        balanceUSD: parseFloat(editBalanceUSD),
-        balanceBTC: parseFloat(editBalanceBTC),
-        balanceLTC: parseFloat(editBalanceLTC),
-        balanceDOGE: parseFloat(editBalanceDOGE),
-        balanceUSDT: parseFloat(editBalanceUSDT) + (addUSDTAmount !== '' ? parseFloat(addUSDTAmount) : 0), // Actualizar USDT
-        balanceVES: parseFloat(editBalanceVES) + (addVESAmount !== '' ? parseFloat(addVESAmount) : 0), // Actualizar VES
+        balanceBTC: parseFloat(editBalanceBTC) + (addBTCAmount !== '' ? parseFloat(addBTCAmount) : 0),
+        balanceLTC: parseFloat(editBalanceLTC) + (addLTCAmount !== '' ? parseFloat(addLTCAmount) : 0),
+        balanceDOGE: parseFloat(editBalanceDOGE) + (addDOGEAmount !== '' ? parseFloat(addDOGEAmount) : 0),
+        balanceUSDTTRC20: parseFloat(editBalanceUSDTTRC20) + (addUSDTAmount !== '' ? parseFloat(addUSDTAmount) : 0),
+        balanceTRX: parseFloat(editBalanceTRX) + (addTRXAmount !== '' ? parseFloat(addTRXAmount) : 0),
+        balanceVES: parseFloat(editBalanceVES) + (addVESAmount !== '' ? parseFloat(addVESAmount) : 0),
         vipStatus: editVipStatus,
         vipExpiry: editVipExpiry ? new Date(editVipExpiry) : null,
       });
@@ -470,15 +481,6 @@ const UserManagement = () => {
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Gestión de Balances y VIP</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400">Balance USD Actual</label>
-                  <input
-                    type="number"
-                    value={editBalanceUSD}
-                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-slate-500 cursor-not-allowed text-sm"
-                    readOnly
-                  />
-                </div>
-                <div className="space-y-2">
                   <label htmlFor="addUSDTAmount" className="text-xs font-bold text-slate-400">Modificar Saldo USDT</label>
                   <input
                     type="number"
@@ -490,6 +492,17 @@ const UserManagement = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <label htmlFor="addTRXAmount" className="text-xs font-bold text-slate-400">Modificar Saldo TRX</label>
+                  <input
+                    type="number"
+                    id="addTRXAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
+                    value={addTRXAmount}
+                    onChange={(e) => setAddTRXAmount(e.target.value)}
+                    placeholder="Ej: 10"
+                  />
+                </div>
+                <div className="space-y-2">
                   <label htmlFor="addVESAmount" className="text-xs font-bold text-slate-400">Modificar Saldo VES</label>
                   <input
                     type="number"
@@ -498,6 +511,39 @@ const UserManagement = () => {
                     value={addVESAmount}
                     onChange={(e) => setAddVESAmount(e.target.value)}
                     placeholder="Ej: 1000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addBTCAmount" className="text-xs font-bold text-slate-400">Modificar Saldo BTC</label>
+                  <input
+                    type="number"
+                    id="addBTCAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-amber-500/50 outline-none transition-all text-sm"
+                    value={addBTCAmount}
+                    onChange={(e) => setAddBTCAmount(e.target.value)}
+                    placeholder="Ej: 0.001"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addLTCAmount" className="text-xs font-bold text-slate-400">Modificar Saldo LTC</label>
+                  <input
+                    type="number"
+                    id="addLTCAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-400/50 outline-none transition-all text-sm"
+                    value={addLTCAmount}
+                    onChange={(e) => setAddLTCAmount(e.target.value)}
+                    placeholder="Ej: 1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addDOGEAmount" className="text-xs font-bold text-slate-400">Modificar Saldo DOGE</label>
+                  <input
+                    type="number"
+                    id="addDOGEAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500/50 outline-none transition-all text-sm"
+                    value={addDOGEAmount}
+                    onChange={(e) => setAddDOGEAmount(e.target.value)}
+                    placeholder="Ej: 100"
                   />
                 </div>
 

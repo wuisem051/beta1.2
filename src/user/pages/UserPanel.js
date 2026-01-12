@@ -130,7 +130,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
                     )}
                   </div>
                   <div className={`flex flex-col ${msg.userId === currentUser.uid ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] text-slate-500 mb-1 px-2">{msg.displayName || msg.username}</span>
+                    <span className="text-[10px] mb-1 px-2 font-bold" style={{ color: '#eab308' }}>{msg.displayName || msg.username}</span>
                     <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${msg.userId === currentUser.uid ? 'bg-accent text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
                       {msg.text}
                     </div>
@@ -246,7 +246,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
                         <span className={styles.statusBadge} style={{ background: signal.status === 'En espera' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: signal.status === 'En espera' ? '#f59e0b' : 'var(--green-check)', border: signal.status === 'En espera' ? '1px solid rgba(245, 158, 11, 0.2)' : 'none' }}>
                           {signal.status || 'Activa'}
                         </span>
-                        <span className={styles.statusBadge} style={{ background: 'rgba(255, 191, 0, 0.1)', color: 'var(--accent)', border: '1px solid rgba(255, 191, 0, 0.2)', fontSize: '10px', fontWeight: 'bold' }}>
+                        <span className={styles.statusBadge} style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', border: '1px solid rgba(234, 179, 8, 0.2)', fontSize: '10px', fontWeight: 'bold' }}>
                           VIP EXCLUSIVO
                         </span>
                       </div>
