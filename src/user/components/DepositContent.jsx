@@ -192,7 +192,7 @@ const DepositContent = () => {
                         </div>
                     </div>
 
-                    {currentAddress ? (
+                    {displayAddress ? (
                         <>
                             {/* Dirección de Depósito */}
                             <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
@@ -206,7 +206,7 @@ const DepositContent = () => {
                                     />
                                     <button
                                         onClick={() => {
-                                            navigator.clipboard.writeText(currentAddress.address);
+                                            navigator.clipboard.writeText(displayAddress);
                                             showSuccess('Dirección copiada al portapapeles');
                                         }}
                                         className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
