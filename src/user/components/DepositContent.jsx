@@ -175,17 +175,12 @@ const DepositContent = () => {
                                 <button
                                     key={crypto.value}
                                     onClick={() => setSelectedCrypto(crypto.value)}
-                                    className={`p-4 rounded-xl border-2 transition-all ${selectedCrypto === crypto.value
-                                        ? 'border-blue-500 bg-blue-500/10'
-                                        : 'border-slate-700 bg-slate-800/50 hover:border-blue-500/30'
-                                        }`}
+                                    className={`${styles.coinSelector} ${selectedCrypto === crypto.value ? styles.coinSelectorActive : ''}`}
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-col gap-1">
                                         <span className="text-2xl">{crypto.icon}</span>
-                                        <div className="text-left">
-                                            <p className="font-bold text-white text-sm">{crypto.label}</p>
-                                            <p className="text-xs text-slate-400">{crypto.network}</p>
-                                        </div>
+                                        <p className="font-bold text-white text-sm">{crypto.label}</p>
+                                        <p className="text-xs text-slate-400">{crypto.network}</p>
                                     </div>
                                 </button>
                             ))}

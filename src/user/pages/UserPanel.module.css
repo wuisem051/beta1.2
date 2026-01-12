@@ -850,6 +850,33 @@ body.dark .newTicketFormTitle {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Coin Selector for Deposit/Withdraw */
+.coinSelector {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem !important;
+  border-radius: 1rem !important;
+  border: 2px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  transition: all 0.2s ease !important;
+  text-align: left !important;
+  min-height: 100px;
+  width: 100%;
+  cursor: pointer;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.coinSelector:hover {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.coinSelectorActive {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
 .twoFactorAuthLabel {
   font-weight: 600;
   color: #ffffff;

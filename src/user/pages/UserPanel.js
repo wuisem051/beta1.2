@@ -637,10 +637,7 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
                     key={option.value}
                     type="button"
                     onClick={() => setCurrency(option.value)}
-                    className={`p-3 rounded-xl border-2 transition-all text-left ${currency === option.value
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-slate-700 bg-slate-800/50 hover:border-blue-500/30'
-                      }`}
+                    className={`${styles.coinSelector} ${currency === option.value ? styles.coinSelectorActive : ''}`}
                   >
                     <div className="flex flex-col gap-1">
                       <span className="text-xl">{option.icon}</span>
