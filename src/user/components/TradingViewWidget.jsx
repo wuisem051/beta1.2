@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react';
 
-function TradingViewWidget({ symbol, theme = 'dark' }) {
+function TradingViewWidget({ symbol, theme = 'dark', interval = '15' }) {
     const container = useRef();
 
     useEffect(
@@ -13,7 +13,7 @@ function TradingViewWidget({ symbol, theme = 'dark' }) {
         {
           "autosize": true,
           "symbol": "BINANCE:${symbol}",
-          "interval": "D",
+          "interval": "${interval}",
           "timezone": "Etc/UTC",
           "theme": "${theme}",
           "style": "1",
@@ -25,7 +25,7 @@ function TradingViewWidget({ symbol, theme = 'dark' }) {
             container.current.innerHTML = '';
             container.current.appendChild(script);
         },
-        [symbol, theme]
+        [symbol, theme, interval]
     );
 
     return (

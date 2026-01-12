@@ -35,6 +35,7 @@ import TradingViewWidget from '../components/TradingViewWidget';
 const VIPChatContent = ({ styles, userBalances }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('public'); // 'public' or 'private'
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +52,14 @@ const VIPChatContent = ({ styles, userBalances }) => {
   useEffect(() => {
     if (!isVIP) return;
 
-    const q = query(collection(db, 'vipChat'), orderBy('createdAt', 'desc'), limit(50));
+    setIsLoading(true);
+    let q;
+    if (activeTab === 'public') {
+      q = query(collection(db, 'vipChat'), orderBy('createdAt', 'desc'), limit(50));
+    } else {
+      q = query(collection(db, 'privateVipMessages'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'), limit(50));
+    }
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedMessages = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -61,12 +69,12 @@ const VIPChatContent = ({ styles, userBalances }) => {
       setMessages(fetchedMessages);
       setIsLoading(false);
     }, (error) => {
-      console.error("Error fetching VIP chat:", error);
+      console.error(`Error fetching ${activeTab} chat:`, error);
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [isVIP]);
+  }, [isVIP, activeTab, currentUser.uid]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,12 +85,14 @@ const VIPChatContent = ({ styles, userBalances }) => {
     if (!newMessage.trim() || !currentUser) return;
 
     try {
-      await addDoc(collection(db, 'vipChat'), {
+      const collectionName = activeTab === 'public' ? 'vipChat' : 'privateVipMessages';
+      await addDoc(collection(db, collectionName), {
         text: newMessage,
         userId: currentUser.uid,
         username: userBalances.username || 'Usuario',
         displayName: userBalances.displayName || 'Usuario',
         profilePhotoUrl: userBalances.profilePhotoUrl || '',
+        isAdmin: false,
         createdAt: new Date(),
       });
       setNewMessage('');
@@ -108,30 +118,53 @@ const VIPChatContent = ({ styles, userBalances }) => {
 
   return (
     <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-      <h1 className={styles.mainContentTitle}>Chat Privado VIP</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className={styles.mainContentTitle}>Comunidad VIP</h1>
+        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shadow-lg">
+          <button
+            onClick={() => setActiveTab('public')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'public' ? 'bg-accent text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+          >
+            Chat Público
+          </button>
+          <button
+            onClick={() => setActiveTab('private')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'private' ? 'bg-accent text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+          >
+            Soporte Admin
+          </button>
+        </div>
+      </div>
 
-      <div className={`${styles.sectionCard} flex-1 overflow-hidden flex flex-col p-0 mb-4`}>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={`${styles.sectionCard} flex-1 overflow-hidden flex flex-col p-0 mb-4 border border-white/5`}>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
           {isLoading ? (
-            <div className="text-center py-10 opacity-50">Conectando al servidor...</div>
+            <div className="text-center py-10 opacity-50 flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-xs">Conectando...</span>
+            </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-10 opacity-50">Envía el primer mensaje para iniciar la conversación.</div>
+            <div className="text-center py-10 opacity-50 text-xs italic">
+              {activeTab === 'public' ? 'Sé el primero en saludar a la comunidad.' : 'Envía un mensaje para contactar con nuestro equipo de traders.'}
+            </div>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.userId === currentUser.uid ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex max-w-[80%] ${msg.userId === currentUser.uid ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-auto ${msg.userId === currentUser.uid ? 'ml-2' : 'mr-2'}`}>
+              <div key={msg.id} className={`flex ${msg.userId === currentUser.uid && !msg.isAdmin ? 'justify-end' : 'justify-start'}`}>
+                <div className={`flex max-w-[80%] ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-auto ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'ml-2' : 'mr-2'}`}>
                     {msg.profilePhotoUrl ? (
                       <img src={msg.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full bg-accent/20 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                      <div className={`w-full h-full flex items-center justify-center ${msg.isAdmin ? 'bg-blue-600' : 'bg-accent/20'}`}>
+                        <span className="text-[10px] font-bold">{msg.isAdmin ? 'TR' : (msg.displayName?.[0] || 'U')}</span>
                       </div>
                     )}
                   </div>
-                  <div className={`flex flex-col ${msg.userId === currentUser.uid ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] mb-1 px-2 font-bold" style={{ color: '#eab308' }}>{msg.displayName || msg.username}</span>
-                    <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${msg.userId === currentUser.uid ? 'bg-accent text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
+                  <div className={`flex flex-col ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[10px] mb-1 px-2 font-bold" style={{ color: msg.isAdmin ? '#3b82f6' : '#eab308' }}>
+                      {msg.isAdmin ? 'TEAM TRADER' : (msg.displayName || msg.username)}
+                    </span>
+                    <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'bg-accent text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
                       {msg.text}
                     </div>
                   </div>
@@ -142,11 +175,11 @@ const VIPChatContent = ({ styles, userBalances }) => {
           <div ref={scrollRef} />
         </div>
 
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-white border-opacity-5 flex gap-2">
+        <form onSubmit={handleSendMessage} className="p-4 border-t border-white border-opacity-5 flex gap-2 bg-black/20">
           <input
             type="text"
             className={`${styles.formInput} flex-1`}
-            placeholder="Escribe un mensaje..."
+            placeholder={activeTab === 'public' ? "Mensaje a la comunidad..." : "Mensaje privado al admin..."}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
           />
@@ -442,13 +475,13 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
         <div className={styles.tradingViewCard}>
           <h3 className={styles.statsTitle}>Gráfico BTC/USDT</h3>
           <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="BTCUSDT" theme={darkMode ? "dark" : "light"} />
+            <TradingViewWidget symbol="BTCUSDT" theme={darkMode ? "dark" : "light"} interval="15" />
           </div>
         </div>
         <div className={styles.tradingViewCard}>
           <h3 className={styles.statsTitle}>Gráfico ARPA/USDT</h3>
           <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="ARPAUSDT" theme={darkMode ? "dark" : "light"} />
+            <TradingViewWidget symbol="ARPAUSDT" theme={darkMode ? "dark" : "light"} interval="15" />
           </div>
         </div>
       </div>
