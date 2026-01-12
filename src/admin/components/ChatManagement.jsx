@@ -88,13 +88,17 @@ const ChatManagement = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || !currentUser) {
+            console.error("No se puede enviar el mensaje: Mensaje vacío o usuario no autenticado.", { newMessage, currentUser });
+            return;
+        }
 
         try {
+            console.log("Intentando enviar mensaje...", { activeTab, selectedRoomId: selectedRoom?.userId });
             if (activeTab === 'public') {
                 await addDoc(collection(db, 'vipChat'), {
                     text: newMessage,
-                    userId: 'admin',
+                    userId: currentUser.uid,
                     username: 'Admin Trader',
                     displayName: 'Admin Trader',
                     profilePhotoUrl: '',
@@ -105,7 +109,7 @@ const ChatManagement = () => {
                 await addDoc(collection(db, 'privateVipMessages'), {
                     text: newMessage,
                     userId: selectedRoom.userId, // El chat pertenece a la sesión de este usuario
-                    senderId: 'admin',
+                    senderId: currentUser.uid,
                     username: 'Admin Trader',
                     displayName: 'Admin Trader',
                     profilePhotoUrl: '',
@@ -113,10 +117,11 @@ const ChatManagement = () => {
                     createdAt: serverTimestamp(),
                 });
             }
+            console.log("Mensaje enviado correctamente.");
             setNewMessage('');
         } catch (err) {
-            console.error("Error sending message:", err);
-            alert("Error al enviar mensaje: " + err.message);
+            console.error("Error al enviar mensaje (Firestore):", err);
+            alert("Error al enviar mensaje: " + err.message + " (Código: " + err.code + ")");
         }
     };
 

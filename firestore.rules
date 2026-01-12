@@ -137,14 +137,15 @@ service cloud.firestore {
     }
 
     match /deposits/{depositId} {
-      allow read, create: if request.auth != null && (request.auth.uid == request.resource.data.userId || request.auth.uid == resource.data.userId);
-      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Reglas para el Chat VIP (Público)
     match /vipChat/{msgId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null; // Se podría restringir a solo VIPs, pero por ahora permitimos a todos los logueados para pruebas
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
     // Reglas para el Chat de Soporte (Privado)
