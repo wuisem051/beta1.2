@@ -65,14 +65,14 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
       <nav className="flex-1 overflow-y-auto no-scrollbar">
         <ul className="space-y-1">
           <li>
-            <Link to={`${basePath}/dashboard`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isDashboardActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/dashboard`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isDashboardActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
               Dashboard
             </Link>
           </li>
 
           <li>
-            <Link to={`${basePath}/collective-fund`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isCollectiveFundActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/collective-fund`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isCollectiveFundActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
               Fondo Colectivo
             </Link>
@@ -81,21 +81,21 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Trading & Crypto</div>
 
           <li>
-            <Link to={`${basePath}/plan-trading`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isPlanTradingActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/plan-trading`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isPlanTradingActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
               Plan Trading
             </Link>
           </li>
 
           <li>
-            <Link to={`${basePath}/miners`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMinersActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/miners`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMinersActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /></svg>
               Señales Trading
             </Link>
           </li>
 
           <li>
-            <Link to={`${basePath}/mining-portfolio`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMiningPortfolioActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/mining-portfolio`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMiningPortfolioActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
               Mi Portafolio
             </Link>
@@ -103,7 +103,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
 
           <li>
             <Link
-              to={isVIP ? `${basePath}/vip-chat` : '#'}
+              to={isVIP ? `/user/vip-chat` : '#'}
               onClick={handleVIPChatClick}
               className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isVIPChatActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}
             >
@@ -122,20 +122,20 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             {showWithdrawals && (
               <ul className="ml-9 space-y-1 mt-1 border-l border-white border-opacity-10 pl-2">
                 <li>
-                  <Link to={`${basePath}/my-wallet`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isMyWalletActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Balance</Link>
+                  <Link to={`/user/my-wallet`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isMyWalletActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Balance</Link>
                 </li>
                 <li>
-                  <Link to={`${basePath}/withdrawals`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isWithdrawalsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Retiros</Link>
+                  <Link to={`/user/withdrawals`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isWithdrawalsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Retiros</Link>
                 </li>
                 <li>
-                  <Link to={`${basePath}/deposits`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isDepositsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Depósitos</Link>
+                  <Link to={`/user/deposits`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isDepositsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Depósitos</Link>
                 </li>
               </ul>
             )}
           </li>
 
           <li>
-            <Link to={`${basePath}/p2p-marketplace`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isP2PMarketplaceActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/p2p-marketplace`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isP2PMarketplaceActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="m8 3 4 8 5-5 5 15H2L8 3z" /></svg>
               Mercado P2P
             </Link>
@@ -144,14 +144,14 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Soporte & Ajustes</div>
 
           <li>
-            <Link to={`${basePath}/settings`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isSettingsActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/settings`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isSettingsActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
               Ajustes
             </Link>
           </li>
 
           <li>
-            <Link to={`${basePath}/contact-support`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isContactSupportActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/contact-support`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isContactSupportActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               Soporte
               {unreadTicketsCount > 0 && (

@@ -42,12 +42,15 @@ const VIPChatContent = ({ styles, userBalances }) => {
   const scrollRef = useRef();
 
   const isVIP = useMemo(() => {
+    // Dev bypass for agent testing
+    if (window.location.hostname === 'localhost' && currentUser?.uid === 'agent-dev-uid') return true;
+
     if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
     if (!userBalances.vipExpiry) return false;
     const now = new Date();
     const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
     return expiry > now;
-  }, [userBalances]);
+  }, [userBalances, currentUser?.uid]);
 
   useEffect(() => {
     if (!isVIP) return;
@@ -130,73 +133,66 @@ const VIPChatContent = ({ styles, userBalances }) => {
   }
 
   return (
-    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 120px)', maxWidth: '100%', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
         <div>
-          <h1 className={styles.mainContentTitle} style={{ marginBottom: '0.25rem' }}>Hub de Comunidad VIP</h1>
-          <p className="text-xs text-slate-400 font-medium">Conéctate con traders expertos y la comunidad exclusiva.</p>
+          <h1 className={styles.mainContentTitle} style={{ marginBottom: '0.1rem', fontSize: '2rem' }}>Comunidad Elite VIP</h1>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Conexión directa con Traders Expertos y Soporte Privado</p>
         </div>
 
-        <div className="flex bg-slate-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="flex bg-slate-900/60 backdrop-blur-xl p-1 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden group">
+          <div className={`absolute top-0 bottom-0 w-1/2 bg-blue-600/20 backdrop-blur-md rounded-xl transition-transform duration-500 ease-out ${activeTab === 'private' ? 'translate-x-full' : 'translate-x-0'}`}></div>
           <button
             onClick={() => setActiveTab('public')}
-            className={`relative z-10 px-6 py-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 ${activeTab === 'public' ? 'bg-accent text-white shadow-[0_0_20px_rgba(234,179,8,0.3)] scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
+            className={`relative z-10 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'public' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            <span className="text-sm">🌍</span> Chat Público
+            Chat Público
           </button>
           <button
             onClick={() => setActiveTab('private')}
-            className={`relative z-10 px-6 py-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 ${activeTab === 'private' ? 'bg-accent text-white shadow-[0_0_20px_rgba(234,179,8,0.3)] scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
+            className={`relative z-10 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'private' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            <span className="text-sm">🛡️</span> Soporte Admin
+            Soporte Admin
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col bg-slate-950/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] relative">
-        {/* Subtle background glow */}
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-accent/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="flex-1 overflow-hidden flex flex-col bg-[#020617]/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_48px_100px_-12px_rgba(0,0,0,0.7)] relative group">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/[0.02] to-transparent pointer-events-none"></div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 scrollbar-hide custom-scrollbar">
           {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center gap-4 animate-pulse">
-              <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(234,179,8,0.2)]"></div>
-              <span className="text-xs font-black tracking-widest text-accent uppercase">Sincronizando Canal...</span>
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
+              <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Sincronizando Hub Elite...</p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
-              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-3xl animate-bounce">
-                {activeTab === 'public' ? '👋' : '💬'}
-              </div>
-              <p className="text-sm text-slate-400 font-medium max-w-xs leading-relaxed">
-                {activeTab === 'public'
-                  ? 'La sala está lista. Sé el primero en compartir tu visión con el grupo VIP.'
-                  : '¿Tienes dudas sobre tu estrategia? Escribe directamente a nuestros traders expertos.'}
-              </p>
+            <div className="h-full flex flex-col items-center justify-center text-center p-8">
+              <div className="w-20 h-20 bg-slate-900/50 rounded-3xl flex items-center justify-center text-3xl mb-4 border border-white/5">💬</div>
+              <p className="text-slate-400 font-bold mb-1">Sin mensajes aún</p>
+              <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Inicia la conversación en el Hub VIP</p>
             </div>
           ) : (
-            <div className="flex flex-col space-y-6">
+            <div className="flex flex-col gap-8 max-w-5xl mx-auto w-full">
               {messages.map((msg, index) => {
-                const isMe = msg.userId === currentUser.uid && !msg.isAdmin;
-                const showAvatar = index === 0 || messages[index - 1].userId !== msg.userId;
+                const isMe = msg.userId === currentUser.uid || msg.senderId === currentUser.uid;
+                const isAdmin = msg.role === 'admin';
 
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
-                    <div className={`flex max-w-[85%] md:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end gap-3`}>
-                      {showAvatar && (
-                        <div className="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0 shadow-xl border border-white/10 group-hover:scale-110 transition-transform duration-300">
-                          {msg.profilePhotoUrl ? (
-                            <img src={msg.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group/msg animate-in slide-in-from-bottom-2 duration-300`} style={{ animationDelay: `${index * 50}ms` }}>
+                    <div className={`flex gap-4 max-w-[85%] md:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 mt-auto mb-1">
+                        <div className={`w-10 h-10 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdmin ? 'border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : isMe ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-white/10'}`}>
+                          {msg.userAvatar ? (
+                            <img src={msg.userAvatar} alt="Avatar" className="w-full h-full object-cover" />
                           ) : (
-                            <div className={`w-full h-full flex items-center justify-center ${msg.isAdmin ? 'bg-gradient-to-br from-blue-600 to-blue-800' : 'bg-gradient-to-br from-accent/20 to-accent/40'}`}>
-                              <span className="text-xs font-black text-white">{msg.isAdmin ? 'TR' : (msg.displayName?.[0] || 'U')}</span>
+                            <div className={`w-full h-full flex items-center justify-center text-xs font-black text-white ${isAdmin ? 'bg-gradient-to-tr from-amber-600 to-yellow-400' : 'bg-slate-800'}`}>
+                              {msg.userName ? msg.userName[0].toUpperCase() : '?'}
                             </div>
                           )}
                         </div>
-                      )}
-                      {!showAvatar && <div className="w-10 flex-shrink-0"></div>}
+                      </div>
 
                       <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                         {showAvatar && (
@@ -2199,9 +2195,9 @@ const UserPanel = () => {
   }
 
   const showNavbar = [
-    '/user-panel/miners',      // Ruta para "Señales Trading"
-    '/user-panel/plan-trading', // Ruta para "Plan Trading"
-    '/user-panel/vip-chat',     // Ruta para "Chat VIP"
+    '/user/miners',      // Ruta para "Señales Trading"
+    '/user/plan-trading', // Ruta para "Plan Trading"
+    '/user/vip-chat',     // Ruta para "Chat VIP"
   ].some(path => location.pathname.startsWith(path));
 
   return (

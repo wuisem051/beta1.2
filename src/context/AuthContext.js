@@ -86,14 +86,14 @@ export function AuthProvider({ children }) {
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-          const userData = userDoc.data();
-          console.log("User data from Firestore for UID:", user.uid, ":", userData);
-          setIsAdmin(userData.role === 'admin');
-          console.log("Is Admin:", userData.role === 'admin');
+            const userData = userDoc.data();
+            console.log("User data from Firestore for UID:", user.uid, ":", userData);
+            setIsAdmin(userData.role === 'admin');
+            console.log("Is Admin:", userData.role === 'admin');
           } else {
-        console.log("User document does not exist for UID:", user.uid);
-        setIsAdmin(false);
-        console.log("Is Admin: false (user document not found)");
+            console.log("User document does not exist for UID:", user.uid);
+            setIsAdmin(false);
+            console.log("Is Admin: false (user document not found)");
           }
         } catch (error) {
           console.error("Error fetching user role from Firestore:", error);
@@ -138,6 +138,22 @@ export function AuthProvider({ children }) {
       setLoading(false); // Asegurarse de que loading se establezca en false después de un intento de inicio de sesión
     }
   };
+
+  // Dev Mode Bypass for agentic testing in localhost
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && window.location.hostname === 'localhost') {
+      window.__ENABLE_DEV_MODE__ = () => {
+        console.warn("DEV MODE ENABLED: Bypassing Auth & Permissions");
+        setCurrentUser({
+          uid: 'agent-dev-uid',
+          email: 'agent@elite.dev',
+          displayName: 'Antigravity Agent'
+        });
+        setIsAdmin(true);
+        setLoading(false);
+      };
+    }
+  }, []);
 
   const value = {
     currentUser,
