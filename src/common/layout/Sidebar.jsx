@@ -2,6 +2,8 @@ import React, { useContext, useState } from 'react';
 import { Link, useMatch, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 
+import candadoIcon from '../../imagens/candado.png';
+
 const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser }) => {
   const { darkMode, theme } = useContext(ThemeContext);
   const { pathname } = useLocation();
@@ -21,15 +23,37 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const isContactSupportActive = useMatch(`${basePath}/contact-support`);
   const isDepositsActive = useMatch(`${basePath}/deposits`);
   const isPlanTradingActive = useMatch(`${basePath}/plan-trading`);
+  const isVIPChatActive = useMatch(`${basePath}/vip-chat`);
+
+  const isVIP = displayUser?.vipStatus === 'monthly' || displayUser?.vipStatus === 'yearly' || displayUser?.vipStatus === 'active';
+
+  const handleVIPChatClick = (e) => {
+    if (!isVIP) {
+      e.preventDefault();
+      alert("Adquiere Nuestra Tarifa Vip y Disfruta de tus financias");
+    }
+  };
 
   return (
     <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--bg-sidebar)', backdropFilter: 'var(--glass-blur)' }}>
       <div className="flex flex-col items-center text-center border-b border-white border-opacity-10 pb-6 mb-6">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #1e40af 100%)' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+        <div className="w-16 h-16 rounded-2xl overflow-hidden mb-3 shadow-lg bg-slate-800 flex items-center justify-center border-2 border-accent/20">
+          {displayUser?.profilePhotoUrl ? (
+            <img src={displayUser.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #1e40af 100%)' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            </div>
+          )}
         </div>
-        <h2 className="text-sm font-bold truncate w-full" style={{ color: 'var(--dark-text)' }}>{displayUser.email || 'Usuario'}</h2>
-        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full mt-1" style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent)' }}>Pro Trader</span>
+        <h2 className="text-sm font-bold truncate w-full" style={{ color: 'var(--dark-text)' }}>
+          {displayUser?.displayName || displayUser?.username || displayUser?.email || 'Usuario'}
+        </h2>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: isVIP ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: isVIP ? '#10b981' : 'var(--accent)' }}>
+            {isVIP ? 'VIP Member' : 'Pro Trader'}
+          </span>
+        </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto no-scrollbar">
@@ -68,6 +92,18 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             <Link to={`${basePath}/mining-portfolio`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMiningPortfolioActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
               Mi Portafolio
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to={isVIP ? `${basePath}/vip-chat` : '#'}
+              onClick={handleVIPChatClick}
+              className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isVIPChatActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              Chat Privado VIP
+              {!isVIP && <img src={candadoIcon} alt="Lock" className="ml-auto w-4 h-4 opacity-70" />}
             </Link>
           </li>
 

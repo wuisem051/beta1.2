@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef, useContext, useMemo } from 'react'; // Importar useContext y useMemo
+import candadoIcon from '../../imagens/candado.png';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import { countMinersByUser } from '../../utils/miners';
-import { db, auth } from '../../services/firebase'; // Importar db y auth desde firebase.js
-import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy } from 'firebase/firestore';
+import { db, auth, storage } from '../../services/firebase'; // Importar db, auth y storage desde firebase.js
+import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy, limit } from 'firebase/firestore';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
@@ -28,6 +30,134 @@ import VIPPlanDisplay from '../components/VIPPlanDisplay';
 import TradingViewWidget from '../components/TradingViewWidget';
 
 // Componentes de las sub-secciones
+
+
+const VIPChatContent = ({ styles, userBalances }) => {
+  const { darkMode } = useContext(ThemeContext);
+  const { currentUser } = useAuth();
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const scrollRef = useRef();
+
+  const isVIP = useMemo(() => {
+    if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
+    if (!userBalances.vipExpiry) return false;
+    const now = new Date();
+    const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
+    return expiry > now;
+  }, [userBalances]);
+
+  useEffect(() => {
+    if (!isVIP) return;
+
+    const q = query(collection(db, 'vipChat'), orderBy('createdAt', 'desc'), limit(50));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+      })).reverse();
+      setMessages(fetchedMessages);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error fetching VIP chat:", error);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [isVIP]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !currentUser) return;
+
+    try {
+      await addDoc(collection(db, 'vipChat'), {
+        text: newMessage,
+        userId: currentUser.uid,
+        username: userBalances.username || 'Usuario',
+        displayName: userBalances.displayName || 'Usuario',
+        profilePhotoUrl: userBalances.profilePhotoUrl || '',
+        createdAt: new Date(),
+      });
+      setNewMessage('');
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
+  };
+
+  if (!isVIP) {
+    return (
+      <div className={styles.dashboardContent}>
+        <h1 className={styles.mainContentTitle}>Chat Privado VIP</h1>
+        <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
+            <img src={candadoIcon} alt="Lock" className="w-16 h-16" />
+            <p className="text-xl font-bold" style={{ color: '#f1f5f9' }}>Acceso Restringido</p>
+            <p className={styles.statTitle}>Adquiere Nuestra Tarifa Vip y Disfruta de tus financias. Desbloquea el chat exclusivo con administradores y otros miembros VIP.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+      <h1 className={styles.mainContentTitle}>Chat Privado VIP</h1>
+
+      <div className={`${styles.sectionCard} flex-1 overflow-hidden flex flex-col p-0 mb-4`}>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {isLoading ? (
+            <div className="text-center py-10 opacity-50">Conectando al servidor...</div>
+          ) : messages.length === 0 ? (
+            <div className="text-center py-10 opacity-50">Envía el primer mensaje para iniciar la conversación.</div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.userId === currentUser.uid ? 'justify-end' : 'justify-start'}`}>
+                <div className={`flex max-w-[80%] ${msg.userId === currentUser.uid ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-auto ${msg.userId === currentUser.uid ? 'ml-2' : 'mr-2'}`}>
+                    {msg.profilePhotoUrl ? (
+                      <img src={msg.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-accent/20 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`flex flex-col ${msg.userId === currentUser.uid ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[10px] text-slate-500 mb-1 px-2">{msg.displayName || msg.username}</span>
+                    <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${msg.userId === currentUser.uid ? 'bg-accent text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={scrollRef} />
+        </div>
+
+        <form onSubmit={handleSendMessage} className="p-4 border-t border-white border-opacity-5 flex gap-2">
+          <input
+            type="text"
+            className={`${styles.formInput} flex-1`}
+            placeholder="Escribe un mensaje..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <button type="submit" className={styles.submitButton} style={{ width: 'auto', padding: '0 1.5rem' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polyline points="22 2 15 22 11 13 2 9 22 2" /></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const CopyTraderContent = ({ styles, userBalances }) => {
   const { darkMode } = useContext(ThemeContext);
@@ -1188,6 +1318,11 @@ const SettingsContent = ({ styles }) => {
   const [receivePaymentNotifications, setReceivePaymentNotifications] = useState(false);
   const [receiveLoginAlerts, setReceiveLoginAlerts] = useState(false);
   const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(false);
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
+  const [profilePhotoFile, setProfilePhotoFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
 
   useEffect(() => {
@@ -1202,6 +1337,10 @@ const SettingsContent = ({ styles }) => {
             setReceivePaymentNotifications(userData.receivePaymentNotifications || false);
             setReceiveLoginAlerts(userData.receiveLoginAlerts || false);
             setTwoFactorAuthEnabled(userData.twoFactorAuthEnabled || false);
+            setUsername(userData.username || '');
+            setDisplayName(userData.displayName || '');
+            setBio(userData.bio || '');
+            setProfilePhotoUrl(userData.profilePhotoUrl || '');
           }
         } catch (userError) {
           console.error("Error fetching user settings from Firebase:", userError);
@@ -1217,6 +1356,45 @@ const SettingsContent = ({ styles }) => {
       ...prev,
       [currency]: address
     }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (!currentUser || !currentUser.uid) {
+      showError('No hay usuario autenticado.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      let finalPhotoUrl = profilePhotoUrl;
+
+      // Subir foto si hay una nueva seleccionada
+      if (profilePhotoFile) {
+        const storageRef = ref(storage, `profilePhotos/${currentUser.uid}`);
+        await uploadBytes(storageRef, profilePhotoFile);
+        finalPhotoUrl = await getDownloadURL(storageRef);
+      }
+
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        username: username,
+        displayName: displayName,
+        bio: bio,
+        profilePhotoUrl: finalPhotoUrl,
+      });
+
+      setProfilePhotoUrl(finalPhotoUrl);
+      setProfilePhotoFile(null);
+      showSuccess('Perfil actualizado exitosamente.');
+    } catch (err) {
+      console.error("Error al actualizar el perfil:", err);
+      showError(`Fallo al actualizar el perfil: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUpdateAccount = async (e) => {
@@ -1343,6 +1521,81 @@ const SettingsContent = ({ styles }) => {
       {/* Los mensajes de error y éxito ahora se manejan globalmente */}
 
       <div className={styles.settingsGrid}>
+        {/* Perfil Público */}
+        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
+          <h2 className={styles.sectionTitle}>Perfil Público</h2>
+          <form onSubmit={handleUpdateProfile}>
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-accent/20 bg-slate-800 flex items-center justify-center">
+                  {profilePhotoUrl ? (
+                    <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                </div>
+              </div>
+              <input
+                type="file"
+                id="profile-photo-input"
+                hidden
+                accept=".png,.gif,image/png,image/gif"
+                onChange={(e) => setProfilePhotoFile(e.target.files[0])}
+              />
+              <p className="text-[10px] text-slate-500 mt-2">Formatos permitidos: .png, .gif</p>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="username" className={styles.formLabel}>Nombre de Usuario (@)</label>
+              <input
+                type="text"
+                id="username"
+                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ej: juan_perez"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="displayName" className={styles.formLabel}>Nombre de Visualización</label>
+              <input
+                type="text"
+                id="displayName"
+                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Tu nombre real o alias"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="bio" className={styles.formLabel}>Descripción / Biografía</label>
+              <textarea
+                id="bio"
+                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                style={{ height: '80px', paddingTop: '10px' }}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Cuéntanos un poco sobre ti..."
+                disabled={isLoading}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Guardando...' : 'Guardar Perfil'}
+            </button>
+          </form>
+        </div>
         {/* Configuración de Cuenta */}
         <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
           <h2 className={styles.sectionTitle}>Configuración de Cuenta</h2>
@@ -1578,7 +1831,13 @@ const UserPanel = () => {
   };
 
   const demoUser = { email: 'demo@example.com' };
-  const displayUser = currentUser || demoUser;
+  const displayUser = useMemo(() => {
+    if (!currentUser) return demoUser;
+    return {
+      ...currentUser,
+      ...userBalances // Incluye username, displayName, profilePhotoUrl, vipStatus
+    };
+  }, [currentUser, userBalances]);
 
   console.log("UserPanel: currentUser", currentUser);
   console.log("UserPanel: userMiners", userMiners);
@@ -1684,9 +1943,12 @@ const UserPanel = () => {
           balanceTRX: userData.balanceTRX || 0,
           vipStatus: userData.vipStatus || 'none',
           vipExpiry: userData.vipExpiry || null,
+          username: userData.username || '',
+          displayName: userData.displayName || '',
+          profilePhotoUrl: userData.profilePhotoUrl || '',
         });
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
-        console.log(`UserPanel: Datos de usuario y direcciones de pago cargados para ${currentUser.uid}.`);
+        console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
       } else {
         console.log(`UserPanel: Documento de usuario no existe en Firestore (${currentUser.uid}). Creando uno nuevo...`);
         try { // Añadimos el bloque try-catch completo
@@ -1839,6 +2101,7 @@ const UserPanel = () => {
   const showNavbar = [
     '/user-panel/miners',      // Ruta para "Señales Trading"
     '/user-panel/plan-trading', // Ruta para "Plan Trading"
+    '/user-panel/vip-chat',     // Ruta para "Chat VIP"
   ].some(path => location.pathname.startsWith(path));
 
   return (
@@ -1862,6 +2125,7 @@ const UserPanel = () => {
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
           <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
+          <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
