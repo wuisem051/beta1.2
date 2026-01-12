@@ -144,12 +144,25 @@ service cloud.firestore {
 
     // Reglas para el Chat VIP (Público)
     match /vipChat/{msgId} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
 
     // Reglas para el Chat de Soporte (Privado)
     match /privateVipMessages/{msgId} {
-      allow read, write: if true;
+      // Un usuario puede leer si es el destinatario (userId) o el remitente (senderId)
+      // O si es administrador
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.senderId == request.auth.uid || 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      // Un usuario puede crear si se identifica correctamente como remitente
+      // O si es administrador actuando como soporte
+      allow create: if request.auth != null && (
+        request.resource.data.senderId == request.auth.uid || 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
     }
 
     // Regla general para cualquier otra colección (denegar todo)
