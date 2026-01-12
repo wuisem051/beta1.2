@@ -25,6 +25,7 @@ const UserManagement = () => {
   const [addUSDTAmount, setAddUSDTAmount] = useState(''); // Estado para añadir/restar USDT
   const [addTRXAmount, setAddTRXAmount] = useState(''); // Estado para añadir/restar TRX
   const [addVESAmount, setAddVESAmount] = useState(''); // Estado para añadir/restar VES
+  const [addUSDAmount, setAddUSDAmount] = useState(''); // Estado para añadir/restar USD General
   const [addBTCAmount, setAddBTCAmount] = useState('');
   const [addLTCAmount, setAddLTCAmount] = useState('');
   const [addDOGEAmount, setAddDOGEAmount] = useState('');
@@ -142,6 +143,7 @@ const UserManagement = () => {
     setAddUSDTAmount(''); // Resetear al abrir edición
     setAddTRXAmount(''); // Resetear al abrir edición
     setAddVESAmount(''); // Resetear al abrir edición
+    setAddUSDAmount(''); // Resetear USD General
     setAddBTCAmount('');
     setAddLTCAmount('');
     setAddDOGEAmount('');
@@ -164,6 +166,7 @@ const UserManagement = () => {
         balanceUSDTTRC20: parseFloat(editBalanceUSDTTRC20) + (addUSDTAmount !== '' ? parseFloat(addUSDTAmount) : 0),
         balanceTRX: parseFloat(editBalanceTRX) + (addTRXAmount !== '' ? parseFloat(addTRXAmount) : 0),
         balanceVES: parseFloat(editBalanceVES) + (addVESAmount !== '' ? parseFloat(addVESAmount) : 0),
+        balanceUSD: parseFloat(editBalanceUSD) + (addUSDAmount !== '' ? parseFloat(addUSDAmount) : 0),
         vipStatus: editVipStatus,
         vipExpiry: editVipExpiry ? new Date(editVipExpiry) : null,
       });
@@ -481,14 +484,25 @@ const UserManagement = () => {
               <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Gestión de Balances y VIP</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label htmlFor="addUSDTAmount" className="text-xs font-bold text-slate-400">Modificar Saldo USDT</label>
+                  <label htmlFor="addUSDAmount" className="text-xs font-bold text-slate-400">Modificar Saldo USD (General)</label>
+                  <input
+                    type="number"
+                    id="addUSDAmount"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
+                    value={addUSDAmount}
+                    onChange={(e) => setAddUSDAmount(e.target.value)}
+                    placeholder="Ej: 100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="addUSDTAmount" className="text-xs font-bold text-slate-400">Modificar Saldo USDT (Tether)</label>
                   <input
                     type="number"
                     id="addUSDTAmount"
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none transition-all text-sm"
                     value={addUSDTAmount}
                     onChange={(e) => setAddUSDTAmount(e.target.value)}
-                    placeholder="Ej: 50 o -25"
+                    placeholder="Ej: 50"
                   />
                 </div>
                 <div className="space-y-2">
