@@ -14,14 +14,6 @@ const ChatManagement = () => {
     const [isLoading, setIsLoading] = useState(true);
     const scrollRef = useRef();
 
-    useEffect(() => {
-        console.log("DEBUG: ChatManagement State", {
-            uid: currentUser?.uid,
-            isAdminContext: isAdmin,
-            authLoaded: !!currentUser
-        });
-    }, [currentUser, isAdmin]);
-
     // Public Chat Subscription
     useEffect(() => {
         if (activeTab !== 'public') return;
@@ -102,7 +94,6 @@ const ChatManagement = () => {
         }
 
         try {
-            console.log("Intentando enviar mensaje...", { activeTab, selectedRoomId: selectedRoom?.userId });
             if (activeTab === 'public') {
                 await addDoc(collection(db, 'vipChat'), {
                     text: newMessage,
@@ -125,7 +116,6 @@ const ChatManagement = () => {
                     createdAt: serverTimestamp(),
                 });
             }
-            console.log("Mensaje enviado correctamente.");
             setNewMessage('');
         } catch (err) {
             console.error("Error al enviar mensaje (Firestore):", err);

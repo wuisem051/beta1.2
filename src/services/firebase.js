@@ -29,15 +29,10 @@ const storage = getStorage(app);
 // Conectar a los emuladores de Firebase si estamos en desarrollo
 if (process.env.NODE_ENV === 'development') {
   if (window.location.hostname === "localhost") {
-    console.log("DEBUG: Conectando a emuladores de Firebase...");
     connectAuthEmulator(auth, "http://localhost:9099");
     connectFirestoreEmulator(db, "localhost", 8081);
     connectStorageEmulator(storage, "localhost", 9199);
-  } else {
-    console.log("DEBUG: Modo desarrollo pero no en localhost. Usando Firebase Real.");
   }
-} else {
-  console.log("DEBUG: Modo producción. Usando Firebase Real.");
 }
 
 export { auth, db, storage };
