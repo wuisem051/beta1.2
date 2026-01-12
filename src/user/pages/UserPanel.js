@@ -25,6 +25,7 @@ import useFormValidation from '../../hooks/useFormValidation'; // Importar useFo
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
+import TradingViewWidget from '../components/TradingViewWidget';
 
 // Componentes de las sub-secciones
 
@@ -254,6 +255,22 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
           </div>
           <h3 className={styles.statTitle}>Señales de Trading</h3>
           <p className={styles.statValueAccent}>Activas</p>
+        </div>
+      </div>
+
+      {/* TradingView Charts */}
+      <div className={styles.tradingViewGrid}>
+        <div className={styles.tradingViewCard}>
+          <h3 className={styles.statsTitle}>Gráfico BTC/USDT</h3>
+          <div className={styles.tradingViewContainer}>
+            <TradingViewWidget symbol="BTCUSDT" theme={darkMode ? "dark" : "light"} />
+          </div>
+        </div>
+        <div className={styles.tradingViewCard}>
+          <h3 className={styles.statsTitle}>Gráfico ARPA/USDT</h3>
+          <div className={styles.tradingViewContainer}>
+            <TradingViewWidget symbol="ARPAUSDT" theme={darkMode ? "dark" : "light"} />
+          </div>
         </div>
       </div>
 
@@ -1481,8 +1498,11 @@ const UserPanel = () => {
   }, [userMiners]);
 
   const estimatedDailyUSD = useMemo(() => {
-    return totalHashrate * paymentRate;
-  }, [totalHashrate, paymentRate]);
+    // Cálculo basado en depósito de plan de $25 y un 2% aprox por trade
+    const planDeposit = 25;
+    const tradeProfitPercent = 0.02;
+    return planDeposit * tradeProfitPercent;
+  }, []);
 
   const chartData = useMemo(() => ({
     labels: ['Hashrate Total (TH/s)', 'Ganancia Diaria Estimada (USD)'],

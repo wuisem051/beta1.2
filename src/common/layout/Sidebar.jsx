@@ -19,6 +19,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const isMinersActive = useMatch(`${basePath}/miners`);
   const isSettingsActive = useMatch(`${basePath}/settings`);
   const isContactSupportActive = useMatch(`${basePath}/contact-support`);
+  const isDepositsActive = useMatch(`${basePath}/deposits`);
 
   return (
     <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--bg-sidebar)', backdropFilter: 'var(--glass-blur)' }}>
@@ -75,6 +76,9 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 </li>
                 <li>
                   <Link to={`${basePath}/withdrawals`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isWithdrawalsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Retiros</Link>
+                </li>
+                <li>
+                  <Link to={`${basePath}/deposits`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isDepositsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Depósitos</Link>
                 </li>
               </ul>
             )}
