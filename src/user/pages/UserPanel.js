@@ -76,9 +76,22 @@ const VIPChatContent = ({ styles, userBalances }) => {
     return () => unsubscribe();
   }, [isVIP, activeTab, currentUser.uid]);
 
+  const lastTabRef = useRef(activeTab);
+
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Solo hacemos scroll automático si NO estamos cambiando de pestaña
+    // O si es la primera carga de datos
+    if (lastTabRef.current === activeTab) {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Si cambiamos de pestaña, nos aseguramos de que el scroll esté arriba
+      const scrollContainer = scrollRef.current?.parentElement;
+      if (scrollContainer) {
+        scrollContainer.scrollTop = 0;
+      }
+      lastTabRef.current = activeTab;
+    }
+  }, [messages, activeTab]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
