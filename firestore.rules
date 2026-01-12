@@ -129,6 +129,17 @@ service cloud.firestore {
       allow read, list: if request.auth != null;
       allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+    
+    // Reglas para depósitos y direcciones
+    match /depositAddresses/{addressId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /deposits/{depositId} {
+      allow read, create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
 
     // Regla general para cualquier otra colección (denegar todo)
     match /{document=**} {
