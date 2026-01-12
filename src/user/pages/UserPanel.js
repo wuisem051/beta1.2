@@ -117,76 +117,130 @@ const VIPChatContent = ({ styles, userBalances }) => {
   }
 
   return (
-    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className={styles.mainContentTitle}>Comunidad VIP</h1>
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shadow-lg">
+    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className={styles.mainContentTitle} style={{ marginBottom: '0.25rem' }}>Hub de Comunidad VIP</h1>
+          <p className="text-xs text-slate-400 font-medium">Conéctate con traders expertos y la comunidad exclusiva.</p>
+        </div>
+
+        <div className="flex bg-slate-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <button
             onClick={() => setActiveTab('public')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'public' ? 'bg-accent text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+            className={`relative z-10 px-6 py-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 ${activeTab === 'public' ? 'bg-accent text-white shadow-[0_0_20px_rgba(234,179,8,0.3)] scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
           >
-            Chat Público
+            <span className="text-sm">🌍</span> Chat Público
           </button>
           <button
             onClick={() => setActiveTab('private')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'private' ? 'bg-accent text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+            className={`relative z-10 px-6 py-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 ${activeTab === 'private' ? 'bg-accent text-white shadow-[0_0_20px_rgba(234,179,8,0.3)] scale-105' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
           >
-            Soporte Admin
+            <span className="text-sm">🛡️</span> Soporte Admin
           </button>
         </div>
       </div>
 
-      <div className={`${styles.sectionCard} flex-1 overflow-hidden flex flex-col p-0 mb-4 border border-white/5`}>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+      <div className="flex-1 overflow-hidden flex flex-col bg-slate-950/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] relative">
+        {/* Subtle background glow */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-accent/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth scrollbar-hide">
           {isLoading ? (
-            <div className="text-center py-10 opacity-50 flex flex-col items-center gap-2">
-              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-xs">Conectando...</span>
+            <div className="h-full flex flex-col items-center justify-center gap-4 animate-pulse">
+              <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(234,179,8,0.2)]"></div>
+              <span className="text-xs font-black tracking-widest text-accent uppercase">Sincronizando Canal...</span>
             </div>
           ) : messages.length === 0 ? (
-            <div className="text-center py-10 opacity-50 text-xs italic">
-              {activeTab === 'public' ? 'Sé el primero en saludar a la comunidad.' : 'Envía un mensaje para contactar con nuestro equipo de traders.'}
+            <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-3xl animate-bounce">
+                {activeTab === 'public' ? '👋' : '💬'}
+              </div>
+              <p className="text-sm text-slate-400 font-medium max-w-xs leading-relaxed">
+                {activeTab === 'public'
+                  ? 'La sala está lista. Sé el primero en compartir tu visión con el grupo VIP.'
+                  : '¿Tienes dudas sobre tu estrategia? Escribe directamente a nuestros traders expertos.'}
+              </p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.userId === currentUser.uid && !msg.isAdmin ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex max-w-[80%] ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-auto ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'ml-2' : 'mr-2'}`}>
-                    {msg.profilePhotoUrl ? (
-                      <img src={msg.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className={`w-full h-full flex items-center justify-center ${msg.isAdmin ? 'bg-blue-600' : 'bg-accent/20'}`}>
-                        <span className="text-[10px] font-bold">{msg.isAdmin ? 'TR' : (msg.displayName?.[0] || 'U')}</span>
+            <div className="flex flex-col space-y-6">
+              {messages.map((msg, index) => {
+                const isMe = msg.userId === currentUser.uid && !msg.isAdmin;
+                const showAvatar = index === 0 || messages[index - 1].userId !== msg.userId;
+
+                return (
+                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
+                    <div className={`flex max-w-[85%] md:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end gap-3`}>
+                      {showAvatar && (
+                        <div className="w-10 h-10 rounded-2xl overflow-hidden flex-shrink-0 shadow-xl border border-white/10 group-hover:scale-110 transition-transform duration-300">
+                          {msg.profilePhotoUrl ? (
+                            <img src={msg.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className={`w-full h-full flex items-center justify-center ${msg.isAdmin ? 'bg-gradient-to-br from-blue-600 to-blue-800' : 'bg-gradient-to-br from-accent/20 to-accent/40'}`}>
+                              <span className="text-xs font-black text-white">{msg.isAdmin ? 'TR' : (msg.displayName?.[0] || 'U')}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {!showAvatar && <div className="w-10 flex-shrink-0"></div>}
+
+                      <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        {showAvatar && (
+                          <span className="text-[10px] mb-2 px-1 font-black uppercase tracking-[0.1em] flex items-center gap-1.5" style={{ color: msg.isAdmin ? '#3b82f6' : '#eab308' }}>
+                            {msg.isAdmin && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>}
+                            {msg.isAdmin ? 'TEAM TRADER ELITE' : (msg.displayName || msg.username)}
+                          </span>
+                        )}
+                        <div className={`relative px-4 py-3 rounded-[1.5rem] text-sm font-medium leading-relaxed transition-all shadow-xl group-hover:shadow-2xl ${isMe
+                          ? 'bg-gradient-to-r from-accent to-yellow-600 text-white rounded-tr-none'
+                          : msg.isAdmin
+                            ? 'bg-blue-600/90 backdrop-blur-md text-white rounded-tl-none border border-blue-400/30'
+                            : 'bg-white/5 backdrop-blur-md text-slate-100 rounded-tl-none border border-white/10'
+                          }`}>
+                          {msg.text}
+                          {/* Subtle time hover effect */}
+                          <div className={`absolute -bottom-5 ${isMe ? 'right-0' : 'left-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] text-slate-500 font-bold whitespace-nowrap`}>
+                            {msg.createdAt?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div className={`flex flex-col ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'items-end' : 'items-start'}`}>
-                    <span className="text-[10px] mb-1 px-2 font-bold" style={{ color: msg.isAdmin ? '#3b82f6' : '#eab308' }}>
-                      {msg.isAdmin ? 'TEAM TRADER' : (msg.displayName || msg.username)}
-                    </span>
-                    <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${(msg.userId === currentUser.uid && !msg.isAdmin) ? 'bg-accent text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
-                      {msg.text}
                     </div>
                   </div>
-                </div>
-              </div>
-            ))
-          )}
+                );
+              })}
+            </div>
+          )
+          }
           <div ref={scrollRef} />
         </div>
 
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-white border-opacity-5 flex gap-2 bg-black/20">
-          <input
-            type="text"
-            className={`${styles.formInput} flex-1`}
-            placeholder={activeTab === 'public' ? "Mensaje a la comunidad..." : "Mensaje privado al admin..."}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <button type="submit" className={styles.submitButton} style={{ width: 'auto', padding: '0 1.5rem' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polyline points="22 2 15 22 11 13 2 9 22 2" /></svg>
-          </button>
-        </form>
+        <div className="p-6 bg-slate-900/50 backdrop-blur-2xl border-t border-white/5">
+          <form onSubmit={handleSendMessage} className="relative group">
+            <input
+              type="text"
+              className="w-full bg-slate-950 border border-slate-700/50 rounded-2xl pl-6 pr-16 py-4 text-white font-medium focus:ring-4 focus:ring-accent/20 focus:border-accent outline-none transition-all placeholder:text-slate-600 shadow-inner group-hover:border-slate-500/50"
+              placeholder={activeTab === 'public' ? "Comparte tu visión con la comunidad..." : "Escribe un mensaje privado al equipo de soporte..."}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="absolute right-2 top-2 bottom-2 aspect-square bg-accent hover:bg-yellow-500 text-white flex items-center justify-center rounded-xl transition-all active:scale-95 shadow-lg shadow-accent/20"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="rotate-45 -translate-y-0.5 -translate-x-0.5">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polyline points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </form>
+          <div className="mt-3 flex justify-between items-center px-2">
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Conexión Segura de Grado Elite
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium">Presiona Enter para enviar</p>
+          </div>
+        </div>
       </div>
     </div>
   );
