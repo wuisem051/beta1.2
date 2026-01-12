@@ -445,6 +445,16 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState('');
 
+  const withdrawOptions = [
+    { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', network: 'Bitcoin' },
+    { value: 'USDTTRC20', label: 'USDT (TRC20)', icon: '💵', network: 'Tron (TRC20)' },
+    { value: 'TRX', label: 'Tron (TRX)', icon: '🔴', network: 'Tron' },
+    { value: 'LTC', label: 'Litecoin (LTC)', icon: '⚡', network: 'Litecoin' },
+    { value: 'DOGE', label: 'Dogecoin (DOGE)', icon: '🐕', network: 'Dogecoin' },
+    { value: 'USD', label: 'Dólares (USD)', icon: '🇺🇸', network: 'Binance Pay' },
+    { value: 'VES', label: 'Bolívares (VES)', icon: '🇻🇪', network: 'Pago Móvil' }
+  ];
+
   useEffect(() => {
     const balanceKey = `balance${currency}`;
     setAvailableBalance(userBalances[balanceKey] || 0);
@@ -610,137 +620,172 @@ const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles
 
   return (
     <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Retiros</h1>
+      <h1 className={styles.mainContentTitle}>Retiros de Fondos</h1>
 
-      <div className={styles.withdrawalGrid}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Formulario de Retiro */}
         <div className={styles.sectionCard}>
           <h2 className={styles.sectionTitle}>Solicitar Retiro</h2>
-          <form onSubmit={handleSubmitWithdrawal} className={styles.form}>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Cantidad</label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                step="any"
-                className={styles.formInput}
-                placeholder="0.00000000"
-                required
-              />
-            </div>
 
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Moneda</label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className={styles.formSelect}
-              >
-                <option value="BTC">Bitcoin (BTC)</option>
-                <option value="DOGE">Dogecoin (DOGE)</option>
-                <option value="LTC">Litecoin (LTC)</option>
-                <option value="USDTTRC20">USDT (TRC20)</option>
-                <option value="TRX">Tron (TRX)</option>
-                <option value="USD">USD</option>
-                <option value="VES">VES</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Dirección Guardada</label>
-              <select
-                value={selectedAddress}
-                onChange={(e) => setSelectedAddress(e.target.value)}
-                className={styles.formSelect}
-              >
-                {userPaymentAddresses[currency] && (
-                  <option value={userPaymentAddresses[currency]}>
-                    {userPaymentAddresses[currency]} (Guardada)
-                  </option>
-                )}
-                <option value="new">Ingresar nueva dirección</option>
-              </select>
-            </div>
-
-            {selectedAddress === 'new' && (
-              <>
-                <div className={styles.checkboxGroup}>
-                  <input
-                    type="checkbox"
-                    checked={useBinancePay}
-                    onChange={(e) => setUseBinancePay(e.target.checked)}
-                    className={styles.checkbox}
-                  />
-                  <label className={styles.checkboxLabel}>Usar Binance Pay</label>
-                </div>
-
-                {!useBinancePay ? (
-                  <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Dirección de Wallet</label>
-                    <input
-                      type="text"
-                      value={walletAddress}
-                      onChange={(e) => setWalletAddress(e.target.value)}
-                      className={styles.formInput}
-                      placeholder=" bc1q..."
-                    />
-                  </div>
-                ) : (
-                  <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Email o ID de Binance</label>
-                    <input
-                      type="text"
-                      value={binanceId}
-                      onChange={(e) => setBinanceId(e.target.value)}
-                      className={styles.formInput}
-                      placeholder="ejemplo@binance.com"
-                    />
-                  </div>
-                )}
-              </>
-            )}
-
-            <div className={styles.summaryCard} style={{ margin: '1rem 0', background: 'rgba(0,0,0,0.02)' }}>
-              <div className="flex justify-between text-xs font-semibold">
-                <span>Disponible:</span>
-                <span className={styles.statsValueGreen}>{availableBalance.toFixed((currency === 'USD' || currency === 'USDTTRC20') ? 2 : 8)} {currency}</span>
+          <form onSubmit={handleSubmitWithdrawal} className="space-y-6">
+            {/* Paso 1: Selección de Moneda */}
+            <div className="mb-6">
+              <label className={styles.formLabel}>Paso 1: Selecciona la Moneda</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {withdrawOptions.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setCurrency(option.value)}
+                    className={`p-3 rounded-xl border-2 transition-all text-left ${currency === option.value
+                      ? 'border-blue-500 bg-blue-500/10'
+                      : 'border-slate-700 bg-slate-800/50 hover:border-blue-500/30'
+                      }`}
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xl">{option.icon}</span>
+                      <p className="font-bold text-white text-[10px] leading-tight">{option.label}</p>
+                      <p className="text-[9px] text-slate-400">{option.network}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <button type="submit" className={styles.submitButton} disabled={isLoading}>
-              {isLoading ? 'Procesando...' : 'Solicitar Retiro'}
+            <div className="bg-blue-600/5 p-5 rounded-2xl border border-blue-500/20">
+              <p className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2">
+                <span>Paso 2: Detalles del Retiro</span>
+                <span className="text-xs bg-blue-500/20 px-2 py-0.5 rounded-full">{currency}</span>
+              </p>
+
+              <div className="space-y-4">
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Cantidad a Retirar</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      step="any"
+                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !text-xl font-bold`}
+                      placeholder="0.00"
+                      required
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
+                      {currency}
+                    </div>
+                  </div>
+                  <div className="flex justify-between mt-2 px-1">
+                    <span className="text-[10px] text-slate-400">Disponible:</span>
+                    <span className="text-[10px] font-bold text-green-400">
+                      {availableBalance.toFixed((currency === 'USD' || currency === 'USDTTRC20') ? 2 : 8)} {currency}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Destino de los Fondos</label>
+                  <select
+                    value={selectedAddress}
+                    onChange={(e) => setSelectedAddress(e.target.value)}
+                    className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
+                  >
+                    {userPaymentAddresses[currency] && (
+                      <option value={userPaymentAddresses[currency]}>
+                        {userPaymentAddresses[currency]} (Guardada)
+                      </option>
+                    )}
+                    <option value="new">Ingresar nuevos datos</option>
+                  </select>
+                </div>
+
+                {selectedAddress === 'new' && (
+                  <div className="space-y-4 mt-2 p-4 bg-black/20 rounded-xl border border-white/5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={useBinancePay}
+                        onChange={(e) => setUseBinancePay(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-600"
+                        id="binance-pay-check"
+                      />
+                      <label htmlFor="binance-pay-check" className="text-sm text-slate-300 cursor-pointer">Usar Binance Pay / ID</label>
+                    </div>
+
+                    {!useBinancePay ? (
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Dirección de Wallet</label>
+                        <input
+                          type="text"
+                          value={walletAddress}
+                          onChange={(e) => setWalletAddress(e.target.value)}
+                          className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} font-mono text-sm`}
+                          placeholder="bc1q... / TL..."
+                        />
+                      </div>
+                    ) : (
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Email o ID de Binance</label>
+                        <input
+                          type="text"
+                          value={binanceId}
+                          onChange={(e) => setBinanceId(e.target.value)}
+                          className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} text-sm`}
+                          placeholder="ejemplo@binance.com / 123456"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className={`${styles.submitButton} !py-4 !text-lg shadow-lg shadow-blue-500/20 transition-transform active:scale-95`}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Procesando...' : '📤 Confirmar Solicitud de Retiro'}
             </button>
           </form>
         </div>
 
+        {/* Historial de Retiros */}
         <div className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle}>Historial</h2>
+          <h2 className={styles.sectionTitle}>Historial de Retiros</h2>
           {withdrawalsHistory.length === 0 ? (
-            <p className={styles.noDataText}>No hay retiros.</p>
+            <p className={styles.noDataText}>No has realizado solicitudes de retiro aún.</p>
           ) : (
-            <div className={styles.tableContainer}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th className={styles.tableHeader}>Fecha</th>
-                    <th className={styles.tableHeader}>Cantidad</th>
-                    <th className={styles.tableHeader}>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {withdrawalsHistory.map((w) => (
-                    <tr key={w.id}>
-                      <td className={styles.tableCell}>{w.createdAt.toLocaleDateString()}</td>
-                      <td className={styles.tableCell}>{w.amount.toFixed((w.currency === 'USD' || w.currency === 'USDTTRC20') ? 2 : 8)} {w.currency}</td>
-                      <td className={styles.tableCell}>
-                        <span className={`${styles.statusBadge} ${w.status === 'Pendiente' ? styles.statusPending : styles.statusCompleted}`}>
-                          {w.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {withdrawalsHistory.map((w) => (
+                <div key={w.id} className="p-4 bg-slate-800/50 rounded-xl border border-slate-700 flex justify-between items-center">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-white text-sm">
+                        {w.amount.toFixed((w.currency === 'USD' || w.currency === 'USDTTRC20') ? 2 : 8)} {w.currency}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] text-slate-500">{w.createdAt.toLocaleString()}</p>
+                      <p className="text-[9px] text-slate-400 font-mono truncate max-w-[150px]">{w.addressOrId}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`${styles.statusBadge} !text-[10px] px-2 py-1 rounded-lg border`}
+                      style={
+                        w.status === 'Pendiente'
+                          ? { background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }
+                          : w.status === 'Completado' || w.status === 'Aprobado'
+                            ? { background: 'rgba(16, 185, 129, 0.1)', color: 'var(--green-check)', borderColor: 'rgba(16, 185, 129, 0.2)' }
+                            : { background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red-error)', borderColor: 'rgba(239, 68, 68, 0.2)' }
+                      }
+                    >
+                      {w.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
