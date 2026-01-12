@@ -4,7 +4,7 @@ import { collection, query, orderBy, onSnapshot, addDoc, limit, where, getDocs, 
 import { useAuth } from '../../context/AuthContext';
 
 const ChatManagement = () => {
-    const { currentUser } = useAuth();
+    const { currentUser, isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('public'); // 'public' or 'private'
     const [publicMessages, setPublicMessages] = useState([]);
     const [privateRooms, setPrivateRooms] = useState([]);
@@ -13,6 +13,14 @@ const ChatManagement = () => {
     const [newMessage, setNewMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const scrollRef = useRef();
+
+    useEffect(() => {
+        console.log("DEBUG: ChatManagement State", {
+            uid: currentUser?.uid,
+            isAdminContext: isAdmin,
+            authLoaded: !!currentUser
+        });
+    }, [currentUser, isAdmin]);
 
     // Public Chat Subscription
     useEffect(() => {
