@@ -7,7 +7,7 @@ import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import { countMinersByUser } from '../../utils/miners';
 import { db, auth, storage } from '../../services/firebase'; // Importar db, auth y storage desde firebase.js
-import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, addDoc, deleteDoc, getDocs, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
@@ -93,7 +93,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
         displayName: userBalances.displayName || 'Usuario',
         profilePhotoUrl: userBalances.profilePhotoUrl || '',
         isAdmin: false,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
       setNewMessage('');
     } catch (err) {

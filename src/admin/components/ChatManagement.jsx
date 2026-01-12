@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, limit, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, limit, where, getDocs, doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 
 const ChatManagement = () => {
@@ -88,7 +88,7 @@ const ChatManagement = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !currentUser) return;
+        if (!newMessage.trim()) return;
 
         try {
             if (activeTab === 'public') {
@@ -99,23 +99,24 @@ const ChatManagement = () => {
                     displayName: 'Admin Trader',
                     profilePhotoUrl: '',
                     isAdmin: true,
-                    createdAt: new Date(),
+                    createdAt: serverTimestamp(),
                 });
             } else if (selectedRoom) {
                 await addDoc(collection(db, 'privateVipMessages'), {
                     text: newMessage,
-                    userId: selectedRoom.userId, // The conversation belongs to this user
+                    userId: selectedRoom.userId, // El chat pertenece a la sesión de este usuario
                     senderId: 'admin',
                     username: 'Admin Trader',
                     displayName: 'Admin Trader',
                     profilePhotoUrl: '',
                     isAdmin: true,
-                    createdAt: new Date(),
+                    createdAt: serverTimestamp(),
                 });
             }
             setNewMessage('');
         } catch (err) {
             console.error("Error sending message:", err);
+            alert("Error al enviar mensaje: " + err.message);
         }
     };
 
