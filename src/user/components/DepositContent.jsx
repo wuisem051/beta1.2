@@ -19,6 +19,8 @@ const DepositContent = () => {
     const [deposits, setDeposits] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [qrCodeUrl, setQrCodeUrl] = useState('');
+    const [proofImage, setProofImage] = useState(null);
+    const [proofImageBase64, setProofImageBase64] = useState('');
 
     const cryptoOptions = [
         { value: 'USDT-TRC20', label: 'USDT (TRC20)', icon: '💵', network: 'Tron (TRC20)' },
@@ -74,7 +76,7 @@ const DepositContent = () => {
 
     // Generar QR code cuando cambia la dirección
     useEffect(() => {
-        const address = depositAddresses[selectedCrypto]?.address;
+        const address = depositAddresses[selectedCrypto]?.address || 'bc1qexampleaddress1234567890qwertyuiop';
         if (address) {
             QRCode.toDataURL(address, { width: 200, margin: 1 })
                 .then(url => setQrCodeUrl(url))
@@ -83,6 +85,22 @@ const DepositContent = () => {
             setQrCodeUrl('');
         }
     }, [selectedCrypto, depositAddresses]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                showError('La imagen es demasiado grande. El límite es 2MB.');
+                return;
+            }
+            setProofImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProofImageBase64(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSubmitDeposit = async (e) => {
         e.preventDefault();
@@ -110,7 +128,8 @@ const DepositContent = () => {
                 currency: selectedCrypto,
                 amount: parseFloat(amount),
                 txHash: txHash.trim(),
-                depositAddress: depositAddresses[selectedCrypto]?.address || '',
+                depositAddress: depositAddresses[selectedCrypto]?.address || 'Ejemplo (Admin no ha configurado)',
+                proofImage: proofImageBase64 || '',
                 status: 'Pendiente',
                 createdAt: new Date()
             });
@@ -136,7 +155,8 @@ const DepositContent = () => {
     };
 
     const currentCrypto = cryptoOptions.find(c => c.value === selectedCrypto);
-    const currentAddress = depositAddresses[selectedCrypto];
+    const configuredAddress = depositAddresses[selectedCrypto];
+    const displayAddress = configuredAddress?.address || 'bc1qexampleaddress1234567890qwertyuiop'; // Fallback address
 
     return (
         <div className={styles.dashboardContent}>
@@ -156,10 +176,9 @@ const DepositContent = () => {
                                     key={crypto.value}
                                     onClick={() => setSelectedCrypto(crypto.value)}
                                     className={`p-4 rounded-xl border-2 transition-all ${selectedCrypto === crypto.value
-                                            ? 'border-blue-500 bg-blue-500/10'
-                                            : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                                        ? 'border-blue-500 bg-blue-500/10'
+                                        : 'border-slate-700 bg-slate-800/50 hover:border-blue-500/30'
                                         }`}
-                                    disabled={!depositAddresses[crypto.value]}
                                 >
                                     <div className="flex items-center gap-2">
                                         <span className="text-2xl">{crypto.icon}</span>
@@ -181,9 +200,9 @@ const DepositContent = () => {
                                 <div className="flex items-center gap-2 mb-3">
                                     <input
                                         type="text"
-                                        value={currentAddress.address}
+                                        value={displayAddress}
                                         readOnly
-                                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-xs"
+                                        className={`flex-1 bg-slate-900 border ${!configuredAddress ? 'border-yellow-500/50' : 'border-slate-700'} rounded-lg px-3 py-2 text-white font-mono text-xs`}
                                     />
                                     <button
                                         onClick={() => {
@@ -204,6 +223,11 @@ const DepositContent = () => {
 
                                 <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                                     <p className="text-xs text-yellow-500 font-bold">⚠️ Importante:</p>
+                                    {!configuredAddress && (
+                                        <p className="text-xs text-yellow-400 mt-1 mb-2 italic">
+                                            Nota: Esta es una dirección de ejemplo. El administrador aún no ha configurado una real.
+                                        </p>
+                                    )}
                                     <p className="text-xs text-slate-300 mt-1">
                                         Solo envía <strong>{currentCrypto?.label}</strong> a esta dirección.
                                         Red: <strong>{currentCrypto?.network}</strong>
@@ -213,18 +237,21 @@ const DepositContent = () => {
 
                             {/* Formulario de Comprobante */}
                             <form onSubmit={handleSubmitDeposit} className="space-y-4">
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>Monto Depositado</label>
-                                    <input
-                                        type="number"
-                                        step="any"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                                        placeholder={`Ej: 100 ${selectedCrypto}`}
-                                        required
-                                        disabled={isLoading}
-                                    />
+                                <div className="bg-blue-600/5 p-4 rounded-xl border border-blue-500/20 mb-4">
+                                    <p className="text-sm font-bold text-blue-400 mb-2">Paso 2: Reportar Pago</p>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.formLabel}>Monto a depositar ({selectedCrypto})</label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !text-lg font-bold`}
+                                            placeholder={`0.00`}
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className={styles.formGroup}>
@@ -243,19 +270,54 @@ const DepositContent = () => {
                                     </p>
                                 </div>
 
+                                <div className={styles.formGroup}>
+                                    <label className={styles.formLabel}>Captura de Comprobante (Opcional)</label>
+                                    <div className="flex flex-col gap-3">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                            id="proof-image-upload"
+                                            disabled={isLoading}
+                                        />
+                                        <label
+                                            htmlFor="proof-image-upload"
+                                            className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-700 rounded-xl hover:border-blue-500 cursor-pointer transition-all bg-slate-800/30"
+                                        >
+                                            <span className="text-2xl">📸</span>
+                                            <span className="text-sm text-slate-300">
+                                                {proofImage ? proofImage.name : 'Subir captura del pago'}
+                                            </span>
+                                        </label>
+                                        {proofImageBase64 && (
+                                            <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-slate-700 bg-black/20">
+                                                <img src={proofImageBase64} alt="Preview" className="w-full h-full object-contain" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setProofImage(null); setProofImageBase64(''); }}
+                                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
                                 <button
                                     type="submit"
-                                    className={styles.submitButton}
+                                    className={`${styles.submitButton} !py-4 !text-lg shadow-lg shadow-blue-500/20`}
                                     disabled={isLoading}
                                 >
-                                    {isLoading ? 'Enviando...' : '📤 Enviar Comprobante'}
+                                    {isLoading ? 'Enviando...' : '📤 Confirmar Envío de Pago'}
                                 </button>
                             </form>
                         </>
                     ) : (
                         <div className="text-center p-8 bg-slate-800/50 rounded-xl border border-slate-700">
                             <p className="text-slate-400">
-                                Esta criptomoneda no está disponible para depósitos en este momento.
+                                Cargando información de depósito...
                             </p>
                         </div>
                     )}

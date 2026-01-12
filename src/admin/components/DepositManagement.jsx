@@ -11,6 +11,7 @@ const DepositManagement = () => {
     const [filter, setFilter] = useState('Pendiente'); // 'Todos', 'Pendiente', 'Aprobado', 'Rechazado'
     const [isLoading, setIsLoading] = useState(true);
     const [processingId, setProcessingId] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
 
     useEffect(() => {
         let q;
@@ -167,6 +168,7 @@ const DepositManagement = () => {
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Cripto</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Monto</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">TxHash</th>
+                                <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Comprobante</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Estado</th>
                                 <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Acciones</th>
@@ -198,6 +200,21 @@ const DepositManagement = () => {
                                         >
                                             {deposit.txHash.substring(0, 10)}...
                                         </a>
+                                    </td>
+                                    <td className="px-4 py-4">
+                                        {deposit.proofImage ? (
+                                            <button
+                                                onClick={() => setPreviewImage(deposit.proofImage)}
+                                                className="group relative w-12 h-12 rounded border border-slate-600 overflow-hidden bg-slate-800"
+                                            >
+                                                <img src={deposit.proofImage} alt="Proof" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-[10px] text-white font-bold">VER</span>
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <span className="text-slate-500 text-xs italic">Sin imagen</span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-4 text-slate-300 text-sm whitespace-nowrap">
                                         {deposit.createdAt.toLocaleDateString()}
@@ -234,6 +251,40 @@ const DepositManagement = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {/* Modal de Previsualización de Imagen */}
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+                        <button
+                            onClick={() => setPreviewImage(null)}
+                            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                        >
+                            ✕
+                        </button>
+                        <img
+                            src={previewImage}
+                            alt="Full Proof Representation"
+                            className="max-w-full max-h-[85vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <div className="p-4 bg-slate-900 border-t border-slate-700 flex justify-between items-center text-sm font-medium">
+                            <span className="text-slate-300">Comprobante de Pago</span>
+                            <a
+                                href={previewImage}
+                                download="comprobante-deposito.png"
+                                className="text-blue-400 hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                Descargar Imagen
+                            </a>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
