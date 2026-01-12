@@ -173,81 +173,105 @@ const VIPChatContent = ({ styles, userBalances }) => {
               <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Inicia la conversación en el Hub VIP</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-8 max-w-5xl mx-auto w-full">
+            <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
               {messages.map((msg, index) => {
                 const isMe = msg.userId === currentUser.uid || msg.senderId === currentUser.uid;
                 const isAdmin = msg.role === 'admin';
+                const showAvatar = index === 0 || messages[index - 1].userId !== msg.userId;
 
                 return (
                   <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group/msg animate-in slide-in-from-bottom-2 duration-300`} style={{ animationDelay: `${index * 50}ms` }}>
                     <div className={`flex gap-4 max-w-[85%] md:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                       {/* Avatar */}
                       <div className="flex-shrink-0 mt-auto mb-1">
-                        <div className={`w-10 h-10 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdmin ? 'border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : isMe ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-white/10'}`}>
-                          {msg.userAvatar ? (
-                            <img src={msg.userAvatar} alt="Avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className={`w-full h-full flex items-center justify-center text-xs font-black text-white ${isAdmin ? 'bg-gradient-to-tr from-amber-600 to-yellow-400' : 'bg-slate-800'}`}>
-                              {msg.userName ? msg.userName[0].toUpperCase() : '?'}
-                            </div>
-                          )}
-                        </div>
+                        {showAvatar ? (
+                          <div className={`w-10 h-10 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdmin ? 'border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : isMe ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-white/10'}`}>
+                            {msg.userAvatar ? (
+                              <img src={msg.userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center text-xs font-black text-white ${isAdmin ? 'bg-gradient-to-tr from-amber-600 to-yellow-400' : 'bg-slate-800'}`}>
+                                {msg.userName ? msg.userName[0].toUpperCase() : '?'}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-10" />
+                        )}
                       </div>
 
                       <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        {/* Header del mensaje (Solo si es el primer mensaje del bloque) */}
                         {showAvatar && (
-                          <span className="text-[10px] mb-2 px-1 font-black uppercase tracking-[0.1em] flex items-center gap-1.5" style={{ color: msg.isAdmin ? '#3b82f6' : '#eab308' }}>
-                            {msg.isAdmin && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>}
-                            {msg.isAdmin ? 'TEAM TRADER ELITE' : (msg.displayName || msg.username)}
-                          </span>
-                        )}
-                        <div className={`relative px-4 py-3 rounded-[1.5rem] text-sm font-medium leading-relaxed transition-all shadow-xl group-hover:shadow-2xl ${isMe
-                          ? 'bg-gradient-to-r from-accent to-yellow-600 text-white rounded-tr-none'
-                          : msg.isAdmin
-                            ? 'bg-blue-600/90 backdrop-blur-md text-white rounded-tl-none border border-blue-400/30'
-                            : 'bg-white/5 backdrop-blur-md text-slate-100 rounded-tl-none border border-white/10'
-                          }`}>
-                          {msg.text}
-                          {/* Subtle time hover effect */}
-                          <div className={`absolute -bottom-5 ${isMe ? 'right-0' : 'left-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[9px] text-slate-500 font-bold whitespace-nowrap`}>
-                            {msg.createdAt?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${isAdmin ? 'text-amber-500' : isMe ? 'text-blue-400' : 'text-slate-400'}`}>
+                              {isAdmin ? '🛡️ TEAM TRADER ELITE' : msg.userName || 'Usuario VIP'}
+                            </span>
+                            <span className="text-[8px] text-slate-600 font-bold">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
+                        )}
+
+                        {/* Burbuja */}
+                        <div className={`relative px-6 py-4 rounded-[1.8rem] shadow-2xl transition-all duration-300 ${isAdmin
+                            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-white border border-amber-500/30 backdrop-blur-xl'
+                            : isMe
+                              ? 'bg-blue-600 text-white border-t border-white/20'
+                              : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/5'
+                          } ${isMe ? 'rounded-br-none' : 'rounded-bl-none'}`}>
+                          <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap">{msg.text}</p>
+
+                          {/* Glow effect for hover */}
+                          <div className={`absolute inset-0 rounded-[1.8rem] transition-opacity duration-300 opacity-0 group-hover/msg:opacity-100 pointer-events-none ${isAdmin ? 'shadow-[0_0_30px_rgba(245,158,11,0.2)]' : isMe ? 'shadow-[0_0_30px_rgba(59,130,246,0.3)]' : 'shadow-[0_0_30px_rgba(255,255,255,0.05)]'}`}></div>
                         </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
+              <div ref={scrollRef} />
             </div>
-          )
-          }
-          <div ref={scrollRef} />
+          )}
         </div>
 
-        <div className="p-6 bg-slate-900/50 backdrop-blur-2xl border-t border-white/5">
-          <form onSubmit={handleSendMessage} className="relative group">
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700/50 rounded-2xl pl-6 pr-16 py-4 text-white font-medium focus:ring-4 focus:ring-accent/20 focus:border-accent outline-none transition-all placeholder:text-slate-600 shadow-inner group-hover:border-slate-500/50"
-              placeholder={activeTab === 'public' ? "Comparte tu visión con la comunidad..." : "Escribe un mensaje privado al equipo de soporte..."}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-            />
+        {/* Input Area */}
+        <div className="p-8 bg-slate-950/80 backdrop-blur-3xl border-t border-white/5">
+          <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex items-end gap-4">
+            <div className="flex-1 relative group">
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage(e);
+                  }
+                }}
+                placeholder={activeTab === 'public' ? "Escribe a la comunidad elite..." : "Consulta con un especialista elite..."}
+                className="w-full bg-slate-900/50 border border-white/10 rounded-[1.5rem] px-8 py-5 pr-16 text-sm text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none min-h-[60px] max-h-[150px] shadow-inner"
+                rows="1"
+                style={{ height: 'auto' }}
+              />
+              <div className="absolute right-4 bottom-4">
+                <span className={`text-[8px] font-black uppercase tracking-tighter ${newMessage.length > 250 ? 'text-amber-500' : 'text-slate-600'}`}>
+                  {newMessage.length} / 300
+                </span>
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="absolute right-2 top-2 bottom-2 aspect-square bg-accent hover:bg-yellow-500 text-white flex items-center justify-center rounded-xl transition-all active:scale-95 shadow-lg shadow-accent/20"
+              disabled={!newMessage.trim() || isLoading}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 transform active:scale-90 ${newMessage.trim() ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="rotate-45 -translate-y-0.5 -translate-x-0.5">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polyline points="22 2 15 22 11 13 2 9 22 2" />
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current rotate-45 transform -translate-y-0.5 translate-x-0.5">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
               </svg>
             </button>
           </form>
-          <div className="mt-3 flex justify-between items-center px-2">
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Conexión Segura de Grado Elite
+          <div className="mt-4 flex justify-center">
+            <p className="text-[8px] text-slate-500 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              HUB CIFRADO DE PUNTA A PUNTA
             </p>
-            <p className="text-[10px] text-slate-400 font-medium">Presiona Enter para enviar</p>
           </div>
         </div>
       </div>
