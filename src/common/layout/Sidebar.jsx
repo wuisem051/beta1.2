@@ -20,6 +20,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const isSettingsActive = useMatch(`${basePath}/settings`);
   const isContactSupportActive = useMatch(`${basePath}/contact-support`);
   const isDepositsActive = useMatch(`${basePath}/deposits`);
+  const isPlanTradingActive = useMatch(`${basePath}/plan-trading`);
 
   return (
     <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--bg-sidebar)', backdropFilter: 'var(--glass-blur)' }}>
@@ -50,9 +51,16 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Trading & Crypto</div>
 
           <li>
+            <Link to={`${basePath}/plan-trading`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isPlanTradingActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+              Plan Trading
+            </Link>
+          </li>
+
+          <li>
             <Link to={`${basePath}/miners`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMinersActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /></svg>
-              Copy Trader
+              Señales Trading
             </Link>
           </li>
 

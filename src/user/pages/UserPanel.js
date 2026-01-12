@@ -32,25 +32,7 @@ import TradingViewWidget from '../components/TradingViewWidget';
 const CopyTraderContent = ({ styles, userBalances }) => {
   const { darkMode } = useContext(ThemeContext);
   const [signals, setSignals] = useState([]);
-  const [vipPlans, setVipPlans] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
-  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'vipPlans'), (snapshot) => {
-      const plansData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setVipPlans(plansData);
-      setIsLoadingPlans(false);
-    }, (error) => {
-      console.error("Error fetching VIP plans for user:", error);
-      setIsLoadingPlans(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const isVIP = useMemo(() => {
     if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
@@ -82,10 +64,6 @@ const CopyTraderContent = ({ styles, userBalances }) => {
     return () => unsubscribe();
   }, [isVIP]);
 
-  const handlePlanPurchased = () => {
-    console.log("Plan VIP adquirido. Las suscripciones de Firestore se encargarán de las actualizaciones.");
-  };
-
   // Función para calcular el porcentaje de ganancia potencial
   const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
     const entry = parseFloat(entryPrice);
@@ -107,30 +85,15 @@ const CopyTraderContent = ({ styles, userBalances }) => {
 
   return (
     <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Copy Trader</h1>
-      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>Suscríbete a nuestros cupos VIP para seguir las operaciones en tiempo real.</p>
-
-      <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Cupos VIP Mensuales</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
-        {isLoadingPlans ? (
-          <div className={styles.noDataText}>Cargando planes VIP...</div>
-        ) : vipPlans.length === 0 ? (
-          <div className={styles.noDataText}>No hay planes VIP configurados.</div>
-        ) : (
-          vipPlans.map(plan => (
-            <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
-          ))
-        )}
-      </div>
-
-      <h2 className={styles.sectionTitle} style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>Señales de Trading (Binance)</h2>
+      <h1 className={styles.mainContentTitle}>Señales de Trading</h1>
+      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>Sigue nuestras operaciones en tiempo real. Sección exclusiva para miembros VIP.</p>
 
       {!isVIP ? (
         <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
             <p className="text-xl font-bold" style={{ color: '#f1f5f9' }}>Contenido exclusivo para miembros VIP</p>
-            <p className={styles.statTitle}>Aquí aparecerán mis entradas de Binance (Spot y Margen). Adquiere un cupo VIP arriba para desbloquear esta sección.</p>
+            <p className={styles.statTitle}>Aquí aparecerán nuestras entradas de Binance. Adquiere un Cupo VIP en la sección "Plan Trading" para desbloquear esta sección.</p>
           </div>
         </div>
       ) : (
@@ -200,6 +163,92 @@ const CopyTraderContent = ({ styles, userBalances }) => {
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+const PlanTradingContent = ({ styles }) => {
+  const [vipPlans, setVipPlans] = useState([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'vipPlans'), (snapshot) => {
+      const plansData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setVipPlans(plansData);
+      setIsLoadingPlans(false);
+    }, (error) => {
+      console.error("Error fetching VIP plans for user:", error);
+      setIsLoadingPlans(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handlePlanPurchased = () => {
+    console.log("Plan VIP adquirido. Las suscripciones de Firestore se encargarán de las actualizaciones.");
+  };
+
+  return (
+    <div className={styles.dashboardContent}>
+      <h1 className={styles.mainContentTitle}>Plan Trading</h1>
+      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>Adquiere tu Cupo VIP Mensual para acceder a señales exclusivas y soporte prioritario.</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+        {isLoadingPlans ? (
+          <div className={styles.noDataText}>Cargando planes VIP...</div>
+        ) : vipPlans.length === 0 ? (
+          <div className={styles.noDataText}>No hay planes VIP configurados.</div>
+        ) : (
+          vipPlans.map(plan => (
+            <VIPPlanDisplay key={plan.id} plan={plan} onPlanPurchased={handlePlanPurchased} />
+          ))
+        )}
+      </div>
+
+      <div className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>¿Qué incluye el Cupo VIP?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div className="flex gap-3 items-start">
+            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">Señales en Tiempo Real</p>
+              <p className="text-xs text-slate-400">Entradas y salidas de mercado enviadas directamente a tu panel.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">Análisis Técnico</p>
+              <p className="text-xs text-slate-400">Gráficos y explicaciones detalladas de cada operación sugerida.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">Soporte Prioritario</p>
+              <p className="text-xs text-slate-400">Atención personalizada para resolver dudas sobre tus operaciones.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">Gestión de Riesgo</p>
+              <p className="text-xs text-slate-400">Recomendaciones de inversión máxima y stop loss para proteger tu capital.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1788,7 +1837,8 @@ const UserPanel = () => {
   }
 
   const showNavbar = [
-    '/user-panel/miners',      // Ruta para "Miner" (vía CopyTrader)
+    '/user-panel/miners',      // Ruta para "Señales Trading"
+    '/user-panel/plan-trading', // Ruta para "Plan Trading"
   ].some(path => location.pathname.startsWith(path));
 
   return (
@@ -1811,6 +1861,7 @@ const UserPanel = () => {
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
+          <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
