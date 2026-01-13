@@ -17,6 +17,7 @@ const ExchangeContent = () => {
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT');
     const [tradeAmount, setTradeAmount] = useState('');
     const [tradePrice, setTradePrice] = useState('');
+    const [estimatedTotal, setEstimatedTotal] = useState('0.00');
     const [tradeType, setTradeType] = useState('market');
     const [tradeSide, setTradeSide] = useState('buy');
     const [isTrading, setIsTrading] = useState(false);
@@ -92,6 +93,42 @@ const ExchangeContent = () => {
             }
         } finally {
             setIsLoadingBalance(false);
+        }
+    };
+
+    // Live calculation of estimated total
+    useEffect(() => {
+        if (tradeType === 'market') {
+            setEstimatedTotal('Precio de Mercado');
+        } else if (tradeAmount && tradePrice) {
+            const total = parseFloat(tradeAmount) * parseFloat(tradePrice);
+            setEstimatedTotal(total.toFixed(8));
+        } else {
+            setEstimatedTotal('0.00');
+        }
+    }, [tradeAmount, tradePrice, tradeType]);
+
+    const handlePercentageClick = (percentage) => {
+        if (!balance || !balance.total) return;
+
+        const [asset, base] = tradeSymbol.split('/');
+        const targetAsset = tradeSide === 'buy' ? base : asset;
+        const available = parseFloat(balance.total[targetAsset]) || 0;
+
+        if (tradeSide === 'buy') {
+            // For buy, we use % of USDT (base)
+            if (tradeType === 'limit' && tradePrice) {
+                const amount = (available * (percentage / 100)) / parseFloat(tradePrice);
+                setTradeAmount(amount.toFixed(8));
+            } else {
+                // If market, user might want to buy with x USDT, but CCXT expects asset amount
+                // We'll show a warning or just use a default estimate if we had price
+                alert("Para usar porcentajes en compra, usa una orden 'Limit' para calcular la cantidad exacta.");
+            }
+        } else {
+            // For sell, it's easy: % of the asset balance
+            const amount = available * (percentage / 100);
+            setTradeAmount(amount.toFixed(8));
         }
     };
 
@@ -334,74 +371,155 @@ const ExchangeContent = () => {
 
                         {/* Trade Form - 8 Columns */}
                         <div className="lg:col-span-8">
-                            <div className={styles.sectionCard}>
-                                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
-                                    <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                        <FaBolt className="text-emerald-400" />
+                            <div className={`${styles.sectionCard} overflow-hidden px-0 pt-0 pb-0`}>
+                                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-800/20">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                                            <FaBolt className="text-emerald-400 text-xl" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-lg font-bold text-white leading-none mb-1">Operación Rápida</h2>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Trading Avanzado</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h2 className="text-lg font-bold text-white">Operación Rápida</h2>
-                                        <p className="text-xs text-slate-400">Ejecuta órdenes a precio de mercado instantáneamente</p>
+                                    <div className="flex bg-slate-900/50 p-1 rounded-lg border border-white/5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeType('market')}
+                                            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${tradeType === 'market' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+                                        >
+                                            Market
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeType('limit')}
+                                            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${tradeType === 'limit' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+                                        >
+                                            Limit
+                                        </button>
                                     </div>
                                 </div>
 
-                                <form onSubmit={handleTrade} className="max-w-xl">
-                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                <form onSubmit={handleTrade} className="p-8">
+                                    <div className="grid grid-cols-2 gap-4 mb-8">
                                         <button
                                             type="button"
                                             onClick={() => setTradeSide('buy')}
-                                            className={`py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all border-2 ${tradeSide === 'buy' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-500/10' : 'bg-slate-900/30 border-transparent text-slate-500 hover:bg-slate-800'}`}
+                                            className={`flex flex-col items-center justify-center py-4 rounded-2xl transition-all border-2 relative overflow-hidden group ${tradeSide === 'buy' ? 'border-emerald-500' : 'border-white/5 grayscale opacity-50 hover:grayscale-0 hover:opacity-100'}`}
                                         >
-                                            Comprar
+                                            {tradeSide === 'buy' && <div className="absolute inset-0 bg-emerald-500/10 animate-pulse"></div>}
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${tradeSide === 'buy' ? 'text-emerald-400' : 'text-slate-500'}`}>Long</span>
+                                            <span className={`text-xl font-black ${tradeSide === 'buy' ? 'text-emerald-400' : 'text-slate-400'}`}>COMPRAR</span>
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setTradeSide('sell')}
-                                            className={`py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all border-2 ${tradeSide === 'sell' ? 'bg-red-500/10 border-red-500 text-red-400 shadow-lg shadow-red-500/10' : 'bg-slate-900/30 border-transparent text-slate-500 hover:bg-slate-800'}`}
+                                            className={`flex flex-col items-center justify-center py-4 rounded-2xl transition-all border-2 relative overflow-hidden group ${tradeSide === 'sell' ? 'border-red-500' : 'border-white/5 grayscale opacity-50 hover:grayscale-0 hover:opacity-100'}`}
                                         >
-                                            Vender
+                                            {tradeSide === 'sell' && <div className="absolute inset-0 bg-red-500/10 animate-pulse"></div>}
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${tradeSide === 'sell' ? 'text-red-400' : 'text-slate-500'}`}>Short</span>
+                                            <span className={`text-xl font-black ${tradeSide === 'sell' ? 'text-red-400' : 'text-slate-400'}`}>VENDER</span>
                                         </button>
                                     </div>
 
-                                    <div className="space-y-5">
+                                    <div className="space-y-6">
+                                        {/* Pair Selector */}
                                         <div>
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Par de Trading</label>
-                                            <div className="relative">
-                                                <select
-                                                    value={tradeSymbol}
-                                                    onChange={e => setTradeSymbol(e.target.value)}
-                                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-4 text-white font-bold text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none appearance-none"
-                                                >
-                                                    {tradingPairs.map(pair => (
-                                                        <option key={pair} value={pair}>{pair}</option>
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Mercado Seleccionado</label>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {tradingPairs.map(pair => (
+                                                    <button
+                                                        key={pair}
+                                                        type="button"
+                                                        onClick={() => setTradeSymbol(pair)}
+                                                        className={`py-3 rounded-xl border font-bold text-xs transition-all ${tradeSymbol === pair ? 'bg-blue-600/10 border-blue-500 text-blue-400' : 'bg-slate-900/30 border-white/5 text-slate-500 hover:border-white/10'}`}
+                                                    >
+                                                        {pair.split('/')[0]}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Inputs Container */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {tradeType === 'limit' && (
+                                                <div className="animate-in fade-in slide-in-from-left-4 duration-300">
+                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Precio de Orden (USDT)</label>
+                                                    <div className="relative group">
+                                                        <input
+                                                            type="number"
+                                                            step="0.00000001"
+                                                            value={tradePrice}
+                                                            onChange={e => setTradePrice(e.target.value)}
+                                                            className="w-full bg-slate-900/80 border border-white/10 rounded-2xl px-5 py-5 text-white font-mono text-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                                            placeholder="0.0000"
+                                                        />
+                                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 font-bold group-focus-within:text-blue-500 transition-colors">LIMIT</div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className={`${tradeType === 'market' ? 'col-span-2' : ''} transition-all duration-300`}>
+                                                <div className="flex justify-between items-end mb-3">
+                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Cantidad a Operar</label>
+                                                    <span className="text-[10px] font-bold text-slate-500">
+                                                        Saldo: <span className="text-blue-400">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span> {tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]}
+                                                    </span>
+                                                </div>
+                                                <div className="relative group">
+                                                    <input
+                                                        type="number"
+                                                        step="0.00000001"
+                                                        value={tradeAmount}
+                                                        onChange={e => setTradeAmount(e.target.value)}
+                                                        className="w-full bg-slate-900/80 border border-white/10 rounded-2xl px-5 py-5 text-white font-mono text-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                                        placeholder="0.00"
+                                                    />
+                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 font-bold group-focus-within:text-blue-500 transition-colors">{tradeSymbol.split('/')[0]}</div>
+                                                </div>
+
+                                                {/* Percentage Buttons */}
+                                                <div className="grid grid-cols-4 gap-2 mt-3">
+                                                    {[25, 50, 75, 100].map(p => (
+                                                        <button
+                                                            key={p}
+                                                            type="button"
+                                                            onClick={() => handlePercentageClick(p)}
+                                                            className="py-2 bg-slate-900/40 hover:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 transition-colors border border-white/5"
+                                                        >
+                                                            {p}%
+                                                        </button>
                                                     ))}
-                                                </select>
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold bg-white/10 px-2 py-1 rounded text-slate-300">
-                                                    SPOT
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Cantidad</label>
-                                            <input
-                                                type="number"
-                                                value={tradeAmount}
-                                                onChange={e => setTradeAmount(e.target.value)}
-                                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-4 text-white font-mono text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
-                                                placeholder="0.00"
-                                                step="0.00000001"
-                                            />
+                                        {/* Order Info */}
+                                        <div className="bg-slate-900/50 rounded-2xl p-5 border border-white/5 space-y-3">
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-slate-500 font-bold uppercase tracking-wider">Tipo de Orden</span>
+                                                <span className="text-white font-bold">{tradeType === 'market' ? 'Mercado Instantáneo' : 'Límite Programada'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-slate-500 font-bold uppercase tracking-wider text-xs">Valor Estimado</span>
+                                                <span className="text-lg font-black text-white tracking-tight">{estimatedTotal} <span className="text-xs text-slate-500 font-medium">USDT</span></span>
+                                            </div>
                                         </div>
 
                                         <button
                                             type="submit"
                                             disabled={isTrading}
-                                            className={`w-full py-5 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-xl transform active:scale-95 mt-4 ${tradeSide === 'buy' ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:to-emerald-400 text-white shadow-emerald-500/20' : 'bg-gradient-to-r from-red-600 to-red-500 hover:to-red-400 text-white shadow-red-500/20'}`}
+                                            className={`w-full py-6 rounded-2xl font-black text-base uppercase tracking-widest transition-all shadow-2xl transform active:scale-[0.97] mt-2 relative overflow-hidden group ${tradeSide === 'buy' ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20' : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20'}`}
                                         >
-                                            {isTrading ? 'Procesando...' : (
+                                            {isTrading ? (
                                                 <span className="flex items-center justify-center gap-2">
-                                                    <FaChartLine /> {tradeSide === 'buy' ? 'Confirmar Compra' : 'Confirmar Venta'}
+                                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                                    Procesando...
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center justify-center gap-3">
+                                                    {tradeSide === 'buy' ? <FaCheckCircle className="animate-pulse" /> : <FaExclamationTriangle className="animate-pulse" />}
+                                                    {tradeSide === 'buy' ? 'Abrir Posición Long' : 'Abrir Posición Short'}
                                                 </span>
                                             )}
                                         </button>
