@@ -108,6 +108,35 @@ const ExchangeContent = () => {
         }
     }, [tradeAmount, tradePrice, tradeType]);
 
+    const fetchTicker = async (symbol) => {
+        try {
+            const idToken = await currentUser.getIdToken();
+            const response = await fetch('/.netlify/functions/getExchangeTicker', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ symbol })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.last) {
+                    setTradePrice(data.last.toString());
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching ticker:", error);
+        }
+    };
+
+    // Auto-fetch price when symbol changes
+    useEffect(() => {
+        if (tradeSymbol) {
+            fetchTicker(tradeSymbol);
+        }
+    }, [tradeSymbol]);
+
     const handlePercentageClick = (percentage) => {
         if (!balance || !balance.total) return;
 
@@ -117,13 +146,11 @@ const ExchangeContent = () => {
 
         if (tradeSide === 'buy') {
             // For buy, we use % of USDT (base)
-            if (tradeType === 'limit' && tradePrice) {
+            if (tradePrice) {
                 const amount = (available * (percentage / 100)) / parseFloat(tradePrice);
                 setTradeAmount(amount.toFixed(8));
             } else {
-                // If market, user might want to buy with x USDT, but CCXT expects asset amount
-                // We'll show a warning or just use a default estimate if we had price
-                alert("Para usar porcentajes en compra, usa una orden 'Limit' para calcular la cantidad exacta.");
+                alert("Calculando precio... por favor espera un momento o ingresa el precio manualmente.");
             }
         } else {
             // For sell, it's easy: % of the asset balance
@@ -378,8 +405,11 @@ const ExchangeContent = () => {
                                             <FaBolt className="text-emerald-400 text-xl" />
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-bold text-white leading-none mb-1">Operación Rápida</h2>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Trading Avanzado</p>
+                                            <h2 className="text-lg font-bold text-white leading-none mb-1 flex items-center gap-2">
+                                                Operación Rápida
+                                                <span className="px-1.5 py-0.5 bg-blue-600/20 text-blue-400 text-[8px] rounded border border-blue-500/30">SPOT</span>
+                                            </h2>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Trading al Contado</p>
                                         </div>
                                     </div>
                                     <div className="flex bg-slate-900/50 p-1 rounded-lg border border-white/5">
