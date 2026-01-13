@@ -508,6 +508,22 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
   const { darkMode } = useContext(ThemeContext);
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
+  const [totalProfit, setTotalProfit] = useState(0);
+
+  // Fetch Trading History for Total Profit
+  useEffect(() => {
+    const fetchProfit = async () => {
+      const q = query(collection(db, 'tradingHistory'));
+      // Not realtime for simplicity and performance on dashboard, or we can use onSnapshot if strict realtime needed
+      // Using onSnapshot to match Portfolio behavior
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const profit = snapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().profit) || 0), 0);
+        setTotalProfit(profit);
+      });
+      return () => unsubscribe();
+    };
+    fetchProfit();
+  }, []);
 
   // Calcular porcentaje de ganancia
   const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
@@ -589,13 +605,15 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
           <h3 className={styles.statTitle}>Nivel de Cuenta</h3>
           <p className={styles.statValueBlue}>{vipStatusLabel}</p>
         </div>
-        {/* Rendimiento Estimado */}
+        {/* P/L Total Replaces Retorno Estimado */}
         <div className={styles.statCard}>
-          <div className={styles.statIconGreen}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+          <div className={totalProfit >= 0 ? styles.statIconGreen : styles.statIconAccent} style={{ background: totalProfit >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: totalProfit >= 0 ? 'var(--green-check)' : 'var(--red-error)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
           </div>
-          <h3 className={styles.statTitle}>Retorno Estimado</h3>
-          <p className={styles.statValueGreen}>${estimatedDailyUSD.toFixed(2)}</p>
+          <h3 className={styles.statTitle}>P/L Total (USD)</h3>
+          <p className={totalProfit >= 0 ? styles.statValueGreen : styles.statValueAccent} style={{ color: totalProfit >= 0 ? 'var(--green-check)' : 'var(--red-error)' }}>
+            {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)}
+          </p>
         </div>
         {/* Señales Recientes */}
         <div className={styles.statCard}>
@@ -624,7 +642,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
         <div className={styles.tradingViewCard}>
           <h3 className={styles.statsTitle}>Dominancia BTC</h3>
           <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="CRYPTOCAP:BTC.D" theme={darkMode ? "dark" : "light"} interval="60" />
+            <TradingViewWidget symbol="BTC.D" theme={darkMode ? "dark" : "light"} interval="60" />
           </div>
         </div>
       </div>
@@ -659,12 +677,18 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
 
                 <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
                   <div className="bg-white/5 rounded-lg p-2 text-center">
-                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Entrada</span>
-                    <span className="font-mono text-white font-bold">{signal.entryPrice}</span>
+                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Stop Loss</span>
+                    <span className="font-mono text-white font-bold text-red-400">{signal.stopLoss} <span className="text-[9px] opacity-70">({signal.stopLossPercentage}%)</span></span>
                   </div>
                   <div className="bg-white/5 rounded-lg p-2 text-center">
-                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Profit</span>
-                    <span className="font-mono font-bold" style={{ color: 'var(--green-check)' }}>{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}</span>
+                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Max Inv.</span>
+                    <span className="font-mono text-white font-bold">${signal.maxInvestment}</span>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center col-span-2 mt-1">
+                    <span className="block text-slate-500 text-[9px] uppercase font-bold mb-1">Take Profit Targets</span>
+                    <div className="flex justify-around">
+                      <span className="font-mono font-bold text-emerald-400">{signal.takeProfit} <span className="text-[9px] opacity-70">({calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)})</span></span>
+                    </div>
                   </div>
                 </div>
                 {signal.notes && (

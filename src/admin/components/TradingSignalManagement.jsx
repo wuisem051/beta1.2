@@ -1,127 +1,143 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { db, storage } from '../../services/firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useError } from '../../context/ErrorContext';
-import { useAuth } from '../../context/AuthContext'; // Importar useAuth
-import { SolidSectionStyled, CardStyled, InputStyled, SelectStyled, TextareaStyled } from '../../user/styles/StyledComponents'; // Reutilizar componentes estilizados
-import styles from '../../user/pages/UserPanel.module.css'; // Reutilizar estilos del UserPanel
+import { useAuth } from '../../context/AuthContext';
+
+// Icons
+import { FaBinoculars, FaBolt, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMagic, FaPlus, FaSearch, FaTrash, FaTimes } from 'react-icons/fa';
 
 const TradingSignalManagement = () => {
+  const { darkMode } = useContext(ThemeContext);
   const { showError, showSuccess } = useError();
-  const { currentUser } = useAuth(); // Obtener el usuario actual
+  const { currentUser } = useAuth();
+
+  // Data State
   const [signals, setSignals] = useState([]);
+  const [marketPairs, setMarketPairs] = useState([]);
+  const [filteredPairs, setFilteredPairs] = useState([]);
+  const [isPairDropdownOpen, setIsPairDropdownOpen] = useState(false);
+  const [pairSearch, setPairSearch] = useState('');
+
+  // UI State
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('new'); // 'new', 'list'
 
-  // Estados para el formulario de nueva señal
+  // Form State
   const [asset, setAsset] = useState('');
-  const [type, setType] = useState('Compra'); // 'Compra' o 'Venta'
+  const [type, setType] = useState('Compra');
   const [entryPrice, setEntryPrice] = useState('');
-  const [takeProfit, setTakeProfit] = useState('');
+  const [currentPrice, setCurrentPrice] = useState(0);
+
+  // Strategy State
+  const [riskPercent, setRiskPercent] = useState(2); // 2% default risk
+  const [rewardRatio, setRewardRatio] = useState(2); // 1:2 R:R default
   const [stopLoss, setStopLoss] = useState('');
-  const [notes, setNotes] = useState('');
-  const [maxInvestment, setMaxInvestment] = useState('100'); // Valor por defecto solicitado
   const [stopLossPercentage, setStopLossPercentage] = useState('');
-  const [status, setStatus] = useState('Activa'); // 'Activa' o 'En espera'
+  const [takeProfit, setTakeProfit] = useState('');
+  const [maxInvestment, setMaxInvestment] = useState('100');
+
+  const [notes, setNotes] = useState('');
+  const [status, setStatus] = useState('Activa');
   const [imageFile, setImageFile] = useState(null);
 
-  // Estados para la edición
-  const [editingSignalId, setEditingSignalId] = useState(null);
-  const [editAsset, setEditAsset] = useState('');
-  const [editType, setEditType] = useState('');
-  const [editEntryPrice, setEditEntryPrice] = useState('');
-  const [editTakeProfit, setEditTakeProfit] = useState('');
-  const [editStopLoss, setEditStopLoss] = useState('');
-  const [editNotes, setEditNotes] = useState('');
-  const [editMaxInvestment, setEditMaxInvestment] = useState('');
-  const [editStopLossPercentage, setEditStopLossPercentage] = useState('');
-  const [editImageUrl, setEditImageUrl] = useState('');
-  const [editStatus, setEditStatus] = useState('Activa');
-  const [editCreatedAt, setEditCreatedAt] = useState('');
-
-  // Función para calcular el porcentaje de ganancia/pérdida
-  const calculatePercentage = (type, entry, takeProfit) => {
-    const entryNum = parseFloat(entry);
-    const tpNum = parseFloat(takeProfit);
-
-    if (isNaN(entryNum) || isNaN(tpNum) || entryNum === 0) {
-      return 'N/A';
-    }
-
-    let percentage;
-    if (type === 'Compra') {
-      percentage = ((tpNum - entryNum) / entryNum) * 100;
-    } else { // Venta
-      percentage = ((entryNum - tpNum) / entryNum) * 100;
-    }
-    return percentage.toFixed(2) + '%';
-  };
-
-  // Función para calcular precio de SL basado en %
-  const calculateSLPrice = (type, entry, percentage) => {
-    const entryNum = parseFloat(entry);
-    const percNum = parseFloat(percentage);
-    if (isNaN(entryNum) || isNaN(percNum)) return '';
-
-    if (type === 'Compra') {
-      return (entryNum * (1 - percNum / 100)).toFixed(8);
-    } else {
-      return (entryNum * (1 + percNum / 100)).toFixed(8);
-    }
-  };
-
-  // Función para calcular % de SL basado en precio
-  const calculateSLPercentage = (type, entry, slPrice) => {
-    const entryNum = parseFloat(entry);
-    const slNum = parseFloat(slPrice);
-    if (isNaN(entryNum) || isNaN(slNum) || entryNum === 0) return '';
-
-    let percentage;
-    if (type === 'Compra') {
-      percentage = ((entryNum - slNum) / entryNum) * 100;
-    } else {
-      percentage = ((slNum - entryNum) / entryNum) * 100;
-    }
-    return Math.abs(percentage).toFixed(2);
-  };
-
+  // Initial Data Fetch
   useEffect(() => {
+    fetchBinancePairs();
     const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedSignals = snapshot.docs.map(doc => ({
+      setSignals(snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-      }));
-      setSignals(fetchedSignals);
-      setIsLoading(false);
-    }, (err) => {
-      console.error("Error fetching trading signals:", err);
-      showError('Error al cargar las señales de trading.');
+        createdAt: doc.data().createdAt?.toDate() || new Date()
+      })));
       setIsLoading(false);
     });
-
     return () => unsubscribe();
-  }, [showError]);
+  }, []);
 
-  const handleAddSignal = async (e) => {
+  // Filter Pairs
+  useEffect(() => {
+    if (!pairSearch) {
+      setFilteredPairs([]);
+      return;
+    }
+    const filtered = marketPairs.filter(p => p.symbol.includes(pairSearch.toUpperCase())).slice(0, 10);
+    setFilteredPairs(filtered);
+  }, [pairSearch, marketPairs]);
+
+  // Auto-Calculate Strategy when Entry or Risk changes
+  useEffect(() => {
+    if (!entryPrice || !riskPercent || !rewardRatio) return;
+
+    const entry = parseFloat(entryPrice);
+    if (isNaN(entry)) return;
+
+    // Calculate Stop Loss based on Risk %
+    let sl;
+    if (type === 'Compra') {
+      sl = entry * (1 - (riskPercent / 100));
+    } else {
+      sl = entry * (1 + (riskPercent / 100));
+    }
+    setStopLoss(sl.toFixed(8));
+    setStopLossPercentage(riskPercent);
+
+    // Calculate Take Profit based on R:R
+    const riskAmount = Math.abs(entry - sl);
+    const rewardAmount = riskAmount * rewardRatio;
+
+    let tp;
+    if (type === 'Compra') {
+      tp = entry + rewardAmount;
+    } else {
+      tp = entry - rewardAmount;
+    }
+    setTakeProfit(tp.toFixed(8));
+
+  }, [entryPrice, riskPercent, rewardRatio, type]);
+
+
+  const fetchBinancePairs = async () => {
+    try {
+      const response = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+      const data = await response.json();
+      const usdtPairs = data.symbols
+        .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+        .map(s => ({ symbol: s.symbol, baseAsset: s.baseAsset, quoteAsset: s.quoteAsset }));
+      setMarketPairs(usdtPairs);
+    } catch (error) {
+      console.error("Error fetching pairs:", error);
+    }
+  };
+
+  const fetchCurrentPrice = async (symbol) => {
+    try {
+      const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+      const data = await response.json();
+      const price = parseFloat(data.price);
+      setCurrentPrice(price);
+      setEntryPrice(price.toString()); // Auto-fill entry
+    } catch (error) {
+      console.error("Error fetching price:", error);
+    }
+  };
+
+  const handleSelectPair = (pair) => {
+    setAsset(pair.symbol);
+    setPairSearch(pair.symbol);
+    setIsPairDropdownOpen(false);
+    fetchCurrentPrice(pair.symbol);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!asset || !entryPrice) return showError("Faltan datos obligatorios");
+
     setIsSubmitting(true);
-
-    if (!currentUser || !currentUser.uid) { // Verificar autenticación
-      showError('Debes iniciar sesión para añadir una señal de trading.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!asset || !entryPrice || !takeProfit || !stopLoss) {
-      showError('Todos los campos de la señal son obligatorios.');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
       let imageUrl = '';
       if (imageFile) {
@@ -131,463 +147,340 @@ const TradingSignalManagement = () => {
       }
 
       await addDoc(collection(db, 'tradingSignals'), {
-        asset,
-        type,
+        asset, type,
         entryPrice: parseFloat(entryPrice),
         takeProfit: parseFloat(takeProfit),
         stopLoss: parseFloat(stopLoss),
-        stopLossPercentage: parseFloat(stopLossPercentage) || 0,
-        maxInvestment: parseFloat(maxInvestment) || 0,
-        status: status,
-        notes,
-        imageUrl,
-        createdAt: new Date(),
+        stopLossPercentage: parseFloat(stopLossPercentage),
+        maxInvestment: parseFloat(maxInvestment),
+        status, notes, imageUrl,
+        createdAt: new Date()
       });
-      showSuccess('Señal de trading añadida exitosamente.');
-      // Limpiar formulario
-      setAsset('');
-      setType('Compra');
-      setEntryPrice('');
-      setTakeProfit('');
-      setStopLoss('');
-      setNotes('');
-      setImageFile(null);
-      // Resetear el input de archivo manualmente si es necesario
-      const fileInput = document.getElementById('signalImage');
-      if (fileInput) fileInput.value = '';
-    } catch (err) {
-      console.error("Error adding trading signal:", err);
-      showError(`Fallo al añadir señal: ${err.message}`);
+
+      showSuccess("Señal creada con éxito");
+      // Reset form simple
+      setAsset(''); setPairSearch(''); setEntryPrice(''); setNotes('');
+      setActiveTab('list');
+    } catch (error) {
+      showError("Error al crear señal");
+      console.error(error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleEditClick = (signal) => {
-    setEditingSignalId(signal.id);
-    setEditAsset(signal.asset);
-    setEditType(signal.type);
-    setEditEntryPrice(signal.entryPrice);
-    setEditTakeProfit(signal.takeProfit);
-    setEditStopLoss(signal.stopLoss);
-    setEditNotes(signal.notes);
-    setEditMaxInvestment(signal.maxInvestment || '');
-    setEditStopLossPercentage(signal.stopLossPercentage || '');
-    setEditImageUrl(signal.imageUrl || '');
-    setEditStatus(signal.status || 'Activa');
-    setEditCreatedAt(signal.createdAt.toISOString().split('T')[0]);
-  };
-
-  const handleUpdateSignal = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    if (!currentUser || !currentUser.uid) { // Verificar autenticación
-      showError('Debes iniciar sesión para actualizar una señal de trading.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!editAsset || !editEntryPrice || !editTakeProfit || !editStopLoss) {
-      showError('Todos los campos de la señal son obligatorios.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const signalRef = doc(db, 'tradingSignals', editingSignalId);
-      await updateDoc(signalRef, {
-        asset: editAsset,
-        type: editType,
-        entryPrice: parseFloat(editEntryPrice),
-        takeProfit: parseFloat(editTakeProfit),
-        stopLoss: parseFloat(editStopLoss),
-        stopLossPercentage: parseFloat(editStopLossPercentage) || 0,
-        maxInvestment: parseFloat(editMaxInvestment) || 0,
-        status: editStatus,
-        notes: editNotes,
-        imageUrl: editImageUrl,
-        createdAt: new Date(editCreatedAt),
-      });
-      showSuccess('Señal de trading actualizada exitosamente.');
-      setEditingSignalId(null); // Salir del modo edición
-    } catch (err) {
-      console.error("Error updating trading signal:", err);
-      showError(`Fallo al actualizar señal: ${err.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCloseSignal = async (signal, result) => {
-    if (!currentUser || !currentUser.uid) {
-      showError('Debes iniciar sesión.');
-      return;
-    }
-
-    const confirmMsg = `¿Cerrar esta señal como ${result}? Se moverá al historial de operaciones.`;
-    if (window.confirm(confirmMsg)) {
-      setIsSubmitting(true);
-      try {
-        // 1. Añadir al historial de operaciones
-        await addDoc(collection(db, 'tradingHistory'), {
-          date: new Date().toISOString().split('T')[0],
-          pair: signal.asset,
-          type: signal.type === 'Compra' ? 'Long' : 'Short',
-          result: result,
-          profit: result === 'Exitosa' ? parseFloat(signal.maxInvestment) * 0.15 : -parseFloat(signal.maxInvestment) * (signal.stopLossPercentage / 100), // Estimado de profit
-          createdAt: new Date(),
-          originalSignalId: signal.id
-        });
-
-        // 2. Eliminar de señales activas
-        await deleteDoc(doc(db, 'tradingSignals', signal.id));
-
-        showSuccess(`Señal cerrada como ${result} y movida al historial.`);
-      } catch (err) {
-        console.error("Error closing signal:", err);
-        showError(`Error al cerrar señal: ${err.message}`);
-      } finally {
-        setIsSubmitting(false);
-      }
     }
   };
 
   const handleDeleteSignal = async (id) => {
-    if (!currentUser || !currentUser.uid) { // Verificar autenticación
-      showError('Debes iniciar sesión para eliminar una señal de trading.');
-      return;
-    }
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta señal de trading?')) {
-      setIsSubmitting(true);
+    if (window.confirm('¿Eliminar esta señal?')) {
       try {
         await deleteDoc(doc(db, 'tradingSignals', id));
-        showSuccess('Señal de trading eliminada exitosamente.');
+        showSuccess('Señal eliminada');
       } catch (err) {
-        console.error("Error deleting trading signal:", err);
-        showError(`Fallo al eliminar señal: ${err.message}`);
-      } finally {
-        setIsSubmitting(false);
+        showError('Error al eliminar');
       }
     }
   };
 
+
   return (
-    <div className="p-6 rounded-2xl shadow-xl space-y-8" style={{ backgroundColor: '#0f172a', color: '#f8fafc' }}>
-      <h1 className="text-3xl font-bold text-white border-b border-slate-700 pb-4">Gestión de Señales de Trading</h1>
+    <div className="min-h-screen bg-slate-950 p-6 md:p-12 text-slate-100 font-sans">
+      <div className="max-w-7xl mx-auto">
 
-      {isLoading && (
-        <div className="flex justify-center p-8">
-          <div className="animate-pulse text-slate-400 text-lg">Cargando señales...</div>
-        </div>
-      )}
-      {isSubmitting && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-slate-800 p-6 rounded-2xl shadow-2xl flex items-center gap-4">
-            <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span className="text-white font-medium">Procesando...</span>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-slate-800 pb-8">
+          <div>
+            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-2">
+              Centro de Comando
+            </h1>
+            <p className="text-slate-400 font-medium tracking-wide">Gestión Avanzada de Señales Algorítmicas</p>
           </div>
-        </div>
-      )}
-
-      {/* Formulario para añadir nueva señal */}
-      <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg">
-        <h2 className="text-xl font-semibold text-blue-400 mb-6 flex items-center gap-2">
-          <span className="bg-blue-500/10 p-2 rounded-lg">➕</span> Añadir Nueva Señal
-        </h2>
-        <form onSubmit={handleAddSignal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="asset" className="text-sm font-medium text-slate-400">Activo</label>
-            <input
-              type="text"
-              id="asset"
-              value={asset}
-              onChange={(e) => setAsset(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-              placeholder="Ej: BTC/USD"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="type" className="text-sm font-medium text-slate-400">Tipo de Señal</label>
-            <select
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
-              disabled={isSubmitting}
+          <div className="flex gap-4 mt-6 md:mt-0">
+            <button
+              onClick={() => setActiveTab('new')}
+              className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === 'new' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
             >
-              <option value="Compra">Compra</option>
-              <option value="Venta">Venta</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="entryPrice" className="text-sm font-medium text-slate-400">Precio de Entrada</label>
-            <input
-              type="number"
-              id="entryPrice"
-              value={entryPrice}
-              onChange={(e) => setEntryPrice(e.target.value)}
-              step="any"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
-              placeholder="Ej: 30000.00"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="takeProfit" className="text-sm font-medium text-slate-400">Precio de Salida (Take Profit)</label>
-            <input
-              type="number"
-              id="takeProfit"
-              value={takeProfit}
-              onChange={(e) => setTakeProfit(e.target.value)}
-              step="any"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
-              placeholder="Ej: 31000.00"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 col-span-full">
-            <div className="space-y-2">
-              <label htmlFor="maxInvestment" className="text-sm font-medium text-slate-400">Inversión Máxima (USD)</label>
-              <input
-                type="number"
-                id="maxInvestment"
-                value={maxInvestment}
-                onChange={(e) => setMaxInvestment(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-                placeholder="Ej: 100"
-                required
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="stopLossPercentage" className="text-sm font-medium text-slate-400">Stop Loss (%)</label>
-              <input
-                type="number"
-                id="stopLossPercentage"
-                value={stopLossPercentage}
-                onChange={(e) => {
-                  setStopLossPercentage(e.target.value);
-                  const slPrice = calculateSLPrice(type, entryPrice, e.target.value);
-                  setStopLoss(slPrice);
-                }}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-                placeholder="Ej: 5"
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-          <div className="space-y-2 col-span-full">
-            <label htmlFor="stopLoss" className="text-sm font-medium text-slate-400">Precio Stop Loss</label>
-            <input
-              type="number"
-              id="stopLoss"
-              value={stopLoss}
-              onChange={(e) => {
-                setStopLoss(e.target.value);
-                const slPerc = calculateSLPercentage(type, entryPrice, e.target.value);
-                setStopLossPercentage(slPerc);
-              }}
-              step="any"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-              placeholder="Ej: 29500.00"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="space-y-2 col-span-full">
-            <label htmlFor="notes" className="text-sm font-medium text-slate-400">Notas (Opcional)</label>
-            <textarea
-              id="notes"
-              rows="3"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-              placeholder="Información adicional sobre la señal..."
-              disabled={isSubmitting}
-            ></textarea>
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="status" className="text-sm font-medium text-slate-400">Estado de la Señal</label>
-            <select
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
-              disabled={isSubmitting}
+              <FaMagic /> Nueva Señal
+            </button>
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === 'list' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
             >
-              <option value="Activa">Activa</option>
-              <option value="En espera">En espera</option>
-            </select>
+              <FaBinoculars /> Señales Activas <span className="ml-2 bg-slate-900 px-2 py-0.5 rounded-md text-xs">{signals.length}</span>
+            </button>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="signalImage" className="text-sm font-medium text-slate-400">Captura de Pantalla/Imagen (Opcional)</label>
-            <input
-              type="file"
-              id="signalImage"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files[0])}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"
-              disabled={isSubmitting}
-            />
-          </div>
-          <button
-            type="submit"
-            className="col-span-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : '🚀 Añadir Señal'}
-          </button>
-        </form>
-      </div>
+        </div>
 
-      {/* Lista de Señales Existentes */}
-      <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 shadow-lg">
-        <h2 className="text-lg font-semibold text-blue-400 mb-3 flex items-center gap-2">
-          <span className="bg-blue-500/10 p-1.5 rounded-lg text-sm">📊</span> Señales de Trading Existentes
-        </h2>
-        {signals.length === 0 && !isLoading ? (
-          <p className="text-center text-slate-500 py-6 text-sm">No hay señales de trading registradas.</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-700">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="bg-slate-900/50">
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Activo</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Tipo</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Entrada</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Max Inv</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">SL %</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Take Profit</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Stop Loss</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Imagen</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Fecha</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">% Potencial</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Estado</th>
-                  <th className="px-2 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700">
-                {signals.map(signal => (
-                  <tr key={signal.id} className="hover:bg-slate-700/30 transition-colors">
-                    {editingSignalId === signal.id ? (
-                      <>
-                        <td className="px-2 py-2">
-                          <input type="text" value={editAsset} onChange={(e) => setEditAsset(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <select value={editType} onChange={(e) => setEditType(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting}>
-                            <option value="Compra">Compra</option>
-                            <option value="Venta">Venta</option>
-                          </select>
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="number" step="any" value={editEntryPrice} onChange={(e) => {
-                            setEditEntryPrice(e.target.value);
-                            const slPrice = calculateSLPrice(editType, e.target.value, editStopLossPercentage);
-                            setEditStopLoss(slPrice);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="number" value={editMaxInvestment} onChange={(e) => setEditMaxInvestment(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="number" value={editStopLossPercentage} onChange={(e) => {
-                            setEditStopLossPercentage(e.target.value);
-                            const slPrice = calculateSLPrice(editType, editEntryPrice, e.target.value);
-                            setEditStopLoss(slPrice);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="number" step="any" value={editTakeProfit} onChange={(e) => setEditTakeProfit(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="number" step="any" value={editStopLoss} onChange={(e) => {
-                            setEditStopLoss(e.target.value);
-                            const slPerc = calculateSLPercentage(editType, editEntryPrice, e.target.value);
-                            setEditStopLossPercentage(slPerc);
-                          }} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="text" value={editImageUrl} onChange={(e) => setEditImageUrl(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" placeholder="URL de imagen" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2">
-                          <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting}>
-                            <option value="Activa">Activa</option>
-                            <option value="En espera">En espera</option>
-                          </select>
-                        </td>
-                        <td className="px-2 py-2">
-                          <input type="date" value={editCreatedAt} onChange={(e) => setEditCreatedAt(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-white text-xs" disabled={isSubmitting} />
-                        </td>
-                        <td className="px-2 py-2 text-blue-400 font-bold text-xs">
-                          {calculatePercentage(editType, editEntryPrice, editTakeProfit)}
-                        </td>
-                        <td className="px-2 py-2 space-x-1">
-                          <button onClick={handleUpdateSignal} className="bg-green-600 hover:bg-green-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✓</button>
-                          <button onClick={() => setEditingSignalId(null)} className="bg-slate-600 hover:bg-slate-500 text-white px-2 py-0.5 rounded text-xs transition-colors" disabled={isSubmitting}>✕</button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-2 py-2 font-medium text-white text-xs">{signal.asset}</td>
-                        <td className="px-2 py-2">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${signal.type === 'Compra' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-                            {signal.type}
-                          </span>
-                        </td>
-                        <td className="px-2 py-2 text-slate-300 font-mono text-xs">{signal.entryPrice}</td>
-                        <td className="px-2 py-2 text-white font-semibold text-xs">${signal.maxInvestment || 0}</td>
-                        <td className="px-2 py-2 text-red-500 font-bold text-xs">{signal.stopLossPercentage || 0}%</td>
-                        <td className="px-2 py-2 text-green-500 font-mono font-bold text-xs">{signal.takeProfit}</td>
-                        <td className="px-2 py-2 text-red-500 font-mono text-xs">{signal.stopLoss}</td>
-                        <td className="px-2 py-2 text-slate-400 max-w-xs text-xs truncate">{signal.notes}</td>
-                        <td className="px-4 py-4">
-                          {signal.imageUrl ? (
-                            <a href={signal.imageUrl} target="_blank" rel="noopener noreferrer">
-                              <img src={signal.imageUrl} alt="signal" className="h-10 w-10 object-cover rounded-lg border border-slate-700 hover:scale-150 transition-transform cursor-pointer" />
-                            </a>
-                          ) : <span className="text-slate-600 text-xs italic">N/A</span>}
-                        </td>
-                        <td className="px-4 py-4 text-slate-400 text-sm whitespace-nowrap">{signal.createdAt.toLocaleDateString()}</td>
-                        <td className="px-4 py-4 text-blue-400 font-bold">
-                          {calculatePercentage(signal.type, signal.entryPrice, signal.takeProfit)}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${signal.status === 'En espera' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' : 'bg-green-500/10 text-green-500 border border-green-500/20'}`}>
-                            {signal.status || 'Activa'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex flex-col gap-2">
-                            <button onClick={() => handleCloseSignal(signal, 'Exitosa')} className="w-full bg-green-600/20 hover:bg-green-600 text-green-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-green-600/30 transition-all">¡Completada! ✓</button>
-                            <button onClick={() => handleCloseSignal(signal, 'Fallida')} className="w-full bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-red-600/30 transition-all">Fallida ✗</button>
-                            <div className="flex gap-2">
-                              <button onClick={() => handleEditClick(signal)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded text-[10px] transition-colors" disabled={isSubmitting}>Ajustar</button>
-                              <button onClick={() => handleDeleteSignal(signal.id)} className="flex-1 bg-red-900/30 hover:bg-red-900 text-red-400 hover:text-white px-2 py-1 rounded text-[10px] transition-colors" disabled={isSubmitting}>Borrar</button>
-                            </div>
-                          </div>
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {activeTab === 'new' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* Left Column: Form */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Market Data Section */}
+              <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                  <span className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><FaSearch /></span>
+                  Datos de Mercado
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Pair Selector */}
+                  <div className="relative z-50">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Par (Binance)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={pairSearch}
+                        onChange={(e) => {
+                          setPairSearch(e.target.value);
+                          setIsPairDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsPairDropdownOpen(true)}
+                        placeholder="Buscar par (ej. BTC)"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-4 text-white font-mono font-bold focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                      />
+                      {isPairDropdownOpen && filteredPairs.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-h-60 overflow-y-auto z-50">
+                          {filteredPairs.map(pair => (
+                            <button
+                              key={pair.symbol}
+                              onClick={() => handleSelectPair(pair)}
+                              className="w-full text-left px-4 py-3 hover:bg-slate-700 transition-colors flex justify-between items-center group"
+                            >
+                              <span className="font-bold text-white group-hover:text-blue-400">{pair.symbol}</span>
+                              <span className="text-xs text-slate-500">{pair.baseAsset}/{pair.quoteAsset}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Signal Type */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Dirección</label>
+                    <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => setType('Compra')}
+                        className={`py-3 rounded-lg font-bold text-sm transition-all ${type === 'Compra' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        LONG (Compra)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setType('Venta')}
+                        className={`py-3 rounded-lg font-bold text-sm transition-all ${type === 'Venta' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        SHORT (Venta)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Entry Price */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Precio de Entrada</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="any"
+                        value={entryPrice}
+                        onChange={(e) => setEntryPrice(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-4 text-white font-mono font-bold text-lg focus:ring-2 focus:ring-blue-500/50 outline-none transition-all pl-12"
+                      />
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                      {currentPrice > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setEntryPrice(currentPrice.toString())}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-xs bg-blue-500/10 text-blue-400 px-2 py-1 rounded hover:bg-blue-500/20 transition-colors"
+                        >
+                          Usar Actual: ${currentPrice}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Risk Strategy Section */}
+              <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                  <span className="p-2 bg-purple-500/10 rounded-lg text-purple-400"><FaBolt /></span>
+                  Estrategia Automática
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  {/* Risk Slider */}
+                  <div>
+                    <div className="flex justify-between mb-4">
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Riesgo (Stop Loss %)</label>
+                      <span className="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">{riskPercent}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="10"
+                      step="0.1"
+                      value={riskPercent}
+                      onChange={(e) => setRiskPercent(parseFloat(e.target.value))}
+                      className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                    />
+                    <div className="flex justify-between mt-2 text-xs text-slate-600 font-mono">
+                      <span>Conservador (1%)</span>
+                      <span>Agresivo (5%+)</span>
+                    </div>
+                  </div>
+
+                  {/* Reward Ratio Slider */}
+                  <div>
+                    <div className="flex justify-between mb-4">
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ratio Beneficio (R:R)</label>
+                      <span className="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">1:{rewardRatio}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="0.5"
+                      value={rewardRatio}
+                      onChange={(e) => setRewardRatio(parseFloat(e.target.value))}
+                      className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500"
+                    />
+                    <div className="flex justify-between mt-2 text-xs text-slate-600 font-mono">
+                      <span>Scalp (1:1.5)</span>
+                      <span>Swing (1:3+)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calculated Values Preview */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-4">
+                    <span className="text-xs text-red-400 font-bold uppercase block mb-1">Stop Loss (Calc)</span>
+                    <div className="text-xl font-mono font-black text-red-500">{stopLoss || '---'}</div>
+                    <span className="text-[10px] text-red-400/60 font-mono">-{riskPercent}% del capital</span>
+                  </div>
+                  <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-4">
+                    <span className="text-xs text-green-400 font-bold uppercase block mb-1">Take Profit (Calc)</span>
+                    <div className="text-xl font-mono font-black text-green-500">{takeProfit || '---'}</div>
+                    <span className="text-[10px] text-green-400/60 font-mono">Target 1:{rewardRatio}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-5 rounded-2xl shadow-xl shadow-blue-600/20 transform transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-lg flex items-center justify-center gap-3"
+              >
+                {isSubmitting ? <span className="animate-spin">⏳</span> : <FaMagic />}
+                Publicar Señal Maestra
+              </button>
+
+            </div>
+
+            {/* Right Column: Preview & Extras */}
+            <div className="space-y-6">
+              {/* Live Preview Card */}
+              <div className="sticky top-6">
+                <h4 className="text-slate-500 font-bold uppercase tracking-widest text-xs mb-4">Vista Previa Usuario</h4>
+                <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative">
+                  {/* Accent Line */}
+                  <div className={`h-1 w-full ${type === 'Compra' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h2 className="text-2xl font-black text-white">{asset || 'BTC/USDT'}</h2>
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase mt-1 ${type === 'Compra' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {type}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-slate-500 font-bold uppercase">Entrada</div>
+                        <div className="font-mono text-white font-bold">{entryPrice || '0.00'}</div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Take Profit</div>
+                        <div className="font-mono text-green-400 font-bold">{takeProfit || '---'}</div>
+                      </div>
+                      <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Stop Loss</div>
+                        <div className="font-mono text-red-400 font-bold">{stopLoss || '---'}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-slate-500 font-bold block mb-1">Inversión Máxima</label>
+                        <input
+                          type="number"
+                          value={maxInvestment}
+                          onChange={(e) => setMaxInvestment(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 font-bold block mb-1">Nota del Trader</label>
+                        <textarea
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Análisis técnico..."
+                          rows="2"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm resize-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* List View */}
+        {activeTab === 'list' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {signals.map(signal => (
+              <div key={signal.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 group hover:border-blue-500/30 transition-all">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{signal.asset}</h3>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${signal.type === 'Compra' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                      {signal.type}
+                    </span>
+                  </div>
+                  <button onClick={() => handleDeleteSignal(signal.id)} className="text-slate-600 hover:text-red-500 transition-colors">
+                    <FaTrash />
+                  </button>
+                </div>
+                <div className="space-y-2 text-sm text-slate-400 font-mono">
+                  <div className="flex justify-between">
+                    <span>Entrada:</span>
+                    <span className="text-white">{signal.entryPrice}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>TP:</span>
+                    <span className="text-green-400">{signal.takeProfit}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>SL:</span>
+                    <span className="text-red-400">{signal.stopLoss}</span>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500">
+                  <span>{new Date(signal.createdAt).toLocaleDateString()}</span>
+                  <span className={`px-2 py-0.5 rounded ${signal.status === 'Activa' ? 'bg-blue-500/10 text-blue-400' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                    {signal.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
     </div>
   );
