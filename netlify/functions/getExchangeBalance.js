@@ -53,6 +53,13 @@ const getExchange = async (userId) => {
         config.options = {
             defaultType: 'spot',
         };
+        // BingX uses different API endpoints
+        config.urls = {
+            api: {
+                public: 'https://open-api.bingx.com',
+                private: 'https://open-api.bingx.com',
+            }
+        };
     }
 
     return new exchangeClass(config);
