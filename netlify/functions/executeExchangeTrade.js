@@ -10,7 +10,13 @@ if (!admin.apps.length) {
             throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable not set');
         }
 
-        const serviceAccount = JSON.parse(serviceAccountJson);
+        let serviceAccount;
+        try {
+            serviceAccount = JSON.parse(serviceAccountJson);
+        } catch (parseError) {
+            console.error('FIREBASE_SERVICE_ACCOUNT JSON parse error:', parseError);
+            throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not a valid JSON. Check for leading/trailing spaces or special characters.');
+        }
 
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),

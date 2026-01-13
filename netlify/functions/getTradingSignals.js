@@ -1,35 +1,30 @@
 const admin = require('firebase-admin');
 
-// Inicializar Firebase Admin SDK si no ha sido inicializado
-// Las credenciales se obtendrán de las variables de entorno de Netlify
+// Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-
-  console.log('Netlify Function: Initializing Firebase Admin SDK...');
-  console.log('Project ID:', projectId);
-  console.log('Client Email:', clientEmail);
-  // No loguear la clave privada completa por seguridad
-
-  if (!projectId || !privateKey || !clientEmail) {
-    console.error('ERROR: Missing Firebase environment variables!');
-    // Si faltan variables, lanzamos un error explícito para que Netlify lo capture
-    throw new Error('Missing one or more Firebase environment variables (FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, FIREBASE_CLIENT_EMAIL).');
-  }
-
   try {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+    if (!serviceAccountJson) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable not set');
+    }
+
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(serviceAccountJson);
+    } catch (parseError) {
+      console.error('FIREBASE_SERVICE_ACCOUNT JSON parse error:', parseError);
+      throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable is not a valid JSON. Check for leading/trailing spaces or special characters.');
+    }
+
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: projectId,
-        privateKey: privateKey.replace(/\\n/g, '\n'), // Asegurarse de reemplazar los saltos de línea
-        clientEmail: clientEmail,
-      }),
+      credential: admin.credential.cert(serviceAccount),
+      projectId: serviceAccount.project_id
     });
-    console.log('Firebase Admin SDK initialized successfully.');
-  } catch (initError) {
-    console.error('Error initializing Firebase Admin SDK:', initError);
-    throw initError; // Re-lanzar el error para que Netlify lo capture
+    console.log('Firebase Admin initialized successfully in getTradingSignals');
+  } catch (error) {
+    console.error('Firebase initialization error in getTradingSignals:', error);
+    throw error;
   }
 }
 
