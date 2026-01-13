@@ -12,7 +12,7 @@ function TradingViewWidget({ symbol, theme = 'dark', interval = '15' }) {
             script.innerHTML = `
         {
           "autosize": true,
-          "symbol": "BINANCE:${symbol}",
+          "symbol": "${symbol.includes('.') || symbol.includes(':') ? symbol : 'BINANCE:' + symbol}",
           "interval": "${interval}",
           "timezone": "Etc/UTC",
           "theme": "${theme}",
