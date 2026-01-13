@@ -16,10 +16,24 @@ const ExchangeContent = () => {
     const [isLoadingBalance, setIsLoadingBalance] = useState(false);
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT');
     const [tradeAmount, setTradeAmount] = useState('');
+    const [tradePrice, setTradePrice] = useState('');
+    const [tradeType, setTradeType] = useState('market');
     const [tradeSide, setTradeSide] = useState('buy');
     const [isTrading, setIsTrading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [keysConfigured, setKeysConfigured] = useState(false);
+
+    // Trading pairs list
+    const tradingPairs = [
+        'BTC/USDT',
+        'ETH/USDT',
+        'ARPA/USDT',
+        'BNB/USDT',
+        'SOL/USDT',
+        'XRP/USDT',
+        'ADA/USDT',
+        'DOGE/USDT'
+    ];
 
     // Fetch saved config on mount
     useEffect(() => {
@@ -106,6 +120,10 @@ const ExchangeContent = () => {
     const handleTrade = async (e) => {
         e.preventDefault();
         if (!tradeAmount || !tradeSymbol) return;
+        if (tradeType === 'limit' && !tradePrice) {
+            setErrorMsg('Debes especificar un precio para órdenes limit');
+            return;
+        }
 
         setIsTrading(true);
         setErrorMsg('');
@@ -121,7 +139,8 @@ const ExchangeContent = () => {
                     symbol: tradeSymbol,
                     side: tradeSide,
                     amount: parseFloat(tradeAmount),
-                    type: 'market'
+                    type: tradeType,
+                    price: tradeType === 'limit' ? parseFloat(tradePrice) : undefined
                 })
             });
 
@@ -132,7 +151,8 @@ const ExchangeContent = () => {
 
             fetchBalance(); // Refresh balance
             setTradeAmount('');
-            alert("Orden ejecutada correctamente!");
+            setTradePrice('');
+            alert(`Orden ${tradeType} ejecutada correctamente!`);
         } catch (error) {
             console.error("Trade error:", error);
             setErrorMsg("Fallo en la operación: " + error.message);
