@@ -675,20 +675,29 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
                   <span className="text-[10px] text-slate-500 font-mono">{signal.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
-                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                {/* Entry & Exit Highlight Row */}
+                <div className="grid grid-cols-2 gap-3 my-3">
+                  <div className="bg-slate-800/80 rounded-lg p-2 border border-slate-700">
+                    <span className="block text-slate-400 text-[9px] uppercase font-bold tracking-wider mb-1">Precio Entrada</span>
+                    <div className="font-mono text-white font-black text-sm">{signal.entryPrice}</div>
+                  </div>
+                  <div className="bg-slate-800/80 rounded-lg p-2 border border-slate-700 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-1 opacity-20">
+                      <span className="text-xl">🎯</span>
+                    </div>
+                    <span className="block text-emerald-400 text-[9px] uppercase font-bold tracking-wider mb-1">Salida (Target)</span>
+                    <div className="font-mono text-emerald-400 font-black text-sm">{signal.takeProfit}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                  <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5">
                     <span className="block text-slate-500 text-[9px] uppercase font-bold">Stop Loss</span>
                     <span className="font-mono text-white font-bold text-red-400">{signal.stopLoss} <span className="text-[9px] opacity-70">({signal.stopLossPercentage}%)</span></span>
                   </div>
-                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                  <div className="bg-white/5 rounded-lg p-2 text-center border border-white/5">
                     <span className="block text-slate-500 text-[9px] uppercase font-bold">Max Inv.</span>
                     <span className="font-mono text-white font-bold">${signal.maxInvestment}</span>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-2 text-center col-span-2 mt-1">
-                    <span className="block text-slate-500 text-[9px] uppercase font-bold mb-1">Take Profit Targets</span>
-                    <div className="flex justify-around">
-                      <span className="font-mono font-bold text-emerald-400">{signal.takeProfit} <span className="text-[9px] opacity-70">({calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)})</span></span>
-                    </div>
                   </div>
                 </div>
                 {signal.notes && (
