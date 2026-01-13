@@ -367,13 +367,15 @@ const ExchangeContent = () => {
                                         <div>
                                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Par de Trading</label>
                                             <div className="relative">
-                                                <input
-                                                    type="text"
+                                                <select
                                                     value={tradeSymbol}
-                                                    onChange={e => setTradeSymbol(e.target.value.toUpperCase())}
-                                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-4 text-white font-bold text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
-                                                    placeholder="BTC/USDT"
-                                                />
+                                                    onChange={e => setTradeSymbol(e.target.value)}
+                                                    className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-4 text-white font-bold text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none appearance-none"
+                                                >
+                                                    {tradingPairs.map(pair => (
+                                                        <option key={pair} value={pair}>{pair}</option>
+                                                    ))}
+                                                </select>
                                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold bg-white/10 px-2 py-1 rounded text-slate-300">
                                                     SPOT
                                                 </div>
