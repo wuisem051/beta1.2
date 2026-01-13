@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ccxt": "^4.5.32",
     "chart.js": "^4.5.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.2",
     "firebase": "^12.2.1",
+    "firebase-admin": "^12.0.0",
     "lightweight-charts": "^5.0.9",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
