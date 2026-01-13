@@ -948,6 +948,12 @@ body.dark .newTicketFormTitle {
   }
 }
 
+@media (min-width: 1280px) {
+  .tradingViewGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .tradingViewCard {
   composes: glassBase;
   padding: 1.5rem;

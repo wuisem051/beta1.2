@@ -15,6 +15,7 @@ import BonusContent from '../components/BonusContent'; // Importar BonusContent
 import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
 import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
 import DepositContent from '../components/DepositContent'; // Importar DepositContent
+import ExchangeContent from '../components/ExchangeContent'; // Importar ExchangeContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
 import Navbar from '../components/Navbar'; // Importar Navbar
@@ -212,10 +213,10 @@ const VIPChatContent = ({ styles, userBalances }) => {
 
                         {/* Burbuja */}
                         <div className={`relative px-6 py-4 rounded-[1.8rem] shadow-2xl transition-all duration-300 ${isAdmin
-                            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-white border border-amber-500/30 backdrop-blur-xl'
-                            : isMe
-                              ? 'bg-blue-600 text-white border-t border-white/20'
-                              : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/5'
+                          ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-white border border-amber-500/30 backdrop-blur-xl'
+                          : isMe
+                            ? 'bg-blue-600 text-white border-t border-white/20'
+                            : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/5'
                           } ${isMe ? 'rounded-br-none' : 'rounded-bl-none'}`}>
                           <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap">{msg.text}</p>
 
@@ -505,6 +506,55 @@ const PlanTradingContent = ({ styles }) => {
 
 const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD }) => {
   const { darkMode } = useContext(ThemeContext);
+  const [signals, setSignals] = useState([]);
+  const [isLoadingSignals, setIsLoadingSignals] = useState(false);
+
+  // Calcular porcentaje de ganancia
+  const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
+    const entry = parseFloat(entryPrice);
+    const tp = parseFloat(takeProfit);
+
+    if (isNaN(entry) || isNaN(tp) || entry === 0) {
+      return 'N/A';
+    }
+
+    let percentage;
+    if (type === 'Compra') {
+      percentage = ((tp - entry) / entry) * 100;
+    } else { // Venta
+      percentage = ((entry - tp) / entry) * 100;
+    }
+
+    return percentage.toFixed(2) + '%';
+  };
+
+  // Fetch signals logic
+  useEffect(() => {
+    // Check VIP status logic (optional, but good to have if we only want VIPs to see it,
+    // though the request implies moving it to dashboard for visibility)
+    // For now, we'll fetch for everyone but maybe visually distinguish or limit if needed.
+    // Assuming we want to show it.
+
+    setIsLoadingSignals(true);
+    // Limit to recent signals for the dashboard to keep it "compact" and "organized"
+    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'), limit(3));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedSignals = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate(),
+      }));
+      setSignals(fetchedSignals);
+      setIsLoadingSignals(false);
+    }, (err) => {
+      console.error("Error fetching signals for dashboard:", err);
+      setIsLoadingSignals(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
 
   const vipStatusLabel = useMemo(() => {
     const status = userBalances.vipStatus || 'none';
@@ -553,7 +603,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
           </div>
           <h3 className={styles.statTitle}>Señales de Trading</h3>
-          <p className={styles.statValueAccent}>Activas</p>
+          <p className={styles.statValueAccent}>{signals.length} Activas</p>
         </div>
       </div>
 
@@ -571,7 +621,61 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
             <TradingViewWidget symbol="ARPAUSDT" theme={darkMode ? "dark" : "light"} interval="15" />
           </div>
         </div>
+        <div className={styles.tradingViewCard}>
+          <h3 className={styles.statsTitle}>Dominancia BTC</h3>
+          <div className={styles.tradingViewContainer}>
+            <TradingViewWidget symbol="CRYPTOCAP:BTC.D" theme={darkMode ? "dark" : "light"} interval="60" />
+          </div>
+        </div>
       </div>
+
+      {/* SEÑALES DE TRADING (Dashboard) */}
+      <div className={styles.sectionCard} style={{ marginBottom: '1.5rem' }}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', marginBottom: 0 }}>Señales en Tiempo Real</h3>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Últimas Oportunidades</span>
+        </div>
+
+        {isLoadingSignals ? (
+          <div className={styles.noDataText}>Cargando señales...</div>
+        ) : signals.length === 0 ? (
+          <div className={styles.noDataText}>No hay señales activas recientes.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {signals.map(signal => (
+              <div key={signal.id} className={styles.glassBase} style={{ padding: '1rem', borderRadius: '1rem', borderLeft: `4px solid ${signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)'}` }}>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-bold text-white text-lg">{signal.asset}</h4>
+                    <div className="flex gap-2 items-center mt-1">
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md" style={{ background: signal.type === 'Compra' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
+                        {signal.type}
+                      </span>
+                      <span className="text-[10px] uppercase text-slate-400 font-bold">{signal.status || 'Activa'}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-mono">{signal.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Entrada</span>
+                    <span className="font-mono text-white font-bold">{signal.entryPrice}</span>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <span className="block text-slate-500 text-[9px] uppercase font-bold">Profit</span>
+                    <span className="font-mono font-bold" style={{ color: 'var(--green-check)' }}>{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}</span>
+                  </div>
+                </div>
+                {signal.notes && (
+                  <p className="mt-3 text-xs text-slate-300 italic truncate border-t border-white/5 pt-2">"{signal.notes}"</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       <div className={styles.chartAndStatsGrid}>
         {/* Rendimiento Histórico */}
@@ -2247,6 +2351,7 @@ const UserPanel = () => {
           <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
+          <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
           <Route path="settings/*" element={<SettingsContent styles={styles} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} />} />

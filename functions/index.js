@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs').promises;
+const ccxt = require('ccxt');
 
 admin.initializeApp();
 
@@ -369,5 +370,89 @@ exports.sellerReleasesFunds = functions.https.onCall(async (data, context) => {
       throw error;
     }
     throw new functions.https.HttpsError('internal', 'Error interno al liberar fondos.', error.message);
+  }
+});
+
+// --- Exchange Integration Helpers ---
+
+const getExchange = async (userId) => {
+  const secretsRef = admin.firestore().collection('users').doc(userId).collection('secrets').doc('exchange');
+  const doc = await secretsRef.get();
+
+  if (!doc.exists) {
+    throw new functions.https.HttpsError('not-found', 'API Keys no configuradas.');
+  }
+
+  const { apiKey, secret, exchange } = doc.data();
+  // Default to binance if not specified
+  const exId = exchange ? exchange.toLowerCase() : 'binance';
+
+  if (!ccxt[exId]) {
+    throw new functions.https.HttpsError('invalid-argument', `Exchange ${exId} no soportado.`);
+  }
+
+  const exchangeClass = ccxt[exId];
+  return new exchangeClass({
+    apiKey,
+    secret,
+    enableRateLimit: true,
+  });
+};
+
+exports.getExchangeBalance = functions.https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Autenticación requerida.');
+  const userId = context.auth.uid;
+
+  try {
+    const exchange = await getExchange(userId);
+    const balance = await exchange.fetchBalance();
+    return balance;
+  } catch (error) {
+    console.error('Exchange Balance Error:', error);
+    throw new functions.https.HttpsError('internal', error.message || 'Error al obtener balance.');
+  }
+});
+
+exports.executeExchangeTrade = functions.https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Autenticación requerida.');
+  const userId = context.auth.uid;
+  const { symbol, side, amount, type = 'market', price } = data;
+
+  // Basic validation
+  if (!symbol || !side || !amount) {
+    throw new functions.https.HttpsError('invalid-argument', 'Faltan parámetros (symbol, side, amount).');
+  }
+
+  try {
+    const exchange = await getExchange(userId);
+    // CCXT: createOrder (symbol, type, side, amount, price, params)
+    const order = await exchange.createOrder(symbol, type, side, amount, price);
+    return order;
+  } catch (error) {
+    console.error('Exchange Trade Error:', error);
+    throw new functions.https.HttpsError('internal', error.message || 'Error al ejecutar orden.');
+  }
+});
+
+exports.getExchangeHistory = functions.https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Autenticación requerida.');
+  const userId = context.auth.uid;
+  const { symbol, limit = 10 } = data;
+
+  try {
+    const exchange = await getExchange(userId);
+    let trades;
+    if (symbol) {
+      trades = await exchange.fetchMyTrades(symbol, undefined, limit);
+    } else {
+      if (exchange.id === 'binance' && !symbol) {
+        return { error: 'Symbol required for Binance history' };
+      }
+      trades = await exchange.fetchMyTrades(symbol, undefined, limit);
+    }
+    return trades;
+  } catch (error) {
+    console.error('Exchange History Error:', error);
+    throw new functions.https.HttpsError('internal', error.message || 'Error al obtener historial.');
   }
 });
