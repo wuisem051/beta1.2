@@ -392,11 +392,22 @@ const getExchange = async (userId) => {
   }
 
   const exchangeClass = ccxt[exId];
-  return new exchangeClass({
+
+  // Base configuration
+  const config = {
     apiKey,
     secret,
     enableRateLimit: true,
-  });
+  };
+
+  // BingX-specific configuration
+  if (exId === 'bingx') {
+    config.options = {
+      defaultType: 'spot', // Use spot trading
+    };
+  }
+
+  return new exchangeClass(config);
 };
 
 exports.getExchangeBalance = functions.https.onCall(async (data, context) => {
