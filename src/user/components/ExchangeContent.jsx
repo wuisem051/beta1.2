@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { httpsCallable } from 'firebase/functions';
-import { functions, db } from '../../services/firebase';
+import { db } from '../../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../pages/UserPanel.module.css';
-import { FaBitcoin, FaKey, FaChartLine, FaExchangeAlt, FaBolt, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'; // Assuming react-icons is available or we use SVGs if not
+import { FaBitcoin, FaKey, FaChartLine, FaExchangeAlt, FaBolt, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const ExchangeContent = () => {
     const { currentUser } = useAuth();
@@ -54,14 +53,26 @@ const ExchangeContent = () => {
         setIsLoadingBalance(true);
         setErrorMsg('');
         try {
-            const getBalance = httpsCallable(functions, 'getExchangeBalance');
-            const result = await getBalance();
-            setBalance(result.data);
+            const idToken = await currentUser.getIdToken();
+            const response = await fetch('/.netlify/functions/getExchangeBalance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al obtener balance');
+            }
+
+            const data = await response.json();
+            setBalance(data);
         } catch (error) {
             console.error("Balance fetch error:", error);
-            // Handle specific "not-found" or internal errors gracefully
             if (error.message.includes('not-found') || error.message.includes('API Keys')) {
-                setKeysConfigured(false); // Reset state if keys invalid
+                setKeysConfigured(false);
             } else {
                 setErrorMsg("No se pudo conectar con el Exchange. Verifica tus credenciales.");
             }
@@ -99,13 +110,26 @@ const ExchangeContent = () => {
         setIsTrading(true);
         setErrorMsg('');
         try {
-            const executeTrade = httpsCallable(functions, 'executeExchangeTrade');
-            await executeTrade({
-                symbol: tradeSymbol,
-                side: tradeSide,
-                amount: parseFloat(tradeAmount),
-                type: 'market'
+            const idToken = await currentUser.getIdToken();
+            const response = await fetch('/.netlify/functions/executeExchangeTrade', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    symbol: tradeSymbol,
+                    side: tradeSide,
+                    amount: parseFloat(tradeAmount),
+                    type: 'market'
+                })
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al ejecutar orden');
+            }
+
             fetchBalance(); // Refresh balance
             setTradeAmount('');
             alert("Orden ejecutada correctamente!");
