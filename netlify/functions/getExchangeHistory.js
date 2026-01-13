@@ -3,16 +3,22 @@ const ccxt = require('ccxt');
 
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-        ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-        : null;
+    try {
+        const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
 
-    if (serviceAccount) {
+        if (!serviceAccountJson) {
+            throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable not set');
+        }
+
+        const serviceAccount = JSON.parse(serviceAccountJson);
+
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
+            credential: admin.credential.cert(serviceAccount),
+            projectId: serviceAccount.project_id
         });
-    } else {
-        admin.initializeApp();
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        throw error;
     }
 }
 
