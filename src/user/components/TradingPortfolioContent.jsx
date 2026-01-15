@@ -5,16 +5,29 @@ import { db } from '../../services/firebase';
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import styles from '../pages/UserPanel.module.css';
 
-const TradingPortfolioContent = () => {
+const TradingPortfolioContent = ({ userBalances }) => {
     const { darkMode } = useContext(ThemeContext);
     const { currentUser } = useAuth();
     const [loading, setLoading] = useState(true);
 
     const [operations, setOperations] = useState([]);
+    const [arbitrageEarnings, setArbitrageEarnings] = useState(0);
+
+    const isVIP = useMemo(() => {
+        if (!userBalances || !userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
+        if (!userBalances.vipExpiry) return false;
+        const now = new Date();
+        const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
+        return expiry > now;
+    }, [userBalances]);
+
 
     useEffect(() => {
-        const q = query(collection(db, 'tradingHistory'), orderBy('date', 'desc'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!currentUser?.uid) return;
+
+        // Fetch Trading History
+        const qHistory = query(collection(db, 'tradingHistory'), orderBy('date', 'desc'));
+        const unsubscribeHistory = onSnapshot(qHistory, (snapshot) => {
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -26,21 +39,36 @@ const TradingPortfolioContent = () => {
             setLoading(false);
         });
 
-        return () => unsubscribe();
-    }, []);
+        // Fetch Arbitrage Earnings
+        const qArb = query(collection(db, 'userArbitragePools'), where('userId', '==', currentUser.uid));
+        const unsubscribeArb = onSnapshot(qArb, (snapshot) => {
+            const earnings = snapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().earnings) || 0), 0);
+            setArbitrageEarnings(earnings);
+        });
+
+        return () => {
+            unsubscribeHistory();
+            unsubscribeArb();
+        };
+    }, [currentUser]);
+
 
     const stats = useMemo(() => {
         const total = operations.length;
         const successful = operations.filter(op => op.result === 'Exitosa').length;
-        const profit = operations.reduce((sum, op) => sum + (parseFloat(op.profit) || 0), 0);
+
+        // Only include trading history profit if VIP
+        const tradingProfit = isVIP ? operations.reduce((sum, op) => sum + (parseFloat(op.profit) || 0), 0) : 0;
+        const profit = tradingProfit + arbitrageEarnings;
+
         const successRate = total > 0 ? (successful / total) * 100 : 0;
 
-        // Calculate T. Profit percentage (assuming a base capital, or as a percentage indicator)
-        // If you have a specific base capital, replace 1000 with that value
+        // Calculate T. Profit percentage
         const profitPercentage = total > 0 ? (profit / total) * 10 : 0; // Simplified calculation
 
         return { total, profit, successRate, profitPercentage };
-    }, [operations]);
+    }, [operations, arbitrageEarnings, isVIP]);
+
 
     if (loading) {
         return (
@@ -104,37 +132,46 @@ const TradingPortfolioContent = () => {
 
             <div className={styles.sectionCard}>
                 <h2 className={styles.sectionTitle}>Historial de Operaciones</h2>
-                <div className={styles.tableContainer}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th className={styles.tableHeader}>Fecha</th>
-                                <th className={styles.tableHeader}>Par</th>
-                                <th className={styles.tableHeader}>Tipo</th>
-                                <th className={styles.tableHeader}>Resultado</th>
-                                <th className={styles.tableHeader}>P/L (USD)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {operations.map((op) => (
-                                <tr key={op.id}>
-                                    <td className={styles.tableCell}>{op.date}</td>
-                                    <td className={styles.tableCell} style={{ fontWeight: 'bold' }}>{op.pair}</td>
-                                    <td className={styles.tableCell}>{op.type}</td>
-                                    <td className={styles.tableCell}>
-                                        <span className={`${styles.statusBadge} ${op.result === 'Exitosa' ? styles.statusCompleted : styles.statusError}`}>
-                                            {op.result}
-                                        </span>
-                                    </td>
-                                    <td className={styles.tableCell} style={{ fontWeight: '800', color: parseFloat(op.profit) >= 0 ? 'var(--green-check)' : 'var(--red-error)' }}>
-                                        {op.profit}
-                                    </td>
+                {!isVIP ? (
+                    <div className="flex flex-col items-center justify-center py-10 opacity-60">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-4"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        <p className="font-bold text-center">Historial bloqueado</p>
+                        <p className="text-xs text-center mt-2 max-w-xs">Adquiere un plan VIP para ver el historial detallado de las operaciones copiadas y su impacto en tu P/L.</p>
+                    </div>
+                ) : (
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.tableHeader}>Fecha</th>
+                                    <th className={styles.tableHeader}>Par</th>
+                                    <th className={styles.tableHeader}>Tipo</th>
+                                    <th className={styles.tableHeader}>Resultado</th>
+                                    <th className={styles.tableHeader}>P/L (USD)</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {operations.map((op) => (
+                                    <tr key={op.id}>
+                                        <td className={styles.tableCell}>{op.date}</td>
+                                        <td className={styles.tableCell} style={{ fontWeight: 'bold' }}>{op.pair}</td>
+                                        <td className={styles.tableCell}>{op.type}</td>
+                                        <td className={styles.tableCell}>
+                                            <span className={`${styles.statusBadge} ${op.result === 'Exitosa' ? styles.statusCompleted : styles.statusError}`}>
+                                                {op.result}
+                                            </span>
+                                        </td>
+                                        <td className={styles.tableCell} style={{ fontWeight: '800', color: parseFloat(op.profit) >= 0 ? 'var(--green-check)' : 'var(--red-error)' }}>
+                                            {op.profit}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
+
         </div>
     );
 };

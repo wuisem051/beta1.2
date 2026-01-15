@@ -506,24 +506,54 @@ const PlanTradingContent = ({ styles }) => {
 
 const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD }) => {
   const { darkMode } = useContext(ThemeContext);
+  const { currentUser } = useAuth();
+
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
   const [totalProfit, setTotalProfit] = useState(0);
 
-  // Fetch Trading History for Total Profit
+  const isVIP = useMemo(() => {
+    if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
+    if (!userBalances.vipExpiry) return false;
+    const now = new Date();
+    const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
+    return expiry > now;
+  }, [userBalances]);
+
+  // Fetch Trading History and Arbitrage Earnings for Total Profit
   useEffect(() => {
-    const fetchProfit = async () => {
-      const q = query(collection(db, 'tradingHistory'));
-      // Not realtime for simplicity and performance on dashboard, or we can use onSnapshot if strict realtime needed
-      // Using onSnapshot to match Portfolio behavior
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const profit = snapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().profit) || 0), 0);
-        setTotalProfit(profit);
-      });
-      return () => unsubscribe();
+    if (!currentUser?.uid) return;
+
+    let unsubscribeTrading = () => { };
+    let unsubscribeArbitrage = () => { };
+
+    // 1. Fetch Arbitrage Earnings (Real portfolio earnings)
+    const arbitrageQuery = query(
+      collection(db, 'userArbitragePools'),
+      where('userId', '==', currentUser.uid)
+    );
+
+    unsubscribeArbitrage = onSnapshot(arbitrageQuery, (arbitrageSnapshot) => {
+      const arbProfit = arbitrageSnapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().earnings) || 0), 0);
+
+      // 2. Fetch Global Trading History (Simulated signal profits) if VIP
+      if (isVIP) {
+        const tradingQuery = query(collection(db, 'tradingHistory'));
+        unsubscribeTrading = onSnapshot(tradingQuery, (tradingSnapshot) => {
+          const tradingProfit = tradingSnapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().profit) || 0), 0);
+          setTotalProfit(arbProfit + tradingProfit);
+        });
+      } else {
+        setTotalProfit(arbProfit);
+      }
+    });
+
+    return () => {
+      unsubscribeTrading();
+      unsubscribeArbitrage();
     };
-    fetchProfit();
-  }, []);
+  }, [currentUser, isVIP]);
+
 
   // Calcular porcentaje de ganancia
   const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
@@ -2375,7 +2405,7 @@ const UserPanel = () => {
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
-          <Route path="mining-portfolio/*" element={<TradingPortfolioContent />} /> {/* Nueva ruta para Portafolio de Trading */}
+          <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} /> {/* Nueva ruta para Portafolio de Trading */}
           <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
           <Route path="deposits/*" element={<DepositContent />} /> {/* Nueva ruta para Depósitos */}
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
