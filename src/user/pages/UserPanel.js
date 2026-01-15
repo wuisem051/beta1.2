@@ -2026,343 +2026,450 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
     }
   };
 
+  const [activeTab, setActiveTab] = useState('profile');
+
+  const tabs = [
+    { id: 'profile', label: 'Mi Perfil', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg> },
+    { id: 'account', label: 'Cuenta y Seguridad', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> },
+    { id: 'payments', label: 'Pagos y Billeteras', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg> },
+    { id: 'appearance', label: 'Personalización', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg> },
+    { id: 'notifications', label: 'Notificaciones', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg> },
+  ];
+
   return (
-    <div className={styles.settingsContent}>
-      <h1 className={styles.pageTitle}>Configuración</h1>
+    <div className={`${styles.settingsContent} max-w-6xl mx-auto`}>
+      <header className="mb-8">
+        <h1 className={styles.pageTitle}>Panel de Configuración</h1>
+        <p className="text-slate-400 text-sm mt-1">Gestiona tu identidad, seguridad y preferencias visuales.</p>
+      </header>
+
       {isLoading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingText}>Procesando...</div>
         </div>
       )}
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
 
-      <div className={styles.settingsGrid}>
-        {/* Perfil Público */}
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h2 className={styles.sectionTitle}>Perfil Público</h2>
-          <form onSubmit={handleUpdateProfile}>
-            <div className="flex flex-col items-center mb-6">
-              <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-accent/20 bg-slate-800 flex items-center justify-center">
-                  {profilePhotoUrl ? (
-                    <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                  )}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Modern Sidebar Tabs */}
+        <aside className="w-full lg:w-64 flex flex-row lg:flex-col gap-2 p-1 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl lg:sticky lg:top-4 z-10 overflow-x-auto no-scrollbar">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 whitespace-nowrap group ${activeTab === tab.id
+                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20 shadow-lg shadow-blue-600/5'
+                : 'text-slate-500 hover:bg-white/5 hover:text-slate-300 border border-transparent'
+                }`}
+            >
+              <span className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                {tab.icon}
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider">{tab.label}</span>
+            </button>
+          ))}
+        </aside>
+
+        {/* Tab Content Area */}
+        <div className="flex-1 w-full min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {activeTab === 'profile' && (
+            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 rounded-2xl bg-blue-600/10 text-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 </div>
-                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Perfil Público</h2>
+                  <p className="text-xs text-slate-500 mt-1">Cómo te ven otros miembros de la plataforma.</p>
                 </div>
               </div>
-              <input
-                type="file"
-                id="profile-photo-input"
-                hidden
-                accept=".png,.gif,image/png,image/gif"
-                onChange={(e) => setProfilePhotoFile(e.target.files[0])}
-              />
-              <p className="text-[10px] text-slate-500 mt-2">Formatos permitidos: .png, .gif</p>
-            </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="username" className={styles.formLabel}>Nombre de Usuario (@)</label>
-              <input
-                type="text"
-                id="username"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Ej: juan_perez"
-                disabled={isLoading}
-              />
-            </div>
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
+                <div className="flex flex-col items-center p-8 bg-slate-900/40 rounded-3xl border border-white/5 mb-8">
+                  <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
+                    <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-blue-500/20 bg-slate-800 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105">
+                      {profilePhotoUrl ? (
+                        <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-blue-600/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    id="profile-photo-input"
+                    hidden
+                    accept=".png,.gif,image/png,image/gif"
+                    onChange={(e) => setProfilePhotoFile(e.target.files[0])}
+                  />
+                  <div className="mt-4 text-center">
+                    <p className="text-xs font-bold text-slate-300">Cambiar Foto</p>
+                    <p className="text-[10px] text-slate-500 mt-1">Formatos permitidos: .png, .gif</p>
+                  </div>
+                </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="displayName" className={styles.formLabel}>Nombre de Visualización</label>
-              <input
-                type="text"
-                id="displayName"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Tu nombre real o alias"
-                disabled={isLoading}
-              />
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={styles.formGroup}>
+                    <label htmlFor="username" className={styles.formLabel}>Nombre de Usuario (@)</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">@</span>
+                      <input
+                        type="text"
+                        id="username"
+                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !pl-10 !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all`}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="ej: juan_perez"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="bio" className={styles.formLabel}>Descripción / Biografía</label>
-              <textarea
-                id="bio"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                style={{ height: '80px', paddingTop: '10px' }}
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Cuéntanos un poco sobre ti..."
-                disabled={isLoading}
-              />
-            </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="displayName" className={styles.formLabel}>Nombre de Visualización</label>
+                    <input
+                      type="text"
+                      id="displayName"
+                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all`}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Tu nombre real o alias"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
 
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Guardando...' : 'Guardar Perfil'}
-            </button>
-          </form>
-        </div>
-        {/* Configuración de Cuenta */}
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h2 className={styles.sectionTitle}>Configuración de Cuenta</h2>
-          <form onSubmit={handleUpdateAccount}>
-            <div className={styles.formGroup}>
-              <label htmlFor="contact-email" className={styles.formLabel}>Email de Contacto</label>
-              <input
-                type="email"
-                id="contact-email"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="current-password" className={styles.formLabel}>Contraseña Actual</label>
-              <input
-                type="password"
-                id="current-password"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="new-password" className={styles.formLabel}>Nueva Contraseña</label>
-              <input
-                type="password"
-                id="new-password"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="confirm-new-password" className={styles.formLabel}>Confirmar Contraseña</label>
-              <input
-                type="password"
-                id="confirm-new-password"
-                className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : 'Actualizar Configuración'}
-            </button>
-          </form>
-        </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="bio" className={styles.formLabel}>Biografía</label>
+                  <textarea
+                    id="bio"
+                    className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all min-h-[120px] pt-4`}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Cuéntanos un poco sobre ti..."
+                    disabled={isLoading}
+                  />
+                </div>
 
-        {/* Seguridad y Direcciones de Pago */}
-        <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light}`}>
-          <h2 className={styles.sectionTitle}>Seguridad</h2>
-          <div className={styles.twoFactorAuth}>
-            <span className={styles.twoFactorAuthLabel}>Autenticación de Dos Factores</span>
-            <div className={styles.twoFactorAuthControls}>
-              <span className={styles.developmentTextSmall}>En Desarrollo</span>
-              <button
-                onClick={handleToggleTwoFactorAuth}
-                className={`${styles.disabledButton} ${darkMode ? styles.darkDisabledButton : styles.lightDisabledButton}`}
-                disabled={true || isLoading} // Deshabilitar el botón
-              >
-                Activar
-              </button>
-            </div>
-          </div>
-
-          <h2 className={styles.sectionTitle}>Direcciones de Pago Predeterminadas</h2>
-          <div className={styles.formGroup}>
-            <label htmlFor="bitcoin-address" className={styles.formLabel}>Bitcoin (BTC)</label>
-            <input
-              type="text"
-              id="bitcoin-address"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              value={paymentAddresses.BTC}
-              onChange={(e) => handlePaymentAddressChange('BTC', e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="dogecoin-address" className={styles.formLabel}>Dogecoin (DOGE)</label>
-            <input
-              type="text"
-              id="dogecoin-address"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              value={paymentAddresses.DOGE}
-              onChange={(e) => handlePaymentAddressChange('DOGE', e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="litecoin-address" className={styles.formLabel}>Litecoin (LTC)</label>
-            <input
-              type="text"
-              id="litecoin-address"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              value={paymentAddresses.LTC}
-              onChange={(e) => handlePaymentAddressChange('LTC', e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="usd-address" className={styles.formLabel}>USD (Binance Pay ID/Email)</label>
-            <input
-              type="text"
-              id="usd-address"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              value={paymentAddresses.USD}
-              onChange={(e) => handlePaymentAddressChange('USD', e.target.value)}
-              disabled={isLoading}
-              placeholder="Email o ID de Binance para USD"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="ves-address" className={styles.formLabel}>Bolívar Soberano (VES) (Binance Pay ID/Email)</label>
-            <input
-              type="text"
-              id="ves-address"
-              className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-              value={paymentAddresses.VES}
-              onChange={(e) => handlePaymentAddressChange('VES', e.target.value)}
-              disabled={isLoading}
-              placeholder="Email o ID de Binance para VES"
-            />
-          </div>
-          <button
-            onClick={handleSaveAddresses}
-            className={styles.submitButton}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : 'Guardar Direcciones'}
-          </button>
-
-          {/* Notificaciones */}
-          <h2 className={styles.sectionTitle}>Notificaciones</h2>
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                className={`${styles.checkbox} ${styles.disabledCheckbox}`}
-                checked={false} // Siempre false ya que está en desarrollo
-                onChange={() => { }} // No permitir cambios
-                disabled={true || isLoading} // Deshabilitar el checkbox
-              />
-              <span className={styles.developmentTextSmall}>Recibir notificaciones de pagos por email (En Desarrollo)</span>
-            </label>
-          </div>
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                className={`${styles.checkbox} ${styles.disabledCheckbox}`}
-                checked={false} // Siempre false ya que está en desarrollo
-                onChange={() => { }} // No permitir cambios
-                disabled={true || isLoading} // Deshabilitar el checkbox
-              />
-              <span className={styles.developmentTextSmall}>Recibir alertas de inicio de sesión (En Desarrollo)</span>
-            </label>
-          </div>
-          <button
-            onClick={handleSaveNotifications}
-            className={`${styles.disabledButton} ${darkMode ? styles.darkDisabledButton : styles.lightDisabledButton}`}
-            disabled={true || isLoading} // Deshabilitar el botón
-          >
-            {isLoading ? (
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : 'Guardar Preferencias'}
-          </button>
-
-          {/* Personalización */}
-          <h2 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>Personalización</h2>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Altura de Gráficas (px): <span className="text-accent">{localChartHeight}px</span></label>
-            <input
-              type="range"
-              min="300"
-              max="800"
-              step="10"
-              value={localChartHeight}
-              onChange={(e) => setLocalChartHeight(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              disabled={isLoading}
-            />
-            <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">
-              <span>Pequeña (300px)</span>
-              <span>Por defecto (450px)</span>
-              <span>Grande (800px)</span>
-            </div>
-          </div>
-
-          <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
-            <label className={styles.formLabel}>Distribución de Gráficas (Columnas)</label>
-            <div className="grid grid-cols-4 gap-2">
-              {[0, 1, 2, 3].map((val) => (
                 <button
-                  key={val}
-                  type="button"
-                  onClick={() => setLocalChartColumns(val)}
-                  className={`py-2 text-[10px] font-black rounded-xl transition-all border-2 ${localChartColumns === val
-                    ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-600/20'
-                    : 'bg-slate-800 border-white/5 text-slate-400 hover:border-white/10'
-                    }`}
+                  type="submit"
+                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-blue-600 hover:!bg-blue-500 !shadow-xl !shadow-blue-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
+                  disabled={isLoading}
                 >
-                  {val === 0 ? 'AUTO' : `${val} COL`}
+                  {isLoading ? 'Actualizando...' : 'Guardar Cambios de Perfil'}
                 </button>
-              ))}
+              </form>
             </div>
-            <p className="text-[10px] text-slate-500 mt-2 italic">
-              "AUTO" ajusta las columnas según el tamaño de tu pantalla.
-            </p>
-          </div>
+          )}
 
-          <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
-            <label className={styles.formLabel}>Ancho Máximo del Dashboard (px): <span className="text-accent">{localDashboardWidth}px</span></label>
-            <input
-              type="range"
-              min="800"
-              max="2560"
-              step="20"
-              value={localDashboardWidth}
-              onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              disabled={isLoading}
-            />
-            <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">
-              <span>Compacto (800px)</span>
-              <span>HD (1400px)</span>
-              <span>Ultra-Wide (2560px)</span>
+          {activeTab === 'account' && (
+            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 rounded-2xl bg-amber-600/10 text-amber-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                </div>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Seguridad y Cuenta</h2>
+                  <p className="text-xs text-slate-500 mt-1">Protege tu cuenta y gestiona tus credenciales.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleUpdateAccount} className="space-y-8">
+                <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Información de Acceso</h3>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="contact-email" className={styles.formLabel}>Email de Contacto</label>
+                    <input
+                      type="email"
+                      id="contact-email"
+                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Cambiar Contraseña</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={styles.formGroup}>
+                      <label htmlFor="current-password" className={styles.formLabel}>Contraseña Actual</label>
+                      <input
+                        type="password"
+                        id="current-password"
+                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="Requerido para cambios"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="new-password" className={styles.formLabel}>Nueva Contraseña</label>
+                      <input
+                        type="password"
+                        id="new-password"
+                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Dejar vacío para no cambiar"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Seguridad Avanzada</h3>
+                  <div className="flex items-center justify-between p-6 bg-slate-900/40 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-200 uppercase tracking-wide">Autenticación 2FA</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Añade una capa extra de seguridad.</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-[9px] font-black text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">En Desarrollo</span>
+                      <button
+                        type="button"
+                        onClick={handleToggleTwoFactorAuth}
+                        className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${twoFactorAuthEnabled
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/10'
+                          : 'bg-blue-600/20 text-blue-400 border border-blue-500/10'
+                          } opacity-50 cursor-not-allowed`}
+                        disabled={true}
+                      >
+                        {twoFactorAuthEnabled ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-slate-100 !text-slate-900 hover:!bg-white !shadow-xl !shadow-white/5 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Actualizando...' : 'Actualizar Configuración de Cuenta'}
+                </button>
+              </form>
             </div>
-          </div>
+          )}
+
+          {activeTab === 'payments' && (
+            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 rounded-2xl bg-emerald-600/10 text-emerald-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
+                </div>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Pagos y Billeteras</h2>
+                  <p className="text-xs text-slate-500 mt-1">Donde recibirás tus ganancias y retiros.</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.entries(paymentAddresses).map(([currency, address]) => (
+                    <div key={currency} className="p-6 bg-slate-900/40 rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all group">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-300 border border-white/5">
+                            {currency}
+                          </div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Dirección {currency}</p>
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/40 !border-white/5 !text-xs !py-3 !px-4 focus:!border-blue-500/30`}
+                        value={address}
+                        onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
+                        placeholder={`Ingresa tu wallet de ${currency}`}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 p-6 bg-blue-600/5 rounded-2xl border border-blue-500/10 flex items-start gap-4">
+                  <div className="text-blue-500 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                  </div>
+                  <p className="text-[10px] text-slate-400 italic">
+                    Asegúrate de que las direcciones sean correctas. No nos hacemos responsables por fondos enviados a billeteras erróneas proporcionadas por el usuario.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleSaveAddresses}
+                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-emerald-600 hover:!bg-emerald-500 !shadow-xl !shadow-emerald-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95 mt-4`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Guardando...' : 'Guardar Direcciones de Pago'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'appearance' && (
+            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 rounded-2xl bg-indigo-600/10 text-indigo-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
+                </div>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Personalización Visual</h2>
+                  <p className="text-xs text-slate-500 mt-1">Ajusta cómo se ve tu Dashboard de trading.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Altura de Gráficas */}
+                <div className="p-8 bg-slate-900/40 rounded-3xl border border-white/5">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tamaño de Gráficos</p>
+                      <p className="text-xl font-black text-blue-400 mt-1">{localChartHeight}px</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 14l5-5 5 5" /></svg>
+                    </div>
+                  </div>
+                  <input
+                    type="range"
+                    min="300"
+                    max="800"
+                    step="10"
+                    value={localChartHeight}
+                    onChange={(e) => setLocalChartHeight(parseInt(e.target.value))}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-[9px] font-bold text-slate-600 uppercase">Pequeño</span>
+                    <span className="text-[9px] font-bold text-slate-600 uppercase">Grande</span>
+                  </div>
+                </div>
+
+                {/* Columnas */}
+                <div className="p-8 bg-slate-900/40 rounded-3xl border border-white/5">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Columnas por Fila</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[0, 1, 2, 3].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setLocalChartColumns(val)}
+                        className={`aspect-square flex flex-col items-center justify-center rounded-2xl transition-all border-2 ${localChartColumns === val
+                          ? 'bg-blue-600 border-blue-400 text-white shadow-xl shadow-blue-600/30'
+                          : 'bg-slate-800 border-white/5 text-slate-500 hover:border-white/10 hover:text-slate-300'
+                          }`}
+                      >
+                        <span className="text-base font-black">{val === 0 ? 'A' : val}</span>
+                        <span className="text-[7px] font-bold uppercase mt-1">{val === 0 ? 'AUTO' : 'COL'}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Ancho Máximo Dashboard */}
+                <div className="col-span-1 md:col-span-2 p-8 bg-slate-900/40 rounded-3xl border border-white/5">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ancho Máximo del Panel</p>
+                      <p className="text-xl font-black text-indigo-400 mt-1">{localDashboardWidth}px</p>
+                    </div>
+                    <div className="px-3 py-1 bg-indigo-600/10 rounded-full border border-indigo-500/20">
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
+                        {localDashboardWidth > 1920 ? 'Ultra Wide' : localDashboardWidth > 1400 ? 'Cinema' : 'Standard'}
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="range"
+                    min="800"
+                    max="2560"
+                    step="20"
+                    value={localDashboardWidth}
+                    onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                  />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-[9px] font-bold text-slate-600 uppercase">Compacto</span>
+                    <span className="text-[9px] font-bold text-slate-600 uppercase">Máximo (2.5K)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={handleUpdateAccount} // Reusing account update logic as it includes preferences
+                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-indigo-600 hover:!bg-indigo-500 !shadow-xl !shadow-indigo-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Guardando...' : 'Aplicar Preferencias de Visualización'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3 rounded-2xl bg-rose-600/10 text-rose-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                </div>
+                <div>
+                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Notificaciones</h2>
+                  <p className="text-xs text-slate-500 mt-1">Cómo quieres mantenerte informado.</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  { id: 'pay_notify', label: 'Notificaciones de Pagos', desc: 'Recibe un aviso por cada depósito o retiro procesado.', state: receivePaymentNotifications, setter: setReceivePaymentNotifications },
+                  { id: 'login_notify', label: 'Alertas de Inicio de Sesión', desc: 'Te avisamos cuando alguien accede a tu cuenta.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
+                  { id: 'signals_notify', label: 'Nuevas Señales de Trading', desc: 'No te pierdas ninguna oportunidad de inversión.', state: false, locked: true },
+                ].map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-6 bg-slate-900/40 rounded-3xl border border-white/5 group hover:border-white/10 transition-all">
+                    <div className="flex-1 pr-8">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-xs font-bold text-slate-200 uppercase tracking-wide">{item.label}</p>
+                        {item.locked && <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded uppercase">PRO / VIP</span>}
+                      </div>
+                      <p className="text-[10px] text-slate-500">{item.desc}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={item.state}
+                        onChange={() => !item.locked && item.setter(!item.state)}
+                        disabled={item.locked || isLoading}
+                      />
+                      <div className="w-12 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 peer-checked:after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-20 transition-all"></div>
+                    </label>
+                  </div>
+                ))}
+
+                <div className="mt-8">
+                  <button
+                    onClick={handleSaveNotifications}
+                    className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-rose-600 hover:!bg-rose-500 !shadow-xl !shadow-rose-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Guardando...' : 'Guardar Preferencias de Notificación'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

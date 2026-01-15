@@ -3,7 +3,12 @@ import { db } from '../../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../pages/UserPanel.module.css';
-import { FaBitcoin, FaKey, FaChartLine, FaExchangeAlt, FaBolt, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import {
+    FaBitcoin, FaKey, FaChartLine, FaExchangeAlt,
+    FaBolt, FaCheckCircle, FaExclamationTriangle,
+    FaRegClock, FaHistory, FaListUl, FaShieldAlt,
+    FaArrowUp, FaArrowDown, FaSync
+} from 'react-icons/fa';
 
 const ExchangeContent = () => {
     const { currentUser } = useAuth();
@@ -23,6 +28,20 @@ const ExchangeContent = () => {
     const [isTrading, setIsTrading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [keysConfigured, setKeysConfigured] = useState(false);
+    const [apiPermissions, setApiPermissions] = useState({
+        read: true,
+        trade: true,
+        withdraw: false
+    });
+    const [recentOrders, setRecentOrders] = useState([]);
+    const [orderHistory, setOrderHistory] = useState([]);
+
+    const tabs = [
+        { id: 'trading', label: 'Terminal', icon: <FaBolt /> },
+        { id: 'orders', label: 'Órdenes', icon: <FaListUl /> },
+        { id: 'history', label: 'Historial', icon: <FaHistory /> },
+        { id: 'config', label: 'Credenciales', icon: <FaKey /> }
+    ];
 
     // Trading pairs list
     const tradingPairs = [
@@ -226,296 +245,395 @@ const ExchangeContent = () => {
     };
 
     return (
-        <div className={styles.dashboardContent}>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div className={`${styles.dashboardContent} animate-in fade-in duration-700`}>
+            {/* New Modern Header */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
                 <div>
-                    <h1 className={styles.mainContentTitle}>Conexión Exchange</h1>
-                    <p className="text-sm text-slate-400 font-medium">Opera directamente desde tu cuenta de {exchangeType === 'binance' ? 'Binance' : 'BingX'}</p>
+                    <div className="flex items-center gap-3 mb-1">
+                        <h1 className={styles.mainContentTitle}>Conexión Exchange</h1>
+                        {keysConfigured ? (
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Conectado</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-500/10 border border-white/5 rounded-full">
+                                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Sin Conexión</span>
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-sm text-slate-400 font-medium">
+                        Terminal avanzada para {exchangeType === 'binance' ? 'Binance' : 'BingX'} <span className="text-slate-600 font-bold ml-1">v2.1</span>
+                    </p>
                 </div>
-                <div className="flex bg-slate-900/60 p-1 rounded-xl border border-white/5 mt-4 md:mt-0">
-                    <button
-                        onClick={() => setActiveTab('trading')}
-                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'trading' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-white'}`}
-                    >
-                        Trading
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('config')}
-                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'config' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-500 hover:text-white'}`}
-                    >
-                        Configuración
-                    </button>
+
+                {/* Modern Navigation Tabs */}
+                <div className="flex bg-slate-900/40 backdrop-blur-xl p-1.5 rounded-2xl border border-white/5 overflow-x-auto max-w-full">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 transform active:scale-95 whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 border border-white/10'
+                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                                }`}
+                        >
+                            <span className={activeTab === tab.id ? 'scale-110 duration-500' : 'opacity-60'}>
+                                {tab.icon}
+                            </span>
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {errorMsg && (
-                <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                    <FaExclamationTriangle />
-                    <span className="text-sm font-medium">{errorMsg}</span>
-                </div>
-            )}
-
             {activeTab === 'config' && (
-                <div className="max-w-2xl mx-auto">
-                    <div className={styles.sectionCard} style={{ padding: '3rem' }}>
-                        <div className="flex items-center justify-center mb-8">
-                            <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-500 text-3xl mb-4">
-                                <FaKey />
+                <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-12 relative overflow-hidden group`}>
+                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
+
+                        <div className="relative z-10">
+                            <div className="flex items-center justify-center mb-10">
+                                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl flex items-center justify-center text-white text-4xl shadow-2xl shadow-blue-600/30 transform group-hover:rotate-12 transition-transform duration-500">
+                                    <FaKey />
+                                </div>
                             </div>
+
+                            <h2 className="text-3xl font-black text-center text-white mb-2 tracking-tight">Vincular Exchange</h2>
+                            <p className="text-slate-400 text-center mb-12 text-sm font-medium max-w-md mx-auto leading-relaxed">
+                                Gestiona tus credenciales con seguridad de grado militar. Tus llaves se cifran localmente antes de ser almacenadas.
+                            </p>
+
+                            <form onSubmit={handleSaveKeys} className="space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Seleccionar Plataforma</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            { id: 'binance', label: 'Binance', color: 'yellow' },
+                                            { id: 'bingx', label: 'BingX', color: 'blue' }
+                                        ].map(ex => (
+                                            <button
+                                                key={ex.id}
+                                                type="button"
+                                                onClick={() => setExchangeType(ex.id)}
+                                                className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all duration-300 ${exchangeType === ex.id
+                                                    ? `bg-${ex.color}-500/10 border-${ex.color}-500 text-${ex.color}-500 shadow-lg shadow-${ex.color}-500/10`
+                                                    : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40'
+                                                    }`}
+                                            >
+                                                <div className={`w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-lg ${exchangeType === ex.id ? 'animate-bounce' : ''}`}>
+                                                    {ex.id === 'binance' ? 'B' : 'BX'}
+                                                </div>
+                                                <span className="font-black uppercase tracking-widest text-xs">{ex.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">API Key (Llave Pública)</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={apiKey}
+                                                onChange={e => setApiKey(e.target.value)}
+                                                className="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm placeholder:text-slate-700 shadow-inner"
+                                                placeholder="64+ caracteres..."
+                                            />
+                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700"><FaShieldAlt /></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">API Secret (Llave Privada)</label>
+                                        <div className="relative">
+                                            <input
+                                                type="password"
+                                                value={secret}
+                                                onChange={e => setSecret(e.target.value)}
+                                                className="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm placeholder:text-slate-700 shadow-inner"
+                                                placeholder="••••••••••••••••"
+                                            />
+                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700"><FaKey /></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl transition-all shadow-2xl shadow-blue-600/30 transform active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.15em] text-xs"
+                                    >
+                                        {isSaving ? (
+                                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        ) : (
+                                            <>
+                                                <FaCheckCircle className="text-lg" /> Guardar y Autenticar
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <h2 className="text-2xl font-bold text-center text-white mb-2">Vincula tu Cuenta</h2>
-                        <p className="text-slate-400 text-center mb-8 text-sm">
-                            Tus claves API se cifran y almacenan de forma segura. Solo tú tienes acceso.
-                        </p>
+                    </div>
 
-                        <form onSubmit={handleSaveKeys} className="space-y-5">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Exchange</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setExchangeType('binance')}
-                                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${exchangeType === 'binance' ? 'bg-yellow-500/10 border-yellow-500 text-yellow-500' : 'bg-slate-900/50 border-white/5 text-slate-500 hover:border-white/10'}`}
-                                    >
-                                        <span className="font-bold">Binance</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setExchangeType('bingx')}
-                                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${exchangeType === 'bingx' ? 'bg-blue-500/10 border-blue-500 text-blue-500' : 'bg-slate-900/50 border-white/5 text-slate-500 hover:border-white/10'}`}
-                                    >
-                                        <span className="font-bold">BingX</span>
-                                    </button>
+                    {/* API Permissions Preview */}
+                    <div className="mt-6 grid grid-cols-3 gap-4">
+                        {[
+                            { label: 'Lectura', status: apiPermissions.read, icon: <FaRegClock /> },
+                            { label: 'Trading', status: apiPermissions.trade, icon: <FaBolt /> },
+                            { label: 'Retiros', status: apiPermissions.withdraw, icon: <FaExchangeAlt /> }
+                        ].map((perm, i) => (
+                            <div key={i} className="bg-slate-900/30 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">
+                                <span className={`text-lg ${perm.status ? 'text-emerald-500' : 'text-slate-700'}`}>{perm.icon}</span>
+                                <span className="text-[9px] font-black uppercase text-slate-500">{perm.label}</span>
+                                <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${perm.status ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-600'}`}>
+                                    {perm.status ? 'Habilitado' : 'Bloqueado'}
                                 </div>
                             </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">API Key</label>
-                                    <input
-                                        type="text"
-                                        value={apiKey}
-                                        onChange={e => setApiKey(e.target.value)}
-                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm"
-                                        placeholder="Pegar llave pública..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">API Secret</label>
-                                    <input
-                                        type="password"
-                                        value={secret}
-                                        onChange={e => setSecret(e.target.value)}
-                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm"
-                                        placeholder="Pegar llave secreta..."
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isSaving}
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-600/20 transform active:scale-[0.98] mt-6 flex items-center justify-center gap-2"
-                            >
-                                {isSaving ? 'Guardando...' : (
-                                    <>
-                                        <FaCheckCircle /> Guardar y Conectar
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                        ))}
                     </div>
                 </div>
             )}
 
             {activeTab === 'trading' && (
                 !keysConfigured ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mb-6 border border-white/5">
-                            <FaExchangeAlt className="text-4xl text-slate-600" />
+                    <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in zoom-in-95 duration-500">
+                        <div className="relative mb-8">
+                            <div className="w-32 h-32 bg-blue-600/10 rounded-full flex items-center justify-center border border-blue-500/20 shadow-2xl shadow-blue-600/10">
+                                <FaExchangeAlt className="text-5xl text-blue-500/40" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center shadow-xl">
+                                <FaShieldAlt className="text-rose-500" />
+                            </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">No estás conectado</h2>
-                        <p className="text-slate-400 max-w-md mb-8">Configura tus claves API para ver tu saldo y operar directamente desde aquí.</p>
+                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Acceso Restringido</h2>
+                        <p className="text-slate-400 max-w-sm mb-10 font-medium leading-relaxed">
+                            Para acceder a la terminal de trading y ver tu balance en vivo, primero debes configurar tus credenciales API.
+                        </p>
                         <button
                             onClick={() => setActiveTab('config')}
-                            className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-600/20"
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-2xl shadow-blue-600/30 hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-xs"
                         >
-                            Conectar Exchange
+                            Ir a Configuración
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         {/* Balance Section - 4 Columns */}
                         <div className="lg:col-span-4 space-y-6">
-                            <div className={`${styles.sectionCard} h-full relative overflow-hidden group`}>
-                                <div className="absolute top-0 right-0 p-32 bg-blue-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                            <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-6 h-full relative overflow-hidden group`}>
+                                <div className="absolute top-0 right-0 p-32 bg-blue-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-600/10 transition-colors duration-700"></div>
 
-                                <div className="flex justify-between items-center mb-6 relative z-10">
-                                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                                        <FaBitcoin className="text-yellow-500" /> Balance
-                                    </h2>
-                                    <button onClick={fetchBalance} className="text-[10px] uppercase font-bold bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg text-slate-300 transition-colors">
-                                        Actualizar
+                                <div className="flex justify-between items-center mb-8 relative z-10">
+                                    <div>
+                                        <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Portfolio Balance</h2>
+                                        <p className="text-lg font-black text-white flex items-center gap-2 italic">
+                                            <FaBitcoin className="text-yellow-500" /> RESUMEN
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={fetchBalance}
+                                        className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-blue-600/20 rounded-xl text-slate-400 hover:text-blue-400 transition-all border border-white/5 active:rotate-180 duration-500"
+                                    >
+                                        <FaSync className={isLoadingBalance ? 'animate-spin' : ''} />
                                     </button>
                                 </div>
 
                                 {isLoadingBalance ? (
                                     <div className="space-y-4 animate-pulse">
-                                        <div className="h-16 bg-white/5 rounded-xl"></div>
-                                        <div className="h-16 bg-white/5 rounded-xl"></div>
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="h-20 bg-white/5 rounded-2xl"></div>
+                                        ))}
                                     </div>
                                 ) : balance ? (
                                     <div className="space-y-3 relative z-10">
                                         {balance.total && Object.entries(balance.total).map(([asset, amount]) => {
                                             if (parseFloat(amount) > 0) {
+                                                const isUSDT = asset === 'USDT';
                                                 return (
-                                                    <div key={asset} className="bg-slate-900/40 border border-white/5 p-4 rounded-xl flex justify-between items-center group-hover:border-white/10 transition-colors">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-xs font-bold text-white">
-                                                                {asset[0]}
+                                                    <div key={asset} className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex justify-between items-center group-hover:border-white/10 transition-all hover:bg-slate-900/40">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${isUSDT ? 'from-emerald-500/20 to-emerald-800/20' : 'from-slate-800 to-slate-900'} flex items-center justify-center text-sm font-black text-white border border-white/5 shadow-inner`}>
+                                                                {asset}
                                                             </div>
-                                                            <span className="font-bold text-slate-200">{asset}</span>
+                                                            <div>
+                                                                <span className="block font-black text-white text-base tracking-tight">{parseFloat(amount).toFixed(asset === 'USDT' ? 2 : 6)}</span>
+                                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{isUSDT ? 'Stablecoin' : 'Asset'}</span>
+                                                            </div>
                                                         </div>
-                                                        <span className="font-mono text-lg text-white font-bold tracking-tight">{parseFloat(amount).toFixed(8)}</span>
+                                                        <div className="text-right">
+                                                            <div className={`w-2 h-2 rounded-full ${isUSDT ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-blue-500'}`}></div>
+                                                        </div>
                                                     </div>
                                                 );
                                             }
                                             return null;
                                         })}
                                         {(!balance.total || Object.values(balance.total).every(v => parseFloat(v) === 0)) && (
-                                            <div className="text-center py-8 text-slate-500 text-sm">
-                                                Tu cuenta está vacía o el saldo es 0.
+                                            <div className="flex flex-col items-center justify-center py-20 bg-slate-950/20 rounded-3xl border border-dashed border-white/5">
+                                                <FaExclamationTriangle className="text-4xl text-slate-800 mb-4" />
+                                                <p className="text-slate-500 text-xs font-black uppercase tracking-widest">Sin fondos detectados</p>
                                             </div>
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-10 text-slate-500 text-xs">
-                                        Error cargando datos.
+                                    <div className="text-center py-20 bg-red-500/5 rounded-3xl border border-dashed border-red-500/10">
+                                        <FaExclamationTriangle className="text-3xl text-red-500/40 mb-3 mx-auto" />
+                                        <p className="text-red-500/60 text-xs font-bold uppercase">Error de Conexión</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Trade Form - 8 Columns */}
-                        <div className="lg:col-span-8">
-                            <div className={`${styles.sectionCard} overflow-hidden px-0 pt-0 pb-0`}>
-                                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-800/20">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                                            <FaBolt className="text-emerald-400 text-xl" />
+                        <div className="lg:col-span-8 flex flex-col">
+                            <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-0 overflow-hidden flex-1 flex flex-col`}>
+                                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/20">
+                                            <FaBolt className="text-white text-xl" />
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-bold text-white leading-none mb-1 flex items-center gap-2">
+                                            <h2 className="text-lg font-black text-white leading-none mb-1.5 flex items-center gap-2 tracking-tight">
                                                 Operación Rápida
-                                                <span className="px-1.5 py-0.5 bg-blue-600/20 text-blue-400 text-[8px] rounded border border-blue-500/30">SPOT</span>
+                                                <span className="px-2 py-0.5 bg-blue-600/20 text-blue-400 text-[9px] rounded-lg border border-blue-500/30 font-black">PRO</span>
                                             </h2>
-                                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Trading al Contado</p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Ejecución en Tiempo Real</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex bg-slate-900/50 p-1 rounded-lg border border-white/5">
-                                        <button
-                                            type="button"
-                                            onClick={() => setTradeType('market')}
-                                            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${tradeType === 'market' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-                                        >
-                                            Market
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setTradeType('limit')}
-                                            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${tradeType === 'limit' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-                                        >
-                                            Limit
-                                        </button>
+                                    <div className="flex bg-slate-950/60 p-1.5 rounded-xl border border-white/5 shadow-inner">
+                                        {[
+                                            { id: 'market', label: 'Market' },
+                                            { id: 'limit', label: 'Limit' }
+                                        ].map(type => (
+                                            <button
+                                                key={type.id}
+                                                type="button"
+                                                onClick={() => setTradeType(type.id)}
+                                                className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${tradeType === type.id
+                                                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 border border-white/10'
+                                                    : 'text-slate-500 hover:text-slate-300'
+                                                    }`}
+                                            >
+                                                {type.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
-                                <form onSubmit={handleTrade} className="p-8">
-                                    <div className="grid grid-cols-2 gap-4 mb-8">
+                                <form onSubmit={handleTrade} className="p-8 flex-1 flex flex-col space-y-8">
+                                    {/* Side Selection with Gradients */}
+                                    <div className="grid grid-cols-2 gap-6">
                                         <button
                                             type="button"
                                             onClick={() => setTradeSide('buy')}
-                                            className={`flex flex-col items-center justify-center py-4 rounded-2xl transition-all border-2 relative overflow-hidden group ${tradeSide === 'buy' ? 'border-emerald-500' : 'border-white/5 grayscale opacity-50 hover:grayscale-0 hover:opacity-100'}`}
+                                            className={`group relative flex flex-col items-center justify-center py-6 rounded-3xl transition-all duration-500 border-2 overflow-hidden ${tradeSide === 'buy'
+                                                ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10 scale-105 z-10'
+                                                : 'border-white/5 bg-slate-950/20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'
+                                                }`}
                                         >
-                                            {tradeSide === 'buy' && <div className="absolute inset-0 bg-emerald-500/10 animate-pulse"></div>}
-                                            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${tradeSide === 'buy' ? 'text-emerald-400' : 'text-slate-500'}`}>Long</span>
-                                            <span className={`text-xl font-black ${tradeSide === 'buy' ? 'text-emerald-400' : 'text-slate-400'}`}>COMPRAR</span>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <FaArrowUp className={`${tradeSide === 'buy' ? 'text-emerald-500' : 'text-slate-600'} transition-all group-hover:-translate-y-1`} />
+                                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'buy' ? 'text-emerald-500' : 'text-slate-600'}`}>Posición Larga</span>
+                                            </div>
+                                            <span className={`text-2xl font-black italic tracking-tighter ${tradeSide === 'buy' ? 'text-white' : 'text-slate-500'}`}>COMPRAR</span>
+                                            {tradeSide === 'buy' && <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-500 shadow-[0_-4px_12px_rgba(16,185,129,0.5)]"></div>}
                                         </button>
+
                                         <button
                                             type="button"
                                             onClick={() => setTradeSide('sell')}
-                                            className={`flex flex-col items-center justify-center py-4 rounded-2xl transition-all border-2 relative overflow-hidden group ${tradeSide === 'sell' ? 'border-red-500' : 'border-white/5 grayscale opacity-50 hover:grayscale-0 hover:opacity-100'}`}
+                                            className={`group relative flex flex-col items-center justify-center py-6 rounded-3xl transition-all duration-500 border-2 overflow-hidden ${tradeSide === 'sell'
+                                                ? 'border-rose-500 bg-rose-500/5 shadow-2xl shadow-rose-500/10 scale-105 z-10'
+                                                : 'border-white/5 bg-slate-950/20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'
+                                                }`}
                                         >
-                                            {tradeSide === 'sell' && <div className="absolute inset-0 bg-red-500/10 animate-pulse"></div>}
-                                            <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${tradeSide === 'sell' ? 'text-red-400' : 'text-slate-500'}`}>Short</span>
-                                            <span className={`text-xl font-black ${tradeSide === 'sell' ? 'text-red-400' : 'text-slate-400'}`}>VENDER</span>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <FaArrowDown className={`${tradeSide === 'sell' ? 'text-rose-500' : 'text-slate-600'} transition-all group-hover:translate-y-1`} />
+                                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'sell' ? 'text-rose-500' : 'text-slate-600'}`}>Posición Corta</span>
+                                            </div>
+                                            <span className={`text-2xl font-black italic tracking-tighter ${tradeSide === 'sell' ? 'text-white' : 'text-slate-500'}`}>VENDER</span>
+                                            {tradeSide === 'sell' && <div className="absolute inset-x-0 bottom-0 h-1 bg-rose-500 shadow-[0_-4px_12px_rgba(244,63,94,0.5)]"></div>}
                                         </button>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        {/* Pair Selector */}
-                                        <div>
-                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Mercado Seleccionado</label>
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {tradingPairs.map(pair => (
-                                                    <button
-                                                        key={pair}
-                                                        type="button"
-                                                        onClick={() => setTradeSymbol(pair)}
-                                                        className={`py-3 rounded-xl border font-bold text-xs transition-all ${tradeSymbol === pair ? 'bg-blue-600/10 border-blue-500 text-blue-400' : 'bg-slate-900/30 border-white/5 text-slate-500 hover:border-white/10'}`}
-                                                    >
-                                                        {pair.split('/')[0]}
-                                                    </button>
-                                                ))}
+                                    {/* Advanced Inputs Section */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            {/* Pair Selector Modern */}
+                                            <div>
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1">Instrumento</label>
+                                                <div className="grid grid-cols-2 gap-2.5">
+                                                    {tradingPairs.map(pair => (
+                                                        <button
+                                                            key={pair}
+                                                            type="button"
+                                                            onClick={() => setTradeSymbol(pair)}
+                                                            className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden ${tradeSymbol === pair
+                                                                ? 'bg-blue-600/10 border-blue-500 text-white shadow-xl shadow-blue-600/10'
+                                                                : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40 hover:text-slate-300'
+                                                                }`}
+                                                        >
+                                                            {pair.replace('/USDT', '')}
+                                                            {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-blue-500 rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-white" /></div>}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* Inputs Container */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-6">
+                                            {/* Quantity & Price */}
                                             {tradeType === 'limit' && (
-                                                <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Precio de Orden (USDT)</label>
+                                                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1 text-right">Precio Limit (USDT)</label>
                                                     <div className="relative group">
                                                         <input
                                                             type="number"
                                                             step="0.00000001"
                                                             value={tradePrice}
                                                             onChange={e => setTradePrice(e.target.value)}
-                                                            className="w-full bg-slate-900/80 border border-white/10 rounded-2xl px-5 py-5 text-white font-mono text-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                                            className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
                                                             placeholder="0.0000"
                                                         />
-                                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 font-bold group-focus-within:text-blue-500 transition-colors">LIMIT</div>
+                                                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">PRICE</div>
                                                     </div>
                                                 </div>
                                             )}
 
-                                            <div className={`${tradeType === 'market' ? 'col-span-2' : ''} transition-all duration-300`}>
-                                                <div className="flex justify-between items-end mb-3">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Cantidad a Operar</label>
-                                                    <span className="text-[10px] font-bold text-slate-500">
-                                                        Saldo: <span className="text-blue-400">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span> {tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]}
+                                            <div>
+                                                <div className="flex justify-between items-end mb-4 px-1">
+                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block">Cantidad a Operar</label>
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                        Disp: <span className="text-blue-500">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span>
                                                     </span>
                                                 </div>
-                                                <div className="relative group">
+                                                <div className="relative group mb-4">
                                                     <input
                                                         type="number"
                                                         step="0.00000001"
                                                         value={tradeAmount}
                                                         onChange={e => setTradeAmount(e.target.value)}
-                                                        className="w-full bg-slate-900/80 border border-white/10 rounded-2xl px-5 py-5 text-white font-mono text-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                                        className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
                                                         placeholder="0.00"
                                                     />
-                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 font-bold group-focus-within:text-blue-500 transition-colors">{tradeSymbol.split('/')[0]}</div>
+                                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
+                                                    <div className="absolute right-6 -bottom-2 px-3 py-1 bg-slate-900 border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
                                                 </div>
 
-                                                {/* Percentage Buttons */}
-                                                <div className="grid grid-cols-4 gap-2 mt-3">
+                                                <div className="grid grid-cols-4 gap-2">
                                                     {[25, 50, 75, 100].map(p => (
                                                         <button
                                                             key={p}
                                                             type="button"
                                                             onClick={() => handlePercentageClick(p)}
-                                                            className="py-2 bg-slate-900/40 hover:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-500 transition-colors border border-white/5"
+                                                            className="py-2.5 bg-slate-950/40 hover:bg-slate-900/60 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
                                                         >
                                                             {p}%
                                                         </button>
@@ -523,42 +641,120 @@ const ExchangeContent = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Order Info */}
-                                        <div className="bg-slate-900/50 rounded-2xl p-5 border border-white/5 space-y-3">
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="text-slate-500 font-bold uppercase tracking-wider">Tipo de Orden</span>
-                                                <span className="text-white font-bold">{tradeType === 'market' ? 'Mercado Instantáneo' : 'Límite Programada'}</span>
+                                    {/* Enhanced Order Metrics */}
+                                    <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
+                                                <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-slate-500 font-bold uppercase tracking-wider text-xs">Valor Estimado</span>
-                                                <span className="text-lg font-black text-white tracking-tight">{estimatedTotal} <span className="text-xs text-slate-500 font-medium">USDT</span></span>
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
+                                                <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
                                             </div>
                                         </div>
-
-                                        <button
-                                            type="submit"
-                                            disabled={isTrading}
-                                            className={`w-full py-6 rounded-2xl font-black text-base uppercase tracking-widest transition-all shadow-2xl transform active:scale-[0.97] mt-2 relative overflow-hidden group ${tradeSide === 'buy' ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20' : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20'}`}
-                                        >
-                                            {isTrading ? (
-                                                <span className="flex items-center justify-center gap-2">
-                                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                                    Procesando...
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center justify-center gap-3">
-                                                    {tradeSide === 'buy' ? <FaCheckCircle className="animate-pulse" /> : <FaExclamationTriangle className="animate-pulse" />}
-                                                    {tradeSide === 'buy' ? 'Abrir Posición Long' : 'Abrir Posición Short'}
-                                                </span>
-                                            )}
-                                        </button>
+                                        <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
+                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
+                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isTrading}
+                                        className={`w-full py-7 rounded-3xl font-black text-lg uppercase tracking-[0.25em] transition-all duration-500 shadow-2xl transform active:scale-[0.97] relative overflow-hidden group ${tradeSide === 'buy'
+                                            ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white shadow-emerald-500/20'
+                                            : 'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white shadow-rose-500/20'
+                                            }`}
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                                        {isTrading ? (
+                                            <span className="flex items-center justify-center gap-4 italic">
+                                                <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                                PROCESANDO...
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center justify-center gap-4 italic tracking-widest">
+                                                {tradeSide === 'buy' ? <FaArrowUp className="animate-bounce" /> : <FaArrowDown className="animate-bounce" />}
+                                                EJECUTAR ORDEN {tradeSide === 'buy' ? 'LONG' : 'SHORT'}
+                                            </span>
+                                        )}
+                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 )
+            )}
+
+            {/* Orders & History Viewers (Modern Lists) */}
+            {(activeTab === 'orders' || activeTab === 'history') && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                            <div>
+                                <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
+                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
+                                <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-separate border-spacing-y-3">
+                                <thead>
+                                    <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
+                                        <th className="px-6 py-2">Fecha</th>
+                                        <th className="px-6 py-2">Par</th>
+                                        <th className="px-6 py-2">Side</th>
+                                        <th className="px-6 py-2">Precio</th>
+                                        <th className="px-6 py-2">Cantidad</th>
+                                        <th className="px-6 py-2">Total</th>
+                                        <th className="px-6 py-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="group">
+                                        <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
+                                                    <FaRegClock className="animate-pulse" />
+                                                </div>
+                                                <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {errorMsg && (
+                <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
+                    <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
+                        <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
+                            <FaExclamationTriangle />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
+                            <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
+                        </div>
+                        <button
+                            onClick={() => setErrorMsg('')}
+                            className="text-slate-600 hover:text-white transition-colors p-2"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
