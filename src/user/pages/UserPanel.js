@@ -504,9 +504,47 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartSymbols = ['BTCUSDT', 'ARPAUSDT', 'BTC.D'], onAddSymbol, onRemoveSymbol, chartColumns = 0 }) => {
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartSymbols = ['BTCUSDT', 'ARPAUSDT', 'BTC.D'], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartHeightChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+  const [isResizing, setIsResizing] = useState(false);
+  const [tempHeight, setTempHeight] = useState(chartHeight);
+
+  // Sincronizar tempHeight con chartHeight cuando cambie externamente
+  useEffect(() => {
+    if (!isResizing) {
+      setTempHeight(chartHeight);
+    }
+  }, [chartHeight, isResizing]);
+
+  const handleStartResize = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startY = e.pageY;
+    const startHeight = chartHeight;
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaY = moveEvent.pageY - startY;
+      const newHeight = Math.max(300, Math.min(1200, startHeight + deltaY));
+      setTempHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      // Solo guardar si realmente cambió
+      setTempHeight((finalHeight) => {
+        onChartHeightChange(finalHeight);
+        return finalHeight;
+      });
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'ns-resize';
+  };
 
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
@@ -676,7 +714,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
         }}
       >
         {chartSymbols.map((symbol, index) => (
-          <div key={`${symbol}-${index}`} className={styles.tradingViewCard} style={{ height: `${chartHeight + 50}px`, position: 'relative' }}>
+          <div key={`${symbol}-${index}`} className={styles.tradingViewCard} style={{ height: `${(isResizing ? tempHeight : chartHeight) + 50}px`, position: 'relative' }}>
             <div className="flex justify-between items-center mb-3">
               <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>Gráfico {symbol}</h3>
               <button
@@ -687,8 +725,16 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </button>
             </div>
-            <div className={styles.tradingViewContainer} style={{ height: `${chartHeight}px` }}>
+            <div className={styles.tradingViewContainer} style={{ height: `${isResizing ? tempHeight : chartHeight}px` }}>
               <TradingViewWidget symbol={symbol} theme={darkMode ? "dark" : "light"} interval={symbol.includes('.D') ? "60" : "15"} />
+            </div>
+            {/* Tirador para redimensionar */}
+            <div
+              onMouseDown={handleStartResize}
+              className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize group flex items-center justify-center"
+              title="Arrastra para cambiar la altura"
+            >
+              <div className="w-12 h-1 bg-white/10 group-hover:bg-blue-500 rounded-full transition-colors"></div>
             </div>
           </div>
         ))}
@@ -1748,15 +1794,12 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
         showSuccess('Configuración de cuenta actualizada exitosamente.');
       }
 
-      // Guardar preferencia de altura de gráfica si cambió
-      if (localChartHeight !== chartHeight || localChartColumns !== chartColumns) {
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userDocRef, {
-          'preferences.chartHeight': localChartHeight,
-          'preferences.chartColumns': localChartColumns
-        });
-        if (localChartHeight !== chartHeight) onChartHeightChange(localChartHeight);
-        if (localChartColumns !== chartColumns) onChartColumnsChange(localChartColumns);
+      // Guardar preferencias si cambiaron
+      if (localChartHeight !== chartHeight) {
+        onChartHeightChange(localChartHeight);
+      }
+      if (localChartColumns !== chartColumns) {
+        onChartColumnsChange(localChartColumns);
       }
 
     } catch (err) {
@@ -2138,8 +2181,8 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
                   type="button"
                   onClick={() => setLocalChartColumns(val)}
                   className={`py-2 text-[10px] font-black rounded-xl transition-all border-2 ${localChartColumns === val
-                      ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-600/20'
-                      : 'bg-slate-800 border-white/5 text-slate-400 hover:border-white/10'
+                    ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-600/20'
+                    : 'bg-slate-800 border-white/5 text-slate-400 hover:border-white/10'
                     }`}
                 >
                   {val === 0 ? 'AUTO' : `${val} COL`}
@@ -2498,6 +2541,26 @@ const UserPanel = () => {
     '/user/vip-chat',     // Ruta para "Chat VIP"
   ].some(path => location.pathname.startsWith(path));
 
+  const handleUpdateChartHeight = async (newHeight) => {
+    setChartHeight(newHeight);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.chartHeight': newHeight
+      });
+    }
+  };
+
+  const handleUpdateChartColumns = async (newColumns) => {
+    setChartColumns(newColumns);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.chartColumns': newColumns
+      });
+    }
+  };
+
   return (
     <div className={styles.userPanelContainer} style={{ backgroundColor: 'var(--bg-main)' }}>
       <Sidebar
@@ -2508,7 +2571,7 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartHeightChange={handleUpdateChartHeight} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
@@ -2522,9 +2585,9 @@ const UserPanel = () => {
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
-          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={setChartHeight} chartColumns={chartColumns} onChartColumnsChange={setChartColumns} />} />
+          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartHeightChange={handleUpdateChartHeight} />} />
         </Routes>
       </MainContent>
     </div>
