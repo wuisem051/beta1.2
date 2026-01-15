@@ -504,47 +504,90 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartSymbols = ['BTCUSDT', 'ARPAUSDT', 'BTC.D'], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartHeightChange }) => {
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
-  const [isResizing, setIsResizing] = useState(false);
-  const [tempHeight, setTempHeight] = useState(chartHeight);
 
-  // Sincronizar tempHeight con chartHeight cuando cambie externamente
+  const [searchQuery, setSearchQuery] = useState('');
+  const [binanceSymbols, setBinanceSymbols] = useState([]);
+  const [filteredSymbols, setFilteredSymbols] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
   useEffect(() => {
-    if (!isResizing) {
-      setTempHeight(chartHeight);
+    const fetchSymbols = async () => {
+      try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price');
+        const data = await response.json();
+        const symbols = data.map(item => item.symbol);
+        setBinanceSymbols(symbols);
+      } catch (err) {
+        console.error("Error fetching Binance symbols:", err);
+      }
+    };
+    fetchSymbols();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length > 1) {
+      const filtered = binanceSymbols
+        .filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+        .slice(0, 10);
+      setFilteredSymbols(filtered);
+    } else {
+      setFilteredSymbols([]);
     }
-  }, [chartHeight, isResizing]);
+  }, [searchQuery, binanceSymbols]);
 
-  const handleStartResize = (e) => {
+  const [isResizing, setIsResizing] = useState(null); // { index, startY, startX, startHeight, startSpan }
+  const [tempLayout, setTempLayout] = useState(null);
+
+  const handleStartResize = (e, index) => {
     e.preventDefault();
-    setIsResizing(true);
-    const startY = e.pageY;
-    const startHeight = chartHeight;
+    const layout = chartLayouts[index];
+    if (!layout) return;
 
-    const handleMouseMove = (moveEvent) => {
-      const deltaY = moveEvent.pageY - startY;
-      const newHeight = Math.max(300, Math.min(1200, startHeight + deltaY));
-      setTempHeight(newHeight);
+    setIsResizing({
+      index,
+      startY: e.pageY,
+      startX: e.pageX,
+      startHeight: layout.height || chartHeight,
+      startSpan: layout.span || 1
+    });
+    setTempLayout({ ...layout });
+    document.body.style.cursor = 'nwse-resize';
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e) => {
+      const deltaY = e.pageY - isResizing.startY;
+      const deltaX = e.pageX - isResizing.startX;
+
+      const newHeight = Math.max(300, Math.min(1200, isResizing.startHeight + deltaY));
+
+      // Horizontal resize logic: estimate span change based on cursor movement
+      // Assuming a rough column width of 350px
+      const spanDelta = Math.round(deltaX / 350);
+      const newSpan = Math.max(1, Math.min(chartColumns || 3, isResizing.startSpan + spanDelta));
+
+      setTempLayout(prev => ({ ...prev, height: newHeight, span: newSpan }));
     };
 
     const handleMouseUp = () => {
-      setIsResizing(false);
-      // Solo guardar si realmente cambió
-      setTempHeight((finalHeight) => {
-        onChartHeightChange(finalHeight);
-        return finalHeight;
-      });
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      onChartLayoutChange(isResizing.index, tempLayout);
+      setIsResizing(null);
+      setTempLayout(null);
       document.body.style.cursor = 'default';
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    document.body.style.cursor = 'ns-resize';
-  };
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, tempLayout, chartColumns]);
 
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
@@ -693,54 +736,111 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
         </div>
       </div>
 
-      {/* TradingView Charts */}
-      <div className="flex justify-between items-center mb-4 px-2">
-        <h3 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gráficos en Tiempo Real</h3>
-        <button
-          onClick={() => {
-            const sym = prompt("Ingresa el símbolo del par (ej: ETHUSDT, SOLUSDT, BINANCE:BTCUSDT):");
-            if (sym && sym.trim()) onAddSymbol(sym.trim().toUpperCase());
-          }}
-          className="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/20"
-        >
-          + Añadir Par
-        </button>
+      {/* Advanced Symbol Search */}
+      <div className="mb-6 px-2 relative">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gráficos en Tiempo Real</h3>
+        </div>
+        <div className="flex gap-2 relative">
+          <div className="relative flex-1 group">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar par en Binance (ej: ETHUSDT, SOLUSDT...)"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearching(true);
+              }}
+              onFocus={() => setIsSearching(true)}
+              className="w-full bg-slate-900/40 border border-white/5 focus:border-blue-500/50 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder-slate-600 outline-none transition-all"
+            />
+            {isSearching && filteredSymbols.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden">
+                {filteredSymbols.map(sym => (
+                  <button
+                    key={sym}
+                    onClick={() => {
+                      onAddSymbol(sym);
+                      setSearchQuery('');
+                      setIsSearching(false);
+                    }}
+                    className="w-full px-6 py-3 text-left hover:bg-blue-600/20 text-slate-300 hover:text-white text-sm font-bold flex justify-between items-center transition-colors"
+                  >
+                    <span>{sym}</span>
+                    <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-400">BINANCE</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {searchQuery && isSearching && filteredSymbols.length === 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-[100] text-center">
+                <p className="text-slate-500 text-xs italic">No se encontraron resultados</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div
         className={styles.tradingViewGrid}
         style={{
-          gridTemplateColumns: chartColumns > 0 ? `repeat(${chartColumns}, 1fr)` : undefined
+          gridTemplateColumns: chartColumns > 0 ? `repeat(${chartColumns}, 1fr)` : undefined,
+          gap: '1.5rem'
         }}
       >
-        {chartSymbols.map((symbol, index) => (
-          <div key={`${symbol}-${index}`} className={styles.tradingViewCard} style={{ height: `${(isResizing ? tempHeight : chartHeight) + 50}px`, position: 'relative' }}>
-            <div className="flex justify-between items-center mb-3">
-              <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>Gráfico {symbol}</h3>
-              <button
-                onClick={() => onRemoveSymbol(symbol)}
-                className="text-slate-500 hover:text-red-400 p-1 transition-colors"
-                title="Eliminar gráfico"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-              </button>
-            </div>
-            <div className={styles.tradingViewContainer} style={{ height: `${isResizing ? tempHeight : chartHeight}px` }}>
-              <TradingViewWidget symbol={symbol} theme={darkMode ? "dark" : "light"} interval={symbol.includes('.D') ? "60" : "15"} />
-            </div>
-            {/* Tirador para redimensionar */}
+        {chartLayouts.map((layout, index) => {
+          const isCurrentlyResizing = isResizing?.index === index;
+          const currentH = isCurrentlyResizing ? tempLayout.height : (layout.height || chartHeight);
+          const currentSpan = isCurrentlyResizing ? tempLayout.span : (layout.span || 1);
+
+          return (
             <div
-              onMouseDown={handleStartResize}
-              className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize group flex items-center justify-center"
-              title="Arrastra para cambiar la altura"
+              key={`${layout.symbol}-${index}`}
+              className={styles.tradingViewCard}
+              style={{
+                height: `${currentH + 70}px`,
+                position: 'relative',
+                gridColumn: `span ${currentSpan}`,
+                transition: isCurrentlyResizing ? 'none' : 'all 0.3s ease'
+              }}
             >
-              <div className="w-12 h-1 bg-white/10 group-hover:bg-blue-500 rounded-full transition-colors"></div>
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-500 font-bold text-xs">
+                    {layout.symbol.substring(0, 1)}
+                  </span>
+                  <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>{layout.symbol}</h3>
+                </div>
+                <button
+                  onClick={() => onRemoveSymbol(layout.symbol)}
+                  className="text-slate-600 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-xl transition-all"
+                  title="Eliminar gráfico"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
+              </div>
+              <div className={styles.tradingViewContainer} style={{ height: `${currentH}px` }}>
+                <TradingViewWidget symbol={layout.symbol} theme={darkMode ? "dark" : "light"} interval={layout.symbol.includes('.D') ? "60" : "15"} />
+              </div>
+
+              {/* Corner 2D Resize Handle */}
+              <div
+                onMouseDown={(e) => handleStartResize(e, index)}
+                className="absolute bottom-2 right-2 w-6 h-6 cursor-nwse-resize group flex items-end justify-end p-1 z-10"
+                title="Arrastra para cambiar ancho y alto"
+              >
+                <div className="w-2 h-2 border-r-2 border-b-2 border-white/20 group-hover:border-blue-500 transition-colors"></div>
+                <div className="absolute w-1 h-1 bg-white/10 group-hover:bg-blue-400 bottom-1 right-1 rounded-full"></div>
+              </div>
             </div>
-          </div>
-        ))}
-        {chartSymbols.length === 0 && (
+          );
+        })}
+        {chartLayouts.length === 0 && (
           <div className="col-span-full py-20 text-center bg-slate-900/40 border border-white/5 rounded-3xl">
-            <p className="text-slate-500 font-bold">No has añadido ningún par. Haz clic en "Añadir Par" para comenzar.</p>
+            <p className="text-slate-500 font-bold">No has añadido ningún par. Utiliza el buscador arriba para comenzar.</p>
           </div>
         )}
       </div>
@@ -2218,7 +2318,11 @@ const UserPanel = () => {
     vipExpiry: null,
   });
   const [chartHeight, setChartHeight] = useState(450);
-  const [chartSymbols, setChartSymbols] = useState(['BTCUSDT', 'ARPAUSDT', 'BTC.D']);
+  const [chartLayouts, setChartLayouts] = useState([
+    { symbol: 'BTCUSDT', height: 450, span: 1 },
+    { symbol: 'ARPAUSDT', height: 450, span: 1 },
+    { symbol: 'BTC.D', height: 450, span: 1 }
+  ]);
   const [chartColumns, setChartColumns] = useState(0); // 0 means auto
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
@@ -2359,7 +2463,11 @@ const UserPanel = () => {
           profilePhotoUrl: userData.profilePhotoUrl || '',
         });
         setChartHeight(userData.preferences?.chartHeight || 450);
-        setChartSymbols(userData.preferences?.chartSymbols || ['BTCUSDT', 'ARPAUSDT', 'BTC.D']);
+        setChartLayouts(userData.preferences?.chartLayouts || [
+          { symbol: 'BTCUSDT', height: 450, span: 1 },
+          { symbol: 'ARPAUSDT', height: 450, span: 1 },
+          { symbol: 'BTC.D', height: 450, span: 1 }
+        ]);
         setChartColumns(userData.preferences?.chartColumns || 0);
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
@@ -2513,24 +2621,36 @@ const UserPanel = () => {
   }
 
   const handleAddSymbol = async (symbol) => {
-    if (chartSymbols.includes(symbol)) return;
-    const newSymbols = [...chartSymbols, symbol];
-    setChartSymbols(newSymbols);
+    if (chartLayouts.find(l => l.symbol === symbol)) return;
+    const newLayouts = [...chartLayouts, { symbol, height: chartHeight, span: 1 }];
+    setChartLayouts(newLayouts);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
-        'preferences.chartSymbols': newSymbols
+        'preferences.chartLayouts': newLayouts
       });
     }
   };
 
   const handleRemoveSymbol = async (symbol) => {
-    const newSymbols = chartSymbols.filter(s => s !== symbol);
-    setChartSymbols(newSymbols);
+    const newLayouts = chartLayouts.filter(l => l.symbol !== symbol);
+    setChartLayouts(newLayouts);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
-        'preferences.chartSymbols': newSymbols
+        'preferences.chartLayouts': newLayouts
+      });
+    }
+  };
+
+  const handleUpdateChartLayout = async (index, newLayout) => {
+    const newLayouts = [...chartLayouts];
+    newLayouts[index] = newLayout;
+    setChartLayouts(newLayouts);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.chartLayouts': newLayouts
       });
     }
   };
@@ -2571,7 +2691,7 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartHeightChange={handleUpdateChartHeight} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
@@ -2587,7 +2707,7 @@ const UserPanel = () => {
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
           <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartHeightChange={handleUpdateChartHeight} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} />} />
         </Routes>
       </MainContent>
     </div>
