@@ -4,7 +4,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 
 import candadoIcon from '../../imagens/candado.png';
 
-const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser }) => {
+const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser, isHidden }) => {
   const { darkMode, theme } = useContext(ThemeContext);
   const { pathname } = useLocation();
   const basePath = pathname.split('/').slice(0, 2).join('/');
@@ -42,7 +42,19 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   };
 
   return (
-    <aside className="w-64 p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col" style={{ background: 'var(--bg-sidebar)', backdropFilter: 'var(--glass-blur)' }}>
+    <aside
+      className={`p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
+      style={{
+        background: 'var(--bg-sidebar)',
+        backdropFilter: 'var(--glass-blur)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        zIndex: 110,
+        overflow: 'hidden'
+      }}
+    >
       <div className="flex flex-col items-center text-center border-b border-white border-opacity-10 pb-6 mb-6">
         <div className="w-16 h-16 rounded-2xl overflow-hidden mb-3 shadow-lg bg-slate-800 flex items-center justify-center border-2 border-accent/20">
           {displayUser?.profilePhotoUrl ? (

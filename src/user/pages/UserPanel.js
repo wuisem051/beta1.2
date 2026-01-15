@@ -2324,6 +2324,7 @@ const UserPanel = () => {
     { symbol: 'BTC.D', height: 450, span: 1 }
   ]);
   const [chartColumns, setChartColumns] = useState(0); // 0 means auto
+  const [isSidebarHidden, setIsSidebarHidden] = useState(false);
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
   const [minPaymentThresholds, setMinPaymentThresholds] = useState({ // Nuevo estado para los umbrales mínimos de retiro por moneda
@@ -2685,9 +2686,40 @@ const UserPanel = () => {
     <div className={styles.userPanelContainer} style={{ backgroundColor: 'var(--bg-main)' }}>
       <Sidebar
         unreadTicketsCount={unreadTicketsCount}
-        displayUser={displayUser}
+        newTradingSignalsCount={newTradingSignalsCount}
+        markTradingSignalsAsRead={markTradingSignalsAsRead}
+        displayUser={userData || currentUser}
+        isHidden={isSidebarHidden}
       />
-      <MainContent>
+      <MainContent style={{
+        marginLeft: isSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
+        width: isSidebarHidden ? '100%' : 'calc(100% - var(--sidebar-width, 16rem))',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}>
+        {/* Toggle Sidebar Button - Modern & Floating */}
+        <button
+          onClick={() => setIsSidebarHidden(!isSidebarHidden)}
+          className={`fixed top-24 z-[100] p-2 bg-slate-800/80 backdrop-blur-xl border border-white/10 rounded-r-xl shadow-2xl transition-all duration-300 hover:bg-blue-600 group ${isSidebarHidden ? 'left-0' : 'left-64'}`}
+          title={isSidebarHidden ? 'Mostrar barra lateral' : 'Ocultar barra lateral'}
+          style={{
+            left: isSidebarHidden ? '0' : '16rem',
+            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s'
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20" height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-500 ${isSidebarHidden ? '' : 'rotate-180'}`}
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
