@@ -51,7 +51,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
     const now = new Date();
     const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
     return expiry > now;
-  }, [userBalances, currentUser?.uid]);
+  }, [userBalances.vipStatus, userBalances.vipExpiry]);
 
   useEffect(() => {
     if (!isVIP) return;
@@ -504,7 +504,7 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange }) => {
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
 
@@ -589,17 +589,47 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
     };
   }, [isResizing, tempLayout, chartColumns]);
 
-  const [signals, setSignals] = useState([]);
-  const [isLoadingSignals, setIsLoadingSignals] = useState(false);
-  const [totalProfit, setTotalProfit] = useState(0);
-
   const isVIP = useMemo(() => {
-    if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
-    if (!userBalances.vipExpiry) return false;
+    if (userBalances.vipStatus !== 'active' || !userBalances.vipExpiry) {
+      return false;
+    }
     const now = new Date();
     const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
     return expiry > now;
-  }, [userBalances]);
+  }, [userBalances.vipStatus, userBalances.vipExpiry]);
+
+  // Dashboard Width Resizing Logic
+  const [isResizingWidth, setIsResizingWidth] = useState(false);
+  const handleWidthMouseDown = (e) => {
+    e.preventDefault();
+    setIsResizingWidth(true);
+    document.body.style.cursor = 'ew-resize';
+  };
+
+  useEffect(() => {
+    if (!isResizingWidth) return;
+    const handleMouseMove = (e) => {
+      const viewportWidth = window.innerWidth;
+      const mouseX = e.pageX;
+      const distanceFromCenter = Math.abs(mouseX - (viewportWidth / 2));
+      const newWidth = Math.max(800, Math.min(viewportWidth - 40, distanceFromCenter * 2));
+      onDashboardWidthChange(newWidth);
+    };
+    const handleMouseUp = () => {
+      setIsResizingWidth(false);
+      document.body.style.cursor = 'default';
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingWidth, onDashboardWidthChange]);
+
+  const [signals, setSignals] = useState([]);
+  const [isLoadingSignals, setIsLoadingSignals] = useState(false);
+  const [totalProfit, setTotalProfit] = useState(0);
 
   // Fetch Trading History and Arbitrage Earnings for Total Profit
   useEffect(() => {
@@ -706,7 +736,26 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
   }, [paymentsHistory, withdrawalsHistory]);
 
   return (
-    <div className={styles.dashboardContent}>
+    <div className={styles.dashboardContent} style={{ maxWidth: `${dashboardMaxWidth}px`, margin: '0 auto', position: 'relative' }}>
+      {/* Dashboard Width Resizer - Interactive Handle at the Top Right */}
+      <div
+        onMouseDown={handleWidthMouseDown}
+        className="absolute -right-2 top-0 bottom-0 w-4 cursor-ew-resize group z-[60] flex items-center justify-center"
+        title="Arrastra para ajustar el ancho del Dashboard"
+      >
+        <div className="h-24 w-1.5 bg-blue-500/10 group-hover:bg-blue-600/40 rounded-full transition-all flex flex-col items-center justify-center gap-1 shadow-lg backdrop-blur-sm border border-white/5">
+          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+          <div className="w-1 h-4 bg-white/40 rounded-full"></div>
+          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+        </div>
+        <div className="absolute top-1/2 -translate-y-1/2 right-6 bg-slate-900/90 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-2xl">
+          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8L22 12L18 16"></path><path d="M6 8L2 12L6 16"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            AJUSTAR ANCHO: {Math.round(dashboardMaxWidth)}px
+          </p>
+        </div>
+      </div>
+
       <div className={styles.statsGrid}>
         {/* Miembro VIP */}
         <div className={styles.statCard}>
@@ -1755,16 +1804,18 @@ const ReferralsContent = ({ styles }) => {
   );
 };
 
-const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange }) => {
+const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange, dashboardMaxWidth, onDashboardWidthChange }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const { currentUser } = useAuth();
+  const [localChartHeight, setLocalChartHeight] = useState(chartHeight || 450);
+  const [localChartColumns, setLocalChartColumns] = useState(chartColumns || 0);
+  const [localDashboardWidth, setLocalDashboardWidth] = useState(dashboardMaxWidth);
+  const [isVIPSet, setIsVIPSet] = useState(false);
   const [contactEmail, setContactEmail] = useState(currentUser?.email || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [localChartHeight, setLocalChartHeight] = useState(chartHeight || 450);
-  const [localChartColumns, setLocalChartColumns] = useState(chartColumns || 0);
   const [paymentAddresses, setPaymentAddresses] = useState({
     BTC: '',
     DOGE: '',
@@ -1895,11 +1946,11 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
       }
 
       // Guardar preferencias si cambiaron
-      if (localChartHeight !== chartHeight) {
+      if (localChartHeight !== chartHeight || localChartColumns !== chartColumns || localDashboardWidth !== dashboardMaxWidth) {
         onChartHeightChange(localChartHeight);
-      }
-      if (localChartColumns !== chartColumns) {
         onChartColumnsChange(localChartColumns);
+        onDashboardWidthChange(localDashboardWidth);
+        showSuccess('Preferencias de visualización actualizadas correctamente.');
       }
 
     } catch (err) {
@@ -2293,6 +2344,25 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
               "AUTO" ajusta las columnas según el tamaño de tu pantalla.
             </p>
           </div>
+
+          <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
+            <label className={styles.formLabel}>Ancho Máximo del Dashboard (px): <span className="text-accent">{localDashboardWidth}px</span></label>
+            <input
+              type="range"
+              min="800"
+              max="2560"
+              step="20"
+              value={localDashboardWidth}
+              onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              disabled={isLoading}
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">
+              <span>Compacto (800px)</span>
+              <span>HD (1400px)</span>
+              <span>Ultra-Wide (2560px)</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -2325,6 +2395,7 @@ const UserPanel = () => {
   ]);
   const [chartColumns, setChartColumns] = useState(0); // 0 means auto
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
+  const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1400); // Default 1400px
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
   const [minPaymentThresholds, setMinPaymentThresholds] = useState({ // Nuevo estado para los umbrales mínimos de retiro por moneda
@@ -2470,6 +2541,7 @@ const UserPanel = () => {
           { symbol: 'BTC.D', height: 450, span: 1 }
         ]);
         setChartColumns(userData.preferences?.chartColumns || 0);
+        setDashboardMaxWidth(userData.preferences?.dashboardMaxWidth || 1400);
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
       } else {
@@ -2682,6 +2754,16 @@ const UserPanel = () => {
     }
   };
 
+  const handleUpdateDashboardWidth = async (newWidth) => {
+    setDashboardMaxWidth(newWidth);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.dashboardMaxWidth': newWidth
+      });
+    }
+  };
+
   return (
     <div className={styles.userPanelContainer} style={{ backgroundColor: 'var(--bg-main)' }}>
       <Sidebar
@@ -2721,7 +2803,7 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
@@ -2735,9 +2817,9 @@ const UserPanel = () => {
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
-          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} />} />
+          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
         </Routes>
       </MainContent>
     </div>
