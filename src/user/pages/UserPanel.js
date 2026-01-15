@@ -2686,9 +2686,7 @@ const UserPanel = () => {
     <div className={styles.userPanelContainer} style={{ backgroundColor: 'var(--bg-main)' }}>
       <Sidebar
         unreadTicketsCount={unreadTicketsCount}
-        newTradingSignalsCount={newTradingSignalsCount}
-        markTradingSignalsAsRead={markTradingSignalsAsRead}
-        displayUser={userData || currentUser}
+        displayUser={displayUser}
         isHidden={isSidebarHidden}
       />
       <MainContent style={{
