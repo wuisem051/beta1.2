@@ -504,7 +504,7 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD }) => {
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartSymbols = ['BTCUSDT', 'ARPAUSDT', 'BTC.D'], onAddSymbol, onRemoveSymbol, chartColumns = 0 }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
 
@@ -656,25 +656,47 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
       </div>
 
       {/* TradingView Charts */}
-      <div className={styles.tradingViewGrid}>
-        <div className={styles.tradingViewCard}>
-          <h3 className={styles.statsTitle}>Gráfico BTC/USDT</h3>
-          <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="BTCUSDT" theme={darkMode ? "dark" : "light"} interval="15" />
+      <div className="flex justify-between items-center mb-4 px-2">
+        <h3 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gráficos en Tiempo Real</h3>
+        <button
+          onClick={() => {
+            const sym = prompt("Ingresa el símbolo del par (ej: ETHUSDT, SOLUSDT, BINANCE:BTCUSDT):");
+            if (sym && sym.trim()) onAddSymbol(sym.trim().toUpperCase());
+          }}
+          className="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/20"
+        >
+          + Añadir Par
+        </button>
+      </div>
+
+      <div
+        className={styles.tradingViewGrid}
+        style={{
+          gridTemplateColumns: chartColumns > 0 ? `repeat(${chartColumns}, 1fr)` : undefined
+        }}
+      >
+        {chartSymbols.map((symbol, index) => (
+          <div key={`${symbol}-${index}`} className={styles.tradingViewCard} style={{ height: `${chartHeight + 50}px`, position: 'relative' }}>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>Gráfico {symbol}</h3>
+              <button
+                onClick={() => onRemoveSymbol(symbol)}
+                className="text-slate-500 hover:text-red-400 p-1 transition-colors"
+                title="Eliminar gráfico"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              </button>
+            </div>
+            <div className={styles.tradingViewContainer} style={{ height: `${chartHeight}px` }}>
+              <TradingViewWidget symbol={symbol} theme={darkMode ? "dark" : "light"} interval={symbol.includes('.D') ? "60" : "15"} />
+            </div>
           </div>
-        </div>
-        <div className={styles.tradingViewCard}>
-          <h3 className={styles.statsTitle}>Gráfico ARPA/USDT</h3>
-          <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="ARPAUSDT" theme={darkMode ? "dark" : "light"} interval="15" />
+        ))}
+        {chartSymbols.length === 0 && (
+          <div className="col-span-full py-20 text-center bg-slate-900/40 border border-white/5 rounded-3xl">
+            <p className="text-slate-500 font-bold">No has añadido ningún par. Haz clic en "Añadir Par" para comenzar.</p>
           </div>
-        </div>
-        <div className={styles.tradingViewCard}>
-          <h3 className={styles.statsTitle}>Dominancia BTC</h3>
-          <div className={styles.tradingViewContainer}>
-            <TradingViewWidget symbol="BTC.D" theme={darkMode ? "dark" : "light"} interval="60" />
-          </div>
-        </div>
+        )}
       </div>
 
       {/* SEÑALES DE TRADING (Dashboard) */}
@@ -1587,7 +1609,7 @@ const ReferralsContent = ({ styles }) => {
   );
 };
 
-const SettingsContent = ({ styles }) => {
+const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const { currentUser } = useAuth();
@@ -1595,6 +1617,8 @@ const SettingsContent = ({ styles }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [localChartHeight, setLocalChartHeight] = useState(chartHeight || 450);
+  const [localChartColumns, setLocalChartColumns] = useState(chartColumns || 0);
   const [paymentAddresses, setPaymentAddresses] = useState({
     BTC: '',
     DOGE: '',
@@ -1722,6 +1746,17 @@ const SettingsContent = ({ styles }) => {
 
       if (!newPassword && contactEmail === currentUser.email) {
         showSuccess('Configuración de cuenta actualizada exitosamente.');
+      }
+
+      // Guardar preferencia de altura de gráfica si cambió
+      if (localChartHeight !== chartHeight || localChartColumns !== chartColumns) {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userDocRef, {
+          'preferences.chartHeight': localChartHeight,
+          'preferences.chartColumns': localChartColumns
+        });
+        if (localChartHeight !== chartHeight) onChartHeightChange(localChartHeight);
+        if (localChartColumns !== chartColumns) onChartColumnsChange(localChartColumns);
       }
 
     } catch (err) {
@@ -2072,6 +2107,49 @@ const SettingsContent = ({ styles }) => {
               </svg>
             ) : 'Guardar Preferencias'}
           </button>
+
+          {/* Personalización */}
+          <h2 className={styles.sectionTitle} style={{ marginTop: '2rem' }}>Personalización</h2>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Altura de Gráficas (px): <span className="text-accent">{localChartHeight}px</span></label>
+            <input
+              type="range"
+              min="300"
+              max="800"
+              step="10"
+              value={localChartHeight}
+              onChange={(e) => setLocalChartHeight(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              disabled={isLoading}
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">
+              <span>Pequeña (300px)</span>
+              <span>Por defecto (450px)</span>
+              <span>Grande (800px)</span>
+            </div>
+          </div>
+
+          <div className={styles.formGroup} style={{ marginTop: '1.5rem' }}>
+            <label className={styles.formLabel}>Distribución de Gráficas (Columnas)</label>
+            <div className="grid grid-cols-4 gap-2">
+              {[0, 1, 2, 3].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setLocalChartColumns(val)}
+                  className={`py-2 text-[10px] font-black rounded-xl transition-all border-2 ${localChartColumns === val
+                      ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-600/20'
+                      : 'bg-slate-800 border-white/5 text-slate-400 hover:border-white/10'
+                    }`}
+                >
+                  {val === 0 ? 'AUTO' : `${val} COL`}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-slate-500 mt-2 italic">
+              "AUTO" ajusta las columnas según el tamaño de tu pantalla.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -2096,6 +2174,9 @@ const UserPanel = () => {
     vipStatus: 'none',
     vipExpiry: null,
   });
+  const [chartHeight, setChartHeight] = useState(450);
+  const [chartSymbols, setChartSymbols] = useState(['BTCUSDT', 'ARPAUSDT', 'BTC.D']);
+  const [chartColumns, setChartColumns] = useState(0); // 0 means auto
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
   const [minPaymentThresholds, setMinPaymentThresholds] = useState({ // Nuevo estado para los umbrales mínimos de retiro por moneda
@@ -2234,6 +2315,9 @@ const UserPanel = () => {
           displayName: userData.displayName || '',
           profilePhotoUrl: userData.profilePhotoUrl || '',
         });
+        setChartHeight(userData.preferences?.chartHeight || 450);
+        setChartSymbols(userData.preferences?.chartSymbols || ['BTCUSDT', 'ARPAUSDT', 'BTC.D']);
+        setChartColumns(userData.preferences?.chartColumns || 0);
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
       } else {
@@ -2385,6 +2469,29 @@ const UserPanel = () => {
     }
   }
 
+  const handleAddSymbol = async (symbol) => {
+    if (chartSymbols.includes(symbol)) return;
+    const newSymbols = [...chartSymbols, symbol];
+    setChartSymbols(newSymbols);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.chartSymbols': newSymbols
+      });
+    }
+  };
+
+  const handleRemoveSymbol = async (symbol) => {
+    const newSymbols = chartSymbols.filter(s => s !== symbol);
+    setChartSymbols(newSymbols);
+    if (currentUser?.uid) {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        'preferences.chartSymbols': newSymbols
+      });
+    }
+  };
+
   const showNavbar = [
     '/user/miners',      // Ruta para "Señales Trading"
     '/user/plan-trading', // Ruta para "Plan Trading"
@@ -2401,7 +2508,7 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} />} />
           <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
@@ -2415,9 +2522,9 @@ const UserPanel = () => {
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
-          <Route path="settings/*" element={<SettingsContent styles={styles} />} />
+          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={setChartHeight} chartColumns={chartColumns} onChartColumnsChange={setChartColumns} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartSymbols={chartSymbols} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} />} />
         </Routes>
       </MainContent>
     </div>
