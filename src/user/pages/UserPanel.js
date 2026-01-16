@@ -29,6 +29,7 @@ import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
 import TradingViewWidget from '../components/TradingViewWidget';
+import UpdatesContent from '../components/UpdatesContent';
 
 // Componentes de las sub-secciones
 
@@ -2920,6 +2921,7 @@ const UserPanel = () => {
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
+          <Route path="updates/*" element={<UpdatesContent styles={styles} />} /> {/* Nueva ruta para Actualizaciones */}
           <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}

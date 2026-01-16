@@ -17,6 +17,7 @@ import TradingHistoryManagement from '../components/TradingHistoryManagement';
 import DepositManagement from '../components/DepositManagement';
 import DepositAddressSettings from '../components/DepositAddressSettings';
 import ChatManagement from '../components/ChatManagement';
+import UpdateManagement from '../components/UpdateManagement';
 
 const AdminPanel = () => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -238,6 +239,17 @@ const AdminPanel = () => {
             </li>
             <li className="mb-0.5">
               <Link
+                to="/admin/updates"
+                className={`flex items-center py-1.5 px-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/updates'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
+              >
+                📢 Historial de Mejoras
+              </Link>
+            </li>
+            <li className="mb-0.5">
+              <Link
                 to="/admin/chat-vip"
                 className={`flex items-center py-1.5 px-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/admin/chat-vip'
                   ? 'bg-blue-600 text-white shadow-lg'
@@ -280,6 +292,7 @@ const AdminPanel = () => {
           <Route path="deposit-management" element={<DepositManagement />} /> {/* Nueva ruta para Gestión de Depósitos */}
           <Route path="deposit-addresses" element={<DepositAddressSettings />} /> {/* Nueva ruta para Direcciones de Depósito */}
           <Route path="chat-vip" element={<ChatManagement />} />
+          <Route path="updates" element={<UpdateManagement />} />
           {/* Ruta por defecto o dashboard overview */}
           <Route path="/" element={
             <div className={`p-6 rounded-2xl shadow-xl`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
