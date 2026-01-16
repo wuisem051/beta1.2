@@ -169,6 +169,20 @@ const TradingSignalManagement = () => {
     }
   };
 
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      await updateDoc(doc(db, 'tradingSignals', id), {
+        status: newStatus,
+        updatedAt: new Date()
+      });
+      showSuccess(`Señal marcada como ${newStatus}`);
+    } catch (err) {
+      showError('Error al actualizar el estado');
+      console.error(err);
+    }
+  };
+
+
   const handleDeleteSignal = async (id) => {
     if (window.confirm('¿Eliminar esta señal?')) {
       try {
@@ -472,10 +486,27 @@ const TradingSignalManagement = () => {
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500">
                   <span>{new Date(signal.createdAt).toLocaleDateString()}</span>
-                  <span className={`px-2 py-0.5 rounded ${signal.status === 'Activa' ? 'bg-blue-500/10 text-blue-400' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                  <span className={`px-2 py-0.5 rounded ${signal.status === 'Activa' ? 'bg-blue-500/10 text-blue-400' : signal.status === 'Completada' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                     {signal.status}
                   </span>
                 </div>
+
+                {signal.status === 'Activa' && (
+                  <div className="mt-4 grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <button
+                      onClick={() => handleUpdateStatus(signal.id, 'Completada')}
+                      className="flex items-center justify-center gap-2 py-2 rounded-xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all font-bold text-xs border border-green-500/20"
+                    >
+                      <FaCheckCircle /> Éxito
+                    </button>
+                    <button
+                      onClick={() => handleUpdateStatus(signal.id, 'Fallida')}
+                      className="flex items-center justify-center gap-2 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all font-bold text-xs border border-red-500/20"
+                    >
+                      <FaTimes /> Fallo
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
