@@ -654,105 +654,113 @@ const ExchangeContent = () => {
                                             </div>
                                         </div>
                                     </div>
-                            </div>
 
-                            {/* Enhanced Order Metrics */}
-                            <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
-                                <div className="flex-1 space-y-4">
-                                    <div className="flex justify-between items-center px-1">
-                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
-                                        <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
+                                    {/* Enhanced Order Metrics */}
+                                    <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
+                                                <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center px-1">
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
+                                                <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
+                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
+                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center px-1">
-                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
-                                        <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
-                                    </div>
-                                </div>
-                                <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
-                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
-                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                        </button>
-                    </form>
+                                    <button
+                                        type="submit"
+                                        disabled={isTrading}
+                                        className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all duration-500 shadow-2xl active:scale-[0.98] border-b-4 ${tradeSide === 'buy'
+                                            ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/20 border-emerald-700'
+                                            : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20 border-rose-700'
+                                            }`}
+                                    >
+                                        {isTrading ? 'Procesando Operación...' : `EJECUTAR ${tradeSide === 'buy' ? 'COMPRA' : 'VENTA'}`}
+                                    </button>
+                                </form>
                             </div>
-                        </div >
+                        </div>
                     </div >
                 )
             )}
 
-{/* Orders & History Viewers (Modern Lists) */ }
-{
-    (activeTab === 'orders' || activeTab === 'history') && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                    <div>
-                        <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
-                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
-                        <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
-                    </div>
-                </div>
+            {/* Orders & History Viewers (Modern Lists) */}
+            {
+                (activeTab === 'orders' || activeTab === 'history') && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
+                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
+                                    <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
+                                </div>
+                            </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-separate border-spacing-y-3">
-                        <thead>
-                            <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-                                <th className="px-6 py-2">Fecha</th>
-                                <th className="px-6 py-2">Par</th>
-                                <th className="px-6 py-2">Side</th>
-                                <th className="px-6 py-2">Precio</th>
-                                <th className="px-6 py-2">Cantidad</th>
-                                <th className="px-6 py-2">Total</th>
-                                <th className="px-6 py-2">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr className="group">
-                                <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
-                                            <FaRegClock className="animate-pulse" />
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    )
-}
-{
-    errorMsg && (
-        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
-            <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
-                <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
-                    <FaExclamationTriangle />
-                </div>
-                <div className="flex-1">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
-                    <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
-                </div>
-                <button
-                    onClick={() => setErrorMsg('')}
-                    className="text-slate-600 hover:text-white transition-colors p-2"
-                >
-                    ✕
-                </button>
-            </div>
-        </div>
-    )
-}
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-separate border-spacing-y-3">
+                                    <thead>
+                                        <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
+                                            <th className="px-6 py-2">Fecha</th>
+                                            <th className="px-6 py-2">Par</th>
+                                            <th className="px-6 py-2">Side</th>
+                                            <th className="px-6 py-2">Precio</th>
+                                            <th className="px-6 py-2">Cantidad</th>
+                                            <th className="px-6 py-2">Total</th>
+                                            <th className="px-6 py-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="group">
+                                            <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
+                                                        <FaRegClock className="animate-pulse" />
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                errorMsg && (
+                    <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
+                        <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
+                            <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
+                                <FaExclamationTriangle />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
+                                <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
+                            </div>
+                            <button
+                                onClick={() => setErrorMsg('')}
+                                className="text-slate-600 hover:text-white transition-colors p-2"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
         </div >
     );
 };
