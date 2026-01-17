@@ -337,8 +337,19 @@ const CopyTraderContent = ({ styles, userBalances }) => {
 
   return (
     <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Señales de Trading</h1>
-      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>Sigue nuestras operaciones en tiempo real. Sección exclusiva para miembros VIP.</p>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className={styles.mainContentTitle} style={{ marginBottom: '0.5rem' }}>Señales de Trading</h1>
+          <p className={styles.statTitle}>Sigue nuestras operaciones en tiempo real. Sección exclusiva para miembros VIP.</p>
+        </div>
+        <button
+          onClick={() => navigate('/user/mining-portfolio')}
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600/10 border border-blue-500/20 rounded-xl text-[10px] font-black text-blue-400 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-xl shadow-blue-600/5 group"
+        >
+          <FaHistory className="transition-transform group-hover:rotate-[-20deg]" />
+          Ver Historial Completo
+        </button>
+      </div>
 
       {!isVIP ? (
         <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
@@ -356,7 +367,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
             <div className={styles.noDataText}>No hay señales activas en este momento. Esté atento a las notificaciones.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {signals.map(signal => (
+              {signals.filter(s => s.status !== 'Exitosa').map(signal => (
                 <div key={signal.id} className={styles.signalCard} style={{ borderColor: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -508,6 +519,12 @@ const PlanTradingContent = ({ styles }) => {
 const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+
+  const getCryptoIcon = (symbol) => {
+    // Handling symbols like BTCUSDT or BTC/USDT
+    const coin = symbol.includes('/') ? symbol.split('/')[0] : symbol.replace('USDT', '');
+    return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin.toLowerCase()}.png`;
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [binanceSymbols, setBinanceSymbols] = useState([]);
@@ -859,9 +876,17 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-500 font-bold text-xs">
-                    {layout.symbol.substring(0, 1)}
-                  </span>
+                  <div className="w-8 h-8 rounded-2xl bg-blue-600/10 flex items-center justify-center border border-white/5 overflow-hidden">
+                    <img
+                      src={getCryptoIcon(layout.symbol)}
+                      alt={layout.symbol}
+                      className="w-5 h-5 object-contain"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/generic.png';
+                      }}
+                    />
+                  </div>
                   <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>{layout.symbol}</h3>
                 </div>
                 <button
@@ -898,8 +923,17 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
       {/* SEÑALES DE TRADING (Dashboard) */}
       <div className={styles.sectionCard} style={{ marginBottom: '1.5rem' }}>
         <div className="flex justify-between items-center mb-4">
-          <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', marginBottom: 0 }}>Señales en Tiempo Real</h3>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Últimas Oportunidades</span>
+          <div>
+            <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', marginBottom: 0 }}>Señales en Tiempo Real</h3>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Últimas Oportunidades del Mercado</p>
+          </div>
+          <button
+            onClick={() => navigate('/user/mining-portfolio')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-lg text-[9px] font-black text-blue-400 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-300 group"
+          >
+            <FaHistory className="transition-transform group-hover:rotate-[-20deg]" />
+            Historial de Operaciones
+          </button>
         </div>
 
         {isLoadingSignals ? (
@@ -908,7 +942,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
           <div className={styles.noDataText}>No hay señales activas recientes.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {signals.map(signal => (
+            {signals.filter(s => s.status !== 'Exitosa').map(signal => (
               <div key={signal.id} className={styles.glassBase} style={{ padding: '1rem', borderRadius: '1rem', borderLeft: `4px solid ${signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)'}` }}>
                 <div className="flex justify-between items-start mb-2">
                   <div>

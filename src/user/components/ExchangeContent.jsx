@@ -55,6 +55,11 @@ const ExchangeContent = () => {
         'DOGE/USDT'
     ];
 
+    const getCryptoIcon = (symbol) => {
+        const coin = symbol.split('/')[0].toLowerCase();
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin}.png`;
+    };
+
     // Fetch saved config on mount
     useEffect(() => {
         const fetchConfig = async () => {
@@ -567,196 +572,188 @@ const ExchangeContent = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-6">
                                             {/* Pair Selector Modern */}
-                                            <div>
-                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1">Instrumento</label>
-                                                <div className="grid grid-cols-2 gap-2.5">
-                                                    {tradingPairs.map(pair => (
-                                                        <button
-                                                            key={pair}
-                                                            type="button"
-                                                            onClick={() => setTradeSymbol(pair)}
-                                                            className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden ${tradeSymbol === pair
-                                                                ? 'bg-blue-600/10 border-blue-500 text-white shadow-xl shadow-blue-600/10'
-                                                                : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40 hover:text-slate-300'
-                                                                }`}
-                                                        >
-                                                            {pair.replace('/USDT', '')}
-                                                            {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-blue-500 rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-white" /></div>}
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1">Instrumento</label>
+                                            <div className="grid grid-cols-2 gap-2.5">
+                                                {tradingPairs.map(pair => (
+                                                    <button
+                                                        key={pair}
+                                                        type="button"
+                                                        onClick={() => setTradeSymbol(pair)}
+                                                        className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 ${tradeSymbol === pair
+                                                            ? 'bg-blue-600/10 border-blue-500 text-white shadow-xl shadow-blue-600/10'
+                                                            : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40 hover:text-slate-300'
+                                                            }`}
+                                                    >
+                                                        <img
+                                                            src={getCryptoIcon(pair)}
+                                                            alt={pair}
+                                                            className="w-5 h-5 rounded-full object-contain"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/generic.png';
+                                                            }}
+                                                        />
+                                                        {pair.replace('/USDT', '')}
+                                                        {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-blue-500 rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-white" /></div>}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div className="space-y-6">
-                                            {/* Quantity & Price */}
-                                            {tradeType === 'limit' && (
-                                                <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1 text-right">Precio Limit (USDT)</label>
-                                                    <div className="relative group">
-                                                        <input
-                                                            type="number"
-                                                            step="0.00000001"
-                                                            value={tradePrice}
-                                                            onChange={e => setTradePrice(e.target.value)}
-                                                            className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
-                                                            placeholder="0.0000"
-                                                        />
-                                                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">PRICE</div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div>
-                                                <div className="flex justify-between items-end mb-4 px-1">
-                                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block">Cantidad a Operar</label>
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                                        Disp: <span className="text-blue-500">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span>
-                                                    </span>
-                                                </div>
-                                                <div className="relative group mb-4">
+                                    <div className="space-y-6">
+                                        {/* Quantity & Price */}
+                                        {tradeType === 'limit' && (
+                                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1 text-right">Precio Limit (USDT)</label>
+                                                <div className="relative group">
                                                     <input
                                                         type="number"
                                                         step="0.00000001"
-                                                        value={tradeAmount}
-                                                        onChange={e => setTradeAmount(e.target.value)}
+                                                        value={tradePrice}
+                                                        onChange={e => setTradePrice(e.target.value)}
                                                         className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
-                                                        placeholder="0.00"
+                                                        placeholder="0.0000"
                                                     />
-                                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
-                                                    <div className="absolute right-6 -bottom-2 px-3 py-1 bg-slate-900 border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
-                                                </div>
-
-                                                <div className="grid grid-cols-4 gap-2">
-                                                    {[25, 50, 75, 100].map(p => (
-                                                        <button
-                                                            key={p}
-                                                            type="button"
-                                                            onClick={() => handlePercentageClick(p)}
-                                                            className="py-2.5 bg-slate-950/40 hover:bg-slate-900/60 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
-                                                        >
-                                                            {p}%
-                                                        </button>
-                                                    ))}
+                                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">PRICE</div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Enhanced Order Metrics */}
-                                    <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
-                                        <div className="flex-1 space-y-4">
-                                            <div className="flex justify-between items-center px-1">
-                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
-                                                <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center px-1">
-                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
-                                                <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
-                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={isTrading}
-                                        className={`w-full py-7 rounded-3xl font-black text-lg uppercase tracking-[0.25em] transition-all duration-500 shadow-2xl transform active:scale-[0.97] relative overflow-hidden group ${tradeSide === 'buy'
-                                            ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white shadow-emerald-500/20'
-                                            : 'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white shadow-rose-500/20'
-                                            }`}
-                                    >
-                                        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                                        {isTrading ? (
-                                            <span className="flex items-center justify-center gap-4 italic">
-                                                <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                                PROCESANDO...
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center justify-center gap-4 italic tracking-widest">
-                                                {tradeSide === 'buy' ? <FaArrowUp className="animate-bounce" /> : <FaArrowDown className="animate-bounce" />}
-                                                EJECUTAR ORDEN {tradeSide === 'buy' ? 'LONG' : 'SHORT'}
-                                            </span>
                                         )}
-                                    </button>
-                                </form>
+
+                                        <div>
+                                            <div className="flex justify-between items-end mb-4 px-1">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block">Cantidad a Operar</label>
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                                    Disp: <span className="text-blue-500">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span>
+                                                </span>
+                                            </div>
+                                            <div className="relative group mb-4">
+                                                <input
+                                                    type="number"
+                                                    step="0.00000001"
+                                                    value={tradeAmount}
+                                                    onChange={e => setTradeAmount(e.target.value)}
+                                                    className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
+                                                    placeholder="0.00"
+                                                />
+                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
+                                                <div className="absolute right-6 -bottom-2 px-3 py-1 bg-slate-900 border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
+                                            </div>
+
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {[25, 50, 75, 100].map(p => (
+                                                    <button
+                                                        key={p}
+                                                        type="button"
+                                                        onClick={() => handlePercentageClick(p)}
+                                                        className="py-2.5 bg-slate-950/40 hover:bg-slate-900/60 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
+                                                    >
+                                                        {p}%
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                             </div>
-                        </div>
-                    </div>
+
+                            {/* Enhanced Order Metrics */}
+                            <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
+                                <div className="flex-1 space-y-4">
+                                    <div className="flex justify-between items-center px-1">
+                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
+                                        <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center px-1">
+                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
+                                        <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
+                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </button>
+                    </form>
+                            </div>
+                        </div >
+                    </div >
                 )
             )}
 
-            {/* Orders & History Viewers (Modern Lists) */}
-            {(activeTab === 'orders' || activeTab === 'history') && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                            <div>
-                                <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
-                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
-                                <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
-                            </div>
-                        </div>
+{/* Orders & History Viewers (Modern Lists) */ }
+{
+    (activeTab === 'orders' || activeTab === 'history') && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                    <div>
+                        <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
+                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
+                        <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
+                    </div>
+                </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-separate border-spacing-y-3">
-                                <thead>
-                                    <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-                                        <th className="px-6 py-2">Fecha</th>
-                                        <th className="px-6 py-2">Par</th>
-                                        <th className="px-6 py-2">Side</th>
-                                        <th className="px-6 py-2">Precio</th>
-                                        <th className="px-6 py-2">Cantidad</th>
-                                        <th className="px-6 py-2">Total</th>
-                                        <th className="px-6 py-2">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="group">
-                                        <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
-                                            <div className="flex flex-col items-center gap-4">
-                                                <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
-                                                    <FaRegClock className="animate-pulse" />
-                                                </div>
-                                                <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-separate border-spacing-y-3">
+                        <thead>
+                            <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
+                                <th className="px-6 py-2">Fecha</th>
+                                <th className="px-6 py-2">Par</th>
+                                <th className="px-6 py-2">Side</th>
+                                <th className="px-6 py-2">Precio</th>
+                                <th className="px-6 py-2">Cantidad</th>
+                                <th className="px-6 py-2">Total</th>
+                                <th className="px-6 py-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr className="group">
+                                <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
+                                            <FaRegClock className="animate-pulse" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            )}
-            {errorMsg && (
-                <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
-                    <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
-                        <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
-                            <FaExclamationTriangle />
-                        </div>
-                        <div className="flex-1">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
-                            <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
-                        </div>
-                        <button
-                            onClick={() => setErrorMsg('')}
-                            className="text-slate-600 hover:text-white transition-colors p-2"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                </div>
-            )}
+            </div>
         </div>
+    )
+}
+{
+    errorMsg && (
+        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
+            <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
+                <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
+                    <FaExclamationTriangle />
+                </div>
+                <div className="flex-1">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
+                    <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
+                </div>
+                <button
+                    onClick={() => setErrorMsg('')}
+                    className="text-slate-600 hover:text-white transition-colors p-2"
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+    )
+}
+        </div >
     );
 };
 

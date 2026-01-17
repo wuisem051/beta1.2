@@ -154,7 +154,20 @@ const TradingPortfolioContent = ({ userBalances }) => {
                                 {operations.map((op) => (
                                     <tr key={op.id}>
                                         <td className={styles.tableCell}>{op.date}</td>
-                                        <td className={styles.tableCell} style={{ fontWeight: 'bold' }}>{op.pair}</td>
+                                        <td className={styles.tableCell} style={{ fontWeight: 'bold' }}>
+                                            <div className="flex items-center gap-2">
+                                                <img
+                                                    src={getCryptoIcon(op.pair)}
+                                                    alt={op.pair}
+                                                    className="w-5 h-5 rounded-full object-contain"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/generic.png';
+                                                    }}
+                                                />
+                                                {op.pair}
+                                            </div>
+                                        </td>
                                         <td className={styles.tableCell}>{op.type}</td>
                                         <td className={styles.tableCell}>
                                             <span className={`${styles.statusBadge} ${op.result === 'Exitosa' ? styles.statusCompleted : styles.statusError}`}>
