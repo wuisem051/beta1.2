@@ -28,6 +28,7 @@ import useFormValidation from '../../hooks/useFormValidation'; // Importar useFo
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
+import { FaHistory } from 'react-icons/fa';
 import TradingViewWidget from '../components/TradingViewWidget';
 import UpdatesContent from '../components/UpdatesContent';
 
