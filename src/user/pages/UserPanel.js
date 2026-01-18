@@ -368,7 +368,7 @@ const CopyTraderContent = ({ styles, userBalances }) => {
             <div className={styles.noDataText}>No hay señales activas en este momento. Esté atento a las notificaciones.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {signals.filter(s => s.status !== 'Exitosa').map(signal => (
+              {signals.filter(s => ['Activa', 'En espera'].includes(s.status)).map(signal => (
                 <div key={signal.id} className={styles.signalCard} style={{ borderColor: signal.type === 'Compra' ? 'var(--green-check)' : 'var(--red-error)' }}>
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -520,10 +520,20 @@ const PlanTradingContent = ({ styles }) => {
 const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const getCryptoIcon = (symbol) => {
+    // Custom icons mapping
+    const customIcons = {
+      'ARPA': 'https://s2.coinmarketcap.com/static/img/coins/64x64/4636.png'
+    };
+
     // Handling symbols like BTCUSDT or BTC/USDT
     const coin = symbol.includes('/') ? symbol.split('/')[0] : symbol.replace('USDT', '');
+
+    // Check specific map first
+    if (customIcons[coin]) return customIcons[coin];
+
     return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin.toLowerCase()}.png`;
   };
 
@@ -899,7 +909,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
                 </button>
               </div>
               <div className={styles.tradingViewContainer} style={{ height: `${currentH}px` }}>
-                <TradingViewWidget symbol={layout.symbol} theme={darkMode ? "dark" : "light"} interval={layout.symbol.includes('.D') ? "60" : "15"} />
+                <TradingViewWidget symbol={layout.symbol} theme={darkMode ? "dark" : "light"} interval={layout.symbol.includes('.D') ? "60" : (layout.interval || "60")} />
               </div>
 
               {/* Corner 2D Resize Handle */}
@@ -2533,12 +2543,14 @@ const UserPanel = () => {
   const [chartHeight, setChartHeight] = useState(450);
   const [chartLayouts, setChartLayouts] = useState([
     { symbol: 'BTCUSDT', height: 450, span: 1 },
+    { symbol: 'ETHUSDT', height: 450, span: 1 },
+    { symbol: 'LTCUSDT', height: 450, span: 1 },
     { symbol: 'ARPAUSDT', height: 450, span: 1 },
     { symbol: 'BTC.D', height: 450, span: 1 }
   ]);
   const [chartColumns, setChartColumns] = useState(0); // 0 means auto
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
-  const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1400); // Default 1400px
+  const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1250); // Default 1250px (approx 1198px+)
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
   const [minPaymentThresholds, setMinPaymentThresholds] = useState({ // Nuevo estado para los umbrales mínimos de retiro por moneda
