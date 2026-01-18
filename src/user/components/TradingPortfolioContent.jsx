@@ -53,6 +53,22 @@ const TradingPortfolioContent = ({ userBalances }) => {
     }, [currentUser]);
 
 
+    const getCryptoIcon = (symbol) => {
+        // Custom icons mapping
+        const customIcons = {
+            'ARPA': 'https://s2.coinmarketcap.com/static/img/coins/64x64/4636.png'
+        };
+
+        // Handling symbols like BTCUSDT or BTC/USDT
+        const coin = symbol.includes('/') ? symbol.split('/')[0] : symbol.replace('USDT', '');
+
+        // Check specific map first
+        if (customIcons[coin]) return customIcons[coin];
+
+        return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin.toLowerCase()}.png`;
+    };
+
+
     const stats = useMemo(() => {
         const total = operations.length;
         const successful = operations.filter(op => op.result === 'Exitosa').length;
