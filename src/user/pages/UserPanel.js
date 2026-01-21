@@ -12,9 +12,8 @@ import { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCrede
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import CollectiveFundContent from '../components/CollectiveFundContent'; // Importar CollectiveFundContent
 import BonusContent from '../components/BonusContent'; // Importar BonusContent
-import WalletDisplay from '../components/WalletDisplay'; // Importar WalletDisplay
+import WalletHub from '../components/WalletHub'; // Importar WalletHub unificado
 import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
-import DepositContent from '../components/DepositContent'; // Importar DepositContent
 import ExchangeContent from '../components/ExchangeContent'; // Importar ExchangeContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
 import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
@@ -517,7 +516,7 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange }) => {
+const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange, isSidebarHidden = false }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -817,7 +816,16 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
   }, [paymentsHistory, withdrawalsHistory]);
 
   return (
-    <div className={styles.dashboardContent} style={{ maxWidth: `${dashboardMaxWidth}px`, margin: '0 auto', position: 'relative' }}>
+    <div
+      className={styles.dashboardContent}
+      style={{
+        maxWidth: isSidebarHidden ? '98%' : `${dashboardMaxWidth}px`,
+        padding: isSidebarHidden ? '1rem 0.5rem' : '1.5rem',
+        margin: '0 auto',
+        position: 'relative',
+        transition: 'all 0.3s ease'
+      }}
+    >
       {/* Dashboard Width Resizer - Interactive Handle at the Top Right */}
       <div
         onMouseDown={handleWidthMouseDown}
@@ -1121,461 +1129,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
 };
 
 
-const PaymentsContent = ({ currentUser, styles }) => {
-  const { darkMode } = useContext(ThemeContext);
-  const { showError } = useError();
-  const [paymentsHistory, setPaymentsHistory] = useState([]);
-
-  useEffect(() => {
-    if (!currentUser || !currentUser.uid) {
-      setPaymentsHistory([]);
-      return;
-    }
-
-    const q = query(
-      collection(db, 'payments'),
-      where('userId', '==', currentUser.uid),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      try {
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt.toDate(),
-        }));
-        setPaymentsHistory(data);
-      } catch (fetchError) {
-        console.error("Error fetching payments history from Firebase:", fetchError);
-        showError('Error al cargar el historial de pagos.');
-      }
-    }, (err) => {
-      console.error("Error subscribing to payments:", err);
-      showError('Error al suscribirse al historial de pagos.');
-    });
-
-    return () => unsubscribe();
-  }, [currentUser, showError]);
-
-  return (
-    <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Historial de Pagos</h1>
-
-      <div className={styles.sectionCard}>
-        <h2 className={styles.sectionTitle}>Pagos Recibidos</h2>
-        {paymentsHistory.length === 0 ? (
-          <p className={styles.noDataText}>No hay pagos registrados.</p>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th className={styles.tableHeader}>Fecha</th>
-                  <th className={styles.tableHeader}>Cantidad</th>
-                  <th className={styles.tableHeader}>Moneda</th>
-                  <th className={styles.tableHeader}>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentsHistory.map((payment) => (
-                  <tr key={payment.id}>
-                    <td className={styles.tableCell}>
-                      {payment.createdAt.toLocaleDateString()}
-                    </td>
-                    <td className={styles.tableCell} style={{ fontWeight: '700' }}>
-                      {payment.amount.toFixed(8)} {payment.currency}
-                    </td>
-                    <td className={styles.tableCell}>
-                      {payment.currency}
-                    </td>
-                    <td className={styles.tableCell}>
-                      <span className={`${styles.statusBadge} ${payment.status === 'Pendiente' ? styles.statusPending :
-                        payment.status === 'Completado' ? styles.statusCompleted :
-                          styles.statusError
-                        }`}>
-                        {payment.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const WithdrawalsContent = ({ minPaymentThresholds, userPaymentAddresses, styles }) => {
-  const { darkMode } = useContext(ThemeContext);
-  const { showError, showSuccess } = useError();
-  const { currentUser } = useAuth();
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('BTC');
-  const [walletAddress, setWalletAddress] = useState('');
-  const [binanceId, setBinanceId] = useState('');
-  const [useBinancePay, setUseBinancePay] = useState(false);
-  const [availableBalance, setAvailableBalance] = useState(0);
-  const [userBalances, setUserBalances] = useState({
-    balanceUSD: 0,
-    balanceBTC: 0,
-    balanceLTC: 0,
-    balanceDOGE: 0,
-    balanceVES: 0,
-    balanceUSDTTRC20: 0,
-    balanceTRX: 0,
-  });
-  const [withdrawalsHistory, setWithdrawalsHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState('');
-
-  const withdrawOptions = [
-    { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', network: 'Bitcoin' },
-    { value: 'USDTTRC20', label: 'USDT (TRC20)', icon: '💵', network: 'Tron (TRC20)' },
-    { value: 'TRX', label: 'Tron (TRX)', icon: '🔴', network: 'Tron' },
-    { value: 'LTC', label: 'Litecoin (LTC)', icon: '⚡', network: 'Litecoin' },
-    { value: 'DOGE', label: 'Dogecoin (DOGE)', icon: '🐕', network: 'Dogecoin' },
-    { value: 'USD', label: 'Dólares (USD)', icon: '🇺🇸', network: 'Binance Pay' },
-    { value: 'VES', label: 'Bolívares (VES)', icon: '🇻🇪', network: 'Pago Móvil' }
-  ];
-
-  useEffect(() => {
-    const balanceKey = `balance${currency}`;
-    setAvailableBalance(userBalances[balanceKey] || 0);
-
-    const savedAddressForCurrency = userPaymentAddresses[currency];
-
-    if (selectedAddress === 'new') {
-      setWalletAddress('');
-      setBinanceId('');
-      setUseBinancePay(currency === 'USD');
-    } else if (savedAddressForCurrency && selectedAddress === savedAddressForCurrency) {
-      if (currency === 'USD') {
-        setBinanceId(savedAddressForCurrency);
-        setWalletAddress('');
-        setUseBinancePay(true);
-      } else {
-        setWalletAddress(savedAddressForCurrency);
-        setBinanceId('');
-        setUseBinancePay(false);
-      }
-    } else {
-      setSelectedAddress('new');
-      setWalletAddress('');
-      setBinanceId('');
-      setUseBinancePay(currency === 'USD');
-    }
-  }, [userBalances, currency, userPaymentAddresses, selectedAddress]);
-
-  useEffect(() => {
-    const fetchWithdrawalData = async () => {
-      if (!currentUser || !currentUser.uid) {
-        setWithdrawalsHistory([]);
-        setUserBalances({
-          balanceUSD: 0,
-          balanceBTC: 0,
-          balanceLTC: 0,
-          balanceDOGE: 0,
-          balanceVES: 0,
-        });
-        return;
-      }
-
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      const unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          setUserBalances({
-            balanceUSD: userData.balanceUSD || 0,
-            balanceBTC: userData.balanceBTC || 0,
-            balanceLTC: userData.balanceLTC || 0,
-            balanceDOGE: userData.balanceDOGE || 0,
-            balanceVES: userData.balanceVES || 0,
-            balanceUSDTTRC20: userData.balanceUSDTTRC20 || 0,
-            balanceTRX: userData.balanceTRX || 0,
-          });
-        }
-      });
-
-      const q = query(
-        collection(db, 'withdrawals'),
-        where('userId', '==', currentUser.uid),
-        orderBy('createdAt', 'desc')
-      );
-      const unsubscribeWithdrawals = onSnapshot(q, (snapshot) => {
-        const fetchedWithdrawals = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt.toDate(),
-        }));
-        setWithdrawalsHistory(fetchedWithdrawals);
-      });
-
-      return () => {
-        unsubscribeUser();
-        unsubscribeWithdrawals();
-      };
-    };
-
-    fetchWithdrawalData();
-  }, [currentUser, showError]);
-
-  const handleSubmitWithdrawal = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (!currentUser || !currentUser.uid || !currentUser.email) {
-      showError('Debes iniciar sesión para solicitar un retiro.');
-      setIsLoading(false);
-      return;
-    }
-
-    const withdrawalAmount = parseFloat(amount);
-    if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
-      showError('Por favor, introduce una cantidad válida.');
-      setIsLoading(false);
-      return;
-    }
-    const currentMinThreshold = minPaymentThresholds[currency] || 0;
-    if (withdrawalAmount < currentMinThreshold) {
-      showError(`La cantidad mínima de retiro es ${currentMinThreshold.toFixed(currency === 'USD' ? 2 : 8)} ${currency}.`);
-      setIsLoading(false);
-      return;
-    }
-    const currentBalanceForCurrency = userBalances[`balance${currency}`] || 0;
-    if (withdrawalAmount > currentBalanceForCurrency) {
-      showError(`Fondos insuficientes para realizar el retiro en ${currency}.`);
-      setIsLoading(false);
-      return;
-    }
-
-    let method = '';
-    let addressOrId = '';
-
-    if (selectedAddress && selectedAddress !== 'new') {
-      addressOrId = selectedAddress;
-      method = (currency === 'USD' && useBinancePay) ? 'Binance Pay' : 'Wallet';
-    } else {
-      if (useBinancePay) {
-        if (!binanceId.trim()) {
-          showError('Por favor, introduce tu Email o ID de Binance.');
-          setIsLoading(false);
-          return;
-        }
-        method = 'Binance Pay';
-        addressOrId = binanceId.trim();
-      } else {
-        if (!walletAddress.trim()) {
-          showError('Por favor, introduce tu Dirección de Wallet.');
-          setIsLoading(false);
-          return;
-        }
-        method = 'Wallet';
-        addressOrId = walletAddress.trim();
-      }
-    }
-
-    try {
-      await addDoc(collection(db, 'withdrawals'), {
-        userId: currentUser.uid,
-        userEmail: currentUser.email,
-        amount: withdrawalAmount,
-        currency: currency,
-        method: method,
-        addressOrId: addressOrId,
-        status: 'Pendiente',
-        createdAt: new Date(),
-      });
-
-      const balanceKey = `balance${currency}`;
-      const newBalance = currentBalanceForCurrency - withdrawalAmount;
-
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, { [balanceKey]: newBalance });
-
-      showSuccess('Solicitud de retiro enviada exitosamente.');
-      setAmount('');
-    } catch (err) {
-      showError(`Fallo al enviar el retiro: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Retiros de Fondos</h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Formulario de Retiro */}
-        <div className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle}>Solicitar Retiro</h2>
-
-          <form onSubmit={handleSubmitWithdrawal} className="space-y-6">
-            {/* Paso 1: Selección de Moneda */}
-            <div className="mb-6">
-              <label className={styles.formLabel}>Paso 1: Selecciona la Moneda</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {withdrawOptions.map(option => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setCurrency(option.value)}
-                    className={`${styles.coinSelector} ${currency === option.value ? styles.coinSelectorActive : ''}`}
-                  >
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xl">{option.icon}</span>
-                      <p className="font-bold text-white text-[10px] leading-tight">{option.label}</p>
-                      <p className="text-[9px] text-slate-400">{option.network}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-blue-600/5 p-5 rounded-2xl border border-blue-500/20">
-              <p className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2">
-                <span>Paso 2: Detalles del Retiro</span>
-                <span className="text-xs bg-blue-500/20 px-2 py-0.5 rounded-full">{currency}</span>
-              </p>
-
-              <div className="space-y-4">
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Cantidad a Retirar</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      step="any"
-                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !text-xl font-bold`}
-                      placeholder="0.00"
-                      required
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
-                      {currency}
-                    </div>
-                  </div>
-                  <div className="flex justify-between mt-2 px-1">
-                    <span className="text-[10px] text-slate-400">Disponible:</span>
-                    <span className="text-[10px] font-bold text-green-400">
-                      {availableBalance.toFixed((currency === 'USD' || currency === 'USDTTRC20') ? 2 : 8)} {currency}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>Destino de los Fondos</label>
-                  <select
-                    value={selectedAddress}
-                    onChange={(e) => setSelectedAddress(e.target.value)}
-                    className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                  >
-                    {userPaymentAddresses[currency] && (
-                      <option value={userPaymentAddresses[currency]}>
-                        {userPaymentAddresses[currency]} (Guardada)
-                      </option>
-                    )}
-                    <option value="new">Ingresar nuevos datos</option>
-                  </select>
-                </div>
-
-                {selectedAddress === 'new' && (
-                  <div className="space-y-4 mt-2 p-4 bg-black/20 rounded-xl border border-white/5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="checkbox"
-                        checked={useBinancePay}
-                        onChange={(e) => setUseBinancePay(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-600"
-                        id="binance-pay-check"
-                      />
-                      <label htmlFor="binance-pay-check" className="text-sm text-slate-300 cursor-pointer">Usar Binance Pay / ID</label>
-                    </div>
-
-                    {!useBinancePay ? (
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Dirección de Wallet</label>
-                        <input
-                          type="text"
-                          value={walletAddress}
-                          onChange={(e) => setWalletAddress(e.target.value)}
-                          className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} font-mono text-sm`}
-                          placeholder="bc1q... / TL..."
-                        />
-                      </div>
-                    ) : (
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Email o ID de Binance</label>
-                        <input
-                          type="text"
-                          value={binanceId}
-                          onChange={(e) => setBinanceId(e.target.value)}
-                          className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} text-sm`}
-                          placeholder="ejemplo@binance.com / 123456"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className={`${styles.submitButton} !py-4 !text-lg shadow-lg shadow-blue-500/20 transition-transform active:scale-95`}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Procesando...' : '📤 Confirmar Solicitud de Retiro'}
-            </button>
-          </form>
-        </div>
-
-        {/* Historial de Retiros */}
-        <div className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle}>Historial de Retiros</h2>
-          {withdrawalsHistory.length === 0 ? (
-            <p className={styles.noDataText}>No has realizado solicitudes de retiro aún.</p>
-          ) : (
-            <div className="space-y-3">
-              {withdrawalsHistory.map((w) => (
-                <div key={w.id} className="p-4 bg-slate-800/50 rounded-xl border border-slate-700 flex justify-between items-center">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-white text-sm">
-                        {w.amount.toFixed((w.currency === 'USD' || w.currency === 'USDTTRC20') ? 2 : 8)} {w.currency}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[10px] text-slate-500">{w.createdAt.toLocaleString()}</p>
-                      <p className="text-[9px] text-slate-400 font-mono truncate max-w-[150px]">{w.addressOrId}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`${styles.statusBadge} !text-[10px] px-2 py-1 rounded-lg border`}
-                      style={
-                        w.status === 'Pendiente'
-                          ? { background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }
-                          : w.status === 'Completado' || w.status === 'Aprobado'
-                            ? { background: 'rgba(16, 185, 129, 0.1)', color: 'var(--green-check)', borderColor: 'rgba(16, 185, 129, 0.2)' }
-                            : { background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red-error)', borderColor: 'rgba(239, 68, 68, 0.2)' }
-                      }
-                    >
-                      {w.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+// PaymentsContent and WithdrawalsContent were removed and unified into WalletHub.jsx
 
 const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -2944,6 +2498,9 @@ const UserPanel = () => {
     '/user/miners',      // Ruta para "Señales Trading"
     '/user/plan-trading', // Ruta para "Plan Trading"
     '/user/vip-chat',     // Ruta para "Chat VIP"
+    '/user/my-wallet',    // Nueva ruta para Billetera
+    '/user/deposits',     // Nueva ruta para Depósitos
+    '/user/withdrawals',  // Nueva ruta para Retiros
   ].some(path => location.pathname.startsWith(path));
 
   const handleUpdateChartHeight = async (newHeight) => {
@@ -3015,13 +2572,15 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
-          <Route path="withdrawals/*" element={<WithdrawalsContent minPaymentThresholds={minPaymentThresholds} userPaymentAddresses={userPaymentAddresses} styles={styles} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} /> {/* Nueva ruta para Portafolio de Trading */}
-          <Route path="my-wallet/*" element={<WalletDisplay currentUser={currentUser} />} /> {/* Nueva ruta para Mi Billetera */}
-          <Route path="deposits/*" element={<DepositContent />} /> {/* Nueva ruta para Depósitos */}
+          {/* Rutas Unificadas de Billetera */}
+          <Route path="my-wallet/*" element={<WalletHub />} />
+          <Route path="withdrawals/*" element={<WalletHub />} />
+          <Route path="deposits/*" element={<WalletHub />} />
+
           <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
           <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
           <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
@@ -3032,7 +2591,7 @@ const UserPanel = () => {
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
           <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
         </Routes>
       </MainContent>
     </div>

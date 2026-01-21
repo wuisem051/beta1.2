@@ -135,24 +135,10 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           </li>
 
           <li>
-            <div onClick={() => setShowWithdrawals(!showWithdrawals)} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${isMyWalletActive || isWithdrawalsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
+            <Link to={`/user/my-wallet`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMyWalletActive || isWithdrawalsActive || isDepositsActive ? 'bg-accent text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
-              Billetera
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`ml-auto transform transition-transform ${showWithdrawals ? 'rotate-90' : ''}`}><path d="m9 18 6-6-6-6" /></svg>
-            </div>
-            {showWithdrawals && (
-              <ul className="ml-9 space-y-1 mt-1 border-l border-white border-opacity-10 pl-2">
-                <li>
-                  <Link to={`/user/my-wallet`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isMyWalletActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Balance</Link>
-                </li>
-                <li>
-                  <Link to={`/user/withdrawals`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isWithdrawalsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Retiros</Link>
-                </li>
-                <li>
-                  <Link to={`/user/deposits`} className={`block py-2 px-3 rounded-lg text-[11px] font-bold ${isDepositsActive ? 'text-accent' : 'text-slate-500 hover:bg-accent hover:bg-opacity-10 hover:text-accent'}`}>Depósitos</Link>
-                </li>
-              </ul>
-            )}
+              Mi Billetera
+            </Link>
           </li>
 
           <li>

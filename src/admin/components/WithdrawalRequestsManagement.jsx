@@ -59,7 +59,7 @@ const WithdrawalRequestsManagement = ({ onUnreadCountChange }) => { // Aceptar p
         }
 
         const userData = userSnap.data();
-        const balanceKey = `balance${request.currency}`;
+        const balanceKey = `balance${request.currency.replace('-', '')}`;
         const currentBalance = userData[balanceKey] || 0;
         const newBalance = currentBalance - request.amount;
 
