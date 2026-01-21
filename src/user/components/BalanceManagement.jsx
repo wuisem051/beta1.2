@@ -64,9 +64,26 @@ const BalanceManagement = () => {
     const userDoc = users.find(u => u.id === userId);
     if (!userDoc) throw new Error(`Usuario con ID ${userId} no encontrado.`);
 
+    const userRef = doc(db, 'users', userId);
+
+    if (operation === 'reset' && currency === 'ALL') {
+      const resetData = {
+        balanceUSD: 0,
+        balanceUSDTTRC20: 0,
+        balanceUSDTFiat: 0,
+        balanceBTC: 0,
+        balanceLTC: 0,
+        balanceDOGE: 0,
+        balanceTRX: 0,
+        balanceVES: 0
+      };
+      await updateDoc(userRef, resetData);
+      return 0;
+    }
+
     let currencyField = `balance${currency}`;
-    // Correction for specific field names based on previous patterns
     if (currency === 'USDT') currencyField = 'balanceUSDTTRC20';
+    if (currency === 'USDTFiat') currencyField = 'balanceUSDTFiat';
 
     const currentBalance = parseFloat(userDoc[currencyField] || 0);
     let newBalance = currentBalance;
@@ -80,7 +97,6 @@ const BalanceManagement = () => {
       newBalance = 0;
     }
 
-    const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, { [currencyField]: newBalance });
     return newBalance;
   };
@@ -113,6 +129,10 @@ const BalanceManagement = () => {
     const amount = parseFloat(massAmount);
     if (massOperation !== 'reset' && (isNaN(amount) || amount <= 0)) {
       return showError('Introduce una cantidad válida.');
+    }
+
+    if (massCurrency === 'ALL' && massOperation !== 'reset') {
+      return showError('La opción "Todas las Monedas" solo es válida para Resetear.');
     }
 
     try {
@@ -206,7 +226,8 @@ const BalanceManagement = () => {
                   className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-4 py-3 text-white font-bold focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-inner text-xs"
                 >
                   <option value="USD">USD (Dólar)</option>
-                  <option value="USDT">USDT (Tether)</option>
+                  <option value="USDT">USDT (TRC20)</option>
+                  <option value="USDTFiat">USDT (Fiat)</option>
                   <option value="BTC">BTC (Bitcoin)</option>
                   <option value="LTC">LTC (Litecoin)</option>
                   <option value="DOGE">DOGE (Dogecoin)</option>
@@ -272,12 +293,14 @@ const BalanceManagement = () => {
                   className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-4 py-3 text-white font-bold focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all shadow-inner text-xs"
                 >
                   <option value="USD">USD</option>
-                  <option value="USDT">USDT</option>
+                  <option value="USDT">USDT TRC20</option>
+                  <option value="USDTFiat">USDT Fiat</option>
                   <option value="BTC">BTC</option>
                   <option value="LTC">LTC</option>
                   <option value="DOGE">DOGE</option>
                   <option value="TRX">TRX</option>
                   <option value="VES">VES</option>
+                  <option value="ALL" disabled={massOperation !== 'reset'}>★ TODAS LAS MONEDAS ★</option>
                 </select>
               </div>
             </div>
@@ -288,10 +311,10 @@ const BalanceManagement = () => {
                 type="number"
                 value={massAmount}
                 onChange={(e) => setMassAmount(e.target.value)}
-                disabled={massOperation === 'reset'}
+                disabled={massOperation === 'reset' || massCurrency === 'ALL'}
                 step="any"
-                placeholder={massOperation === 'reset' ? "No aplica" : "0.00"}
-                className={`w-full bg-slate-950/50 border border-white/10 rounded-2xl px-4 py-3 text-white font-bold focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all placeholder:text-slate-700 shadow-inner text-xs ${massOperation === 'reset' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                placeholder={massOperation === 'reset' || massCurrency === 'ALL' ? "No aplica" : "0.00"}
+                className={`w-full bg-slate-950/50 border border-white/10 rounded-2xl px-4 py-3 text-white font-bold focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all placeholder:text-slate-700 shadow-inner text-xs ${massOperation === 'reset' || massCurrency === 'ALL' ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
             </div>
 
@@ -321,8 +344,8 @@ const BalanceManagement = () => {
                   />
                 </th>
                 <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Usuario</th>
-                <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Saldo USD</th>
-                <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Saldo USDT</th>
+                <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Saldos USD/USDT</th>
+                <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Fiat (VES)</th>
                 <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Cripto (Ref)</th>
               </tr>
             </thead>
@@ -342,19 +365,29 @@ const BalanceManagement = () => {
                     <div className="text-[9px] text-slate-600 font-mono mt-1">{user.id}</div>
                   </td>
                   <td className="px-6 py-6">
-                    <span className="text-blue-400 font-black text-xs bg-blue-500/5 px-2 py-1 rounded border border-blue-500/10">
-                      ${(user.balanceUSD || 0).toLocaleString()}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-blue-400 font-black text-[10px] bg-blue-500/5 px-2 py-1 rounded border border-blue-500/10 w-fit">
+                        USD: ${(user.balanceUSD || 0).toLocaleString()}
+                      </span>
+                      <span className="text-green-400 font-black text-[10px] bg-green-500/5 px-2 py-1 rounded border border-green-500/10 w-fit">
+                        TRC20: ${(user.balanceUSDTTRC20 || 0).toLocaleString()}
+                      </span>
+                      <span className="text-emerald-400 font-black text-[10px] bg-emerald-500/5 px-2 py-1 rounded border border-emerald-500/10 w-fit">
+                        Fiat: ${(user.balanceUSDTFiat || 0).toLocaleString()}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-6">
-                    <span className="text-green-400 font-black text-xs bg-green-500/5 px-2 py-1 rounded border border-green-500/10">
-                      ${(user.balanceUSDTTRC20 || 0).toLocaleString()}
+                    <span className="text-yellow-500 font-black text-xs bg-yellow-500/5 px-2 py-1 rounded border border-yellow-500/10">
+                      Bs. {(user.balanceVES || 0).toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-6 text-xs text-slate-400 font-medium">
-                    <div className="flex flex-col gap-1">
-                      <span>₿ {(user.balanceBTC || 0).toFixed(6)}</span>
-                      <span>⚡ {(user.balanceTRX || 0).toLocaleString()}</span>
+                    <div className="flex flex-col gap-1 text-[10px]">
+                      <span>₿ {(user.balanceBTC || 0).toFixed(8)} BTC</span>
+                      <span>Ł {(user.balanceLTC || 0).toFixed(6)} LTC</span>
+                      <span>Ð {(user.balanceDOGE || 0).toFixed(2)} DOGE</span>
+                      <span>⚡ {(user.balanceTRX || 0).toLocaleString()} TRX</span>
                     </div>
                   </td>
                 </tr>

@@ -1461,7 +1461,7 @@ const ReferralsContent = ({ styles }) => {
   );
 };
 
-const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange, dashboardMaxWidth, onDashboardWidthChange }) => {
+const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange, dashboardMaxWidth, onDashboardWidthChange, userBalances }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const { currentUser } = useAuth();
@@ -1482,6 +1482,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
   });
   const [receivePaymentNotifications, setReceivePaymentNotifications] = useState(false);
   const [receiveLoginAlerts, setReceiveLoginAlerts] = useState(false);
+  const [receiveSignalsNotifications, setReceiveSignalsNotifications] = useState(false);
   const [twoFactorAuthEnabled, setTwoFactorAuthEnabled] = useState(false);
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -1489,6 +1490,29 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [profilePhotoFile, setProfilePhotoFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false); // Estado de carga
+
+  const isVIP = useMemo(() => {
+    if (!userBalances?.vipStatus || userBalances.vipStatus === 'none') return false;
+    if (!userBalances.vipExpiry) return false;
+    const now = new Date();
+    const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
+    return expiry > now;
+  }, [userBalances]);
+
+  const availableAvatars = [
+    { id: 'male-trader', url: '/avatars/male-trader.png', label: 'Trader Elite' },
+    { id: 'female-trader', url: '/avatars/female-trader.png', label: 'Trader Pro' },
+    { id: 'neon-robot', url: '/avatars/neon-robot.png', label: 'Cyber Bot' },
+    { id: 'crypto-coin', url: '/avatars/crypto-coin.png', label: 'HODL Master' },
+    { id: 'bull-market', url: '/avatars/bull-market.png', label: 'Bull Run' },
+    { id: 'bear-market', url: '/avatars/bear-market.png', label: 'Bear Power' },
+  ];
+
+  const handleSelectAvatar = (url) => {
+    setProfilePhotoUrl(url);
+    setProfilePhotoFile(null);
+    showSuccess('Avatar seleccionado. Recuerda guardar los cambios.');
+  };
 
   useEffect(() => {
     const fetchUserSettings = async () => {
@@ -1501,6 +1525,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
             setPaymentAddresses(userData.paymentAddresses || { BTC: '', DOGE: '', LTC: '', USD: '', VES: '' });
             setReceivePaymentNotifications(userData.receivePaymentNotifications || false);
             setReceiveLoginAlerts(userData.receiveLoginAlerts || false);
+            setReceiveSignalsNotifications(userData.receiveSignalsNotifications || false);
             setTwoFactorAuthEnabled(userData.twoFactorAuthEnabled || false);
             setUsername(userData.username || '');
             setDisplayName(userData.displayName || '');
@@ -1651,6 +1676,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
       await updateDoc(userDocRef, {
         receivePaymentNotifications: receivePaymentNotifications,
         receiveLoginAlerts: receiveLoginAlerts,
+        receiveSignalsNotifications: receiveSignalsNotifications,
       });
       showSuccess('Preferencias de notificación guardadas exitosamente.');
     } catch (err) {
@@ -1762,8 +1788,44 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
                     onChange={(e) => setProfilePhotoFile(e.target.files[0])}
                   />
                   <div className="mt-4 text-center">
-                    <p className="text-xs font-bold text-slate-300">Cambiar Foto</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Formatos permitidos: .png, .gif</p>
+                    <p className="text-xs font-bold text-slate-300">Subir Propio</p>
+                    <p className="text-[10px] text-slate-500 mt-1">Formatos: .png, .gif</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/40 p-6 rounded-3xl border border-white/5 mb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-lg bg-purple-600/10 text-purple-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
+                    </div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-white">Paquete de Avatares Premium</h3>
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                    {availableAvatars.map((avatar) => (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => handleSelectAvatar(avatar.url)}
+                        className={`group relative aspect-square rounded-2xl overflow-hidden border-2 transition-all duration-300 ${profilePhotoUrl === avatar.url
+                          ? 'border-blue-500 shadow-lg shadow-blue-600/20 scale-105'
+                          : 'border-white/5 hover:border-white/20 hover:scale-105'
+                          }`}
+                        title={avatar.label}
+                      >
+                        <img src={avatar.url} alt={avatar.label} className="w-full h-full object-cover" />
+                        {profilePhotoUrl === avatar.url && (
+                          <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
+                            <div className="bg-blue-600 rounded-full p-1 shadow-lg">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 bg-slate-900/80 backdrop-blur-sm py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <p className="text-[8px] font-black text-white uppercase text-center truncate px-1">{avatar.label}</p>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -2092,7 +2154,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
                 {[
                   { id: 'pay_notify', label: 'Notificaciones de Pagos', desc: 'Recibe un aviso por cada depósito o retiro procesado.', state: receivePaymentNotifications, setter: setReceivePaymentNotifications },
                   { id: 'login_notify', label: 'Alertas de Inicio de Sesión', desc: 'Te avisamos cuando alguien accede a tu cuenta.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
-                  { id: 'signals_notify', label: 'Nuevas Señales de Trading', desc: 'No te pierdas ninguna oportunidad de inversión.', state: false, locked: true },
+                  { id: 'signals_notify', label: 'Nuevas Señales de Trading', desc: 'No te pierdas ninguna oportunidad de inversión.', state: receiveSignalsNotifications, setter: setReceiveSignalsNotifications, locked: !isVIP },
                 ].map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-6 bg-slate-900/40 rounded-3xl border border-white/5 group hover:border-white/10 transition-all">
                     <div className="flex-1 pr-8">
@@ -2138,6 +2200,7 @@ const UserPanel = () => {
   const { currentUser, logout } = useAuth();
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const navigate = useNavigate();
+  const location = useLocation(); // Agregar useLocation para react-router
   const [userMiners, setUserMiners] = useState([]);
   const [unreadTicketsCount, setUnreadTicketsCount] = useState(0);
   const [userBalances, setUserBalances] = useState({
@@ -2494,14 +2557,27 @@ const UserPanel = () => {
     }
   };
 
-  const showNavbar = [
-    '/user/miners',      // Ruta para "Señales Trading"
-    '/user/plan-trading', // Ruta para "Plan Trading"
-    '/user/vip-chat',     // Ruta para "Chat VIP"
-    '/user/my-wallet',    // Nueva ruta para Billetera
-    '/user/deposits',     // Nueva ruta para Depósitos
-    '/user/withdrawals',  // Nueva ruta para Retiros
-  ].some(path => location.pathname.startsWith(path));
+  const showNavbar = useMemo(() => {
+    // Definimos explícitamente dónde SÍ debe aparecer el Navbar
+    const allowedPaths = ['/user/miners', '/user/vip-chat'];
+
+    // Y dónde definitivamente NO debe aparecer (por si acaso)
+    const blockedPaths = [
+      '/user/plan-trading',
+      '/user/my-wallet',
+      '/user/deposits',
+      '/user/withdrawals',
+      '/user/settings',
+      '/user/mining-portfolio',
+      '/user/dashboard'
+    ];
+
+    if (blockedPaths.some(path => location.pathname.startsWith(path))) return false;
+
+    return allowedPaths.some(path =>
+      location.pathname === path || location.pathname.startsWith(path + '/')
+    );
+  }, [location.pathname]);
 
   const handleUpdateChartHeight = async (newHeight) => {
     setChartHeight(newHeight);
@@ -2589,7 +2665,7 @@ const UserPanel = () => {
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
-          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} />} />
+          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
         </Routes>
