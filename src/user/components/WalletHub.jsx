@@ -6,7 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useError } from '../../context/ErrorContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import QRCode from 'qrcode';
-import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
+import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaTimesCircle, FaClock, FaChartLine } from 'react-icons/fa';
+import useCryptoPrice from '../../hooks/useCryptoPrice';
 
 
 const WalletHub = ({ initialTab: propTab }) => {
@@ -37,8 +38,44 @@ const WalletHub = ({ initialTab: propTab }) => {
     }, [location.pathname]);
 
     // Estados Compartidos
-    const [userBalances, setUserBalances] = useState(null);
+    const [userBalances, setUserBalances] = useState({
+        USD: 0,
+        'USDT-TRC20': 0,
+        USDTFiat: 0,
+        BTC: 0,
+        LTC: 0,
+        DOGE: 0,
+        TRX: 0,
+        VES: 0
+    });
     const [loading, setLoading] = useState(true);
+
+    // Fetch real-time prices
+    const { price: btcPrice } = useCryptoPrice('bitcoin');
+    const { price: ltcPrice } = useCryptoPrice('litecoin');
+    const { price: dogePrice } = useCryptoPrice('dogecoin');
+    const { price: trxPrice } = useCryptoPrice('tron');
+
+    // Estimaciones de fallback si la API falla
+    const rates = useMemo(() => ({
+        BTC: btcPrice || 43000,
+        LTC: ltcPrice || 70,
+        DOGE: dogePrice || 0.08,
+        TRX: trxPrice || 0.11,
+        VES: 0.027 // Aproximadamente 1/36
+    }), [btcPrice, ltcPrice, dogePrice, trxPrice]);
+
+    const totalEstimatedBalance = useMemo(() => {
+        if (!userBalances) return 0;
+        return (userBalances.USD || 0) +
+            (userBalances['USDT-TRC20'] || 0) +
+            (userBalances.USDTFiat || 0) +
+            ((userBalances.BTC || 0) * rates.BTC) +
+            ((userBalances.LTC || 0) * rates.LTC) +
+            ((userBalances.DOGE || 0) * rates.DOGE) +
+            ((userBalances.TRX || 0) * rates.TRX) +
+            ((userBalances.VES || 0) * rates.VES);
+    }, [userBalances, rates]);
 
     // Estados de Depósito
     const [depositAddresses, setDepositAddresses] = useState({});
@@ -267,10 +304,18 @@ const WalletHub = ({ initialTab: propTab }) => {
                                 <FaWallet size={120} />
                             </div>
                             <p className="text-blue-100 text-sm font-bold uppercase tracking-widest mb-2">Balance Total Estimado</p>
-                            <h2 className="text-5xl font-black text-white mb-6">
-                                ${(userBalances?.BTC * 43000 + userBalances?.['USDT-TRC20'] + userBalances?.LTC * 70).toFixed(2)}
-                                <span className="text-xl ml-2 text-blue-200">USD</span>
-                            </h2>
+                            <div className="flex items-baseline gap-4">
+                                <h2 className="text-5xl font-black text-white mb-6">
+                                    ${totalEstimatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    <span className="text-xl ml-2 text-blue-200">USD</span>
+                                </h2>
+                                {(btcPrice || ltcPrice) && (
+                                    <div className="mb-6 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                        <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">En Vivo</span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex gap-3">
                                 <button onClick={() => setActiveTab('deposit')} className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
                                     <FaArrowDown /> Depositar
@@ -341,7 +386,9 @@ const WalletHub = ({ initialTab: propTab }) => {
                                                     <p className="text-white font-mono font-bold">{balance.toFixed(coin.type === 'fiat' ? 2 : 8)}</p>
                                                 </td>
                                                 <td className="px-6 py-5">
-                                                    <p className="text-slate-400 font-mono text-xs">$ {(balance * (coin.value === 'BTC' ? 43000 : coin.value === 'LTC' ? 70 : 1)).toFixed(2)}</p>
+                                                    <p className="text-slate-400 font-mono text-xs">
+                                                        $ {(balance * (rates[coin.value.split('-')[0]] || rates[coin.value] || 1)).toFixed(2)}
+                                                    </p>
                                                 </td>
                                                 <td className="px-6 py-5 text-right">
                                                     <div className="flex justify-end gap-2">
