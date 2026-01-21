@@ -7,7 +7,7 @@ import { useError } from '../../context/ErrorContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import QRCode from 'qrcode';
 import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
-import styles from './WalletDisplay.module.css'; // Empezaremos usando los estilos existentes y expandiéndolos
+
 
 const WalletHub = ({ initialTab: propTab }) => {
     const { currentUser } = useAuth();
