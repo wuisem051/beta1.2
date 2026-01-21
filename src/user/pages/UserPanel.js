@@ -556,16 +556,68 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
     fetchSymbols();
   }, []);
 
+  const [bingxSymbols, setBingxSymbols] = useState([]);
+
+  // Lista de Acciones y Commodities Populares
+  const stockSymbols = [
+    'NASDAQ:AAPL', 'NASDAQ:TSLA', 'NASDAQ:NVDA', 'NASDAQ:MSFT', 'NASDAQ:GOOGL',
+    'NASDAQ:AMZN', 'NASDAQ:META', 'NASDAQ:NFLX', 'NASDAQ:AMD', 'NASDAQ:INTC',
+    'NASDAQ:COIN', 'NASDAQ:MSTR', 'NYSE:GME', 'NYSE:AMC', 'NYSE:BABA',
+    'NYSE:PLTR', 'NYSE:UBER', 'NYSE:DIS', 'NYSE:JPM', 'NYSE:V',
+    'FOREXCOM:SPX500', 'FOREXCOM:NSXUSD', 'FOREXCOM:DJI', 'FOREXCOM:UK100',
+    'FOREXCOM:XAUUSD', 'FOREXCOM:XAGUSD'
+  ];
+
+  useEffect(() => {
+    const fetchBingXSymbols = async () => {
+      try {
+        // Intentar obtener símbolos de BingX (Spot)
+        // Nota: Si hay problemas de CORS, esto podría fallar en localhost, 
+        // pero funcionará si la API permite acceso público o en producción con proxy.
+        // Usamos un endpoint público común.
+        const response = await fetch('https://open-api.bingx.com/openApi/spot/v1/symbols');
+        const data = await response.json();
+        if (data.code === 0 && data.data && data.data.symbols) {
+          // data.data.symbols es un array de objetos con propiedad 'symbol' (ej: BTC-USDT)
+          const symbols = data.data.symbols.map(s => s.symbol);
+          setBingxSymbols(symbols);
+        }
+      } catch (err) {
+        console.warn("No se pudieron cargar símbolos de BingX (posible bloqueo CORS o API):", err);
+      }
+    };
+    fetchBingXSymbols();
+  }, []);
+
   useEffect(() => {
     if (searchQuery.length > 1) {
-      const filtered = binanceSymbols
-        .filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-        .slice(0, 10);
-      setFilteredSymbols(filtered);
+      const q = searchQuery.toLowerCase();
+
+      // Filter Binance (Top 5)
+      const binanceResults = binanceSymbols
+        .filter(s => s.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map(s => ({ symbol: s, display: s, source: 'BINANCE', type: 'crypto' }));
+
+      // Filter BingX (Top 5)
+      const bingxResults = bingxSymbols
+        .filter(s => s.toLowerCase().includes(q))
+        .slice(0, 5)
+        // TradingView widget necesita el prefijo BINGX: para símbolos de BingX si hay ambigüedad
+        // pero BingX usa guion (BTC-USDT). TradingView suele reconocer BINGX:BTC-USDT
+        .map(s => ({ symbol: `BINGX:${s}`, display: s, source: 'BINGX', type: 'crypto' }));
+
+      // Filter Stocks (Top 5)
+      const stockResults = stockSymbols
+        .filter(s => s.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map(s => ({ symbol: s, display: s.split(':')[1], source: 'STOCK', type: 'stock' }));
+
+      setFilteredSymbols([...binanceResults, ...bingxResults, ...stockResults]);
     } else {
       setFilteredSymbols([]);
     }
-  }, [searchQuery, binanceSymbols]);
+  }, [searchQuery, binanceSymbols, bingxSymbols]);
 
   const [isResizing, setIsResizing] = useState(null); // { index, startY, startX, startHeight, startSpan }
   const [tempLayout, setTempLayout] = useState(null);
@@ -836,19 +888,24 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
               className="w-full bg-slate-900/40 border border-white/5 focus:border-blue-500/50 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder-slate-600 outline-none transition-all"
             />
             {isSearching && filteredSymbols.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden">
-                {filteredSymbols.map(sym => (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden max-h-[300px] overflow-y-auto custom-scrollbar">
+                {filteredSymbols.map((item, idx) => (
                   <button
-                    key={sym}
+                    key={`${item.source}-${item.symbol}-${idx}`}
                     onClick={() => {
-                      onAddSymbol(sym);
+                      onAddSymbol(item.symbol);
                       setSearchQuery('');
                       setIsSearching(false);
                     }}
-                    className="w-full px-6 py-3 text-left hover:bg-blue-600/20 text-slate-300 hover:text-white text-sm font-bold flex justify-between items-center transition-colors"
+                    className="w-full px-6 py-3 text-left hover:bg-blue-600/20 text-slate-300 hover:text-white text-sm font-bold flex justify-between items-center transition-colors border-b border-white/5 last:border-0"
                   >
-                    <span>{sym}</span>
-                    <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-400">BINANCE</span>
+                    <span>{item.display}</span>
+                    <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${item.source === 'BINANCE' ? 'bg-yellow-500/20 text-yellow-500' :
+                      item.source === 'BINGX' ? 'bg-blue-500/20 text-blue-500' :
+                        'bg-purple-500/20 text-purple-500'
+                      }`}>
+                      {item.source}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -2542,15 +2599,14 @@ const UserPanel = () => {
   });
   const [chartHeight, setChartHeight] = useState(450);
   const [chartLayouts, setChartLayouts] = useState([
-    { symbol: 'BTCUSDT', height: 450, span: 1 },
+    { symbol: 'BTCUSDT', height: 500, span: 2 },
     { symbol: 'ETHUSDT', height: 450, span: 1 },
-    { symbol: 'LTCUSDT', height: 450, span: 1 },
-    { symbol: 'ARPAUSDT', height: 450, span: 1 },
-    { symbol: 'BTC.D', height: 450, span: 1 }
+    { symbol: 'LTCUSDT', height: 450, span: 1, interval: '15' },
+    { symbol: 'BTC.D', height: 400, span: 2 }
   ]);
-  const [chartColumns, setChartColumns] = useState(0); // 0 means auto
+  const [chartColumns, setChartColumns] = useState(2); // 2 columns for better organization
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
-  const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1250); // Default 1250px (approx 1198px+)
+  const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1600); // Default 1600px for wider charts
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
   const [minPaymentThresholds, setMinPaymentThresholds] = useState({ // Nuevo estado para los umbrales mínimos de retiro por moneda
@@ -2691,12 +2747,13 @@ const UserPanel = () => {
         });
         setChartHeight(userData.preferences?.chartHeight || 450);
         setChartLayouts(userData.preferences?.chartLayouts || [
-          { symbol: 'BTCUSDT', height: 450, span: 1 },
-          { symbol: 'ARPAUSDT', height: 450, span: 1 },
-          { symbol: 'BTC.D', height: 450, span: 1 }
+          { symbol: 'BTCUSDT', height: 500, span: 2 },
+          { symbol: 'ETHUSDT', height: 450, span: 1 },
+          { symbol: 'LTCUSDT', height: 450, span: 1, interval: '15' },
+          { symbol: 'BTC.D', height: 400, span: 2 }
         ]);
-        setChartColumns(userData.preferences?.chartColumns || 0);
-        setDashboardMaxWidth(userData.preferences?.dashboardMaxWidth || 1400);
+        setChartColumns(userData.preferences?.chartColumns || 2);
+        setDashboardMaxWidth(userData.preferences?.dashboardMaxWidth || 1600);
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
       } else {
@@ -2854,9 +2911,9 @@ const UserPanel = () => {
     setChartLayouts(newLayouts);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.chartLayouts': newLayouts
-      });
+      await setDoc(userDocRef, {
+        preferences: { chartLayouts: newLayouts }
+      }, { merge: true });
     }
   };
 
@@ -2865,9 +2922,9 @@ const UserPanel = () => {
     setChartLayouts(newLayouts);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.chartLayouts': newLayouts
-      });
+      await setDoc(userDocRef, {
+        preferences: { chartLayouts: newLayouts }
+      }, { merge: true });
     }
   };
 
@@ -2877,9 +2934,9 @@ const UserPanel = () => {
     setChartLayouts(newLayouts);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.chartLayouts': newLayouts
-      });
+      await setDoc(userDocRef, {
+        preferences: { chartLayouts: newLayouts }
+      }, { merge: true });
     }
   };
 
@@ -2893,9 +2950,9 @@ const UserPanel = () => {
     setChartHeight(newHeight);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.chartHeight': newHeight
-      });
+      await setDoc(userDocRef, {
+        preferences: { chartHeight: newHeight }
+      }, { merge: true });
     }
   };
 
@@ -2903,9 +2960,9 @@ const UserPanel = () => {
     setChartColumns(newColumns);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.chartColumns': newColumns
-      });
+      await setDoc(userDocRef, {
+        preferences: { chartColumns: newColumns }
+      }, { merge: true });
     }
   };
 
@@ -2913,9 +2970,9 @@ const UserPanel = () => {
     setDashboardMaxWidth(newWidth);
     if (currentUser?.uid) {
       const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        'preferences.dashboardMaxWidth': newWidth
-      });
+      await setDoc(userDocRef, {
+        preferences: { dashboardMaxWidth: newWidth }
+      }, { merge: true });
     }
   };
 
