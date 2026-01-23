@@ -56,37 +56,43 @@ const FuturisticHome = () => {
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-6xl pointer-events-none opacity-30">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-blue-600 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        {/* Modern Animated Blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-6xl pointer-events-none">
+          <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-accent rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 text-center">
-          <div className="inline-flex items-center py-1.5 px-4 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-black uppercase tracking-[0.2em] mb-8 animate-fade-in">
-            <span className="relative flex h-2 w-2 mr-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+        <div className="container mx-auto px-6 relative z-10 text-center animate-fade-in-up">
+          <div className="animate-float">
+            <span className="inline-flex items-center py-2 px-5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-10 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2 mr-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
+              {siteConfig.heroBadge}
             </span>
-            {siteConfig.heroBadge}
           </div>
 
-          <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] animate-fade-in-up">
+          <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] animate-float-delayed">
             <span className="block">{siteConfig.heroTitle.split(' ').slice(0, 3).join(' ')}</span>
-            <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-white via-blue-400 to-accent bg-clip-text text-transparent italic">
               {siteConfig.heroTitle.split(' ').slice(3).join(' ')}
             </span>
           </h1>
 
-          <p className="text-lg md:text-2xl text-slate-500 max-w-3xl mx-auto mb-12 font-medium leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-lg md:text-2xl text-slate-500 max-w-3xl mx-auto mb-12 font-medium leading-relaxed">
             {siteConfig.homeText}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            <Link to="/signup" className="group relative px-10 py-5 bg-accent text-white rounded-2xl font-black text-xl shadow-2xl shadow-orange-500/40 transition-all hover:scale-105 hover:shadow-orange-500/60">
-              {siteConfig.heroBtn1Text}
-              <svg xmlns="http://www.w3.org/2000/svg" className="inline-block ml-2 w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+            <Link to="/signup" className="group relative px-12 py-6 bg-accent text-white rounded-[2rem] font-black text-2xl shadow-2xl shadow-accent/40 transition-all hover:scale-105 active:scale-95 overflow-hidden animate-shine">
+              <span className="relative z-10 flex items-center gap-3">
+                {siteConfig.heroBtn1Text}
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </span>
             </Link>
-            <Link to="/user/dashboard" className="px-10 py-5 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-2xl font-black text-xl hover:bg-opacity-10 transition-all backdrop-blur-md">
+            <Link to="/user/dashboard" className="px-12 py-6 bg-white/5 border border-white/10 rounded-[2rem] font-black text-2xl hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 backdrop-blur-md">
               {siteConfig.heroBtn2Text}
             </Link>
           </div>
@@ -190,7 +196,7 @@ const FuturisticHome = () => {
               <p className="text-xl md:text-2xl text-slate-500 mb-12 max-w-2xl mx-auto font-medium">
                 {siteConfig.ctaText}
               </p>
-              <Link to="/signup" className="inline-block px-12 py-6 bg-accent text-white rounded-2xl font-black text-2xl shadow-2xl shadow-orange-500/30 hover:scale-105 transition-transform">
+              <Link to="/signup" className="inline-block px-12 py-6 bg-accent text-white rounded-2xl font-black text-2xl shadow-2xl shadow-orange-500/30 hover:scale-105 transition-transform animate-shine">
                 {siteConfig.ctaBtnText}
               </Link>
             </div>
@@ -222,18 +228,18 @@ const FuturisticHome = () => {
 
 const FeatureCard = ({ icon, title, description, color }) => {
   const colorMap = {
-    blue: 'text-blue-500 bg-blue-500/10',
-    green: 'text-green-500 bg-green-500/10',
-    accent: 'text-accent bg-accent/10'
+    blue: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    green: 'text-green-500 bg-green-500/10 border-green-500/20',
+    accent: 'text-accent bg-accent/10 border-accent/20'
   };
 
   return (
-    <div className="p-10 rounded-[2.5rem] bg-white bg-opacity-5 border border-white border-opacity-5 hover:border-accent/40 transition-all duration-500 group hover:-translate-y-3 shadow-xl">
-      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-8 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-[10deg] ${colorMap[color]}`}>
+    <div className="p-10 rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-accent/30 transition-all duration-500 group hover:-translate-y-4 hover:shadow-2xl hover:shadow-accent/10 animate-shine">
+      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12 border ${colorMap[color]}`}>
         {icon}
       </div>
-      <h3 className="text-2xl font-black mb-4 tracking-tight">{title}</h3>
-      <p className="text-slate-500 font-medium leading-relaxed">
+      <h3 className="text-2xl font-black mb-4 tracking-tight group-hover:text-accent transition-colors">{title}</h3>
+      <p className="text-slate-500 font-medium leading-relaxed text-sm md:text-base">
         {description}
       </p>
     </div>
@@ -241,13 +247,13 @@ const FeatureCard = ({ icon, title, description, color }) => {
 };
 
 const StepItem = ({ number, title, description }) => (
-  <div className="flex gap-8 group">
-    <div className="text-5xl font-black text-accent/10 group-hover:text-accent transition-colors duration-500 tabular-nums">
+  <div className="flex gap-8 group py-6 first:pt-0 border-b border-white/5 last:border-0 items-start">
+    <div className="text-5xl font-black text-white/5 group-hover:text-accent/40 transition-all duration-500 transform group-hover:scale-110 italic">
       {number}
     </div>
-    <div>
-      <h4 className="text-2xl font-black mb-3 tracking-tight">{title}</h4>
-      <p className="text-slate-500 text-lg font-medium leading-relaxed">{description}</p>
+    <div className="pt-2">
+      <h4 className="text-2xl font-black mb-3 tracking-tight group-hover:translate-x-2 transition-transform duration-300">{title}</h4>
+      <p className="text-slate-400 text-sm md:text-lg font-medium leading-normal">{description}</p>
     </div>
   </div>
 );
