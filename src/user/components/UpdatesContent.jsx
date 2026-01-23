@@ -7,6 +7,38 @@ const UpdatesContent = ({ styles }) => {
     const [updates, setUpdates] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const systemUpdates = [
+        {
+            id: 'security-v2.2',
+            title: "Seguridad de Conexión Avanzada",
+            description: "Hemos implementado una nueva capa de cifrado de grado industrial para todas las conexiones externas. Tus credenciales ahora están protegidas por protocolos de seguridad de alto nivel, asegurando que tu información sensible permanezca privada y segura.",
+            type: "improvement",
+            version: "v2.2",
+            tag: "SEGURIDAD",
+            changes: [
+                "Cifrado de grado militar para llaves de API",
+                "Protección avanzada contra acceso no autorizado",
+                "Manejo seguro de secretos en el servidor"
+            ],
+            createdAt: new Date('2026-01-23T10:00:00')
+        },
+        {
+            id: 'aesthetics-v2.3',
+            title: "Nueva Experiencia Visual Elite",
+            description: "La plataforma se siente más viva que nunca. Hemos rediseñado la interfaz principal con animaciones modernas, fondos dinámicos y micro-interacciones fluidas que mejoran la navegación y resaltan el potencial tecnológico de nuestro ecosistema.",
+            type: "improvement",
+            version: "v2.3",
+            tag: "INTERFAZ",
+            changes: [
+                "Fondos orgánicos animados",
+                "Efectos de flotación y profundidad",
+                "Micro-interacciones táctiles y de ratón",
+                "Optimización de rendimiento visual"
+            ],
+            createdAt: new Date('2026-01-23T10:15:00')
+        }
+    ];
+
     useEffect(() => {
         const q = query(collection(db, 'siteUpdates'), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -15,10 +47,15 @@ const UpdatesContent = ({ styles }) => {
                 ...doc.data(),
                 createdAt: doc.data().createdAt?.toDate() || new Date(),
             }));
-            setUpdates(fetchedUpdates);
+
+            // Merge system updates with fetched updates, sorting by date
+            const allUpdates = [...systemUpdates, ...fetchedUpdates].sort((a, b) => b.createdAt - a.createdAt);
+            setUpdates(allUpdates);
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching updates:", error);
+            // Fallback to only system updates if database fails
+            setUpdates(systemUpdates);
             setIsLoading(false);
         });
         return () => unsubscribe();

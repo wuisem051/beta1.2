@@ -189,13 +189,29 @@ const ExchangeContent = () => {
         setErrorMsg('');
         try {
             if (!currentUser?.uid) return;
-            await setDoc(doc(db, 'users', currentUser.uid, 'secrets', 'exchange'), {
-                apiKey,
-                secret,
-                exchange: exchangeType,
-                updatedAt: new Date()
+
+            const idToken = await currentUser.getIdToken();
+            const response = await fetch('/.netlify/functions/saveExchangeKeys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    apiKey,
+                    secret,
+                    exchange: exchangeType
+                })
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al guardar credenciales');
+            }
+
             setKeysConfigured(true);
+            // We clear the secret from local state after saving for extra security
+            setSecret('');
             setTimeout(() => setActiveTab('trading'), 1000); // Auto switch to trading
         } catch (error) {
             console.error("Save error:", error);

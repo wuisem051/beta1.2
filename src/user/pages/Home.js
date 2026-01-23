@@ -32,29 +32,34 @@ const Home = () => {
 
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 overflow-hidden">
-        {/* Background Accents */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-6xl pointer-events-none opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-blue-500 rounded-full blur-[120px] animate-pulse"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+        {/* Modern Animated Blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-6xl pointer-events-none">
+          <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-accent rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center animate-fade-in-up">
-          <span className="inline-block py-1 px-3 rounded-full bg-accent bg-opacity-10 text-accent text-xs font-black uppercase tracking-widest mb-6">
-            Trading de Nueva Generación
-          </span>
-          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter leading-tight">
-            <span className="bg-gradient-to-r from-blue-400 to-accent bg-clip-text text-transparent">
+          <div className="animate-float">
+            <span className="inline-block py-2 px-4 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-8 backdrop-blur-sm">
+              ✨ Trading de Nueva Generación
+            </span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] animate-float-delayed">
+            <span className="bg-gradient-to-br from-white via-blue-400 to-accent bg-clip-text text-transparent italic">
               {siteConfig.heroTitle}
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-10 font-medium">
+          <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-12 font-medium leading-relaxed">
             {siteConfig.homeText}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-lg shadow-xl shadow-orange-500/20 hover:scale-105 transition-transform">
-              Empezar Ahora
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Link to="/register" className="group relative px-10 py-5 bg-accent text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-accent/20 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden animate-shine">
+              <span className="relative z-10 flex items-center gap-2">
+                Empezar Ahora <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </span>
             </Link>
-            <Link to="/user/dashboard" className="px-8 py-4 bg-white bg-opacity-5 border border-white border-opacity-10 rounded-2xl font-black text-lg hover:bg-opacity-10 transition-all">
+            <Link to="/user/dashboard" className="px-10 py-5 bg-white/5 border border-white/10 rounded-[2rem] font-black text-xl hover:bg-white/10 hover:border-white/20 transition-all active:scale-95">
               Ver Demo
             </Link>
           </div>
@@ -178,18 +183,18 @@ const Home = () => {
 
 const FeatureCard = ({ icon, title, description, color }) => {
   const colorMap = {
-    blue: 'text-blue-500 bg-blue-500/10',
-    green: 'text-green-500 bg-green-500/10',
-    accent: 'text-accent bg-accent/10'
+    blue: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    green: 'text-green-500 bg-green-500/10 border-green-500/20',
+    accent: 'text-accent bg-accent/10 border-accent/20'
   };
 
   return (
-    <div className="p-8 rounded-3xl bg-white bg-opacity-5 border border-white border-opacity-5 hover:border-accent/30 transition-all duration-300 group hover:-translate-y-2">
-      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:rotate-12 ${colorMap[color]}`}>
+    <div className="p-10 rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-accent/30 transition-all duration-500 group hover:-translate-y-4 hover:shadow-2xl hover:shadow-accent/10 animate-shine">
+      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-12 border ${colorMap[color]}`}>
         {icon}
       </div>
-      <h3 className="text-xl font-black mb-4 tracking-tight">{title}</h3>
-      <p className="text-slate-500 font-medium leading-relaxed">
+      <h3 className="text-2xl font-black mb-4 tracking-tight group-hover:text-accent transition-colors">{title}</h3>
+      <p className="text-slate-500 font-medium leading-relaxed text-sm md:text-base">
         {description}
       </p>
     </div>
@@ -197,13 +202,13 @@ const FeatureCard = ({ icon, title, description, color }) => {
 };
 
 const StepItem = ({ number, title, description }) => (
-  <div className="flex gap-6 group">
-    <div className="text-3xl font-black text-accent/20 group-hover:text-accent transition-colors duration-300">
+  <div className="flex gap-8 group py-6 first:pt-0 border-b border-white/5 last:border-0">
+    <div className="text-5xl font-black text-white/5 group-hover:text-accent/40 transition-all duration-500 transform group-hover:scale-110 italic">
       {number}
     </div>
-    <div>
-      <h4 className="text-xl font-bold mb-2 tracking-tight">{title}</h4>
-      <p className="text-slate-500 text-sm md:text-base">{description}</p>
+    <div className="pt-2">
+      <h4 className="text-2xl font-black mb-3 tracking-tight group-hover:translate-x-2 transition-transform duration-300">{title}</h4>
+      <p className="text-slate-500 text-sm md:text-lg font-medium leading-normal">{description}</p>
     </div>
   </div>
 );

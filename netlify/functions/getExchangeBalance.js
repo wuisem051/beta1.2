@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const ccxt = require('ccxt');
+const { decrypt } = require('./utils/vault');
 
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
@@ -39,7 +40,10 @@ const getExchange = async (userId) => {
         throw new Error('API Keys no configuradas.');
     }
 
-    const { apiKey, secret, exchange } = doc.data();
+    const data = doc.data();
+    const apiKey = decrypt(data.apiKey);
+    const secret = decrypt(data.secret);
+    const exchange = data.exchange;
     const exId = exchange ? exchange.toLowerCase() : 'binance';
 
     if (!ccxt[exId]) {
