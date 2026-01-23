@@ -1,106 +1,162 @@
-/* Estilos modernos para UserPanel.module.css */
+/* Estilos modernos para UserPanel.module.css - ELITE REDESIGN */
+
+:root {
+  --bg-main: #020617;
+  --bg-card: rgba(15, 23, 42, 0.6);
+  --accent-glow: rgba(59, 130, 246, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
 
 .userPanelContainer {
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-main);
-  transition: background-color 0.3s ease;
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
+  transition: background-color 0.5s ease;
 }
 
-/* Glassmorphism Effect */
+/* Glassmorphism Elite */
 .glassBase {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Header & Title */
 .mainContentHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  margin-bottom: 2.5rem;
   padding: 0 1rem;
 }
 
+@media (min-width: 768px) {
+  .mainContentHeader {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
 .mainContentTitle {
-  font-size: 1.875rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
   color: #ffffff;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
 }
 
 /* Dashboard Grid */
 .dashboardContent {
-  padding: 1.5rem;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 @media (min-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1280px) {
   .statsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* Modern Stat Cards */
+/* Modern Elite Stat Cards */
 .statCard {
   composes: glassBase;
-  padding: 1.5rem;
-  border-radius: 1.25rem;
+  padding: 2rem;
+  border-radius: 2rem;
   position: relative;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .statCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.statCard:hover::before {
+  opacity: 1;
 }
 
 .statTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  /* Light gray for high contrast labels */
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .statValueBlue,
 .statValueGreen,
 .statValueAccent {
-  font-size: 2.25rem;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 2.75rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .statValueBlue {
-  color: var(--blue-link);
+  color: #f8fafc;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .statValueGreen {
-  color: var(--green-check);
+  color: #22c55e;
+  text-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
 }
 
 .statValueAccent {
-  color: var(--accent);
+  color: #f59e0b;
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
 .statIconBlue,
@@ -109,57 +165,66 @@
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 1rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
 
-.statIconBlue {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--blue-link);
+.statCard:hover .statIconBlue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  transform: rotate(12deg);
 }
 
-.statIconGreen {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--green-check);
+.statCard:hover .statIconGreen {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  transform: rotate(12deg);
 }
 
-.statIconAccent {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--accent);
+.statCard:hover .statIconAccent {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  transform: rotate(12deg);
 }
 
 /* Charts & Detailed Stats */
 .chartAndStatsGrid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 @media (min-width: 1024px) {
   .chartAndStatsGrid {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.8fr 1.2fr;
   }
 }
 
 .chartCard,
 .statsCard {
   composes: glassBase;
-  padding: 1.5rem;
-  border-radius: 1.5rem;
+  padding: 2rem;
+  border-radius: 2.5rem;
+  transition: all 0.3s ease;
 }
 
 .chartTitle,
 .statsTitle {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #f1f5f9;
-  /* Slate 100 for high visibility */
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 2rem;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .chartContainer {
