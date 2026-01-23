@@ -745,6 +745,69 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
     };
   }, [currentUser, isVIP]);
 
+  const [realProfitChartData, setRealProfitChartData] = useState({
+    labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+    datasets: [{
+      label: 'Ganancias Netas (USD)',
+      data: [0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: 'rgba(59, 130, 246, 0.5)',
+      borderColor: '#3b82f6',
+      borderWidth: 2,
+      borderRadius: 12,
+      hoverBackgroundColor: '#3b82f6',
+    }]
+  });
+
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+
+    const tradesRef = collection(db, 'users', currentUser.uid, 'userTrades');
+    const q = query(tradesRef, orderBy('executedAt', 'asc'), limit(50));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const trades = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        executedAt: doc.data().executedAt?.toDate() || new Date()
+      }));
+
+      // Agrupar por día de la semana para el gráfico simple (o ultimas 7 ejecuciones)
+      const dayData = [0, 0, 0, 0, 0, 0, 0];
+      const today = new Date();
+
+      trades.forEach(trade => {
+        const tradeDate = trade.executedAt;
+        // Solo trades de los ultimos 7 días para simplificar el gráfico semanal
+        const diffTime = Math.abs(today - tradeDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 7) {
+          const dayIndex = tradeDate.getDay(); // 0 is Sunday
+          // Convert to Monday focus: Mon(1) ... Sun(0) -> 0..6
+          const reportIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+          dayData[reportIndex] += (parseFloat(trade.projectedProfit) || 0);
+        }
+      });
+
+      setRealProfitChartData({
+        labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
+        datasets: [{
+          label: 'Ganancias Netas (USD)',
+          data: dayData,
+          backgroundColor: 'rgba(34, 197, 94, 0.4)',
+          borderColor: '#22c55e',
+          borderWidth: 2,
+          borderRadius: 12,
+          hoverBackgroundColor: '#22c55e',
+          fill: true,
+          tension: 0.4
+        }]
+      });
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
 
   // Calcular porcentaje de ganancia
   const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
@@ -1069,6 +1132,14 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
                 {signal.notes && (
                   <p className="mt-3 text-xs text-slate-300 italic truncate border-t border-white/5 pt-2">"{signal.notes}"</p>
                 )}
+
+                <button
+                  onClick={() => handleExecuteTrade(signal)}
+                  className="mt-4 w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-900/40 transition-all active:scale-95 flex items-center justify-center gap-2 group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  EJECUTAR TRADE AHORA
+                </button>
               </div>
             ))}
           </div>
@@ -1078,11 +1149,19 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
 
       <div className={styles.chartAndStatsGrid}>
         {/* Rendimiento Histórico */}
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Rendimiento de Mercado</h3>
+        <div className={styles.chartCard} style={{ background: 'linear-gradient(180deg, rgba(2, 6, 23, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)' }}>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className={styles.chartTitle} style={{ marginBottom: '0.2rem' }}>Ganancias Netas Reales</h3>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Basado en tus trades ejecutados</p>
+            </div>
+            <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[9px] font-black uppercase tracking-widest animate-pulse">
+              LIVE DATA
+            </div>
+          </div>
           <div className={styles.chartContainer}>
             <Bar
-              data={chartData}
+              data={realProfitChartData}
               options={{
                 maintainAspectRatio: false,
                 plugins: {
