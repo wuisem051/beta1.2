@@ -9,6 +9,21 @@ const UpdatesContent = ({ styles }) => {
 
     const systemUpdates = [
         {
+            id: 'unified-activity-v2.5',
+            title: "Historial Unificado & Transferencias",
+            description: "Hemos unificado toda tu actividad financiera en un solo lugar. Además, ahora puedes invertir en el fondo colectivo directamente desde tu billetera con un solo clic, simplificando la gestión de tu capital.",
+            type: "feature",
+            version: "v2.5",
+            tag: "SISTEMA",
+            changes: [
+                "Historial unificado de depósitos, retiros y fondos",
+                "Integración de ganancias de arbitraje en tiempo real",
+                "Botón de inversión directa al Fondo Colectivo",
+                "Interfaz de transacciones optimizada"
+            ],
+            createdAt: new Date('2026-01-25T15:45:00')
+        },
+        {
             id: 'collective-fund-v2.4',
             title: "Fondo Colectivo & Gestión Admin",
             description: "Implementación integral del sistema de aportes colectivos. Ahora los usuarios pueden participar directamente desde su balance y los administradores tienen un panel de control dedicado para monitorear el crecimiento del fondo.",
