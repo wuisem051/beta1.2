@@ -5,11 +5,11 @@ import {
     onSnapshot,
     query,
     orderBy,
-    deleteDoc,
     doc,
-    getDocs
+    getDocs,
+    setDoc
 } from 'firebase/firestore';
-import { FaTrash, FaUsers, FaCoins, FaListUl } from 'react-icons/fa';
+import { FaTrash, FaUsers, FaCoins, FaListUl, FaEdit, FaSave, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 
 const CollectiveFundManagement = () => {
     const [contributions, setContributions] = useState([]);
@@ -19,6 +19,15 @@ const CollectiveFundManagement = () => {
     });
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Stats Management State
+    const [isSaving, setIsSaving] = useState(false);
+    const [config, setConfig] = useState({
+        displayMode: 'real', // 'real' or 'manual'
+        manualCapital: 1250000,
+        manualYield: 12.4,
+        manualMembers: 2450
+    });
 
     useEffect(() => {
         const q = query(
@@ -48,6 +57,29 @@ const CollectiveFundManagement = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // Fetch config
+    useEffect(() => {
+        const unsub = onSnapshot(doc(db, 'siteSettings', 'collectiveFund'), (docSnap) => {
+            if (docSnap.exists()) {
+                setConfig(docSnap.data());
+            }
+        });
+        return () => unsub();
+    }, []);
+
+    const handleSaveConfig = async () => {
+        setIsSaving(true);
+        try {
+            await setDoc(doc(db, 'siteSettings', 'collectiveFund'), config);
+            alert('Configuración guardada exitosamente.');
+        } catch (error) {
+            console.error("Error saving config:", error);
+            alert('Error al guardar la configuración.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleDelete = async (id) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este aporte? Esto NO reembolsará el dinero al usuario automáticamente.')) {
@@ -86,6 +118,80 @@ const CollectiveFundManagement = () => {
                     <div>
                         <p className="text-slate-500 text-xs font-black uppercase tracking-widest">Total de Aportadores Únicos</p>
                         <p className="text-3xl font-black text-white mt-1">{stats.totalContributors}</p>
+                    </div>
+                </div>
+
+                {/* Stats Editor */}
+                <div className="bg-slate-800/50 p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-transparent opacity-100 transition-opacity"></div>
+
+                    <h3 className="text-xl font-black text-white mb-8 flex items-center gap-3 relative z-10">
+                        <span className="w-10 h-10 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400">
+                            <FaEdit />
+                        </span>
+                        Configuración de Estadísticas Visibles (User Panel)
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Modo de Visualización</label>
+                            <button
+                                onClick={() => setConfig({ ...config, displayMode: config.displayMode === 'real' ? 'manual' : 'real' })}
+                                className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border transition-all ${config.displayMode === 'real'
+                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                        : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                                    }`}
+                            >
+                                <span className="font-bold text-xs uppercase tracking-widest">
+                                    {config.displayMode === 'real' ? 'Valores Reales' : 'Valores Manuales'}
+                                </span>
+                                {config.displayMode === 'real' ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
+                            </button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Capital Total (Manual)</label>
+                            <input
+                                type="number"
+                                value={config.manualCapital}
+                                onChange={(e) => setConfig({ ...config, manualCapital: parseFloat(e.target.value) })}
+                                className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-blue-500 outline-none transition-all"
+                                placeholder="Ej: 1500000"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Rendimiento % (Manual)</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={config.manualYield}
+                                onChange={(e) => setConfig({ ...config, manualYield: parseFloat(e.target.value) })}
+                                className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-blue-500 outline-none transition-all"
+                                placeholder="Ej: 12.4"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Miembros (Manual)</label>
+                            <input
+                                type="number"
+                                value={config.manualMembers}
+                                onChange={(e) => setConfig({ ...config, manualMembers: parseInt(e.target.value) })}
+                                className="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold focus:border-blue-500 outline-none transition-all"
+                                placeholder="Ej: 2450"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-end relative z-10">
+                        <button
+                            onClick={handleSaveConfig}
+                            disabled={isSaving}
+                            className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            <FaSave /> {isSaving ? 'Guardando...' : 'Guardar Configuración'}
+                        </button>
                     </div>
                 </div>
             </div>

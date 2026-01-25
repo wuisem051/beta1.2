@@ -30,6 +30,19 @@ const CollectiveFundContent = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Configuración de Estadísticas
+  const [config, setConfig] = useState({
+    displayMode: 'manual',
+    manualCapital: 1250000,
+    manualYield: 12.4,
+    manualMembers: 2450
+  });
+
+  const [realStats, setRealStats] = useState({
+    capital: 0,
+    members: 0
+  });
+
   // Fetch recent contributions
   useEffect(() => {
     const q = query(
@@ -47,6 +60,28 @@ const CollectiveFundContent = () => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Fetch real-time config
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'siteSettings', 'collectiveFund'), (docSnap) => {
+      if (docSnap.exists()) {
+        setConfig(docSnap.data());
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Calculate real stats from ALL contributions
+  useEffect(() => {
+    const q = query(collection(db, 'collectiveFundContributions'));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(d => d.data());
+      const totalCapital = docs.reduce((sum, d) => sum + (d.amount || 0), 0);
+      const uniqueMembers = new Set(docs.map(d => d.userId)).size;
+      setRealStats({ capital: totalCapital, members: uniqueMembers });
+    });
+    return () => unsub();
   }, []);
 
   const handleDeposit = async (e) => {
@@ -260,15 +295,21 @@ const CollectiveFundContent = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className={styles.summaryCard}>
             <p className={styles.statTitle}>Capital Total</p>
-            <p className={styles.statsValueGreen}>$1,250,000</p>
+            <p className={styles.statsValueGreen}>
+              ${(config.displayMode === 'real' ? realStats.capital : config.manualCapital).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
           </div>
           <div className={styles.summaryCard}>
             <p className={styles.statTitle}>Rendimiento 30d</p>
-            <p className={styles.statsValueBlue}>+12.4%</p>
+            <p className={styles.statsValueBlue}>
+              {config.displayMode === 'real' ? '+12.4' : config.manualYield}%
+            </p>
           </div>
           <div className={styles.summaryCard}>
             <p className={styles.statTitle}>Miembros</p>
-            <p className={styles.statsTitle} style={{ marginBottom: 0 }}>2,450</p>
+            <p className={styles.statsTitle} style={{ marginBottom: 0 }}>
+              {(config.displayMode === 'real' ? realStats.members : config.manualMembers).toLocaleString()}
+            </p>
           </div>
         </div>
       </div>
