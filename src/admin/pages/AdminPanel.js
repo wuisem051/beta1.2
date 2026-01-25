@@ -53,7 +53,7 @@ const AdminPanel = () => {
   return (
     <div className="flex h-screen text-white" style={{ backgroundColor: '#0f172a' }}>
       {/* Sidebar de Navegación */}
-      <aside className="w-64 p-2 shadow-lg" style={{ backgroundColor: '#1e293b' }}>
+      <aside className="w-64 p-2 shadow-lg overflow-y-auto custom-scrollbar" style={{ backgroundColor: '#1e293b' }}>
         <div className="text-xl font-bold text-yellow-500 mb-6">Admin Dashboard</div>
         <nav>
           <ul>
