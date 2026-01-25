@@ -9,6 +9,21 @@ const UpdatesContent = ({ styles }) => {
 
     const systemUpdates = [
         {
+            id: 'collective-fund-v2.4',
+            title: "Fondo Colectivo & Gestión Admin",
+            description: "Implementación integral del sistema de aportes colectivos. Ahora los usuarios pueden participar directamente desde su balance y los administradores tienen un panel de control dedicado para monitorear el crecimiento del fondo.",
+            type: "feature",
+            version: "v2.4",
+            tag: "NUEVO",
+            changes: [
+                "Sistema de aportes directos desde balance USD",
+                "Listado público de contribuciones en tiempo real",
+                "Panel de administración del Fondo Colectivo",
+                "Estadísticas globales de capital y aportadores"
+            ],
+            createdAt: new Date('2026-01-25T11:50:00')
+        },
+        {
             id: 'security-v2.2',
             title: "Seguridad de Conexión Avanzada",
             description: "Hemos implementado una nueva capa de cifrado de grado industrial para todas las conexiones externas. Tus credenciales ahora están protegidas por protocolos de seguridad de alto nivel, asegurando que tu información sensible permanezca privada y segura.",
