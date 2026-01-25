@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { db } from '../../services/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, setDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { useError } from '../../context/ErrorContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import QRCode from 'qrcode';
-import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaTimesCircle, FaClock, FaChartLine } from 'react-icons/fa';
+import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaTimesCircle, FaClock, FaChartLine, FaUsers } from 'react-icons/fa';
 import useCryptoPrice from '../../hooks/useCryptoPrice';
 
 
@@ -96,6 +96,11 @@ const WalletHub = ({ initialTab: propTab }) => {
 
     // Historial
     const [financialHistory, setFinancialHistory] = useState([]);
+
+    // Estado Fondo Colectivo
+    const [isCollectiveModalOpen, setIsCollectiveModalOpen] = useState(false);
+    const [collectiveAmount, setCollectiveAmount] = useState('');
+    const [isProcessingCollective, setIsProcessingCollective] = useState(false);
 
     const cryptoOptions = [
         { value: 'BTC', label: 'Bitcoin', icon: '₿', color: '#f7931a', network: 'Bitcoin' },
@@ -261,6 +266,55 @@ const WalletHub = ({ initialTab: propTab }) => {
         }
     };
 
+    const handleCollectiveTransfer = async (e) => {
+        e.preventDefault();
+        if (isProcessingCollective) return;
+        const amount = parseFloat(collectiveAmount);
+        const balance = userBalances?.USD || 0;
+
+        if (!amount || amount <= 0) return showError('Monto inválido');
+        if (amount > balance) return showError('Saldo insuficiente en USD');
+
+        setIsProcessingCollective(true);
+        try {
+            const userRef = doc(db, 'users', currentUser.uid);
+
+            await runTransaction(db, async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists()) throw new Error("¡El usuario no existe!");
+
+                const currentBalance = userDoc.data().balanceUSD || 0;
+                if (currentBalance < amount) {
+                    throw new Error("Saldo insuficiente.");
+                }
+
+                // Deduct balance
+                transaction.update(userRef, {
+                    balanceUSD: currentBalance - amount
+                });
+
+                // Add contribution record
+                const contributionRef = collection(db, 'collectiveFundContributions');
+                const newContribution = {
+                    userId: currentUser.uid,
+                    username: userDoc.data().username || userDoc.data().displayName || 'Usuario Privado',
+                    amount: amount,
+                    createdAt: serverTimestamp()
+                };
+                transaction.set(doc(contributionRef), newContribution);
+            });
+
+            showSuccess(`¡Éxito! Has transferido $${amount} al fondo colectivo.`);
+            setCollectiveAmount('');
+            setIsCollectiveModalOpen(false);
+        } catch (err) {
+            console.error("Error in collective transfer:", err);
+            showError(err.message || 'Error al procesar la transferencia.');
+        } finally {
+            setIsProcessingCollective(false);
+        }
+    };
+
     if (loading) return <div className="flex items-center justify-center p-20 text-blue-500 font-bold">Cargando Billetera...</div>;
 
     return (
@@ -316,12 +370,15 @@ const WalletHub = ({ initialTab: propTab }) => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex gap-3">
+                            <div className="flex flex-wrap gap-3">
                                 <button onClick={() => setActiveTab('deposit')} className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
                                     <FaArrowDown /> Depositar
                                 </button>
                                 <button onClick={() => setActiveTab('withdraw')} className="bg-black/20 hover:bg-black/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
                                     <FaArrowUp /> Retirar
+                                </button>
+                                <button onClick={() => setIsCollectiveModalOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold border border-emerald-500/30 flex items-center gap-2 transition-all">
+                                    <FaUsers className="text-emerald-400" /> Fondo Colectivo
                                 </button>
                             </div>
                         </div>
@@ -653,6 +710,54 @@ const WalletHub = ({ initialTab: propTab }) => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+            {/* Modal Fondo Colectivo */}
+            {isCollectiveModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <div className="bg-slate-900 border border-white/10 rounded-[40px] p-8 md:p-10 w-full max-w-md shadow-2xl animate-scaleIn">
+                        <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-6">
+                            <FaUsers size={30} />
+                        </div>
+                        <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Invertir en Fondo Colectivo</h2>
+                        <p className="text-slate-500 text-sm mb-8">Transfiere saldo de tu billetera principal directamente al fondo gestionado.</p>
+
+                        <form onSubmit={handleCollectiveTransfer} className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 ml-2">Monto a Transferir (USD)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        value={collectiveAmount}
+                                        onChange={(e) => setCollectiveAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-6 py-4 text-white text-2xl font-bold outline-none focus:border-emerald-500/50 transition-all font-mono"
+                                        disabled={isProcessingCollective}
+                                    />
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-end">
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase">Saldo Disponible</span>
+                                        <span className="text-emerald-400 font-black text-xs">${userBalances?.USD?.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCollectiveModalOpen(false)}
+                                    className="flex-1 px-4 py-4 bg-slate-800 text-slate-400 rounded-2xl font-bold hover:bg-slate-700 transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isProcessingCollective}
+                                    className="flex-1 px-4 py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-500 transition-all disabled:opacity-50 shadow-lg shadow-emerald-600/20"
+                                >
+                                    {isProcessingCollective ? 'Procesando...' : 'Confirmar'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
