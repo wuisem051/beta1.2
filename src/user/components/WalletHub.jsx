@@ -160,36 +160,96 @@ const WalletHub = ({ initialTab: propTab }) => {
         }
     }, [selectedDepositCrypto, depositAddresses]);
 
-    // 4. Cargar Historial Unificado
+    // 4. Cargar Historial Unificado (Depósitos, Retiros, Fondo, Arbitraje, Trading)
     useEffect(() => {
         if (!currentUser?.uid) return;
 
-        const depositsQ = query(collection(db, 'deposits'), where('userId', '==', currentUser.uid));
-        const withdrawalsQ = query(collection(db, 'withdrawals'), where('userId', '==', currentUser.uid));
-
-        const mergeHistory = () => {
-            // En una aplicación real, usaríamos un hook más complejo o centralizado para esto
-            // Por ahora, combinamos los resultados de los snapshots
+        const historyState = {
+            DEPOSITS: [],
+            WITHDRAWALS: [],
+            COLLECTIVE: [],
+            ARBITRAGE: [],
+            TRADING: []
         };
 
-        const unsubDeposits = onSnapshot(depositsQ, (snap) => {
-            const deps = snap.docs.map(d => ({ ...d.data(), id: d.id, type: 'DEPOSIT', createdAt: d.data().createdAt?.toDate() || new Date() }));
-            updateHistory(deps, 'DEPOSITS');
-        });
-
-        const unsubWithdraws = onSnapshot(withdrawalsQ, (snap) => {
-            const withs = snap.docs.map(d => ({ ...d.data(), id: d.id, type: 'WITHDRAW', createdAt: d.data().createdAt?.toDate() || new Date() }));
-            updateHistory(withs, 'WITHDRAWALS');
-        });
-
-        const historyMap = { DEPOSITS: [], WITHDRAWALS: [] };
-        const updateHistory = (data, category) => {
-            historyMap[category] = data;
-            const combined = [...historyMap.DEPOSITS, ...historyMap.WITHDRAWALS].sort((a, b) => b.createdAt - a.createdAt);
+        const updateUnifiedHistory = () => {
+            const combined = [
+                ...historyState.DEPOSITS,
+                ...historyState.WITHDRAWALS,
+                ...historyState.COLLECTIVE,
+                ...historyState.ARBITRAGE,
+                ...historyState.TRADING
+            ].sort((a, b) => b.createdAt - a.createdAt);
             setFinancialHistory(combined);
         };
 
-        return () => { unsubDeposits(); unsubWithdraws(); };
+        const depositsQ = query(collection(db, 'deposits'), where('userId', '==', currentUser.uid));
+        const unsubDeposits = onSnapshot(depositsQ, (snap) => {
+            historyState.DEPOSITS = snap.docs.map(d => ({
+                ...d.data(), id: d.id, type: 'DEPOSIT',
+                createdAt: d.data().createdAt?.toDate() || new Date()
+            }));
+            updateUnifiedHistory();
+        });
+
+        const withdrawalsQ = query(collection(db, 'withdrawals'), where('userId', '==', currentUser.uid));
+        const unsubWithdraws = onSnapshot(withdrawalsQ, (snap) => {
+            historyState.WITHDRAWALS = snap.docs.map(d => ({
+                ...d.data(), id: d.id, type: 'WITHDRAW',
+                createdAt: d.data().createdAt?.toDate() || new Date()
+            }));
+            updateUnifiedHistory();
+        });
+
+        const collectiveQ = query(collection(db, 'collectiveFundContributions'), where('userId', '==', currentUser.uid));
+        const unsubCollective = onSnapshot(collectiveQ, (snap) => {
+            historyState.COLLECTIVE = snap.docs.map(d => ({
+                ...d.data(), id: d.id, type: 'COLLECTIVE',
+                label: 'Aporte Fondo',
+                currency: 'USD',
+                createdAt: d.data().createdAt?.toDate() || new Date(),
+                status: 'Completado'
+            }));
+            updateUnifiedHistory();
+        });
+
+        const arbitrageQ = query(collection(db, 'userArbitragePools'), where('userId', '==', currentUser.uid));
+        const unsubArbitrage = onSnapshot(arbitrageQ, (snap) => {
+            historyState.ARBITRAGE = snap.docs.map(d => ({
+                ...d.data(), id: d.id, type: 'ARBITRAGE',
+                label: `Arbitraje: ${d.data().poolName || 'Pool'}`,
+                amount: d.data().earnings || 0,
+                currency: 'USD',
+                createdAt: d.data().joinedAt?.toDate() || d.data().createdAt?.toDate() || new Date(),
+                status: 'Activa'
+            }));
+            updateUnifiedHistory();
+        });
+
+        const tradingQ = query(collection(db, 'tradingHistory'), orderBy('date', 'desc'));
+        const unsubTrading = onSnapshot(tradingQ, (snap) => {
+            historyState.TRADING = snap.docs.map(d => {
+                const data = d.data();
+                // Simular historial personal si es VIP (basado en TradingPortfolioContent)
+                return {
+                    ...data, id: d.id, type: 'TRADING',
+                    label: `Trading: ${data.pair}`,
+                    amount: data.profit || 0,
+                    currency: 'USD',
+                    createdAt: data.date ? new Date(data.date) : new Date(),
+                    status: data.result || 'Exitosa'
+                };
+            });
+            updateUnifiedHistory();
+        });
+
+        return () => {
+            unsubDeposits();
+            unsubWithdraws();
+            unsubCollective();
+            unsubArbitrage();
+            unsubTrading();
+        };
     }, [currentUser]);
 
     // Handlers
@@ -676,33 +736,42 @@ const WalletHub = ({ initialTab: propTab }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {financialHistory.map(item => (
-                                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-8 py-6 text-xs text-slate-400 font-medium">
-                                            {item.createdAt.toLocaleDateString()} {item.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${item.type === 'DEPOSIT' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-                                                }`}>
-                                                {item.type === 'DEPOSIT' ? 'Depósito' : 'Retiro'}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6 font-mono font-bold text-white">
-                                            {item.type === 'DEPOSIT' ? '+' : '-'}{item.amount} {item.currency}
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-2">
-                                                {item.status === 'Pendiente' && <FaClock className="text-yellow-500" size={12} />}
-                                                {item.status === 'Aprobado' || item.status === 'Completado' ? <FaCheckCircle className="text-green-500" size={12} /> : null}
-                                                {item.status === 'Rechazado' && <FaTimesCircle className="text-red-500" size={12} />}
-                                                <span className="text-xs font-bold text-slate-300">{item.status}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 text-right font-mono text-[10px] text-slate-500">
-                                            {item.txHash || item.addressOrId || 'N/A'}
-                                        </td>
-                                    </tr>
-                                ))}
+                                {financialHistory.map(item => {
+                                    const isPositive = ['DEPOSIT', 'ARBITRAGE'].includes(item.type) || (item.type === 'TRADING' && parseFloat(item.amount) >= 0);
+                                    const isNegative = ['WITHDRAW', 'COLLECTIVE'].includes(item.type) || (item.type === 'TRADING' && parseFloat(item.amount) < 0);
+
+                                    return (
+                                        <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-8 py-6 text-xs text-slate-400 font-medium">
+                                                {item.createdAt.toLocaleDateString()} {item.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${item.type === 'DEPOSIT' ? 'bg-green-500/10 text-green-500' :
+                                                        item.type === 'WITHDRAW' ? 'bg-red-500/10 text-red-500' :
+                                                            item.type === 'COLLECTIVE' ? 'bg-blue-500/10 text-blue-500' :
+                                                                item.type === 'ARBITRAGE' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                                    'bg-purple-500/10 text-purple-500'
+                                                    }`}>
+                                                    {item.label || (item.type === 'DEPOSIT' ? 'Depósito' : 'Retiro')}
+                                                </span>
+                                            </td>
+                                            <td className={`px-8 py-6 font-mono font-bold ${isPositive ? 'text-green-500' : isNegative ? 'text-red-500' : 'text-white'}`}>
+                                                {isPositive ? '+' : isNegative ? '-' : ''}{Math.abs(item.amount)} {item.currency}
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-2">
+                                                    {(item.status === 'Pendiente' || item.status === 'En Espera') && <FaClock className="text-yellow-500" size={12} />}
+                                                    {(item.status === 'Aprobado' || item.status === 'Completado' || item.status === 'Exitosa' || item.status === 'Activa') ? <FaCheckCircle className="text-green-500" size={12} /> : null}
+                                                    {(item.status === 'Rechazado' || item.status === 'Fallida') && <FaTimesCircle className="text-red-500" size={12} />}
+                                                    <span className="text-xs font-bold text-slate-300">{item.status}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 text-right font-mono text-[10px] text-slate-500">
+                                                {item.txHash || item.addressOrId || item.poolId || item.id.substring(0, 8)}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 {financialHistory.length === 0 && (
                                     <tr>
                                         <td colSpan="5" className="px-8 py-20 text-center text-slate-500 italic">No se han encontrado registros de transacciones</td>
