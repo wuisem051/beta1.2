@@ -7,8 +7,9 @@ import {
     FaBitcoin, FaKey, FaChartLine, FaExchangeAlt,
     FaBolt, FaCheckCircle, FaExclamationTriangle,
     FaRegClock, FaHistory, FaListUl, FaShieldAlt,
-    FaArrowUp, FaArrowDown, FaSync
+    FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh
 } from 'react-icons/fa';
+import TradingViewWidget from './TradingViewWidget';
 
 const ExchangeContent = () => {
     const { currentUser } = useAuth();
@@ -35,6 +36,34 @@ const ExchangeContent = () => {
     });
     const [recentOrders, setRecentOrders] = useState([]);
     const [orderHistory, setOrderHistory] = useState([]);
+
+    // Chart Layout State
+    const [layout, setLayout] = useState('1'); // '1', '2v', '4', '6'
+    const [charts, setCharts] = useState([
+        { id: 1, symbol: 'BTC/USDT' },
+        { id: 2, symbol: 'ETH/USDT' },
+        { id: 3, symbol: 'BNB/USDT' },
+        { id: 4, symbol: 'SOL/USDT' },
+        { id: 5, symbol: 'XRP/USDT' },
+        { id: 6, symbol: 'ADA/USDT' }
+    ]);
+    const [activeChartId, setActiveChartId] = useState(1);
+
+    // Sync tradeSymbol with active chart
+    useEffect(() => {
+        const activeChart = charts.find(c => c.id === activeChartId);
+        if (activeChart && activeChart.symbol !== tradeSymbol) {
+            setTradeSymbol(activeChart.symbol);
+        }
+    }, [activeChartId, charts]);
+
+    const updateChartSymbol = (chartId, newSymbol) => {
+        setCharts(prev => prev.map(c => c.id === chartId ? { ...c, symbol: newSymbol } : c));
+        if (chartId === activeChartId) {
+            setTradeSymbol(newSymbol);
+        }
+    };
+
 
     const tabs = [
         { id: 'trading', label: 'Terminal', icon: <FaBolt /> },
@@ -443,6 +472,86 @@ const ExchangeContent = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="lg:col-span-12 mb-8">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-black text-white italic tracking-tight flex items-center gap-2">
+                                    <FaChartLine className="text-blue-500" />
+                                    ANÁLISIS DE MERCADO
+                                </h2>
+                                <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5">
+                                    <button
+                                        onClick={() => setLayout('1')}
+                                        className={`p-2 rounded-lg transition-all ${layout === '1' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                        title="Vista Simple"
+                                    >
+                                        <FaSquare />
+                                    </button>
+                                    <button
+                                        onClick={() => setLayout('2v')}
+                                        className={`p-2 rounded-lg transition-all ${layout === '2v' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                        title="Vista Dividida"
+                                    >
+                                        <FaColumns />
+                                    </button>
+                                    <button
+                                        onClick={() => setLayout('4')}
+                                        className={`p-2 rounded-lg transition-all ${layout === '4' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                        title="Grid 4"
+                                    >
+                                        <FaThLarge />
+                                    </button>
+                                    <button
+                                        onClick={() => setLayout('6')}
+                                        className={`p-2 rounded-lg transition-all ${layout === '6' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                        title="Grid 6"
+                                    >
+                                        <FaTh />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className={`grid gap-4 ${layout === '1' ? 'grid-cols-1' :
+                                    layout === '2v' ? 'grid-cols-1 lg:grid-cols-2' :
+                                        layout === '4' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' :
+                                            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                                }`}>
+                                {charts.slice(0, layout === '1' ? 1 : layout === '2v' ? 2 : layout === '4' ? 4 : 6).map((chart) => (
+                                    <div
+                                        key={chart.id}
+                                        onClick={() => setActiveChartId(chart.id)}
+                                        className={`bg-slate-900/40 rounded-3xl border overflow-hidden shadow-2xl relative group transition-all duration-300 ${activeChartId === chart.id
+                                                ? 'border-blue-500 ring-1 ring-blue-500/50 shadow-blue-500/20'
+                                                : 'border-white/5 hover:border-white/10'
+                                            }`}
+                                        style={{ height: layout === '1' ? '500px' : '400px' }}
+                                    >
+                                        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start pointer-events-none">
+                                            <div className="flex gap-2 pointer-events-auto">
+                                                <select
+                                                    value={chart.symbol}
+                                                    onChange={(e) => updateChartSymbol(chart.id, e.target.value)}
+                                                    className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer transition-all ${activeChartId === chart.id
+                                                            ? 'bg-blue-600/80 backdrop-blur-md border-white/10 text-white hover:bg-blue-500'
+                                                            : 'bg-slate-900/80 backdrop-blur-md border-white/10 text-slate-400 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {tradingPairs.map(p => (
+                                                        <option key={p} value={p} className="bg-slate-900 text-white">{p}</option>
+                                                    ))}
+                                                </select>
+                                                {activeChartId === chart.id && (
+                                                    <div className="px-2 py-1 bg-blue-500 rounded-lg text-[8px] font-black text-white uppercase tracking-widest flex items-center animate-in zoom-in">
+                                                        ACTIVO
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <TradingViewWidget symbol={chart.symbol.replace('/', '')} theme="dark" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Balance Section - 4 Columns */}
                         <div className="lg:col-span-4 space-y-6">
                             <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-6 h-full relative overflow-hidden group`}>
@@ -594,7 +703,7 @@ const ExchangeContent = () => {
                                                     <button
                                                         key={pair}
                                                         type="button"
-                                                        onClick={() => setTradeSymbol(pair)}
+                                                        onClick={() => updateChartSymbol(activeChartId, pair)}
                                                         className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 ${tradeSymbol === pair
                                                             ? 'bg-blue-600/10 border-blue-500 text-white shadow-xl shadow-blue-600/10'
                                                             : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40 hover:text-slate-300'
