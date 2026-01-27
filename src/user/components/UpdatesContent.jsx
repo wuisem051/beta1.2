@@ -9,6 +9,21 @@ const UpdatesContent = ({ styles }) => {
 
     const systemUpdates = [
         {
+            id: 'trading-suite-v2.6',
+            title: "Suite de Trading Profesional & Limpieza",
+            description: "Actualización masiva de la experiencia de trading. Hemos limpiado el Dashboard principal para un enfoque más minimalista y potenciado la sección de Exchange con herramientas de análisis técnico y gestión de pares personalizada.",
+            type: "feature",
+            version: "v2.6",
+            tag: "TRADING",
+            changes: [
+                "Herramientas de dibujo activadas en gráficos TradingView",
+                "Soporte nativo para LTC/USDT y DOGE/USDT",
+                "Nueva función para agregar cualquier par de trading",
+                "Limpieza de widgets antiguos del Dashboard principal"
+            ],
+            createdAt: new Date()
+        },
+        {
             id: 'unified-activity-v2.5',
             title: "Historial Unificado & Transferencias",
             description: "Hemos unificado toda tu actividad financiera en un solo lugar. Además, ahora puedes invertir en el fondo colectivo directamente desde tu billetera con un solo clic, simplificando la gestión de tu capital.",

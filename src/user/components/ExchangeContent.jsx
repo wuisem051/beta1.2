@@ -43,9 +43,9 @@ const ExchangeContent = () => {
         { id: 1, symbol: 'BTC/USDT' },
         { id: 2, symbol: 'ETH/USDT' },
         { id: 3, symbol: 'BNB/USDT' },
-        { id: 4, symbol: 'SOL/USDT' },
-        { id: 5, symbol: 'XRP/USDT' },
-        { id: 6, symbol: 'ADA/USDT' }
+        { id: 4, symbol: 'LTC/USDT' },
+        { id: 5, symbol: 'DOGE/USDT' },
+        { id: 6, symbol: 'SOL/USDT' }
     ]);
     const [activeChartId, setActiveChartId] = useState(1);
 
@@ -72,17 +72,38 @@ const ExchangeContent = () => {
         { id: 'config', label: 'Credenciales', icon: <FaKey /> }
     ];
 
-    // Trading pairs list
-    const tradingPairs = [
+    // Trading pairs state
+    const [availablePairs, setAvailablePairs] = useState([
         'BTC/USDT',
         'ETH/USDT',
-        'ARPA/USDT',
+        'LTC/USDT',
+        'DOGE/USDT',
         'BNB/USDT',
         'SOL/USDT',
         'XRP/USDT',
         'ADA/USDT',
-        'DOGE/USDT'
-    ];
+        'ARPA/USDT'
+    ]);
+    const [newPairInput, setNewPairInput] = useState('');
+    const [isAddingPair, setIsAddingPair] = useState(false);
+
+    const handleAddPair = () => {
+        if (!newPairInput) return;
+        const pair = newPairInput.toUpperCase().trim();
+        // Basic validation: ensure it has a slash or at least 3 chars (we'll assume /USDT if missing, or enforce format)
+        // Let's enforce /USDT for simplicity or just auto-append if missing context, but TradingView acts best with full pairs.
+        // We'll trust the user or better yet, assume format like "COIN/USDT".
+        let finalPair = pair;
+        if (!finalPair.includes('/')) {
+            finalPair = `${finalPair}/USDT`;
+        }
+
+        if (!availablePairs.includes(finalPair)) {
+            setAvailablePairs([...availablePairs, finalPair]);
+            setNewPairInput('');
+            setIsAddingPair(false);
+        }
+    };
 
     const getCryptoIcon = (symbol) => {
         const coin = symbol.split('/')[0].toLowerCase();
@@ -511,17 +532,17 @@ const ExchangeContent = () => {
                             </div>
 
                             <div className={`grid gap-4 ${layout === '1' ? 'grid-cols-1' :
-                                    layout === '2v' ? 'grid-cols-1 lg:grid-cols-2' :
-                                        layout === '4' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' :
-                                            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                                layout === '2v' ? 'grid-cols-1 lg:grid-cols-2' :
+                                    layout === '4' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2' :
+                                        'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                                 }`}>
                                 {charts.slice(0, layout === '1' ? 1 : layout === '2v' ? 2 : layout === '4' ? 4 : 6).map((chart) => (
                                     <div
                                         key={chart.id}
                                         onClick={() => setActiveChartId(chart.id)}
                                         className={`bg-slate-900/40 rounded-3xl border overflow-hidden shadow-2xl relative group transition-all duration-300 ${activeChartId === chart.id
-                                                ? 'border-blue-500 ring-1 ring-blue-500/50 shadow-blue-500/20'
-                                                : 'border-white/5 hover:border-white/10'
+                                            ? 'border-blue-500 ring-1 ring-blue-500/50 shadow-blue-500/20'
+                                            : 'border-white/5 hover:border-white/10'
                                             }`}
                                         style={{ height: layout === '1' ? '500px' : '400px' }}
                                     >
@@ -531,17 +552,39 @@ const ExchangeContent = () => {
                                                     value={chart.symbol}
                                                     onChange={(e) => updateChartSymbol(chart.id, e.target.value)}
                                                     className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer transition-all ${activeChartId === chart.id
-                                                            ? 'bg-blue-600/80 backdrop-blur-md border-white/10 text-white hover:bg-blue-500'
-                                                            : 'bg-slate-900/80 backdrop-blur-md border-white/10 text-slate-400 hover:text-white'
+                                                        ? 'bg-blue-600/80 backdrop-blur-md border-white/10 text-white hover:bg-blue-500'
+                                                        : 'bg-slate-900/80 backdrop-blur-md border-white/10 text-slate-400 hover:text-white'
                                                         }`}
                                                 >
-                                                    {tradingPairs.map(p => (
+                                                    {availablePairs.map(p => (
                                                         <option key={p} value={p} className="bg-slate-900 text-white">{p}</option>
                                                     ))}
                                                 </select>
                                                 {activeChartId === chart.id && (
-                                                    <div className="px-2 py-1 bg-blue-500 rounded-lg text-[8px] font-black text-white uppercase tracking-widest flex items-center animate-in zoom-in">
-                                                        ACTIVO
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="px-2 py-1 bg-blue-500 rounded-lg text-[8px] font-black text-white uppercase tracking-widest flex items-center animate-in zoom-in">
+                                                            ACTIVO
+                                                        </div>
+                                                        {/* Quick Add Pair Small Input for active chart */}
+                                                        <div className="relative group/add">
+                                                            <button
+                                                                className="w-6 h-6 bg-slate-800 hover:bg-blue-600 rounded flex items-center justify-center text-white text-xs transition-colors"
+                                                                title="Agregar par personalizado"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const pair = prompt("Ingresa el par (ej: PEPE/USDT):");
+                                                                    if (pair) {
+                                                                        const formatted = pair.toUpperCase().trim();
+                                                                        const final = formatted.includes('/') ? formatted : `${formatted}/USDT`;
+                                                                        if (!availablePairs.includes(final)) {
+                                                                            setAvailablePairs([...availablePairs, final]);
+                                                                        }
+                                                                        updateChartSymbol(chart.id, final);
+                                                                    }
+                                                                }}
+                                                            >+
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
