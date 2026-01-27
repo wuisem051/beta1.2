@@ -742,7 +742,7 @@ const ExchangeContent = () => {
                                             {/* Pair Selector Modern */}
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block ml-1">Instrumento</label>
                                             <div className="grid grid-cols-2 gap-2.5">
-                                                {tradingPairs.map(pair => (
+                                                {availablePairs.map(pair => (
                                                     <button
                                                         key={pair}
                                                         type="button"
