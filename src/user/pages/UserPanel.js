@@ -28,7 +28,7 @@ import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
 import { FaHistory } from 'react-icons/fa';
-import TradingViewWidget from '../components/TradingViewWidget';
+
 import UpdatesContent from '../components/UpdatesContent';
 
 // Componentes de las sub-secciones
@@ -516,158 +516,11 @@ const PlanTradingContent = ({ styles }) => {
   );
 };
 
-const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, withdrawalsHistory, estimatedDailyUSD, chartHeight = 450, chartLayouts = [], onAddSymbol, onRemoveSymbol, chartColumns = 0, onChartLayoutChange, dashboardMaxWidth = 1400, onDashboardWidthChange, isSidebarHidden = false }) => {
+// DashboardContent stripped of chart logic
+const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHistory, dashboardMaxWidth, onDashboardWidthChange, isSidebarHidden = false }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-
-  const getCryptoIcon = (symbol) => {
-    // Custom icons mapping
-    const customIcons = {
-      'ARPA': 'https://s2.coinmarketcap.com/static/img/coins/64x64/4636.png'
-    };
-
-    // Handling symbols like BTCUSDT or BTC/USDT
-    const coin = symbol.includes('/') ? symbol.split('/')[0] : symbol.replace('USDT', '');
-
-    // Check specific map first
-    if (customIcons[coin]) return customIcons[coin];
-
-    return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin.toLowerCase()}.png`;
-  };
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [binanceSymbols, setBinanceSymbols] = useState([]);
-  const [filteredSymbols, setFilteredSymbols] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    const fetchSymbols = async () => {
-      try {
-        const response = await fetch('https://api.binance.com/api/v3/ticker/price');
-        const data = await response.json();
-        const symbols = data.map(item => item.symbol);
-        setBinanceSymbols(symbols);
-      } catch (err) {
-        console.error("Error fetching Binance symbols:", err);
-      }
-    };
-    fetchSymbols();
-  }, []);
-
-  const [bingxSymbols, setBingxSymbols] = useState([]);
-
-  // Lista de Acciones y Commodities Populares
-  const stockSymbols = [
-    'NASDAQ:AAPL', 'NASDAQ:TSLA', 'NASDAQ:NVDA', 'NASDAQ:MSFT', 'NASDAQ:GOOGL',
-    'NASDAQ:AMZN', 'NASDAQ:META', 'NASDAQ:NFLX', 'NASDAQ:AMD', 'NASDAQ:INTC',
-    'NASDAQ:COIN', 'NASDAQ:MSTR', 'NYSE:GME', 'NYSE:AMC', 'NYSE:BABA',
-    'NYSE:PLTR', 'NYSE:UBER', 'NYSE:DIS', 'NYSE:JPM', 'NYSE:V',
-    'FOREXCOM:SPX500', 'FOREXCOM:NSXUSD', 'FOREXCOM:DJI', 'FOREXCOM:UK100',
-    'FOREXCOM:XAUUSD', 'FOREXCOM:XAGUSD'
-  ];
-
-  useEffect(() => {
-    const fetchBingXSymbols = async () => {
-      try {
-        // Intentar obtener símbolos de BingX (Spot)
-        // Nota: Si hay problemas de CORS, esto podría fallar en localhost, 
-        // pero funcionará si la API permite acceso público o en producción con proxy.
-        // Usamos un endpoint público común.
-        const response = await fetch('https://open-api.bingx.com/openApi/spot/v1/symbols');
-        const data = await response.json();
-        if (data.code === 0 && data.data && data.data.symbols) {
-          // data.data.symbols es un array de objetos con propiedad 'symbol' (ej: BTC-USDT)
-          const symbols = data.data.symbols.map(s => s.symbol);
-          setBingxSymbols(symbols);
-        }
-      } catch (err) {
-        console.warn("No se pudieron cargar símbolos de BingX (posible bloqueo CORS o API):", err);
-      }
-    };
-    fetchBingXSymbols();
-  }, []);
-
-  useEffect(() => {
-    if (searchQuery.length > 1) {
-      const q = searchQuery.toLowerCase();
-
-      // Filter Binance (Top 5)
-      const binanceResults = binanceSymbols
-        .filter(s => s.toLowerCase().includes(q))
-        .slice(0, 5)
-        .map(s => ({ symbol: s, display: s, source: 'BINANCE', type: 'crypto' }));
-
-      // Filter BingX (Top 5)
-      const bingxResults = bingxSymbols
-        .filter(s => s.toLowerCase().includes(q))
-        .slice(0, 5)
-        // TradingView widget necesita el prefijo BINGX: para símbolos de BingX si hay ambigüedad
-        // pero BingX usa guion (BTC-USDT). TradingView suele reconocer BINGX:BTC-USDT
-        .map(s => ({ symbol: `BINGX:${s}`, display: s, source: 'BINGX', type: 'crypto' }));
-
-      // Filter Stocks (Top 5)
-      const stockResults = stockSymbols
-        .filter(s => s.toLowerCase().includes(q))
-        .slice(0, 5)
-        .map(s => ({ symbol: s, display: s.split(':')[1], source: 'STOCK', type: 'stock' }));
-
-      setFilteredSymbols([...binanceResults, ...bingxResults, ...stockResults]);
-    } else {
-      setFilteredSymbols([]);
-    }
-  }, [searchQuery, binanceSymbols, bingxSymbols]);
-
-  const [isResizing, setIsResizing] = useState(null); // { index, startY, startX, startHeight, startSpan }
-  const [tempLayout, setTempLayout] = useState(null);
-
-  const handleStartResize = (e, index) => {
-    e.preventDefault();
-    const layout = chartLayouts[index];
-    if (!layout) return;
-
-    setIsResizing({
-      index,
-      startY: e.pageY,
-      startX: e.pageX,
-      startHeight: layout.height || chartHeight,
-      startSpan: layout.span || 1
-    });
-    setTempLayout({ ...layout });
-    document.body.style.cursor = 'nwse-resize';
-  };
-
-  useEffect(() => {
-    if (!isResizing) return;
-
-    const handleMouseMove = (e) => {
-      const deltaY = e.pageY - isResizing.startY;
-      const deltaX = e.pageX - isResizing.startX;
-
-      const newHeight = Math.max(300, Math.min(1200, isResizing.startHeight + deltaY));
-
-      // Horizontal resize logic: estimate span change based on cursor movement
-      // Assuming a rough column width of 350px
-      const spanDelta = Math.round(deltaX / 350);
-      const newSpan = Math.max(1, Math.min(chartColumns || 3, isResizing.startSpan + spanDelta));
-
-      setTempLayout(prev => ({ ...prev, height: newHeight, span: newSpan }));
-    };
-
-    const handleMouseUp = () => {
-      onChartLayoutChange(isResizing.index, tempLayout);
-      setIsResizing(null);
-      setTempLayout(null);
-      document.body.style.cursor = 'default';
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing, tempLayout, chartColumns]);
 
   const isVIP = useMemo(() => {
     if (userBalances.vipStatus !== 'active' || !userBalances.vipExpiry) {
@@ -706,6 +559,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isResizingWidth, onDashboardWidthChange]);
+
 
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
@@ -970,127 +824,7 @@ const DashboardContent = ({ chartData, userBalances, styles, paymentsHistory, wi
         </div>
       </div>
 
-      {/* Advanced Symbol Search */}
-      <div className="mb-6 px-2 relative">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Gráficos en Tiempo Real</h3>
-        </div>
-        <div className="flex gap-2 relative">
-          <div className="relative flex-1 group">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar par en Binance (ej: ETHUSDT, SOLUSDT...)"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setIsSearching(true);
-              }}
-              onFocus={() => setIsSearching(true)}
-              className="w-full bg-slate-900/40 border border-white/5 focus:border-blue-500/50 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder-slate-600 outline-none transition-all"
-            />
-            {isSearching && filteredSymbols.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden max-h-[300px] overflow-y-auto custom-scrollbar">
-                {filteredSymbols.map((item, idx) => (
-                  <button
-                    key={`${item.source}-${item.symbol}-${idx}`}
-                    onClick={() => {
-                      onAddSymbol(item.symbol);
-                      setSearchQuery('');
-                      setIsSearching(false);
-                    }}
-                    className="w-full px-6 py-3 text-left hover:bg-blue-600/20 text-slate-300 hover:text-white text-sm font-bold flex justify-between items-center transition-colors border-b border-white/5 last:border-0"
-                  >
-                    <span>{item.display}</span>
-                    <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${item.source === 'BINANCE' ? 'bg-yellow-500/20 text-yellow-500' :
-                      item.source === 'BINGX' ? 'bg-blue-500/20 text-blue-500' :
-                        'bg-purple-500/20 text-purple-500'
-                      }`}>
-                      {item.source}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-            {searchQuery && isSearching && filteredSymbols.length === 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-[100] text-center">
-                <p className="text-slate-500 text-xs italic">No se encontraron resultados</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div
-        className={styles.tradingViewGrid}
-        style={{
-          gridTemplateColumns: chartColumns > 0 ? `repeat(${chartColumns}, 1fr)` : undefined,
-          gap: '1.5rem'
-        }}
-      >
-        {chartLayouts.map((layout, index) => {
-          const isCurrentlyResizing = isResizing?.index === index;
-          const currentH = isCurrentlyResizing ? tempLayout.height : (layout.height || chartHeight);
-          const currentSpan = isCurrentlyResizing ? tempLayout.span : (layout.span || 1);
-
-          return (
-            <div
-              key={`${layout.symbol}-${index}`}
-              className={styles.tradingViewCard}
-              style={{
-                height: `${currentH + 70}px`,
-                position: 'relative',
-                gridColumn: `span ${currentSpan}`,
-                transition: isCurrentlyResizing ? 'none' : 'all 0.3s ease'
-              }}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-2xl bg-blue-600/10 flex items-center justify-center border border-white/5 overflow-hidden">
-                    <img
-                      src={getCryptoIcon(layout.symbol)}
-                      alt={layout.symbol}
-                      className="w-5 h-5 object-contain"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/generic.png';
-                      }}
-                    />
-                  </div>
-                  <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>{layout.symbol}</h3>
-                </div>
-                <button
-                  onClick={() => onRemoveSymbol(layout.symbol)}
-                  className="text-slate-600 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-xl transition-all"
-                  title="Eliminar gráfico"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                </button>
-              </div>
-              <div className={styles.tradingViewContainer} style={{ height: `${currentH}px` }}>
-                <TradingViewWidget symbol={layout.symbol} theme={darkMode ? "dark" : "light"} interval={layout.symbol.includes('.D') ? "60" : (layout.interval || "60")} />
-              </div>
-
-              {/* Corner 2D Resize Handle */}
-              <div
-                onMouseDown={(e) => handleStartResize(e, index)}
-                className="absolute bottom-2 right-2 w-6 h-6 cursor-nwse-resize group flex items-end justify-end p-1 z-10"
-                title="Arrastra para cambiar ancho y alto"
-              >
-                <div className="w-2 h-2 border-r-2 border-b-2 border-white/20 group-hover:border-blue-500 transition-colors"></div>
-                <div className="absolute w-1 h-1 bg-white/10 group-hover:bg-blue-400 bottom-1 right-1 rounded-full"></div>
-              </div>
-            </div>
-          );
-        })}
-        {chartLayouts.length === 0 && (
-          <div className="col-span-full py-20 text-center bg-slate-900/40 border border-white/5 rounded-3xl">
-            <p className="text-slate-500 font-bold">No has añadido ningún par. Utiliza el buscador arriba para comenzar.</p>
-          </div>
-        )}
-      </div>
 
       {/* SEÑALES DE TRADING (Dashboard) */}
       <div className={styles.sectionCard} style={{ marginBottom: '1.5rem' }}>
@@ -1620,12 +1354,10 @@ const ReferralsContent = ({ styles }) => {
   );
 };
 
-const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumns, onChartColumnsChange, dashboardMaxWidth, onDashboardWidthChange, userBalances }) => {
+const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, userBalances }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
   const { showError, showSuccess } = useError(); // Usar el contexto de errores
   const { currentUser } = useAuth();
-  const [localChartHeight, setLocalChartHeight] = useState(chartHeight || 450);
-  const [localChartColumns, setLocalChartColumns] = useState(chartColumns || 0);
   const [localDashboardWidth, setLocalDashboardWidth] = useState(dashboardMaxWidth);
   const [isVIPSet, setIsVIPSet] = useState(false);
   const [contactEmail, setContactEmail] = useState(currentUser?.email || '');
@@ -1787,9 +1519,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
       }
 
       // Guardar preferencias si cambiaron
-      if (localChartHeight !== chartHeight || localChartColumns !== chartColumns || localDashboardWidth !== dashboardMaxWidth) {
-        onChartHeightChange(localChartHeight);
-        onChartColumnsChange(localChartColumns);
+      if (localDashboardWidth !== dashboardMaxWidth) {
         onDashboardWidthChange(localDashboardWidth);
         showSuccess('Preferencias de visualización actualizadas correctamente.');
       }
@@ -2208,82 +1938,36 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Altura de Gráficas */}
-                <div className="p-8 bg-slate-900/40 rounded-3xl border border-white/5">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tamaño de Gráficos</p>
-                      <p className="text-xl font-black text-blue-400 mt-1">{localChartHeight}px</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 14l5-5 5 5" /></svg>
-                    </div>
+
+
+              {/* Ancho Máximo Dashboard */}
+              <div className="col-span-1 md:col-span-2 p-8 bg-slate-900/40 rounded-3xl border border-white/5">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ancho Máximo del Panel</p>
+                    <p className="text-xl font-black text-indigo-400 mt-1">{localDashboardWidth}px</p>
                   </div>
-                  <input
-                    type="range"
-                    min="300"
-                    max="800"
-                    step="10"
-                    value={localChartHeight}
-                    onChange={(e) => setLocalChartHeight(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                  />
-                  <div className="flex justify-between mt-4">
-                    <span className="text-[9px] font-bold text-slate-600 uppercase">Pequeño</span>
-                    <span className="text-[9px] font-bold text-slate-600 uppercase">Grande</span>
+                  <div className="px-3 py-1 bg-indigo-600/10 rounded-full border border-indigo-500/20">
+                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
+                      {localDashboardWidth > 1920 ? 'Ultra Wide' : localDashboardWidth > 1400 ? 'Cinema' : 'Standard'}
+                    </span>
                   </div>
                 </div>
-
-                {/* Columnas */}
-                <div className="p-8 bg-slate-900/40 rounded-3xl border border-white/5">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Columnas por Fila</p>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[0, 1, 2, 3].map((val) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setLocalChartColumns(val)}
-                        className={`aspect-square flex flex-col items-center justify-center rounded-2xl transition-all border-2 ${localChartColumns === val
-                          ? 'bg-blue-600 border-blue-400 text-white shadow-xl shadow-blue-600/30'
-                          : 'bg-slate-800 border-white/5 text-slate-500 hover:border-white/10 hover:text-slate-300'
-                          }`}
-                      >
-                        <span className="text-base font-black">{val === 0 ? 'A' : val}</span>
-                        <span className="text-[7px] font-bold uppercase mt-1">{val === 0 ? 'AUTO' : 'COL'}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Ancho Máximo Dashboard */}
-                <div className="col-span-1 md:col-span-2 p-8 bg-slate-900/40 rounded-3xl border border-white/5">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ancho Máximo del Panel</p>
-                      <p className="text-xl font-black text-indigo-400 mt-1">{localDashboardWidth}px</p>
-                    </div>
-                    <div className="px-3 py-1 bg-indigo-600/10 rounded-full border border-indigo-500/20">
-                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
-                        {localDashboardWidth > 1920 ? 'Ultra Wide' : localDashboardWidth > 1400 ? 'Cinema' : 'Standard'}
-                      </span>
-                    </div>
-                  </div>
-                  <input
-                    type="range"
-                    min="800"
-                    max="2560"
-                    step="20"
-                    value={localDashboardWidth}
-                    onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                  />
-                  <div className="flex justify-between mt-4">
-                    <span className="text-[9px] font-bold text-slate-600 uppercase">Compacto</span>
-                    <span className="text-[9px] font-bold text-slate-600 uppercase">Máximo (2.5K)</span>
-                  </div>
+                <input
+                  type="range"
+                  min="800"
+                  max="2560"
+                  step="20"
+                  value={localDashboardWidth}
+                  onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                />
+                <div className="flex justify-between mt-4">
+                  <span className="text-[9px] font-bold text-slate-600 uppercase">Compacto</span>
+                  <span className="text-[9px] font-bold text-slate-600 uppercase">Máximo (2.5K)</span>
                 </div>
               </div>
+
 
               <div className="mt-8">
                 <button
@@ -2350,7 +2034,7 @@ const SettingsContent = ({ styles, chartHeight, onChartHeightChange, chartColumn
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
@@ -2373,14 +2057,6 @@ const UserPanel = () => {
     vipStatus: 'none',
     vipExpiry: null,
   });
-  const [chartHeight, setChartHeight] = useState(450);
-  const [chartLayouts, setChartLayouts] = useState([
-    { symbol: 'BTCUSDT', height: 500, span: 2 },
-    { symbol: 'ETHUSDT', height: 450, span: 1 },
-    { symbol: 'LTCUSDT', height: 450, span: 1, interval: '15' },
-    { symbol: 'BTC.D', height: 400, span: 2 }
-  ]);
-  const [chartColumns, setChartColumns] = useState(2); // 2 columns for better organization
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
   const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1600); // Default 1600px for wider charts
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
@@ -2521,14 +2197,6 @@ const UserPanel = () => {
           displayName: userData.displayName || '',
           profilePhotoUrl: userData.profilePhotoUrl || '',
         });
-        setChartHeight(userData.preferences?.chartHeight || 450);
-        setChartLayouts(userData.preferences?.chartLayouts || [
-          { symbol: 'BTCUSDT', height: 500, span: 2 },
-          { symbol: 'ETHUSDT', height: 450, span: 1 },
-          { symbol: 'LTCUSDT', height: 450, span: 1, interval: '15' },
-          { symbol: 'BTC.D', height: 400, span: 2 }
-        ]);
-        setChartColumns(userData.preferences?.chartColumns || 2);
         setDashboardMaxWidth(userData.preferences?.dashboardMaxWidth || 1600);
         setUserPaymentAddresses(userData.paymentAddresses || {}); // Actualizar direcciones de pago
         console.log(`UserPanel: Datos de usuario, perfil y direcciones cargados para ${currentUser.uid}.`);
@@ -2681,40 +2349,7 @@ const UserPanel = () => {
     }
   }
 
-  const handleAddSymbol = async (symbol) => {
-    if (chartLayouts.find(l => l.symbol === symbol)) return;
-    const newLayouts = [...chartLayouts, { symbol, height: chartHeight, span: 1 }];
-    setChartLayouts(newLayouts);
-    if (currentUser?.uid) {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userDocRef, {
-        preferences: { chartLayouts: newLayouts }
-      }, { merge: true });
-    }
-  };
 
-  const handleRemoveSymbol = async (symbol) => {
-    const newLayouts = chartLayouts.filter(l => l.symbol !== symbol);
-    setChartLayouts(newLayouts);
-    if (currentUser?.uid) {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userDocRef, {
-        preferences: { chartLayouts: newLayouts }
-      }, { merge: true });
-    }
-  };
-
-  const handleUpdateChartLayout = async (index, newLayout) => {
-    const newLayouts = [...chartLayouts];
-    newLayouts[index] = newLayout;
-    setChartLayouts(newLayouts);
-    if (currentUser?.uid) {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userDocRef, {
-        preferences: { chartLayouts: newLayouts }
-      }, { merge: true });
-    }
-  };
 
   const showNavbar = useMemo(() => {
     // Definimos explícitamente dónde SÍ debe aparecer el Navbar
@@ -2738,25 +2373,7 @@ const UserPanel = () => {
     );
   }, [location.pathname]);
 
-  const handleUpdateChartHeight = async (newHeight) => {
-    setChartHeight(newHeight);
-    if (currentUser?.uid) {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userDocRef, {
-        preferences: { chartHeight: newHeight }
-      }, { merge: true });
-    }
-  };
 
-  const handleUpdateChartColumns = async (newColumns) => {
-    setChartColumns(newColumns);
-    if (currentUser?.uid) {
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userDocRef, {
-        preferences: { chartColumns: newColumns }
-      }, { merge: true });
-    }
-  };
 
   const handleUpdateDashboardWidth = async (newWidth) => {
     setDashboardMaxWidth(newWidth);
@@ -2807,7 +2424,7 @@ const UserPanel = () => {
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>
-          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
+          <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
           <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
           <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} /> {/* Nueva ruta para Portafolio de Trading */}
@@ -2824,9 +2441,9 @@ const UserPanel = () => {
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
-          <Route path="settings/*" element={<SettingsContent styles={styles} chartHeight={chartHeight} onChartHeightChange={handleUpdateChartHeight} chartColumns={chartColumns} onChartColumnsChange={handleUpdateChartColumns} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
+          <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
-          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} chartHeight={chartHeight} chartLayouts={chartLayouts} onAddSymbol={handleAddSymbol} onRemoveSymbol={handleRemoveSymbol} chartColumns={chartColumns} onChartLayoutChange={handleUpdateChartLayout} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
+          <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
         </Routes>
       </MainContent>
     </div>

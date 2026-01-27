@@ -20,6 +20,7 @@ function TradingViewWidget({ symbol, theme = 'dark', interval = '15' }) {
           "locale": "es",
           "allow_symbol_change": true,
           "calendar": false,
+          "hide_side_toolbar": false,
           "support_host": "https://www.tradingview.com"
         }`;
             container.current.innerHTML = '';
