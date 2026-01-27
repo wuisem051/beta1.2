@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, limit, where, getDocs, doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, limit, where, getDocs, doc, updateDoc, serverTimestamp, Timestamp, deleteDoc, writeBatch } from 'firebase/firestore';
+import { FaHistory, FaRocket, FaBug, FaMagic, FaTrash, FaTrashAlt, FaEraser } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 const ChatManagement = () => {
@@ -123,6 +124,47 @@ const ChatManagement = () => {
         }
     };
 
+    const handleDeleteMessage = async (msgId) => {
+        if (!window.confirm("¿Estás seguro de que deseas eliminar este mensaje?")) return;
+
+        const collName = activeTab === 'public' ? 'vipChat' : 'privateVipMessages';
+        try {
+            await deleteDoc(doc(db, collName, msgId));
+        } catch (err) {
+            console.error("Error al eliminar mensaje:", err);
+            alert("Error al eliminar mensaje: " + err.message);
+        }
+    };
+
+    const handleResetChat = async () => {
+        const chatName = activeTab === 'public' ? 'PÚBLICO' : `PRIVADO con ${selectedRoom?.displayName || selectedRoom?.username}`;
+        if (!window.confirm(`⚠️ ADVERTENCIA: ¿Estás seguro de que deseas BORRAR TODOS los mensajes del chat ${chatName}? Esta acción es irreversible.`)) return;
+
+        setIsLoading(true);
+        try {
+            const collName = activeTab === 'public' ? 'vipChat' : 'privateVipMessages';
+            const q = activeTab === 'public'
+                ? query(collection(db, collName))
+                : query(collection(db, collName), where('userId', '==', selectedRoom.userId));
+
+            const snapshot = await getDocs(q);
+            const batch = writeBatch(db);
+
+            snapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+            alert("Chat reiniciado con éxito.");
+        } catch (err) {
+            console.error("Error al reiniciar chat:", err);
+            alert("Error al reiniciar chat: " + err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     return (
         <div className="flex flex-col h-full bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
             {/* Header / Tabs */}
@@ -139,6 +181,19 @@ const ChatManagement = () => {
                 >
                     Chats Privados
                 </button>
+
+                <div className="flex-1"></div>
+
+                {(activeTab === 'public' || (activeTab === 'private' && selectedRoom)) && (
+                    <button
+                        onClick={handleResetChat}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-red-600/10 hover:bg-red-600 border border-red-500/20 text-red-500 hover:text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+                        title="Borrar todos los mensajes"
+                    >
+                        <FaEraser />
+                        <span className="hidden sm:inline">Reiniciar Chat</span>
+                    </button>
+                )}
             </div>
 
             <div className="flex flex-1 overflow-hidden">
@@ -194,9 +249,18 @@ const ChatManagement = () => {
                                             <div className={`p-3 rounded-2xl text-xs font-medium shadow-sm ${msg.isAdmin ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}`}>
                                                 {msg.text}
                                             </div>
-                                            <span className="text-[9px] text-slate-600 mt-1 px-2">
-                                                {msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[9px] text-slate-600 px-2">
+                                                    {msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleDeleteMessage(msg.id)}
+                                                    className="p-1 text-slate-700 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Eliminar mensaje"
+                                                >
+                                                    <FaTrashAlt size={10} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
