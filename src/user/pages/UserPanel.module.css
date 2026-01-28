@@ -1,29 +1,31 @@
 /* Estilos modernos para UserPanel.module.css - ELITE REDESIGN */
 
 :root {
-  --bg-main: #020617;
-  --bg-card: rgba(15, 23, 42, 0.6);
-  --accent-glow: rgba(59, 130, 246, 0.3);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --bg-main: #0b0e11;
+  --bg-binance-dark: #12161c;
+  --bg-binance-card: #1e2329;
+  --bg-binance-item: #2b3139;
+  --binance-yellow: #fcd535;
+  --binance-yellow-hover: #f0b90b;
+  --text-primary: #eaecef;
+  --text-secondary: #848e9c;
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --accent-glow: rgba(252, 213, 53, 0.1);
 }
 
 .userPanelContainer {
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-main);
-  background-image:
-    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
+  color: var(--text-primary);
   transition: background-color 0.5s ease;
 }
 
-/* Glassmorphism Elite */
+/* Glassmorphism Binance Style */
 .glassBase {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: var(--bg-binance-card);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Header & Title */

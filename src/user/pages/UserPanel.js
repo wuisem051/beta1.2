@@ -521,6 +521,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [showBalance, setShowBalance] = useState(true);
 
   const isVIP = useMemo(() => {
     if (userBalances.vipStatus !== 'active' || !userBalances.vipExpiry) {
@@ -530,36 +531,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
     return expiry > now;
   }, [userBalances.vipStatus, userBalances.vipExpiry]);
-
-  // Dashboard Width Resizing Logic
-  const [isResizingWidth, setIsResizingWidth] = useState(false);
-  const handleWidthMouseDown = (e) => {
-    e.preventDefault();
-    setIsResizingWidth(true);
-    document.body.style.cursor = 'ew-resize';
-  };
-
-  useEffect(() => {
-    if (!isResizingWidth) return;
-    const handleMouseMove = (e) => {
-      const viewportWidth = window.innerWidth;
-      const mouseX = e.pageX;
-      const distanceFromCenter = Math.abs(mouseX - (viewportWidth / 2));
-      const newWidth = Math.max(800, Math.min(viewportWidth - 40, distanceFromCenter * 2));
-      onDashboardWidthChange(newWidth);
-    };
-    const handleMouseUp = () => {
-      setIsResizingWidth(false);
-      document.body.style.cursor = 'default';
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizingWidth, onDashboardWidthChange]);
-
 
   const [signals, setSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
@@ -572,7 +543,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     let unsubscribeTrading = () => { };
     let unsubscribeArbitrage = () => { };
 
-    // 1. Fetch Arbitrage Earnings (Real portfolio earnings)
     const arbitrageQuery = query(
       collection(db, 'userArbitragePools'),
       where('userId', '==', currentUser.uid)
@@ -580,8 +550,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
     unsubscribeArbitrage = onSnapshot(arbitrageQuery, (arbitrageSnapshot) => {
       const arbProfit = arbitrageSnapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().earnings) || 0), 0);
-
-      // 2. Fetch Global Trading History (Simulated signal profits) if VIP
       if (isVIP) {
         const tradingQuery = query(collection(db, 'tradingHistory'));
         unsubscribeTrading = onSnapshot(tradingQuery, (tradingSnapshot) => {
@@ -599,422 +567,172 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     };
   }, [currentUser, isVIP]);
 
-  const [realProfitChartData, setRealProfitChartData] = useState({
-    labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-    datasets: [{
-      label: 'Ganancias Netas (USD)',
-      data: [0, 0, 0, 0, 0, 0, 0],
-      backgroundColor: 'rgba(59, 130, 246, 0.5)',
-      borderColor: '#3b82f6',
-      borderWidth: 2,
-      borderRadius: 12,
-      hoverBackgroundColor: '#3b82f6',
-    }]
-  });
-
-  useEffect(() => {
-    if (!currentUser?.uid) return;
-
-    const tradesRef = collection(db, 'users', currentUser.uid, 'userTrades');
-    const q = query(tradesRef, orderBy('executedAt', 'asc'), limit(50));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const trades = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        executedAt: doc.data().executedAt?.toDate() || new Date()
-      }));
-
-      // Agrupar por día de la semana para el gráfico simple (o ultimas 7 ejecuciones)
-      const dayData = [0, 0, 0, 0, 0, 0, 0];
-      const today = new Date();
-
-      trades.forEach(trade => {
-        const tradeDate = trade.executedAt;
-        // Solo trades de los ultimos 7 días para simplificar el gráfico semanal
-        const diffTime = Math.abs(today - tradeDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays <= 7) {
-          const dayIndex = tradeDate.getDay(); // 0 is Sunday
-          // Convert to Monday focus: Mon(1) ... Sun(0) -> 0..6
-          const reportIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-          dayData[reportIndex] += (parseFloat(trade.projectedProfit) || 0);
-        }
-      });
-
-      setRealProfitChartData({
-        labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
-        datasets: [{
-          label: 'Ganancias Netas (USD)',
-          data: dayData,
-          backgroundColor: 'rgba(34, 197, 94, 0.4)',
-          borderColor: '#22c55e',
-          borderWidth: 2,
-          borderRadius: 12,
-          hoverBackgroundColor: '#22c55e',
-          fill: true,
-          tension: 0.4
-        }]
-      });
-    });
-
-    return () => unsubscribe();
-  }, [currentUser]);
-
-
-  // Calcular porcentaje de ganancia
-  const calculateProfitPercentage = (type, entryPrice, takeProfit) => {
-    const entry = parseFloat(entryPrice);
-    const tp = parseFloat(takeProfit);
-
-    if (isNaN(entry) || isNaN(tp) || entry === 0) {
-      return 'N/A';
-    }
-
-    let percentage;
-    if (type === 'Compra') {
-      percentage = ((tp - entry) / entry) * 100;
-    } else { // Venta
-      percentage = ((entry - tp) / entry) * 100;
-    }
-
-    return percentage.toFixed(2) + '%';
-  };
-
   // Fetch signals logic
   useEffect(() => {
-    // Check VIP status logic (optional, but good to have if we only want VIPs to see it,
-    // though the request implies moving it to dashboard for visibility)
-    // For now, we'll fetch for everyone but maybe visually distinguish or limit if needed.
-    // Assuming we want to show it.
-
     setIsLoadingSignals(true);
-    // Limit to recent signals for the dashboard to keep it "compact" and "organized"
     const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'), limit(3));
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedSignals = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt.toDate(),
-      })).filter(s => s.status !== 'Exitosa' && s.status !== 'Finalizada'); // Filtro para activas
-
+      })).filter(s => s.status !== 'Exitosa' && s.status !== 'Finalizada');
       setSignals(fetchedSignals);
       setIsLoadingSignals(false);
     }, (err) => {
       console.error("Error fetching signals for dashboard:", err);
       setIsLoadingSignals(false);
     });
-
     return () => unsubscribe();
   }, []);
 
-
   const vipStatusLabel = useMemo(() => {
     const status = userBalances.vipStatus || 'none';
-    if (status === 'none') return 'Sin Plan';
-
-    // Si tenemos el nombre del plan en userBalances lo usamos
-    if (userBalances.vipPlanName) {
-      return `VIP-${userBalances.vipPlanName}`;
-    }
-
-    // Fallback basado en el status
+    if (status === 'none') return 'Usuario habitual';
+    if (userBalances.vipPlanName) return `VIP-${userBalances.vipPlanName}`;
     return status.charAt(0).toUpperCase() + status.slice(1);
   }, [userBalances.vipStatus, userBalances.vipPlanName]);
-
-  const lastTransactionInfo = useMemo(() => {
-    const lastPayment = paymentsHistory.length > 0 ? paymentsHistory[0] : null;
-    const lastWithdrawal = withdrawalsHistory.length > 0 ? withdrawalsHistory[0] : null;
-
-    if (lastPayment && lastWithdrawal) {
-      return lastPayment.createdAt > lastWithdrawal.createdAt
-        ? `Recibido: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency}`
-        : `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency}`;
-    } else if (lastPayment) {
-      return `Recibido: ${lastPayment.amount.toFixed(8)} ${lastPayment.currency}`;
-    } else if (lastWithdrawal) {
-      return `Retiro: ${lastWithdrawal.amount.toFixed(8)} ${lastWithdrawal.currency}`;
-    }
-    return "Sin actividad";
-  }, [paymentsHistory, withdrawalsHistory]);
 
   return (
     <div
       className={styles.dashboardContent}
       style={{
         maxWidth: isSidebarHidden ? '98%' : `${dashboardMaxWidth}px`,
-        padding: isSidebarHidden ? '1rem 0.5rem' : '1.5rem',
         margin: '0 auto',
-        position: 'relative',
-        transition: 'all 0.3s ease'
+        padding: '2rem 1rem'
       }}
     >
-      {/* Dashboard Width Resizer - Interactive Handle at the Top Right */}
-      <div
-        onMouseDown={handleWidthMouseDown}
-        className="absolute -right-2 top-0 bottom-0 w-4 cursor-ew-resize group z-[60] flex items-center justify-center"
-        title="Arrastra para ajustar el ancho del Dashboard"
-      >
-        <div className="h-24 w-1.5 bg-blue-500/10 group-hover:bg-blue-600/40 rounded-full transition-all flex flex-col items-center justify-center gap-1 shadow-lg backdrop-blur-sm border border-white/5">
-          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
-          <div className="w-1 h-4 bg-white/40 rounded-full"></div>
-          <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+      {/* Profile Header */}
+      <div className="flex flex-col md:flex-row items-center gap-6 mb-8 p-6 bg-[#1e2329] rounded-2xl border border-white/5">
+        <div className="w-20 h-20 rounded-full bg-[#fcd535] flex items-center justify-center overflow-hidden border-4 border-[#2b3139]">
+          {userBalances.profilePhotoUrl ? (
+            <img src={userBalances.profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1e2329" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+          )}
         </div>
-        <div className="absolute top-1/2 -translate-y-1/2 right-6 bg-slate-900/90 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-2xl">
-          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8L22 12L18 16"></path><path d="M6 8L2 12L6 16"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-            AJUSTAR ANCHO: {Math.round(dashboardMaxWidth)}px
-          </p>
+        <div className="flex-1 text-center md:text-left">
+          <h2 className="text-xl font-bold text-white mb-1">{userBalances.displayName || userBalances.username || currentUser?.email}</h2>
+          <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-slate-400">
+            <span className="flex items-center gap-1">UID: <span className="text-white">{currentUser?.uid?.substring(0, 8)}</span></span>
+            <span className="flex items-center gap-1">Nivel VIP: <span className="text-[#fcd535]">{vipStatusLabel}</span></span>
+          </div>
         </div>
-      </div>
-
-      <div className={styles.mainContentHeader}>
-        <div>
-          <h1 className={styles.mainContentTitle}>Panel de Control</h1>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            Sincronización de Datos en Tiempo Real
-          </p>
-        </div>
-        <div className="flex gap-4 mt-6 md:mt-0">
-          <div className="flex flex-col items-end">
-            <span className="text-[8px] text-slate-500 font-black uppercase tracking-[0.2em]">Última Actualización</span>
-            <span className="text-[10px] text-white font-mono">{new Date().toLocaleTimeString()}</span>
+        <div className="flex gap-4">
+          <div className="text-center">
+            <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Siguiendo</p>
+            <p className="text-lg font-bold text-white">3</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Seguidores</p>
+            <p className="text-lg font-bold text-white">28</p>
           </div>
         </div>
       </div>
 
-      <div className={styles.statsGrid}>
-        {/* Miembro VIP */}
-        <div className={styles.statCard}>
-          <div className={styles.statIconBlue}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>
-          </div>
-          <h3 className={styles.statTitle}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle></svg>
-            Nivel de Cuenta
-          </h3>
-          <p className={styles.statValueBlue}>{vipStatusLabel}</p>
-        </div>
-        {/* P/L Total */}
-        <div className={styles.statCard}>
-          <div className={totalProfit >= 0 ? styles.statIconGreen : styles.statIconAccent} style={{ background: totalProfit >= 0 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: totalProfit >= 0 ? '#22c55e' : '#ef4444' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-          </div>
-          <h3 className={styles.statTitle}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            P/L Total (USD)
-          </h3>
-          <p className={totalProfit >= 0 ? styles.statValueGreen : styles.statValueAccent} style={{ color: totalProfit >= 0 ? '#22c55e' : '#ef4444' }}>
-            {totalProfit >= 0 ? '+$' : '-$'}{Math.abs(totalProfit).toFixed(2)}
-          </p>
-        </div>
-        {/* Señales Recientes */}
-        <div className={styles.statCard}>
-          <div className={styles.statIconAccent}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
-          </div>
-          <h3 className={styles.statTitle}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 8L22 12L18 16"></path><path d="M6 8L2 12L6 16"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-            Señales Activas
-          </h3>
-          <p className={styles.statValueAccent}>{signals.length}</p>
-        </div>
-      </div>
-
-
-
-      {/* SEÑALES DE TRADING (Dashboard) */}
-      <div className={styles.sectionCard} style={{ marginBottom: '1.5rem' }}>
-        <div className="flex justify-between items-center mb-4">
+      {/* Balance Card Section */}
+      <div className="bg-[#1e2329] p-8 rounded-2xl border border-white/5 mb-8">
+        <div className="flex justify-between items-start mb-6">
           <div>
-            <h3 className={styles.sectionTitle} style={{ fontSize: '1.25rem', marginBottom: 0 }}>Señales en Tiempo Real</h3>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Últimas Oportunidades del Mercado</p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm text-slate-400">Balance estimado</span>
+              <button onClick={() => setShowBalance(!showBalance)} className="text-slate-500 hover:text-white transition-colors">
+                {showBalance ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                )}
+              </button>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-white">
+                {showBalance ? (userBalances.balanceUSD + (parseFloat(userBalances.balanceBTC) * 100000 || 0)).toLocaleString() : '******'}
+              </span>
+              <span className="text-lg font-bold text-slate-400">USDT <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="inline ml-1"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+            </div>
+            <p className="text-sm text-slate-500 mt-1">≈ {showBalance ? (userBalances.balanceUSD + (parseFloat(userBalances.balanceBTC) * 100000 || 0)).toFixed(2) : '******'} $</p>
+            <div className="flex items-center gap-2 mt-4">
+              <span className="text-xs text-slate-400">PnL de hoy</span>
+              <span className={`text-xs font-bold ${totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} $({((totalProfit / Math.max(1, userBalances.balanceUSD)) * 100).toFixed(2)}%)
+              </span>
+            </div>
           </div>
-          <button
-            onClick={() => navigate('/user/mining-portfolio')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-lg text-[9px] font-black text-blue-400 uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-300 group"
-          >
-            <FaHistory className="transition-transform group-hover:rotate-[-20deg]" />
-            Historial de Operaciones
+          <div className="flex gap-2">
+            <button onClick={() => navigate('/user/deposits')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Depositar</button>
+            <button onClick={() => navigate('/user/withdrawals')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Retirar</button>
+            <button onClick={() => navigate('/user/exchange')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Efectivo</button>
+          </div>
+        </div>
+
+        {/* Mini Chart Mockup using SVG to emulate the line in image */}
+        <div className="h-20 w-full mt-8 flex items-end opacity-50">
+          <svg className="w-full h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
+            <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 90 T 400 40" fill="none" stroke="#fcd535" strokeWidth="2" />
+            <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#fcd535" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#fcd535" stopOpacity="0" />
+            </linearGradient>
+            <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 90 T 400 40 L 400 100 L 0 100 Z" fill="url(#chartGradient)" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Markets Section */}
+      <div className="bg-[#1e2329] p-6 rounded-2xl border border-white/5">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-white">Mercados</h3>
+          <button onClick={() => navigate('/user/miners')} className="text-xs text-slate-400 hover:text-[#fcd535] transition-colors flex items-center gap-1">
+            Más <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
 
-        {isLoadingSignals ? (
-          <div className={styles.noDataText}>Cargando señales...</div>
-        ) : signals.length === 0 ? (
-          <div className={styles.noDataText}>No hay señales activas recientes.</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {signals.filter(s => s.status !== 'Exitosa').map(signal => (
-              <div key={signal.id} className={styles.glassBase} style={{
-                padding: '1.5rem',
-                borderRadius: '2rem',
-                borderLeft: `6px solid ${signal.type === 'Compra' ? '#22c55e' : '#ef4444'}`,
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="font-extrabold text-white text-xl tracking-tighter">{signal.asset}</h4>
-                    <div className="flex gap-2 items-center mt-2">
-                      <span className="text-[9px] font-black uppercase px-3 py-1 rounded-full" style={{
-                        background: signal.type === 'Compra' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                        color: signal.type === 'Compra' ? '#4ade80' : '#f87171',
-                        border: `1px solid ${signal.type === 'Compra' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
-                      }}>
-                        {signal.type}
-                      </span>
-                      <span className="text-[9px] uppercase text-slate-500 font-black tracking-widest">{signal.status || 'Activa'}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-[10px] text-slate-600 font-mono mb-1">{signal.createdAt.toLocaleDateString()}</span>
-                    <span className="text-[9px] text-slate-500 font-black tracking-tighter">{signal.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 my-5">
-                  <div className="bg-slate-900/40 rounded-2xl p-3 border border-white/5 backdrop-blur-sm group/price transition-all hover:border-blue-500/30">
-                    <span className="block text-slate-500 text-[8px] uppercase font-black tracking-[0.2em] mb-1">Entrada</span>
-                    <div className="font-mono text-white font-black text-base group-hover/price:text-blue-400 transition-colors">{signal.entryPrice}</div>
-                  </div>
-                  <div className="bg-emerald-500/5 rounded-2xl p-3 border border-emerald-500/10 backdrop-blur-sm group/target transition-all hover:border-emerald-500/30">
-                    <span className="block text-emerald-500/60 text-[8px] uppercase font-black tracking-[0.2em] mb-1 flex items-center gap-1">
-                      Target 🎯
-                    </span>
-                    <div className="font-mono text-emerald-400 font-black text-base group-hover/target:scale-105 origin-left transition-transform">{signal.takeProfit}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-5">
-                  <div className="bg-slate-950/20 rounded-xl p-3 flex flex-col justify-center">
-                    <span className="text-slate-600 text-[8px] font-black uppercase mb-1">Stop Loss</span>
-                    <span className="font-mono text-red-400 font-bold text-[11px] flex items-center gap-1">
-                      {signal.stopLoss}
-                      <span className="text-[9px] opacity-40">({signal.stopLossPercentage}%)</span>
-                    </span>
-                  </div>
-                  <div className="bg-slate-950/20 rounded-xl p-3 flex flex-col justify-center">
-                    <span className="text-slate-600 text-[8px] font-black uppercase mb-1">Riesgo</span>
-                    <span className="font-mono text-amber-500 font-bold text-[11px]">${signal.maxInvestment} MAX</span>
-                  </div>
-                </div>
-                {signal.notes && (
-                  <p className="mt-3 text-xs text-slate-300 italic truncate border-t border-white/5 pt-2">"{signal.notes}"</p>
-                )}
-
-                <button
-                  onClick={() => handleExecuteTrade(signal)}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:scale-[1.02] active:scale-95 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3 group relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-all group-hover:rotate-12 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  EJECUTAR TRADE ELITE
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-
-      <div className={styles.chartAndStatsGrid}>
-        {/* Rendimiento Histórico */}
-        <div className={styles.chartCard} style={{
-          background: 'radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%)',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className={styles.chartTitle} style={{ marginBottom: '0.2rem' }}>Ganancias Netas Reales</h3>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Basado en tus trades ejecutados</p>
-            </div>
-            <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[9px] font-black uppercase tracking-widest animate-pulse">
-              LIVE DATA
-            </div>
-          </div>
-          <div className={styles.chartContainer}>
-            <Bar
-              data={realProfitChartData}
-              options={{
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: darkMode ? '#1e293b' : '#ffffff',
-                    titleColor: darkMode ? '#f1f5f9' : '#0f172a',
-                    bodyColor: darkMode ? '#f1f5f9' : '#0f172a',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                  }
-                },
-                scales: {
-                  y: { grid: { color: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } },
-                  x: { grid: { display: false } }
-                }
-              }}
-            />
-          </div>
+        {/* Tabs mockup */}
+        <div className="flex gap-6 border-b border-white/5 mb-6 overflow-x-auto no-scrollbar">
+          <button className="pb-4 text-sm font-bold text-[#fcd535] border-b-2 border-[#fcd535] whitespace-nowrap">Holding</button>
+          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Populares</button>
+          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Nueva inclusión</button>
+          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Favoritos</button>
         </div>
 
-        {/* Estado de Cuenta */}
-        <div className={styles.statsCard}>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
-            </div>
-            <h3 className={styles.statsTitle} style={{ marginBottom: 0 }}>Estado de Cuenta</h3>
+        <div className="space-y-4">
+          <div className="grid grid-cols-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2">
+            <span>Moneda</span>
+            <span className="text-right">Importe</span>
+            <span className="text-right">Precio</span>
+            <span className="text-right">Cambio 24h</span>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-white/[0.08]">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Balance Disponible</span>
-              <span className="text-xl font-black text-white hover:text-blue-400 transition-colors">${userBalances.balanceUSD.toFixed(2)}</span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5 transition-all hover:bg-white/[0.08]">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Última Actividad</span>
-              <span className="text-[11px] font-bold text-slate-300 max-w-[150px] text-right truncate">{lastTransactionInfo}</span>
-            </div>
-
-            <div className="pt-4 mt-2">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Seguridad de la Cuenta</span>
-                </div>
-                <span className="text-[10px] font-black text-green-500 uppercase">Protegida</span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verificación KYC</span>
-                </div>
-                <span className="text-[10px] font-black text-blue-500 uppercase">Completada</span>
-              </div>
-            </div>
-
-            {userBalances.vipStatus !== 'none' && (
-              <div className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-600/5 border border-amber-500/20 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-125 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                </div>
-                <div className="relative z-10 flex items-center justify-between">
+          {isLoadingSignals ? (
+            <div className="text-center py-8 text-slate-500">Cargando mercados...</div>
+          ) : signals.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">No hay activos activos.</div>
+          ) : (
+            signals.map(signal => (
+              <div key={signal.id} className="grid grid-cols-4 items-center p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[10px] text-[#fcd535]">
+                    {signal.asset.substring(0, 2)}
+                  </div>
                   <div>
-                    <span className="block text-[8px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Beneficios Activos</span>
-                    <span className="text-sm font-black text-white">Suscripción VIP {userBalances.vipPlanName}</span>
-                  </div>
-                  <div className="text-amber-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    <p className="text-sm font-bold text-white">{signal.asset}</p>
+                    <p className="text-[10px] text-slate-500">USDT</p>
                   </div>
                 </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-white">{signal.maxInvestment || '0.00'}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-white">{signal.entryPrice}</p>
+                </div>
+                <div className="text-right">
+                  <span className={`text-xs font-bold ${signal.type === 'Compra' ? 'text-green-500' : 'text-red-500'}`}>
+                    {signal.type === 'Compra' ? '+' : '-'}{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>
