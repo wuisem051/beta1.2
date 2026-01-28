@@ -27,7 +27,7 @@ import useFormValidation from '../../hooks/useFormValidation'; // Importar useFo
 import { useError } from '../../context/ErrorContext'; // Importar useError
 import minersData from '../../data/miners'; // Importar la lista de mineros
 import VIPPlanDisplay from '../components/VIPPlanDisplay';
-import { FaHistory } from 'react-icons/fa';
+import { FaHistory, FaUserCircle, FaRegEye, FaRegEyeSlash, FaCrown } from 'react-icons/fa';
 
 import UpdatesContent from '../components/UpdatesContent';
 
