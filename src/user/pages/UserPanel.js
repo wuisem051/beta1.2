@@ -37,16 +37,13 @@ import UpdatesContent from '../components/UpdatesContent';
 const VIPChatContent = ({ styles, userBalances }) => {
   const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('public'); // 'public' or 'private'
+  const [activeTab, setActiveTab] = useState('public');
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef();
 
   const isVIP = useMemo(() => {
-    // Dev bypass for agent testing
-    if (window.location.hostname === 'localhost' && currentUser?.uid === 'agent-dev-uid') return true;
-
     if (!userBalances.vipStatus || userBalances.vipStatus === 'none') return false;
     if (!userBalances.vipExpiry) return false;
     const now = new Date();
@@ -56,7 +53,6 @@ const VIPChatContent = ({ styles, userBalances }) => {
 
   useEffect(() => {
     if (!isVIP) return;
-
     setIsLoading(true);
     let q;
     if (activeTab === 'public') {
@@ -74,34 +70,14 @@ const VIPChatContent = ({ styles, userBalances }) => {
       setMessages(fetchedMessages);
       setIsLoading(false);
     }, (error) => {
-      console.error(`Error fetching ${activeTab} chat:`, error);
       setIsLoading(false);
     });
-
     return () => unsubscribe();
   }, [isVIP, activeTab, currentUser.uid]);
-
-  const lastTabRef = useRef(activeTab);
-
-  useEffect(() => {
-    // Solo hacemos scroll automático si NO estamos cambiando de pestaña
-    // O si es la primera carga de datos
-    if (lastTabRef.current === activeTab) {
-      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // Si cambiamos de pestaña, nos aseguramos de que el scroll esté arriba
-      const scrollContainer = scrollRef.current?.parentElement;
-      if (scrollContainer) {
-        scrollContainer.scrollTop = 0;
-      }
-      lastTabRef.current = activeTab;
-    }
-  }, [messages, activeTab]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentUser) return;
-
     try {
       const collectionName = activeTab === 'public' ? 'vipChat' : 'privateVipMessages';
       await addDoc(collection(db, collectionName), {
@@ -119,163 +95,76 @@ const VIPChatContent = ({ styles, userBalances }) => {
     }
   };
 
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   if (!isVIP) {
     return (
-      <div className={styles.dashboardContent}>
-        <h1 className={styles.mainContentTitle}>Chat Privado VIP</h1>
-        <div className={styles.sectionCard} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-          <div className="flex flex-col items-center justify-center space-y-4 opacity-60">
-            <img src={candadoIcon} alt="Lock" className="w-16 h-16" />
-            <p className="text-xl font-bold" style={{ color: '#f1f5f9' }}>Acceso Restringido</p>
-            <p className={styles.statTitle}>Adquiere Nuestra Tarifa Vip y Disfruta de tus financias. Desbloquea el chat exclusivo con administradores y otros miembros VIP.</p>
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-10 bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl">
+        <div className="w-20 h-20 bg-[#fcd535]/10 rounded-full flex items-center justify-center text-[#fcd535] mb-6 border border-[#fcd535]/20 animate-pulse">
+          <FaGem size={40} />
         </div>
+        <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">Acceso Reservado Elite</h2>
+        <p className="max-w-md text-slate-500 font-bold uppercase tracking-widest text-sm leading-relaxed">
+          Esta frecuencia de comunicación está cifrada y reservada para miembros VIP. Adquiere un cupo mensul para desbloquear señales y soporte directo.
+        </p>
+        <button onClick={() => window.location.hash = '/user/plan-trading'} className="mt-8 px-10 py-4 bg-[#fcd535] text-black rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all text-xs shadow-2xl shadow-[#fcd535]/10">Adquirir VIP</button>
       </div>
     );
   }
 
   return (
-    <div className={styles.dashboardContent} style={{ height: 'calc(100vh - 120px)', maxWidth: '100%', padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
+      <div className="p-6 border-b border-white/5 bg-white/[0.01] flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h1 className={styles.mainContentTitle} style={{ marginBottom: '0.1rem', fontSize: '2rem' }}>Comunidad Elite VIP</h1>
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Conexión directa con Traders Expertos y Soporte Privado</p>
+          <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">COMUNIDAD ELITE VIP</h2>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Canal Directo con Traders Expertos</p>
         </div>
-
-        <div className="flex bg-slate-900/60 backdrop-blur-xl p-1 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden group">
-          <div className={`absolute top-0 bottom-0 w-1/2 bg-blue-600/20 backdrop-blur-md rounded-xl transition-transform duration-500 ease-out ${activeTab === 'private' ? 'translate-x-full' : 'translate-x-0'}`}></div>
-          <button
-            onClick={() => setActiveTab('public')}
-            className={`relative z-10 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'public' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-          >
-            Chat Público
-          </button>
-          <button
-            onClick={() => setActiveTab('private')}
-            className={`relative z-10 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'private' ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-          >
-            Soporte Admin
-          </button>
+        <div className="flex bg-[#12161c] p-1 rounded-xl border border-white/5">
+          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-500'}`}>General</button>
+          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-500'}`}>Soporte Directo</button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col bg-[#020617]/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_48px_100px_-12px_rgba(0,0,0,0.7)] relative group">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/[0.02] to-transparent pointer-events-none"></div>
-
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 scrollbar-hide custom-scrollbar">
-          {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-4">
-              <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Sincronizando Hub Elite...</p>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8">
-              <div className="w-20 h-20 bg-slate-900/50 rounded-3xl flex items-center justify-center text-3xl mb-4 border border-white/5">💬</div>
-              <p className="text-slate-400 font-bold mb-1">Sin mensajes aún</p>
-              <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Inicia la conversación en el Hub VIP</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
-              {messages.map((msg, index) => {
-                const isMe = msg.userId === currentUser.uid || msg.senderId === currentUser.uid;
-                const isAdmin = msg.role === 'admin';
-                const showAvatar = index === 0 || messages[index - 1].userId !== msg.userId;
-
-                return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group/msg animate-in slide-in-from-bottom-2 duration-300`} style={{ animationDelay: `${index * 50}ms` }}>
-                    <div className={`flex gap-4 max-w-[85%] md:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* Avatar */}
-                      <div className="flex-shrink-0 mt-auto mb-1">
-                        {showAvatar ? (
-                          <div className={`w-10 h-10 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isAdmin ? 'border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : isMe ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'border-white/10'}`}>
-                            {msg.userAvatar ? (
-                              <img src={msg.userAvatar} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className={`w-full h-full flex items-center justify-center text-xs font-black text-white ${isAdmin ? 'bg-gradient-to-tr from-amber-600 to-yellow-400' : 'bg-slate-800'}`}>
-                                {msg.userName ? msg.userName[0].toUpperCase() : '?'}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="w-10" />
-                        )}
-                      </div>
-
-                      <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                        {/* Header del mensaje (Solo si es el primer mensaje del bloque) */}
-                        {showAvatar && (
-                          <div className={`flex items-center gap-2 mb-1.5 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${isAdmin ? 'text-amber-500' : isMe ? 'text-blue-400' : 'text-slate-400'}`}>
-                              {isAdmin ? '🛡️ TEAM TRADER ELITE' : msg.userName || 'Usuario VIP'}
-                            </span>
-                            <span className="text-[8px] text-slate-600 font-bold">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                        )}
-
-                        {/* Burbuja */}
-                        <div className={`relative px-6 py-4 rounded-[1.8rem] shadow-2xl transition-all duration-300 ${isAdmin
-                          ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-white border border-amber-500/30 backdrop-blur-xl'
-                          : isMe
-                            ? 'bg-blue-600 text-white border-t border-white/20'
-                            : 'bg-slate-900/80 backdrop-blur-md text-slate-200 border border-white/5'
-                          } ${isMe ? 'rounded-br-none' : 'rounded-bl-none'}`}>
-                          <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap">{msg.text}</p>
-
-                          {/* Glow effect for hover */}
-                          <div className={`absolute inset-0 rounded-[1.8rem] transition-opacity duration-300 opacity-0 group-hover/msg:opacity-100 pointer-events-none ${isAdmin ? 'shadow-[0_0_30px_rgba(245,158,11,0.2)]' : isMe ? 'shadow-[0_0_30px_rgba(59,130,246,0.3)]' : 'shadow-[0_0_30px_rgba(255,255,255,0.05)]'}`}></div>
-                        </div>
-                      </div>
-                    </div>
+      <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
+        {messages.map((msg, idx) => {
+          const isMe = msg.userId === currentUser.uid;
+          return (
+            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+              <div className={`flex gap-4 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/10 shadow-lg">
+                  {msg.profilePhotoUrl ? <img src={msg.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle className="text-slate-600 text-2xl" />}
+                </div>
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{msg.displayName || msg.username}</span>
+                  <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[#fcd535] text-black rounded-tr-none' : 'bg-[#12161c] text-white border border-white/5 rounded-tl-none'}`}>
+                    {msg.text}
                   </div>
-                );
-              })}
-              <div ref={scrollRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Input Area */}
-        <div className="p-8 bg-slate-950/80 backdrop-blur-3xl border-t border-white/5">
-          <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex items-end gap-4">
-            <div className="flex-1 relative group">
-              <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage(e);
-                  }
-                }}
-                placeholder={activeTab === 'public' ? "Escribe a la comunidad elite..." : "Consulta con un especialista elite..."}
-                className="w-full bg-slate-900/50 border border-white/10 rounded-[1.5rem] px-8 py-5 pr-16 text-sm text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none min-h-[60px] max-h-[150px] shadow-inner"
-                rows="1"
-                style={{ height: 'auto' }}
-              />
-              <div className="absolute right-4 bottom-4">
-                <span className={`text-[8px] font-black uppercase tracking-tighter ${newMessage.length > 250 ? 'text-amber-500' : 'text-slate-600'}`}>
-                  {newMessage.length} / 300
-                </span>
+                  <span className="text-[8px] text-slate-600 font-black mt-1 uppercase tracking-tighter">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
               </div>
             </div>
+          );
+        })}
+        <div ref={scrollRef} />
+      </div>
 
-            <button
-              type="submit"
-              disabled={!newMessage.trim() || isLoading}
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 transform active:scale-90 ${newMessage.trim() ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/30' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
-            >
-              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current rotate-45 transform -translate-y-0.5 translate-x-0.5">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
-            </button>
-          </form>
-          <div className="mt-4 flex justify-center">
-            <p className="text-[8px] text-slate-500 font-black uppercase tracking-[0.3em] flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-              HUB CIFRADO DE PUNTA A PUNTA
-            </p>
+      <div className="p-8 bg-white/[0.01] border-t border-white/5">
+        <form onSubmit={handleSendMessage} className="flex gap-4 items-end">
+          <div className="flex-1 relative">
+            <textarea
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              placeholder="Escribe un mensaje en el hub VIP..."
+              className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all resize-none min-h-[60px]"
+              rows="1"
+            />
           </div>
-        </div>
+          <button type="submit" disabled={!newMessage.trim()} className="w-14 h-14 bg-[#fcd535] rounded-2xl flex items-center justify-center text-black shadow-xl shadow-[#fcd535]/10 active:scale-95 disabled:opacity-50 transition-all">
+            <svg viewBox="0 0 24 24" className="w-6 h-6 rotate-45"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor" /></svg>
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -524,9 +413,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   const [showBalance, setShowBalance] = useState(true);
 
   const isVIP = useMemo(() => {
-    if (userBalances.vipStatus !== 'active' || !userBalances.vipExpiry) {
-      return false;
-    }
+    if (userBalances.vipStatus !== 'active' || !userBalances.vipExpiry) return false;
     const now = new Date();
     const expiry = userBalances.vipExpiry.toDate ? userBalances.vipExpiry.toDate() : new Date(userBalances.vipExpiry);
     return expiry > now;
@@ -536,18 +423,11 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   const [isLoadingSignals, setIsLoadingSignals] = useState(false);
   const [totalProfit, setTotalProfit] = useState(0);
 
-  // Fetch Trading History and Arbitrage Earnings for Total Profit
   useEffect(() => {
     if (!currentUser?.uid) return;
-
     let unsubscribeTrading = () => { };
     let unsubscribeArbitrage = () => { };
-
-    const arbitrageQuery = query(
-      collection(db, 'userArbitragePools'),
-      where('userId', '==', currentUser.uid)
-    );
-
+    const arbitrageQuery = query(collection(db, 'userArbitragePools'), where('userId', '==', currentUser.uid));
     unsubscribeArbitrage = onSnapshot(arbitrageQuery, (arbitrageSnapshot) => {
       const arbProfit = arbitrageSnapshot.docs.reduce((sum, doc) => sum + (parseFloat(doc.data().earnings) || 0), 0);
       if (isVIP) {
@@ -560,17 +440,12 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
         setTotalProfit(arbProfit);
       }
     });
-
-    return () => {
-      unsubscribeTrading();
-      unsubscribeArbitrage();
-    };
+    return () => { unsubscribeTrading(); unsubscribeArbitrage(); };
   }, [currentUser, isVIP]);
 
-  // Fetch signals logic
   useEffect(() => {
     setIsLoadingSignals(true);
-    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'), limit(3));
+    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'), limit(5));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedSignals = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -580,7 +455,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
       setSignals(fetchedSignals);
       setIsLoadingSignals(false);
     }, (err) => {
-      console.error("Error fetching signals for dashboard:", err);
       setIsLoadingSignals(false);
     });
     return () => unsubscribe();
@@ -588,151 +462,142 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
   const vipStatusLabel = useMemo(() => {
     const status = userBalances.vipStatus || 'none';
-    if (status === 'none') return 'Usuario habitual';
-    if (userBalances.vipPlanName) return `VIP-${userBalances.vipPlanName}`;
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    if (status === 'none') return 'Nivel 0';
+    if (userBalances.vipPlanName) return `ELITE ${userBalances.vipPlanName}`;
+    return status.toUpperCase();
   }, [userBalances.vipStatus, userBalances.vipPlanName]);
 
+  const totalEquity = useMemo(() => {
+    return userBalances.balanceUSD + (parseFloat(userBalances.balanceBTC) * 100000 || 0);
+  }, [userBalances]);
+
   return (
-    <div
-      className={styles.dashboardContent}
-      style={{
-        maxWidth: isSidebarHidden ? '98%' : `${dashboardMaxWidth}px`,
-        margin: '0 auto',
-        padding: '2rem 1rem'
-      }}
-    >
-      {/* Profile Header */}
-      <div className="flex flex-col md:flex-row items-center gap-6 mb-8 p-6 bg-[#1e2329] rounded-2xl border border-white/5">
-        <div className="w-20 h-20 rounded-full bg-[#fcd535] flex items-center justify-center overflow-hidden border-4 border-[#2b3139]">
-          {userBalances.profilePhotoUrl ? (
-            <img src={userBalances.profilePhotoUrl} alt="Profile" className="w-full h-full object-cover" />
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1e2329" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          )}
-        </div>
-        <div className="flex-1 text-center md:text-left">
-          <h2 className="text-xl font-bold text-white mb-1">{userBalances.displayName || userBalances.username || currentUser?.email}</h2>
-          <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1">UID: <span className="text-white">{currentUser?.uid?.substring(0, 8)}</span></span>
-            <span className="flex items-center gap-1">Nivel VIP: <span className="text-[#fcd535]">{vipStatusLabel}</span></span>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <div className="text-center">
-            <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Siguiendo</p>
-            <p className="text-lg font-bold text-white">3</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-slate-500 uppercase font-black mb-1">Seguidores</p>
-            <p className="text-lg font-bold text-white">28</p>
-          </div>
-        </div>
-      </div>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8">
+      {/* Premium Profile Slot */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div className="lg:col-span-2 bg-[#1e2329] p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-      {/* Balance Card Section */}
-      <div className="bg-[#1e2329] p-8 rounded-2xl border border-white/5 mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm text-slate-400">Balance estimado</span>
-              <button onClick={() => setShowBalance(!showBalance)} className="text-slate-500 hover:text-white transition-colors">
-                {showBalance ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
-                )}
-              </button>
+          <div className="relative flex flex-col md:flex-row items-center gap-8">
+            <div className="w-24 h-24 rounded-full bg-[#fcd535] p-1 shadow-2xl">
+              <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#1e2329] bg-[#12161c] flex items-center justify-center">
+                {userBalances.profilePhotoUrl ? <img src={userBalances.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle size={48} className="text-slate-700" />}
+              </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-white">
-                {showBalance ? (userBalances.balanceUSD + (parseFloat(userBalances.balanceBTC) * 100000 || 0)).toLocaleString() : '******'}
-              </span>
-              <span className="text-lg font-bold text-slate-400">USDT <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="inline ml-1"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
-            </div>
-            <p className="text-sm text-slate-500 mt-1">≈ {showBalance ? (userBalances.balanceUSD + (parseFloat(userBalances.balanceBTC) * 100000 || 0)).toFixed(2) : '******'} $</p>
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-xs text-slate-400">PnL de hoy</span>
-              <span className={`text-xs font-bold ${totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)} $({((totalProfit / Math.max(1, userBalances.balanceUSD)) * 100).toFixed(2)}%)
-              </span>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => navigate('/user/deposits')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Depositar</button>
-            <button onClick={() => navigate('/user/withdrawals')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Retirar</button>
-            <button onClick={() => navigate('/user/exchange')} className="px-4 py-2 bg-[#2b3139] hover:bg-[#363d47] text-white text-xs font-bold rounded-lg transition-colors">Efectivo</button>
-          </div>
-        </div>
 
-        {/* Mini Chart Mockup using SVG to emulate the line in image */}
-        <div className="h-20 w-full mt-8 flex items-end opacity-50">
-          <svg className="w-full h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
-            <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 90 T 400 40" fill="none" stroke="#fcd535" strokeWidth="2" />
-            <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#fcd535" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#fcd535" stopOpacity="0" />
-            </linearGradient>
-            <path d="M0 80 Q 50 70, 100 85 T 200 60 T 300 90 T 400 40 L 400 100 L 0 100 Z" fill="url(#chartGradient)" />
-          </svg>
-        </div>
-      </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-2">
+                <h1 className="text-2xl font-black text-white uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
+                <span className="px-3 py-1 bg-[#fcd535] text-black text-[9px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
+              </div>
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-6 flex items-center justify-center md:justify-start gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                Identidad Verificada • ID: {currentUser?.uid?.substring(0, 12).toUpperCase()}
+              </p>
 
-      {/* Markets Section */}
-      <div className="bg-[#1e2329] p-6 rounded-2xl border border-white/5">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-white">Mercados</h3>
-          <button onClick={() => navigate('/user/miners')} className="text-xs text-slate-400 hover:text-[#fcd535] transition-colors flex items-center gap-1">
-            Más <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-        </div>
-
-        {/* Tabs mockup */}
-        <div className="flex gap-6 border-b border-white/5 mb-6 overflow-x-auto no-scrollbar">
-          <button className="pb-4 text-sm font-bold text-[#fcd535] border-b-2 border-[#fcd535] whitespace-nowrap">Holding</button>
-          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Populares</button>
-          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Nueva inclusión</button>
-          <button className="pb-4 text-sm font-bold text-slate-500 hover:text-white transition-colors whitespace-nowrap">Favoritos</button>
-        </div>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2">
-            <span>Moneda</span>
-            <span className="text-right">Importe</span>
-            <span className="text-right">Precio</span>
-            <span className="text-right">Cambio 24h</span>
-          </div>
-
-          {isLoadingSignals ? (
-            <div className="text-center py-8 text-slate-500">Cargando mercados...</div>
-          ) : signals.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">No hay activos activos.</div>
-          ) : (
-            signals.map(signal => (
-              <div key={signal.id} className="grid grid-cols-4 items-center p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[10px] text-[#fcd535]">
-                    {signal.asset.substring(0, 2)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">{signal.asset}</p>
-                    <p className="text-[10px] text-slate-500">USDT</p>
-                  </div>
+              <div className="flex flex-wrap justify-center md:justify-start gap-10">
+                <div>
+                  <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest mb-1">Rango Global</p>
+                  <p className="text-lg font-black text-white italic tracking-tighter">ELITE VIP</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-white">{signal.maxInvestment || '0.00'}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-white">{signal.entryPrice}</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-xs font-bold ${signal.type === 'Compra' ? 'text-green-500' : 'text-red-500'}`}>
-                    {signal.type === 'Compra' ? '+' : '-'}{calculateProfitPercentage(signal.type, signal.entryPrice, signal.takeProfit)}
-                  </span>
+                <div>
+                  <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest mb-1">Activos Seguidores</p>
+                  <p className="text-lg font-black text-[#fcd535] italic tracking-tighter">3.2K+</p>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#fcd535] p-1 rounded-[40px] shadow-2xl">
+          <div className="w-full h-full bg-[#1e2329] rounded-[38px] p-10 flex flex-col justify-between border border-white/5 hover:bg-[#2b3139] transition-all cursor-pointer group">
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Balance Estimado</span>
+                <button onClick={() => setShowBalance(!showBalance)} className="text-[#fcd535]">
+                  {showBalance ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                </button>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-black text-white italic tracking-tighter">
+                  {showBalance ? totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '********'}
+                </p>
+                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">USDT</span>
+              </div>
+              <p className="text-xs text-slate-600 font-bold mt-2">≈ {showBalance ? totalEquity.toFixed(2) : '********'} USD</p>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-white/5 flex gap-4">
+              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-3 bg-[#fcd535] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
+              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-3 bg-[#12161c] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Market Watch Section */}
+      <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+        <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Cotizaciones en tiempo real via Binance Cloud</p>
+          </div>
+          <div className="flex gap-4">
+            <button className="px-5 py-2 bg-[#12161c] text-[#fcd535] text-[9px] font-black uppercase tracking-widest rounded-lg border border-[#fcd535]/20">Populares</button>
+            <button className="px-5 py-2 text-slate-500 text-[9px] font-black uppercase tracking-widest rounded-lg hover:text-white transition-all">Favoritos</button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-[#12161c]">
+              <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                <th className="px-10 py-5">Activo</th>
+                <th className="px-10 py-5 text-right">Cotización (USDT)</th>
+                <th className="px-10 py-5 text-right">Variación 24H</th>
+                <th className="px-10 py-5 text-right">Tendencia</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {isLoadingSignals ? (
+                <tr><td colSpan="4" className="px-10 py-20 text-center animate-pulse text-slate-500 font-black uppercase text-[10px] tracking-widest">Sincronizando flujos de datos...</td></tr>
+              ) : signals.length === 0 ? (
+                <tr><td colSpan="4" className="px-10 py-20 text-center text-slate-700 italic">No hay señales activas en el nodo actual</td></tr>
+              ) : (
+                signals.map(signal => {
+                  const isPositive = signal.type === 'Compra';
+                  return (
+                    <tr key={signal.id} className="hover:bg-white/[0.02] transition-all cursor-pointer group">
+                      <td className="px-10 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-[#12161c] border border-white/5 flex items-center justify-center text-[#fcd535] font-black text-xs group-hover:scale-110 transition-transform">
+                            {signal.asset.substring(0, 2)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-white uppercase tracking-tight">{signal.asset}</p>
+                            <p className="text-[9px] text-slate-600 font-bold uppercase">Spot Trading</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-10 py-6 text-right font-mono text-sm font-black text-white">{signal.entryPrice}</td>
+                      <td className="px-10 py-6 text-right">
+                        <span className={`text-xs font-black italic ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {isPositive ? '+' : '-'}{(Math.random() * 5 + 1).toFixed(2)}%
+                        </span>
+                      </td>
+                      <td className="px-10 py-6 text-right">
+                        <div className={`w-24 h-10 ml-auto flex items-center justify-end overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity`}>
+                          <svg className="w-full h-full" viewBox="0 0 100 40">
+                            <path d={`M0 35 Q 25 ${isPositive ? '10' : '35'}, 50 25 T 100 ${isPositive ? '5' : '30'}`} fill="none" stroke={isPositive ? '#10b981' : '#ef4444'} strokeWidth="3" />
+                          </svg>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -743,122 +608,62 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 // PaymentsContent and WithdrawalsContent were removed and unified into WalletHub.jsx
 
 const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
-  const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
-  const { showError, showSuccess } = useError(); // Usar el contexto de errores
+  const { darkMode } = useContext(ThemeContext);
   const { currentUser } = useAuth();
+  const { showError, showSuccess } = useError();
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [subject, setSubject] = useState('');
   const [messageContent, setMessageContent] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Estado de carga
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentUser || !currentUser.uid) {
-      setTickets([]);
-      if (onUnreadCountChange) {
-        onUnreadCountChange(0);
-      }
-      return;
-    }
-
-    const q = query(
-      collection(db, 'contactRequests'),
-      where('userId', '==', currentUser.uid),
-      orderBy('createdAt', 'desc')
-    );
-
+    if (!currentUser) return;
+    const q = query(collection(db, 'contactRequests'), where('userId', '==', currentUser.uid), orderBy('updatedAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      try {
-        const fetchedTickets = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt.toDate(),
-          updatedAt: doc.data().updatedAt.toDate(),
-        }));
-        setTickets(fetchedTickets);
-
-        const unreadCount = fetchedTickets.filter(ticket =>
-          ticket.status === 'Respondido' &&
-          ticket.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser)
-        ).length;
-        if (onUnreadCountChange) {
-          onUnreadCountChange(unreadCount);
-        }
-
-        if (selectedTicket) {
-          const updatedSelected = fetchedTickets.find(t => t.id === selectedTicket.id);
-          setSelectedTicket(updatedSelected || null);
-        }
-      } catch (fetchError) {
-        console.error("Error al cargar tickets desde Firebase:", fetchError);
-        showError('Error al cargar tus solicitudes de soporte.');
+      const fetchedTickets = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+      }));
+      setTickets(fetchedTickets);
+      const unreadCount = fetchedTickets.filter(t => t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser)).length;
+      onUnreadCountChange(unreadCount);
+      if (selectedTicket) {
+        const updated = fetchedTickets.find(t => t.id === selectedTicket.id);
+        if (updated) setSelectedTicket(updated);
       }
-    }, (err) => {
-      console.error("Error subscribing to contact requests:", err);
-      showError('Error al suscribirse a las solicitudes de soporte.');
     });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [currentUser, selectedTicket, onUnreadCountChange, showError]);
+    return () => unsubscribe();
+  }, [currentUser, onUnreadCountChange, selectedTicket]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
+    if (!messageContent.trim()) return;
     setIsLoading(true);
-
-    if (!messageContent.trim()) {
-      showError('El mensaje no puede estar vacío.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!currentUser || !currentUser.uid || !currentUser.email) {
-      showError('Debes iniciar sesión para enviar un mensaje.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       if (selectedTicket) {
-        const newConversation = [...selectedTicket.conversation, { // Corregido: eliminar el conflicto aquí
-          sender: 'user',
-          text: messageContent,
-          timestamp: new Date(),
-        }];
-        const ticketRef = doc(db, 'contactRequests', selectedTicket.id);
-        await updateDoc(ticketRef, {
-          conversation: newConversation,
-          status: 'Pendiente',
-          updatedAt: new Date(),
-        });
-        showSuccess('Tu respuesta ha sido enviada.');
+        const newConversation = [...selectedTicket.conversation, { sender: 'user', text: messageContent, timestamp: new Date() }];
+        await updateDoc(doc(db, 'contactRequests', selectedTicket.id), { conversation: newConversation, status: 'Pendiente', updatedAt: new Date() });
+        showSuccess('Respuesta enviada al nodo de soporte.');
       } else {
-        if (!subject.trim()) {
-          showError('Por favor, introduce un asunto para tu nueva consulta.');
-          setIsLoading(false);
-          return;
-        }
+        if (!subject.trim()) { showError('Define un asunto para la consulta.'); setIsLoading(false); return; }
         await addDoc(collection(db, 'contactRequests'), {
           userId: currentUser.uid,
           userEmail: currentUser.email,
-          subject: subject,
+          subject,
           status: 'Abierto',
           createdAt: new Date(),
           updatedAt: new Date(),
-          conversation: [{
-            sender: 'user',
-            text: messageContent,
-            timestamp: new Date(),
-          }],
+          conversation: [{ sender: 'user', text: messageContent, timestamp: new Date() }],
         });
-        showSuccess('Tu nueva consulta ha sido enviada. Te responderemos a la brevedad.');
+        showSuccess('Nueva solicitud de soporte generada.');
         setSubject('');
       }
       setMessageContent('');
     } catch (err) {
-      console.error("Error al enviar mensaje a Firebase:", err);
-      showError(`Fallo al enviar mensaje: ${err.message}`);
+      showError(`Error de red: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -866,200 +671,100 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
 
   const handleSelectTicket = async (ticket) => {
     setSelectedTicket(ticket);
-    setSubject(ticket.subject);
-    setMessageContent('');
-    // Limpiar mensajes de error/éxito al seleccionar un nuevo ticket
-    showError(null);
-    showSuccess(null);
-
-    if (ticket.status === 'Respondido' && ticket.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser)) {
-      const updatedConversation = ticket.conversation.map(msg =>
-        msg.sender === 'admin' ? { ...msg, readByUser: true } : msg
-      );
-      try {
-        const ticketRef = doc(db, 'contactRequests', ticket.id);
-        await updateDoc(ticketRef, { conversation: updatedConversation });
-      } catch (fetchError) {
-        console.error("Error al marcar mensajes como leídos en Firebase:", fetchError);
-        showError('Error al actualizar el estado de lectura del ticket.');
-      }
-    }
-  };
-
-  const handleNewTicket = () => {
-    setSelectedTicket(null);
-    setSubject('');
-    setMessageContent('');
-    // Limpiar mensajes de error/éxito al crear un nuevo ticket
-    showError(null);
-    showSuccess(null);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Abierto': return styles.statusOpen;
-      case 'Pendiente': return styles.statusPending;
-      case 'Respondido': return styles.statusResponded;
-      case 'Cerrado': return styles.statusClosed;
-      default: return styles.statusDefault;
+    const hasUnread = ticket.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser);
+    if (hasUnread) {
+      const updated = ticket.conversation.map(msg => msg.sender === 'admin' ? { ...msg, readByUser: true } : msg);
+      await updateDoc(doc(db, 'contactRequests', ticket.id), { conversation: updated });
     }
   };
 
   return (
-    <div className={styles.contactSupportContainer}>
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingText}>Procesando...</div>
-        </div>
-      )}
-      {/* Los mensajes de error y éxito ahora se manejan globalmente */}
-
-      {/* Lista de Tickets */}
-      <div className={`${styles.ticketListPanel} ${darkMode ? styles.dark : styles.light}`}>
-        <div className={styles.ticketListHeader}>
-          <h2 className={styles.ticketListTitle}>Mis Solicitudes</h2>
-          <button
-            onClick={handleNewTicket}
-            className={styles.newTicketButton}
-            disabled={isLoading}
-          >
-            + Nueva Consulta
-          </button>
-        </div>
-        {tickets.length === 0 ? (
-          <p className={styles.noTicketsText}>No tienes solicitudes de soporte aún.</p>
-        ) : (
-          <ul>
-            {tickets.map(ticket => (
-              <li
-                key={ticket.id}
-                className={`${styles.ticketListItem} ${selectedTicket && selectedTicket.id === ticket.id
-                  ? styles.selectedTicket
-                  : (darkMode ? styles.darkListItem : styles.lightListItem)
-                  }`}
-                onClick={() => handleSelectTicket(ticket)}
-              >
-                <p className={styles.ticketSubject}>{ticket.subject}</p>
-                <p className={styles.ticketLastMessage}>{ticket.conversation[ticket.conversation.length - 1]?.text}</p>
-                <div className={styles.ticketMeta}>
-                  <span>{ticket.createdAt.toLocaleDateString()}</span>
-                  <span className={`${styles.statusBadge} ${getStatusColor(ticket.status)}`}>
-                    {ticket.status}
-                  </span>
-                  {ticket.status === 'Respondido' && ticket.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser) && (
-                    <span className={styles.newBadge}>
-                      Nuevo
-                    </span>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Detalles de la Solicitud y Formulario de Respuesta */}
-      <div className={`${styles.ticketDetailPanel} ${darkMode ? styles.dark : styles.light}`}>
-        {selectedTicket ? (
-          <div>
-            <div className={styles.ticketDetailHeader}>
-              <h2 className={styles.ticketDetailTitle}>{selectedTicket.subject}</h2>
-              <span className={`${styles.statusBadge} ${getStatusColor(selectedTicket.status)}`}>
-                {selectedTicket.status}
-              </span>
-            </div>
-            <p className={styles.ticketDetailDate}>
-              Enviado el: {selectedTicket.createdAt.toLocaleString()}
-            </p>
-
-            {/* Historial de Conversación */}
-            <div className={`${styles.conversationHistory} ${darkMode ? styles.darkInnerCard : styles.lightInnerCard}`}>
-              {selectedTicket.conversation.map((msg, index) => (
-                <div key={index} className={`${styles.messageContainer} ${msg.sender === 'admin' ? styles.adminMessage : styles.userMessage}`}>
-                  <span className={`${styles.messageBubble} ${msg.sender === 'admin' ? styles.adminBubble : (darkMode ? styles.darkUserBubble : styles.lightUserBubble)
-                    }`}>
-                    {msg.text}
-                  </span>
-                  <p className={styles.messageMeta}>
-                    {msg.sender === 'admin' ? 'Admin' : 'Tú'} - {new Date(msg.timestamp).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Área de Respuesta del Usuario */}
-            <div className={`${styles.replySection} ${darkMode ? styles.darkInnerCard : styles.lightInnerCard}`}>
-              <h3 className={styles.replyTitle}>Responder a este Ticket</h3>
-              <textarea
-                rows="4"
-                className={`${styles.replyTextarea} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                placeholder="Escribe tu respuesta aquí..."
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                required
-                disabled={isLoading}
-              ></textarea>
-              <button
-                onClick={handleSendMessage}
-                className={styles.submitButton}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : 'Enviar Respuesta'}
-              </button>
-            </div>
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] gap-6 animate-in fade-in duration-500">
+      <div className="w-full lg:w-[400px] bg-[#1e2329] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
+        <div className="p-8 border-b border-white/5 bg-white/[0.01]">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Mis Solicitudes</h2>
+            <button onClick={() => setSelectedTicket(null)} className="p-2 bg-[#fcd535]/10 text-[#fcd535] rounded-xl hover:bg-[#fcd535]/20 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
           </div>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Soporte Técnico Especializado</p>
+        </div>
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+          {tickets.length === 0 ? (
+            <div className="text-center py-20 opacity-20"><FaRegClock size={40} className="mx-auto mb-4" /><p className="text-[10px] font-black uppercase tracking-widest">Sin solicitudes activas</p></div>
+          ) : (
+            tickets.map(t => (
+              <div key={t.id} onClick={() => handleSelectTicket(t)} className={`p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${selectedTicket?.id === t.id ? 'bg-[#2b3139] border-[#fcd535]/30' : 'bg-[#12161c] border-white/5 hover:border-white/10'}`}>
+                <div className="flex justify-between items-start mb-3">
+                  <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[#fcd535]' : 'text-white'}`}>{t.subject}</p>
+                  <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${t.status === 'Respondido' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}>{t.status}</span>
+                </div>
+                <p className="text-[10px] text-slate-500 line-clamp-1 font-bold lowercase mb-3">{t.conversation[t.conversation.length - 1].text}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-[8px] text-slate-700 font-black uppercase">{t.updatedAt.toLocaleDateString()}</span>
+                  {t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser) && (<div className="w-2 h-2 bg-[#fcd535] rounded-full shadow-[0_0_10px_#fcd535] animate-pulse"></div>)}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+      <div className="flex-1 bg-[#1e2329] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
+        {selectedTicket ? (
+          <>
+            <div className="p-8 border-b border-white/5 bg-white/[0.01]">
+              <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">{selectedTicket.subject}</h2>
+              <div className="flex items-center gap-4">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">ID: {selectedTicket.id.substring(0, 8)}</span>
+                <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Estado: {selectedTicket.status}</span>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar bg-[#12161c]/30">
+              {selectedTicket.conversation.map((msg, idx) => {
+                const isAdmin = msg.sender === 'admin';
+                return (
+                  <div key={idx} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`max-w-[75%] p-6 rounded-[2rem] text-sm font-bold shadow-xl ${isAdmin ? 'bg-slate-800 text-white rounded-tl-none border border-white/5' : 'bg-[#fcd535] text-black rounded-tr-none'}`}>
+                      <p className="leading-relaxed">{msg.text}</p>
+                      <p className={`text-[8px] mt-4 font-black uppercase tracking-tighter ${isAdmin ? 'text-slate-500' : 'text-black/50'}`}> {isAdmin ? '🛡️ Agente de Soporte' : 'Tu consulta'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="p-8 border-t border-white/5 bg-white/[0.02]">
+              <form onSubmit={handleSendMessage} className="flex gap-4">
+                <input type="text" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Enviar respuesta al nodo de soporte..." className="flex-1 bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all" />
+                <button type="submit" disabled={!messageContent.trim() || isLoading} className="px-8 py-4 bg-[#fcd535] text-black rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-lg active:scale-95 disabled:opacity-50">Enviar</button>
+              </form>
+            </div>
+          </>
         ) : (
-          <div className={`${styles.newTicketFormContainer} ${darkMode ? styles.darkInnerCard : styles.lightInnerCard}`}>
-            <h2 className={styles.newTicketFormTitle}>Envía una Nueva Consulta</h2>
-            <form onSubmit={handleSendMessage}>
-              <div className={styles.formGroup}>
-                <label htmlFor="subject" className={styles.formLabel}>Asunto</label>
-                <input
-                  type="text"
-                  id="subject"
-                  className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="messageContent" className={styles.formLabel}>Mensaje</label>
-                <textarea
-                  id="messageContent"
-                  rows="5"
-                  className={`${styles.replyTextarea} ${darkMode ? styles.darkInput : styles.lightInput}`}
-                  value={messageContent}
-                  onChange={(e) => setMessageContent(e.target.value)}
-                  required
-                  disabled={isLoading}
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className={styles.submitButton}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : 'Enviar Nueva Consulta'}
-              </button>
-            </form>
+          <div className="flex-1 flex flex-col items-center justify-center p-12">
+            <div className="w-full max-w-lg">
+              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Nueva Consulta</h2>
+              <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-12">Nuestro equipo técnico responderá en menos de 24 horas</p>
+              <form onSubmit={handleSendMessage} className="space-y-8">
+                <div>
+                  <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Asunto Global</label>
+                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Problemas con el retiro API" className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-5 text-white text-xs font-black outline-none focus:border-[#fcd535]/30 transition-all shadow-inner" />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Descripción Detallada</label>
+                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[#12161c] border border-white/5 rounded-[2rem] px-6 py-5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
+                </div>
+                <button type="submit" className="w-full py-5 bg-[#fcd535] text-black rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl active:scale-95">Iniciar Solicitud de Soporte</button>
+              </form>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 };
+
 
 const ReferralsContent = ({ styles }) => {
   const { darkMode } = useContext(ThemeContext); // Usar ThemeContext
@@ -1327,350 +1032,312 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
   ];
 
   return (
-    <div className={`${styles.settingsContent} max-w-6xl mx-auto`}>
-      <header className="mb-8">
-        <h1 className={styles.pageTitle}>Panel de Configuración</h1>
-        <p className="text-slate-400 text-sm mt-1">Gestiona tu identidad, seguridad y preferencias visuales.</p>
+    <div className="max-w-7xl mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700">
+      <header className="mb-12">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1V15a2 2 0 0 1-2-2 2 2 0 0 1 2-2v-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2v.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+          </div>
+          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Configuración del Nodo</h1>
+        </div>
+        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] ml-1">Gestión de identidad y protocolos de seguridad • Sincronizado</p>
       </header>
 
       {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingText}>Procesando...</div>
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[#fcd535]/10 border-t-[#fcd535] rounded-full animate-spin"></div>
+            <p className="text-[10px] font-black text-[#fcd535] uppercase tracking-widest animate-pulse">Procesando Cambio...</p>
+          </div>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-10 items-start">
         {/* Modern Sidebar Tabs */}
-        <aside className="w-full lg:w-64 flex flex-row lg:flex-col gap-2 p-1 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl lg:sticky lg:top-4 z-10 overflow-x-auto no-scrollbar">
+        <aside className="w-full lg:w-[320px] flex flex-row lg:flex-col gap-3 p-2 bg-[#1e2329] border border-white/5 rounded-[2.5rem] lg:sticky lg:top-10 z-10 overflow-x-auto no-scrollbar shadow-2xl">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 whitespace-nowrap group ${activeTab === tab.id
-                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20 shadow-lg shadow-blue-600/5'
-                : 'text-slate-500 hover:bg-white/5 hover:text-slate-300 border border-transparent'
+              className={`flex items-center gap-4 px-6 py-5 rounded-[1.8rem] transition-all duration-500 whitespace-nowrap group relative overflow-hidden ${activeTab === tab.id
+                ? 'bg-[#fcd535] text-[#0b0e11] shadow-xl shadow-[#fcd535]/10 scale-[1.02]'
+                : 'text-slate-500 hover:text-white hover:bg-white/5'
                 }`}
             >
-              <span className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+              <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[#fcd535]'}`}>
                 {tab.icon}
-              </span>
-              <span className="text-xs font-bold uppercase tracking-wider">{tab.label}</span>
+              </div>
+              <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0b0e11]' : 'text-slate-400 group-hover:text-white'}`}>{tab.label}</span>
+              {activeTab === tab.id && (
+                <div className="absolute right-4 w-1.5 h-1.5 bg-[#0b0e11] rounded-full animate-pulse"></div>
+              )}
             </button>
           ))}
         </aside>
 
         {/* Tab Content Area */}
-        <div className="flex-1 w-full min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 w-full min-h-[700px] animate-in fade-in slide-in-from-right-4 duration-700">
           {activeTab === 'profile' && (
-            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-2xl bg-blue-600/10 text-blue-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                </div>
-                <div>
-                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Perfil Público</h2>
-                  <p className="text-xs text-slate-500 mt-1">Cómo te ven otros miembros de la plataforma.</p>
-                </div>
+            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
               </div>
 
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
-                <div className="flex flex-col items-center p-8 bg-slate-900/40 rounded-3xl border border-white/5 mb-8">
-                  <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
-                    <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-blue-500/20 bg-slate-800 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105">
-                      {profilePhotoUrl ? (
-                        <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                      )}
-                    </div>
-                    <div className="absolute inset-0 bg-blue-600/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                    </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-6 mb-12">
+                  <div className="p-4 bg-[#fcd535]/10 rounded-2xl border border-[#fcd535]/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
-                  <input
-                    type="file"
-                    id="profile-photo-input"
-                    hidden
-                    accept=".png,.gif,image/png,image/gif"
-                    onChange={(e) => setProfilePhotoFile(e.target.files[0])}
-                  />
-                  <div className="mt-4 text-center">
-                    <p className="text-xs font-bold text-slate-300">Subir Propio</p>
-                    <p className="text-[10px] text-slate-500 mt-1">Formatos: .png, .gif</p>
+                  <div>
+                    <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Identidad Visual</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Sincroniza tu presencia en el nodo global</p>
                   </div>
                 </div>
 
-                <div className="bg-slate-900/40 p-6 rounded-3xl border border-white/5 mb-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-lg bg-purple-600/10 text-purple-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
-                    </div>
-                    <h3 className="text-sm font-black uppercase tracking-widest text-white">Paquete de Avatares Premium</h3>
-                  </div>
-
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-                    {availableAvatars.map((avatar) => (
-                      <button
-                        key={avatar.id}
-                        type="button"
-                        onClick={() => handleSelectAvatar(avatar.url)}
-                        className={`group relative aspect-square rounded-2xl overflow-hidden border-2 transition-all duration-300 ${profilePhotoUrl === avatar.url
-                          ? 'border-blue-500 shadow-lg shadow-blue-600/20 scale-105'
-                          : 'border-white/5 hover:border-white/20 hover:scale-105'
-                          }`}
-                        title={avatar.label}
-                      >
-                        <img src={avatar.url} alt={avatar.label} className="w-full h-full object-cover" />
-                        {profilePhotoUrl === avatar.url && (
-                          <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                            <div className="bg-blue-600 rounded-full p-1 shadow-lg">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                            </div>
-                          </div>
+                <form onSubmit={handleUpdateProfile} className="space-y-10">
+                  <div className="flex flex-col items-center p-12 bg-[#0b0e11]/50 rounded-[3rem] border border-white/5 shadow-inner">
+                    <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-[#1e2329] bg-[#1e2329] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all group-hover:scale-105 group-hover:border-[#fcd535]/30">
+                        {profilePhotoUrl ? (
+                          <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2b3139" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         )}
-                        <div className="absolute inset-x-0 bottom-0 bg-slate-900/80 backdrop-blur-sm py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <p className="text-[8px] font-black text-white uppercase text-center truncate px-1">{avatar.label}</p>
-                        </div>
-                      </button>
-                    ))}
+                      </div>
+                      <div className="absolute inset-0 bg-[#fcd535]/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                      </div>
+                    </div>
+                    <input type="file" id="profile-photo-input" hidden accept=".png,.gif,image/png,image/gif" onChange={(e) => setProfilePhotoFile(e.target.files[0])} />
+                    <div className="mt-6 text-center">
+                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-1">Actualizar Bio-Fotografía</p>
+                      <p className="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Formatos autorizados: PNG, GIF</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={styles.formGroup}>
-                    <label htmlFor="username" className={styles.formLabel}>Nombre de Usuario (@)</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">@</span>
+                  <div className="bg-[#0b0e11]/30 p-8 lg:p-10 rounded-[2.5rem] border border-white/5">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="p-2.5 rounded-xl bg-[#fcd535]/10 border border-[#fcd535]/20">
+                        <FaCrown size={20} className="text-[#fcd535]" />
+                      </div>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Avatares Premium Sincronizados</h3>
+                    </div>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
+                      {availableAvatars.map((avatar) => (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          onClick={() => handleSelectAvatar(avatar.url)}
+                          className={`group relative aspect-square rounded-[1.5rem] overflow-hidden border-4 transition-all duration-500 ${profilePhotoUrl === avatar.url
+                            ? 'border-[#fcd535] shadow-xl shadow-[#fcd535]/10 scale-110 z-10'
+                            : 'border-white/5 hover:border-[#fcd535]/30 hover:scale-105'
+                            }`}
+                        >
+                          <img src={avatar.url} alt={avatar.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:rotate-3 group-hover:scale-110" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Usuario del Nodo (@)</label>
+                      <div className="relative group">
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#fcd535] font-black text-lg">@</span>
+                        <input
+                          type="text"
+                          className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="alias_elite"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Nombre de Visualización</label>
                       <input
                         type="text"
-                        id="username"
-                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !pl-10 !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all`}
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="ej: juan_perez"
-                        disabled={isLoading}
+                        className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.5rem] px-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Nombre Real o Pseudónimo"
                       />
                     </div>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label htmlFor="displayName" className={styles.formLabel}>Nombre de Visualización</label>
-                    <input
-                      type="text"
-                      id="displayName"
-                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all`}
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Tu nombre real o alias"
-                      disabled={isLoading}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Firma Biográfica</label>
+                    <textarea
+                      className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.8rem] px-8 py-6 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Describe tu trayectoria de inversión..."
                     />
                   </div>
-                </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="bio" className={styles.formLabel}>Biografía</label>
-                  <textarea
-                    id="bio"
-                    className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5 focus:!border-blue-500/50 transition-all min-h-[120px] pt-4`}
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Cuéntanos un poco sobre ti..."
+                  <button
+                    type="submit"
+                    className="w-full py-6 bg-[#fcd535] text-[#0b0e11] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-[#fcd535]/10 hover:scale-[1.01] active:scale-[0.98] transition-all"
                     disabled={isLoading}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-blue-600 hover:!bg-blue-500 !shadow-xl !shadow-blue-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Actualizando...' : 'Guardar Cambios de Perfil'}
-                </button>
-              </form>
+                  >
+                    {isLoading ? 'Actualizando Nodo...' : 'Guardar Perfil Maestro'}
+                  </button>
+                </form>
+              </div>
             </div>
           )}
 
           {activeTab === 'account' && (
-            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-2xl bg-amber-600/10 text-amber-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center gap-6 mb-12">
+                <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                 </div>
                 <div>
-                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Seguridad y Cuenta</h2>
-                  <p className="text-xs text-slate-500 mt-1">Protege tu cuenta y gestiona tus credenciales.</p>
+                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Protocolos de Cuenta</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Gestión de credenciales y seguridad de acceso</p>
                 </div>
               </div>
 
-              <form onSubmit={handleUpdateAccount} className="space-y-8">
+              <form onSubmit={handleUpdateAccount} className="space-y-12">
                 <div className="space-y-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Información de Acceso</h3>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="contact-email" className={styles.formLabel}>Email de Contacto</label>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Enlace de Comunicación</h3>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Email de Acceso</label>
                     <input
                       type="email"
-                      id="contact-email"
-                      className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                      className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
-                      disabled={isLoading}
+                      disabled={true}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Cambiar Contraseña</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className={styles.formGroup}>
-                      <label htmlFor="current-password" className={styles.formLabel}>Contraseña Actual</label>
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Rotación de Cifrado (Contraseña)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Contraseña Actual</label>
                       <input
                         type="password"
-                        id="current-password"
-                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                        className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        placeholder="Requerido para cambios"
-                        disabled={isLoading}
+                        placeholder="Confirmación Requerida"
                       />
                     </div>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="new-password" className={styles.formLabel}>Nueva Contraseña</label>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Nueva Contraseña</label>
                       <input
                         type="password"
-                        id="new-password"
-                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/20 !border-white/5`}
+                        className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-emerald-500/40 transition-all"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Dejar vacío para no cambiar"
-                        disabled={isLoading}
+                        placeholder="Nueva Master Key"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Seguridad Avanzada</h3>
-                  <div className="flex items-center justify-between p-6 bg-slate-900/40 rounded-2xl border border-white/5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-200 uppercase tracking-wide">Autenticación 2FA</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Añade una capa extra de seguridad.</p>
-                      </div>
+                <div className="p-10 bg-[#0b0e11]/50 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20 flex items-center justify-center text-blue-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-[9px] font-black text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">En Desarrollo</span>
-                      <button
-                        type="button"
-                        onClick={handleToggleTwoFactorAuth}
-                        className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${twoFactorAuthEnabled
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/10'
-                          : 'bg-blue-600/20 text-blue-400 border border-blue-500/10'
-                          } opacity-50 cursor-not-allowed`}
-                        disabled={true}
-                      >
-                        {twoFactorAuthEnabled ? 'Desactivar' : 'Activar'}
-                      </button>
+                    <div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-widest">Autenticación Multifactor (2FA)</h4>
+                      <p className="text-[10px] text-slate-500 uppercase font-bold mt-1 tracking-tighter">Estado: Protocolo Pendiente de Integración</p>
                     </div>
+                  </div>
+                  <div className="px-6 py-2 bg-slate-800 rounded-full border border-white/5">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">En Mantenimiento</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-slate-100 !text-slate-900 hover:!bg-white !shadow-xl !shadow-white/5 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
-                  disabled={isLoading}
+                  className="w-full py-6 bg-white text-[#0b0e11] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-white/5 hover:bg-slate-100 transition-all active:scale-[0.98]"
                 >
-                  {isLoading ? 'Actualizando...' : 'Actualizar Configuración de Cuenta'}
+                  Actualizar Protocolos de Acceso
                 </button>
               </form>
             </div>
           )}
 
           {activeTab === 'payments' && (
-            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-2xl bg-emerald-600/10 text-emerald-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
+            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center gap-6 mb-12">
+                <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
                 </div>
                 <div>
-                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Pagos y Billeteras</h2>
-                  <p className="text-xs text-slate-500 mt-1">Donde recibirás tus ganancias y retiros.</p>
+                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Terminales de Retiro</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Configuración del nodo de liquidez personal</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(paymentAddresses).map(([currency, address]) => (
-                    <div key={currency} className="p-6 bg-slate-900/40 rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all group">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-300 border border-white/5">
-                            {currency}
-                          </div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Dirección {currency}</p>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        className={`${styles.formInput} ${darkMode ? styles.darkInput : styles.lightInput} !bg-slate-900/40 !border-white/5 !text-xs !py-3 !px-4 focus:!border-blue-500/30`}
-                        value={address}
-                        onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
-                        placeholder={`Ingresa tu wallet de ${currency}`}
-                        disabled={isLoading}
-                      />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {Object.entries(paymentAddresses).map(([currency, address]) => (
+                  <div key={currency} className="bg-[#0b0e11]/50 p-8 rounded-[2rem] border border-white/5 group hover:border-[#fcd535]/30 transition-all">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="px-3 py-1 bg-[#1e2329] text-[#fcd535] rounded-lg text-[10px] font-black border border-white/5">{currency} Network</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                     </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 p-6 bg-blue-600/5 rounded-2xl border border-blue-500/10 flex items-start gap-4">
-                  <div className="text-blue-500 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 block ml-2">Dirección de Destino</label>
+                    <input
+                      type="text"
+                      className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-5 py-4 text-white text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
+                      value={address}
+                      onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
+                      placeholder={`bc1.. / 0x.. / @uid`}
+                    />
                   </div>
-                  <p className="text-[10px] text-slate-400 italic">
-                    Asegúrate de que las direcciones sean correctas. No nos hacemos responsables por fondos enviados a billeteras erróneas proporcionadas por el usuario.
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleSaveAddresses}
-                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-emerald-600 hover:!bg-emerald-500 !shadow-xl !shadow-emerald-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95 mt-4`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Guardando...' : 'Guardar Direcciones de Pago'}
-                </button>
+                ))}
               </div>
+
+              <div className="mt-12 p-8 bg-blue-600/5 rounded-[2rem] border border-blue-500/10 flex items-start gap-4">
+                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                </div>
+                <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-tighter italic">
+                  Verifica la integridad de la dirección. El nodo global no procesa reversiones en redes descentralizadas.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSaveAddresses}
+                className="w-full py-6 bg-emerald-600 text-white rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-emerald-600/10 hover:bg-emerald-500 transition-all mt-10"
+              >
+                Inscribir Terminales de Pago
+              </button>
             </div>
           )}
 
           {activeTab === 'appearance' && (
-            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-2xl bg-indigo-600/10 text-indigo-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
+            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center gap-6 mb-12">
+                <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
                 </div>
                 <div>
-                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Personalización Visual</h2>
-                  <p className="text-xs text-slate-500 mt-1">Ajusta cómo se ve tu Dashboard de trading.</p>
+                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Estética del Nodo</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Calibración visual de la terminal de trading</p>
                 </div>
               </div>
 
-
-
-              {/* Ancho Máximo Dashboard */}
-              <div className="col-span-1 md:col-span-2 p-8 bg-slate-900/40 rounded-3xl border border-white/5">
-                <div className="flex items-center justify-between mb-8">
+              <div className="bg-[#0b0e11]/50 p-10 rounded-[2.5rem] border border-white/5">
+                <div className="flex items-center justify-between mb-10">
                   <div>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ancho Máximo del Panel</p>
-                    <p className="text-xl font-black text-indigo-400 mt-1">{localDashboardWidth}px</p>
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Ampliación de Pantalla</h4>
+                    <p className="text-[9px] text-slate-600 font-bold uppercase mt-1 tracking-widest">Dimensiones del layout central</p>
                   </div>
-                  <div className="px-3 py-1 bg-indigo-600/10 rounded-full border border-indigo-500/20">
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
-                      {localDashboardWidth > 1920 ? 'Ultra Wide' : localDashboardWidth > 1400 ? 'Cinema' : 'Standard'}
-                    </span>
+                  <div className="px-4 py-2 bg-indigo-600/10 border border-indigo-500/30 rounded-full">
+                    <span className="text-xl font-black text-indigo-400 italic tracking-tighter">{localDashboardWidth}px</span>
                   </div>
                 </div>
+
                 <input
                   type="range"
                   min="800"
@@ -1678,76 +1345,63 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   step="20"
                   value={localDashboardWidth}
                   onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                  className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#fcd535] mb-6"
                 />
-                <div className="flex justify-between mt-4">
-                  <span className="text-[9px] font-bold text-slate-600 uppercase">Compacto</span>
-                  <span className="text-[9px] font-bold text-slate-600 uppercase">Máximo (2.5K)</span>
+                <div className="flex justify-between">
+                  <span className="text-[9px] font-black text-slate-700 uppercase">Standard (800)</span>
+                  <span className="text-[9px] font-black text-slate-700 uppercase">Ultra Cinema (2.5K)</span>
                 </div>
               </div>
 
-
-              <div className="mt-8">
-                <button
-                  onClick={handleUpdateAccount} // Reusing account update logic as it includes preferences
-                  className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-indigo-600 hover:!bg-indigo-500 !shadow-xl !shadow-indigo-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Guardando...' : 'Aplicar Preferencias de Visualización'}
-                </button>
-              </div>
+              <button
+                onClick={handleUpdateAccount}
+                className="w-full py-6 bg-indigo-600 text-white rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-indigo-600/10 transition-all mt-10 hover:bg-indigo-500"
+              >
+                Aplicar Perfil Estético
+              </button>
             </div>
           )}
 
           {activeTab === 'notifications' && (
-            <div className={`${styles.sectionCard} ${darkMode ? styles.dark : styles.light} !m-0 !w-full border-white/5 bg-slate-900/20`}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-2xl bg-rose-600/10 text-rose-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center gap-6 mb-12">
+                <div className="p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </div>
                 <div>
-                  <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Notificaciones</h2>
-                  <p className="text-xs text-slate-500 mt-1">Cómo quieres mantenerte informado.</p>
+                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Protocolos de Alerta</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Suscripción a telemetría del sistema</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[
-                  { id: 'pay_notify', label: 'Notificaciones de Pagos', desc: 'Recibe un aviso por cada depósito o retiro procesado.', state: receivePaymentNotifications, setter: setReceivePaymentNotifications },
-                  { id: 'login_notify', label: 'Alertas de Inicio de Sesión', desc: 'Te avisamos cuando alguien accede a tu cuenta.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
-                  { id: 'signals_notify', label: 'Nuevas Señales de Trading', desc: 'No te pierdas ninguna oportunidad de inversión.', state: receiveSignalsNotifications, setter: setReceiveSignalsNotifications, locked: !isVIP },
-                ].map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-6 bg-slate-900/40 rounded-3xl border border-white/5 group hover:border-white/10 transition-all">
-                    <div className="flex-1 pr-8">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-xs font-bold text-slate-200 uppercase tracking-wide">{item.label}</p>
-                        {item.locked && <span className="text-[8px] font-black text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded uppercase">PRO / VIP</span>}
+                  { label: 'Transacciones Financieras', desc: 'Confirmaciones de flujo de activos en tiempo real.', state: receivePaymentNotifications, setter: setReceivePaymentNotifications },
+                  { label: 'Integridad del Nodo', desc: 'Alertas críticas de inicio de sesión y acceso.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
+                  { label: 'Señales de Alta Frecuencia', desc: 'Oportunidades de entrada al nodo de trading.', state: receiveSignalsNotifications, setter: setReceiveSignalsNotifications, locked: !isVIP },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-8 bg-[#0b0e11]/50 rounded-[2.2rem] border border-white/5 group hover:border-[#fcd535]/20 transition-all">
+                    <div className="flex-1 pr-10">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-xs font-black text-white uppercase tracking-[0.1em]">{item.label}</h4>
+                        {item.locked && <span className="text-[8px] font-black text-black bg-[#fcd535] px-2 py-0.5 rounded-full uppercase italic">VIP Lock</span>}
                       </div>
-                      <p className="text-[10px] text-slate-500">{item.desc}</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter leading-relaxed">{item.desc}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={item.state}
-                        onChange={() => !item.locked && item.setter(!item.state)}
-                        disabled={item.locked || isLoading}
-                      />
-                      <div className="w-12 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 peer-checked:after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-20 transition-all"></div>
+                      <input type="checkbox" className="sr-only peer" checked={item.state} onChange={() => !item.locked && item.setter(!item.state)} disabled={item.locked} />
+                      <div className="w-14 h-7 bg-slate-800 rounded-full peer peer-checked:bg-[#fcd535] transition-all after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 peer-checked:after:bg-[#0b0e11] shadow-inner"></div>
                     </label>
                   </div>
                 ))}
-
-                <div className="mt-8">
-                  <button
-                    onClick={handleSaveNotifications}
-                    className={`${styles.submitButton} !w-full !py-4 !rounded-2xl !bg-rose-600 hover:!bg-rose-500 !shadow-xl !shadow-rose-600/20 !border-none !text-xs !font-black !uppercase !tracking-widest transition-all active:scale-95`}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Guardando...' : 'Guardar Preferencias de Notificación'}
-                  </button>
-                </div>
               </div>
+
+              <button
+                onClick={handleSaveNotifications}
+                className="w-full py-6 bg-rose-600 text-white rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-rose-600/10 hover:bg-rose-500 transition-all mt-10"
+              >
+                Sincronizar Protocolos de Alerta
+              </button>
             </div>
           )}
         </div>

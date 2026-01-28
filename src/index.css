@@ -4,14 +4,28 @@
 
 /* Definición de variables CSS para temas claro y oscuro */
 :root {
+  /* Binance Pro Theme Tokens */
+  --binance-bg: #0b0e11;
+  --binance-card: #1e2329;
+  --binance-card-hover: #2b3139;
+  --binance-yellow: #fcd535;
+  --binance-yellow-hover: #f0b90b;
+  --binance-text: #eaecef;
+  --binance-text-gray: #848e9c;
+  --binance-gray: #474d57;
+  --binance-border: rgba(255, 255, 255, 0.05);
+
+  --bg-main: var(--binance-bg);
+  --card-bg: var(--binance-card);
+  --accent: var(--binance-yellow);
+
   --light-bg: #f8fafc;
   --light-card: rgba(255, 255, 255, 0.9);
   --dark-text: #0f172a;
   --light-text: #f1f5f9;
-  --dark-bg: #020617;
-  --dark-card: rgba(30, 41, 59, 0.7);
-  --accent: #f59e0b;
-  --accent-glow: rgba(245, 158, 11, 0.2);
+  --dark-bg: var(--binance-bg);
+  --dark-card: var(--binance-card);
+  --accent-glow: rgba(252, 213, 53, 0.2);
   --green-check: #10b981;
   --gray-border: #e2e8f0;
   --dark-border: rgba(255, 255, 255, 0.1);
@@ -42,8 +56,37 @@ body {
 
 /* Aplicar estilos del modo oscuro cuando la clase 'dark' está en el body */
 body.dark {
-  background-color: var(--bg-main);
-  color: var(--light-text);
+  background-color: var(--binance-bg);
+  color: var(--binance-text);
+}
+
+/* Scrollbar Style Binance */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--binance-gray);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--binance-text-gray);
+}
+
+/* Global utility for hiding scrollbars but keeping functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Animaciones para el Home Futurista */
@@ -139,31 +182,69 @@ body.dark {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes float-delayed {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes shine {
-  0% { left: -100%; }
-  20% { left: 100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  20% {
+    left: 100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
 }
 
 .animate-float {
@@ -187,12 +268,10 @@ body.dark {
   left: -100%;
   width: 50%;
   height: 200%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
   transform: rotate(45deg);
   animation: shine 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
