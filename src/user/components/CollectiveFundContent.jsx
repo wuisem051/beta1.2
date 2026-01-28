@@ -16,6 +16,7 @@ import {
   doc,
   runTransaction
 } from 'firebase/firestore';
+import { FaCheckCircle, FaExclamationTriangle, FaRegClock } from 'react-icons/fa';
 import styles from '../pages/UserPanel.module.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
