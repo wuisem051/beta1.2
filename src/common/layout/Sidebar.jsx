@@ -4,7 +4,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 import {
   FaChevronDown, FaChevronUp, FaWallet, FaChartLine,
   FaUserCircle, FaHeadset, FaCog, FaBell, FaGem,
-  FaLayout, FaHistory, FaExchangeAlt, FaNetworkWired,
+  FaThLarge, FaHistory, FaExchangeAlt, FaNetworkWired,
   FaArrowDown, FaArrowUp, FaUsers, FaShieldAlt
 } from 'react-icons/fa';
 
@@ -46,8 +46,8 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
       to={to}
       onClick={onClick}
       className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 group ${isActive
-          ? 'bg-[#2b3139] text-[#fcd535]'
-          : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'
+        ? 'bg-[#2b3139] text-[#fcd535]'
+        : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'
         }`}
     >
       <span className={`mr-3 text-sm ${isActive ? 'text-[#fcd535]' : 'text-slate-500 group-hover:text-white'}`}>
@@ -114,7 +114,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           {/* Dashboard Item */}
           <NavLink
             to="/user/dashboard"
-            icon={<FaLayout />}
+            icon={<FaThLarge />}
             label="Dashboard"
             isActive={pathname.includes('/dashboard')}
           />
