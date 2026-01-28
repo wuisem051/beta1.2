@@ -410,118 +410,140 @@ const WalletHub = ({ initialTab: propTab }) => {
 
             {/* Tab: Overview */}
             {activeTab === 'overview' && (
-                <div className="space-y-6">
-                    {/* Resumen Principal */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:col-span-2 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-3xl shadow-2xl relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 transform group-hover:scale-110 transition-transform">
-                                <FaWallet size={120} />
+                <div className="space-y-6 animate-in fade-in duration-500">
+                    {/* Resumen Principal - Estilo Binance Spot */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div className="lg:col-span-8 bg-[#1e2329] p-8 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
+                                <FaWallet size={200} />
                             </div>
-                            <p className="text-blue-100 text-sm font-bold uppercase tracking-widest mb-2">Balance Total Estimado</p>
-                            <div className="flex items-baseline gap-4">
-                                <h2 className="text-5xl font-black text-white mb-6">
-                                    ${totalEstimatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    <span className="text-xl ml-2 text-blue-200">USD</span>
-                                </h2>
-                                {(btcPrice || ltcPrice) && (
-                                    <div className="mb-6 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                        <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">En Vivo</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex flex-wrap gap-3">
-                                <button onClick={() => setActiveTab('deposit')} className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
-                                    <FaArrowDown /> Depositar
-                                </button>
-                                <button onClick={() => setActiveTab('withdraw')} className="bg-black/20 hover:bg-black/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all">
-                                    <FaArrowUp /> Retirar
-                                </button>
-                                <button onClick={() => setIsCollectiveModalOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 backdrop-blur-md text-white px-6 py-3 rounded-2xl font-bold border border-emerald-500/30 flex items-center gap-2 transition-all">
-                                    <FaUsers className="text-emerald-400" /> Fondo Colectivo
-                                </button>
+
+                            <div className="relative z-10">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Balance Estimado</span>
+                                    <div className="px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-[9px] font-black text-green-500 uppercase tracking-tighter">Spot</div>
+                                </div>
+
+                                <div className="flex items-baseline gap-3 mb-8">
+                                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                                        {totalEstimatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </h2>
+                                    <span className="text-xl font-bold text-slate-500">USDT</span>
+                                </div>
+
+                                <div className="flex flex-wrap gap-3">
+                                    <button
+                                        onClick={() => setActiveTab('deposit')}
+                                        className="px-6 py-3 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[#fcd535]/10 active:scale-95"
+                                    >
+                                        Depositar
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('withdraw')}
+                                        className="px-6 py-3 bg-[#2b3139] hover:bg-[#363d47] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-white/5"
+                                    >
+                                        Retirar
+                                    </button>
+                                    <button
+                                        onClick={() => setIsCollectiveModalOpen(true)}
+                                        className="px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+                                    >
+                                        Transferir
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-slate-800/40 p-6 rounded-3xl border border-white/5 backdrop-blur-md">
-                            <h4 className="text-white font-bold mb-4 flex items-center gap-2">
-                                <FaClock className="text-yellow-500" /> Actividad Reciente
-                            </h4>
-                            <div className="space-y-4">
-                                {financialHistory.slice(0, 3).map(h => (
-                                    <div key={h.id} className="flex justify-between items-center p-3 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="lg:col-span-4 bg-[#1e2329] p-6 rounded-3xl border border-white/5 shadow-xl">
+                            <div className="flex justify-between items-center mb-6">
+                                <h4 className="text-white text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                                    <FaHistory className="text-[#fcd535] text-xs" /> Recientes
+                                </h4>
+                                <button onClick={() => setActiveTab('history')} className="text-[10px] font-bold text-[#fcd535] hover:underline">Ver todo</button>
+                            </div>
+                            <div className="space-y-3">
+                                {financialHistory.slice(0, 4).map(h => (
+                                    <div key={h.id} className="flex justify-between items-center p-3 hover:bg-white/[0.02] rounded-xl transition-colors">
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${h.type === 'DEPOSIT' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${h.type === 'DEPOSIT' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
                                                 {h.type === 'DEPOSIT' ? <FaArrowDown size={12} /> : <FaArrowUp size={12} />}
                                             </div>
                                             <div>
-                                                <p className="text-white text-xs font-bold">{h.amount} {h.currency}</p>
-                                                <p className="text-[10px] text-slate-500">{h.status}</p>
+                                                <p className="text-white text-[11px] font-black">{h.amount} {h.currency}</p>
+                                                <p className="text-[9px] text-slate-500 uppercase tracking-tighter">{h.status}</p>
                                             </div>
                                         </div>
-                                        <span className="text-[9px] text-slate-600">{h.createdAt.toLocaleDateString()}</span>
+                                        <span className="text-[9px] text-slate-600 font-mono italic">{h.createdAt.toLocaleDateString([], { day: '2-digit', month: '2-digit' })}</span>
                                     </div>
                                 ))}
-                                {financialHistory.length === 0 && <p className="text-xs text-slate-500 italic">Sin transacciones recientes</p>}
+                                {financialHistory.length === 0 && (
+                                    <div className="text-center py-10 opacity-30">
+                                        <FaHistory size={30} className="mx-auto mb-2" />
+                                        <p className="text-[10px] uppercase font-black">Sin actividad</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Lista de Activos */}
-                    <div className="bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden">
-                        <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                            <h3 className="text-white font-bold">Tus Activos</h3>
-                            <span className="text-xs text-slate-500">Valor real según mercado</span>
+                    {/* Lista de Activos - Estilo Tabla Binance */}
+                    <div className="bg-[#1e2329] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                            <div>
+                                <h3 className="text-white font-black uppercase tracking-widest text-sm">Activos Spot</h3>
+                                <p className="text-[10px] text-slate-500 font-bold mt-0.5">Valores actualizados en tiempo real</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-slate-400 uppercase">Filtro: Balance {'>'} 0</div>
+                            </div>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-white/5">
+                                <thead className="bg-[#12161c]">
                                     <tr>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase">Moneda</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase">Saldo</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase">Equivalente USD</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase text-right">Acciones</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Moneda</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Saldo Total</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Valor USD</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {[...cryptoOptions, ...fiatOptions.map(f => ({ ...f, type: 'fiat' }))].map(coin => {
                                         const balance = userBalances?.[coin.value] || 0;
                                         return (
-                                            <tr key={coin.value} className="hover:bg-white/5 transition-colors group">
+                                            <tr key={coin.value} className="hover:bg-white/[0.03] transition-colors group cursor-default">
                                                 <td className="px-6 py-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl font-bold" style={{ backgroundColor: coin.color + '20', color: coin.color }}>
-                                                            {coin.icon}
+                                                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-inner" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: `1px solid ${coin.color}40` }}>
+                                                            <span style={{ color: coin.color }}>{coin.icon}</span>
                                                         </div>
                                                         <div>
-                                                            <p className="text-white font-bold text-sm tracking-tight">{coin.label}</p>
-                                                            <p className="text-[10px] text-slate-500 uppercase">{coin.network || 'P2P Fund'}</p>
+                                                            <p className="text-white font-black text-sm tracking-tight">{coin.label.split(' ')[0]}</p>
+                                                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">{coin.network || 'Asset'}</p>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-5">
-                                                    <p className="text-white font-mono font-bold">{balance.toFixed(coin.type === 'fiat' ? 2 : 8)}</p>
+                                                    <p className="text-white font-mono font-black text-sm">{balance.toFixed(coin.type === 'fiat' ? 2 : 8)}</p>
                                                 </td>
                                                 <td className="px-6 py-5">
-                                                    <p className="text-slate-400 font-mono text-xs">
-                                                        $ {(balance * (rates[coin.value.split('-')[0]] || rates[coin.value] || 1)).toFixed(2)}
+                                                    <p className="text-slate-400 font-mono text-[11px] font-bold">
+                                                        $ {(balance * (rates[coin.value.split('-')[0]] || rates[coin.value] || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </p>
                                                 </td>
                                                 <td className="px-6 py-5 text-right">
-                                                    <div className="flex justify-end gap-2">
+                                                    <div className="flex justify-end gap-3">
                                                         <button
-                                                            onClick={() => { setSelectedDepositCrypto(coin.value); setActiveTab('deposit'); }}
-                                                            className="p-2 bg-blue-600/10 text-blue-500 rounded-lg hover:bg-blue-600 hover:text-white transition-all"
-                                                            title="Depositar"
+                                                            onClick={(e) => { e.stopPropagation(); setSelectedDepositCrypto(coin.value); setActiveTab('deposit'); }}
+                                                            className="text-[10px] font-black text-[#fcd535] hover:text-white transition-colors uppercase tracking-widest"
                                                         >
-                                                            <FaArrowDown size={12} />
+                                                            Depositar
                                                         </button>
                                                         <button
-                                                            onClick={() => { setWithdrawCurrency(coin.value); setActiveTab('withdraw'); }}
-                                                            className="p-2 bg-indigo-600/10 text-indigo-500 rounded-lg hover:bg-indigo-600 hover:text-white transition-all"
-                                                            title="Retirar"
+                                                            onClick={(e) => { e.stopPropagation(); setWithdrawCurrency(coin.value); setActiveTab('withdraw'); }}
+                                                            className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
                                                         >
-                                                            <FaArrowUp size={12} />
+                                                            Retirar
                                                         </button>
                                                     </div>
                                                 </td>
@@ -535,204 +557,233 @@ const WalletHub = ({ initialTab: propTab }) => {
                 </div>
             )}
 
-            {/* Tab: Deposit */}
+            {/* Tab: Deposit - Binance Professional Look */}
             {activeTab === 'deposit' && (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-slate-900/60 p-6 rounded-3xl border border-white/5">
-                            <h3 className="text-white font-bold mb-6 flex items-center gap-2">
-                                <span className="bg-blue-500/20 text-blue-500 p-2 rounded-lg text-sm">1</span> Seleccionar Moneda
+                        <div className="bg-[#1e2329] p-6 rounded-3xl border border-white/5 shadow-xl">
+                            <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                                <span className="w-6 h-6 bg-[#fcd535] text-[#0b0e11] rounded-full flex items-center justify-center text-[10px]">1</span>
+                                Seleccionar Moneda
                             </h3>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-2">
                                 {cryptoOptions.map(c => (
                                     <button
                                         key={c.value}
                                         onClick={() => setSelectedDepositCrypto(c.value)}
-                                        className={`p-4 rounded-3xl border transition-all text-left group ${selectedDepositCrypto === c.value ? 'bg-blue-600 border-blue-500 shadow-xl shadow-blue-600/20' : 'bg-white/5 border-white/5 hover:border-white/20'
+                                        className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${selectedDepositCrypto === c.value
+                                            ? 'bg-blue-600/10 border-blue-500/50 shadow-lg'
+                                            : 'bg-white/5 border-white/5 hover:border-white/10'
                                             }`}
                                     >
-                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-lg mb-2 ${selectedDepositCrypto === c.value ? 'bg-white/20' : 'bg-slate-800'}`} style={{ color: selectedDepositCrypto === c.value ? 'white' : c.color }}>
+                                        <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center text-sm" style={{ color: c.color }}>
                                             {c.icon}
                                         </div>
-                                        <p className={`text-[10px] font-black uppercase ${selectedDepositCrypto === c.value ? 'text-white' : 'text-slate-400'}`}>{c.label}</p>
+                                        <div className="text-left">
+                                            <p className="text-xs font-black text-white">{c.label}</p>
+                                            <p className="text-[9px] text-slate-500 font-bold uppercase">{c.network}</p>
+                                        </div>
+                                        {selectedDepositCrypto === c.value && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>}
                                     </button>
                                 ))}
                             </div>
                         </div>
 
                         {depositQrUrl && (
-                            <div className="bg-white p-6 rounded-3xl flex flex-col items-center justify-center">
+                            <div className="bg-white p-6 rounded-3xl flex flex-col items-center justify-center shadow-2xl relative">
+                                <div className="absolute top-2 left-2 text-[8px] font-black text-slate-300 uppercase italic">QR Secure</div>
                                 <img src={depositQrUrl} alt="QR" className="w-40 h-40" />
-                                <p className="text-[10px] text-slate-400 mt-2 font-black uppercase">Escanea para pagar</p>
+                                <div className="mt-4 px-4 py-1.5 bg-black/[0.03] rounded-full text-[9px] text-slate-400 font-bold uppercase tracking-widest border border-slate-100">Escaneame</div>
                             </div>
                         )}
                     </div>
 
-                    <div className="lg:col-span-3 bg-slate-900/60 p-8 rounded-3xl border border-white/5 flex flex-col">
-                        <h3 className="text-white font-bold mb-6 flex items-center gap-2">
-                            <span className="bg-green-500/20 text-green-500 p-2 rounded-lg text-sm">2</span> Dirección de Envío
+                    <div className="lg:col-span-3 bg-[#1e2329] p-8 rounded-3xl border border-white/5 shadow-xl">
+                        <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <span className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px]">2</span>
+                            Detalles de Depósito
                         </h3>
 
-                        <div className="p-4 bg-black/40 rounded-2xl border border-white/5 mb-8">
-                            <p className="text-[10px] text-slate-500 font-black uppercase mb-2">Red: {cryptoOptions.find(c => c.value === selectedDepositCrypto)?.network}</p>
-                            <div className="flex items-center gap-3">
-                                <code className="flex-1 text-blue-400 text-sm break-all font-mono font-bold">
-                                    {depositAddresses[selectedDepositCrypto] || 'No disponible'}
+                        <div className="p-5 bg-black/20 rounded-2xl border border-white/5 mb-8 relative group">
+                            <p className="text-[9px] text-slate-500 font-black uppercase mb-3 tracking-widest">Dirección de Billetera ({selectedDepositCrypto})</p>
+                            <div className="flex items-center gap-4">
+                                <code className="flex-1 text-blue-400 text-sm break-all font-mono font-bold select-all leading-relaxed bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
+                                    {depositAddresses[selectedDepositCrypto] || 'Buscando dirección...'}
                                 </code>
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(depositAddresses[selectedDepositCrypto]);
                                         showSuccess('Copiado');
                                     }}
-                                    className="p-3 bg-slate-800 rounded-xl hover:bg-blue-600 transition-colors"
+                                    className="p-4 bg-white/5 rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-white/5 active:scale-95 shadow-lg"
+                                    title="Copiar"
                                 >
                                     <FaCopy />
                                 </button>
                             </div>
+                            <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded text-[8px] font-black text-rose-500 uppercase tracking-tighter">Red: {cryptoOptions.find(c => c.value === selectedDepositCrypto)?.network}</div>
                         </div>
 
-                        <form onSubmit={handleAddDeposit} className="space-y-6 mt-auto">
-                            <div className="space-y-4">
+                        <form onSubmit={handleAddDeposit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">Monto Depositado</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={depositAmount}
-                                        onChange={(e) => setDepositAmount(e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-blue-500 transition-all"
-                                    />
+                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest mb-2 block">Monto Enviado</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={depositAmount}
+                                            onChange={(e) => setDepositAmount(e.target.value)}
+                                            className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white font-black outline-none focus:border-blue-500 transition-all font-mono text-xl"
+                                        />
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 font-black text-xs">{selectedDepositCrypto.split('-')[0]}</div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">TxHash (ID de Transacción)</label>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1 tracking-widest mb-2 block">Hash de Transacción</label>
                                     <input
                                         type="text"
-                                        placeholder="Pega aquí el hash..."
+                                        placeholder="Pega el TxID aquí..."
                                         value={txHash}
                                         onChange={(e) => setTxHash(e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-white/5 rounded-2xl px-6 py-4 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all"
+                                        className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all"
                                     />
                                 </div>
                             </div>
+
+                            <div className="pt-4">
+                                <button
+                                    disabled={isProcessingDeposit}
+                                    className="w-full bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] font-black py-5 rounded-2xl shadow-2xl shadow-[#fcd535]/10 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-[0.2em] text-xs"
+                                >
+                                    {isProcessingDeposit ? 'Procesando...' : 'Confirmar Depósito'}
+                                </button>
+                                <p className="text-[9px] text-slate-600 text-center mt-4 font-bold max-w-xs mx-auto italic">
+                                    El proceso de verificación puede tardar entre 5 y 15 minutos dependiendo de la congestión de la red.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Tab: Withdraw - Binance Elite Style */}
+            {activeTab === 'withdraw' && (
+                <div className="max-w-4xl mx-auto bg-[#1e2329] p-8 lg:p-12 rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
+                        <FaArrowUp size={300} />
+                    </div>
+
+                    <div className="relative z-10">
+                        <h3 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Retirar Activos</h3>
+                        <p className="text-slate-500 mb-10 text-sm font-bold uppercase tracking-widest">Retiros rápidos y seguros a tu billetera externa</p>
+
+                        <form onSubmit={handleAddWithdrawal} className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div className="space-y-8">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] mb-3 block">Moneda a Retirar</label>
+                                        <select
+                                            value={withdrawCurrency}
+                                            onChange={(e) => setWithdrawCurrency(e.target.value)}
+                                            className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-black outline-none focus:border-blue-500 appearance-none bg-no-repeat transition-all shadow-inner"
+                                            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
+                                        >
+                                            {[...cryptoOptions, ...fiatOptions].map(c => (
+                                                <option key={c.value} value={c.value} className="bg-[#1e2329] font-bold">{c.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3 ml-4">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Monto</label>
+                                            <span className="text-[9px] font-black text-[#fcd535] uppercase">Disponible: {userBalances?.[withdrawCurrency]?.toFixed(2)}</span>
+                                        </div>
+                                        <div className="relative group">
+                                            <input
+                                                type="number"
+                                                placeholder="0.00"
+                                                value={withdrawAmount}
+                                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-6 text-white text-4xl font-black outline-none focus:border-blue-500 transition-all placeholder-slate-800 shadow-inner"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setWithdrawAmount(userBalances[withdrawCurrency])}
+                                                className="absolute right-6 top-1/2 -translate-y-1/2 text-[#fcd535] font-black uppercase text-xs hover:text-white transition-colors"
+                                            >
+                                                MAX
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8 flex flex-col justify-center">
+                                    <div className="flex items-center gap-4 bg-[#12161c] p-5 rounded-3xl border border-white/5 shadow-inner">
+                                        <div className="flex items-center gap-3 cursor-pointer select-none w-full" onClick={() => setUseBinancePay(!useBinancePay)}>
+                                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${useBinancePay ? 'bg-blue-600 border-blue-500 shadow-lg' : 'border-slate-700 bg-black/20'}`}>
+                                                {useBinancePay && <FaCheckCircle className="text-white text-xs" />}
+                                            </div>
+                                            <span className="text-xs font-black text-slate-300 uppercase tracking-widest leading-none">Usar Binance Pay</span>
+                                        </div>
+                                    </div>
+
+                                    {useBinancePay ? (
+                                        <div className="animate-in zoom-in-95 duration-300">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] mb-3 block">Binance ID / Email</label>
+                                            <input
+                                                type="text"
+                                                value={withdrawBinanceId}
+                                                onChange={(e) => setWithdrawBinanceId(e.target.value)}
+                                                placeholder="UID del destinatario"
+                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono outline-none focus:border-blue-500 transition-all shadow-inner"
+                                            />
+                                            <p className="mt-4 text-[9px] text-slate-500 font-bold px-4 italic leading-relaxed">Retiros instantáneos y sin comisiones entre usuarios de Binance.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="animate-in zoom-in-95 duration-300">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.2em] mb-3 block">Dirección de Billetera Externa</label>
+                                            <input
+                                                type="text"
+                                                value={withdrawAddress}
+                                                onChange={(e) => setWithdrawAddress(e.target.value)}
+                                                placeholder=" bc1q..."
+                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all shadow-inner"
+                                            />
+                                            <p className="mt-4 text-[9px] text-slate-500 font-bold px-4 italic leading-relaxed text-rose-400">Asegúrate de que la red sea la correcta para evitar pérdida de fondos.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             <button
-                                disabled={isProcessingDeposit}
-                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-3xl shadow-2xl shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50"
+                                disabled={isProcessingWithdraw}
+                                className="w-full py-6 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] font-black rounded-3xl text-sm uppercase tracking-[0.3em] shadow-2xl shadow-[#fcd535]/10 transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
                             >
-                                {isProcessingDeposit ? 'Procesando...' : 'NOTIFICAR TRANSFERENCIA'}
+                                {isProcessingWithdraw ? 'Procesando...' : 'Confirmar Retiro'}
                             </button>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Tab: Withdraw */}
-            {activeTab === 'withdraw' && (
-                <div className="max-w-3xl mx-auto bg-slate-900/60 p-8 lg:p-12 rounded-[50px] border border-white/5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-12 opacity-5">
-                        <FaArrowUp size={200} />
-                    </div>
-
-                    <h3 className="text-3xl font-black text-white mb-2">Retirar Fondos</h3>
-                    <p className="text-slate-500 mb-10">Solicita transferencias a tu wallet externa</p>
-
-                    <form onSubmit={handleAddWithdrawal} className="space-y-8 relative z-10">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4">Moneda</label>
-                                    <select
-                                        value={withdrawCurrency}
-                                        onChange={(e) => setWithdrawCurrency(e.target.value)}
-                                        className="w-full bg-slate-800/80 border border-white/5 rounded-3xl px-6 py-5 text-white font-bold outline-none focus:border-blue-500 appearance-none bg-no-repeat"
-                                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
-                                    >
-                                        {[...cryptoOptions, ...fiatOptions].map(c => (
-                                            <option key={c.value} value={c.value} className="bg-slate-900">{c.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4">Monto</label>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            placeholder="0.00"
-                                            value={withdrawAmount}
-                                            onChange={(e) => setWithdrawAmount(e.target.value)}
-                                            className="w-full bg-slate-800/80 border border-white/5 rounded-3xl px-6 py-5 text-white text-3xl font-black outline-none focus:border-blue-500 transition-all placeholder-slate-700"
-                                        />
-                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 font-bold uppercase text-xs">
-                                            MAX: {userBalances?.[withdrawCurrency]?.toFixed(2)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-4 bg-slate-800/40 p-4 rounded-3xl border border-white/5">
-                                    <input
-                                        type="checkbox"
-                                        id="useBinancePay"
-                                        checked={useBinancePay}
-                                        onChange={(e) => setUseBinancePay(e.target.checked)}
-                                        className="w-6 h-6 rounded-xl border-slate-700 bg-slate-900 text-blue-600 focus:ring-0"
-                                    />
-                                    <label htmlFor="useBinancePay" className="text-sm font-bold text-slate-300 pointer-cursor">Usar Binance Pay (Email/ID)</label>
-                                </div>
-
-                                {useBinancePay ? (
-                                    <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-4">Binance ID / Email</label>
-                                        <input
-                                            type="text"
-                                            value={withdrawBinanceId}
-                                            onChange={(e) => setWithdrawBinanceId(e.target.value)}
-                                            placeholder="12345678"
-                                            className="w-full bg-slate-800/80 border border-white/5 rounded-3xl px-6 py-5 text-white font-mono outline-none focus:border-blue-500 transition-all"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase ml-4">Dirección Wallet Escrita</label>
-                                        <input
-                                            type="text"
-                                            value={withdrawAddress}
-                                            onChange={(e) => setWithdrawAddress(e.target.value)}
-                                            placeholder="bc1q..."
-                                            className="w-full bg-slate-800/80 border border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-xs outline-none focus:border-blue-500 transition-all"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <button
-                            disabled={isProcessingWithdraw}
-                            className="w-full py-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-3xl text-xl shadow-2xl shadow-blue-600/20 transition-all active:scale-95 disabled:opacity-50"
-                        >
-                            {isProcessingWithdraw ? 'PROCESANDO...' : 'ENVIAR SOLICITUD DE RETIRO'}
-                        </button>
-                    </form>
-                </div>
-            )}
-
-            {/* Tab: History */}
+            {/* Tab: History - Binance Clean Table */}
             {activeTab === 'history' && (
-                <div className="bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden">
-                    <div className="p-8 border-b border-white/5">
-                        <h3 className="text-xl font-bold text-white">Historial de Transacciones</h3>
-                        <p className="text-slate-500 text-sm">Registros de todos tus movimientos financieros</p>
+                <div className="bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-500">
+                    <div className="p-10 border-b border-white/5 bg-white/[0.01]">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Historial Transaccional</h3>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Registros inmutables de tus movimientos</p>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-white/5">
+                            <thead className="bg-[#12161c]">
                                 <tr>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase">Fecha</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase">Tipo</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase">Monto</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase">Estado</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase text-right">Referencia</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Fecha y Hora</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Monto</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">ID Operación</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -741,40 +792,45 @@ const WalletHub = ({ initialTab: propTab }) => {
                                     const isNegative = ['WITHDRAW', 'COLLECTIVE'].includes(item.type) || (item.type === 'TRADING' && parseFloat(item.amount) < 0);
 
                                     return (
-                                        <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-8 py-6 text-xs text-slate-400 font-medium">
-                                                {item.createdAt.toLocaleDateString()} {item.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <tr key={item.id} className="hover:bg-white/[0.02] transition-colors border-l-4 border-l-transparent hover:border-l-[#fcd535]">
+                                            <td className="px-8 py-6 text-[11px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                {item.createdAt.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' })} <br />
+                                                <span className="text-[9px] opacity-40 font-mono">{item.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </td>
                                             <td className="px-8 py-6">
-                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${item.type === 'DEPOSIT' ? 'bg-green-500/10 text-green-500' :
-                                                        item.type === 'WITHDRAW' ? 'bg-red-500/10 text-red-500' :
-                                                            item.type === 'COLLECTIVE' ? 'bg-blue-500/10 text-blue-500' :
-                                                                item.type === 'ARBITRAGE' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                                    'bg-purple-500/10 text-purple-500'
+                                                <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded border ${item.type === 'DEPOSIT' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                        item.type === 'WITHDRAW' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                                                            item.type === 'COLLECTIVE' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                                'bg-purple-500/10 text-purple-500 border-purple-500/20'
                                                     }`}>
                                                     {item.label || (item.type === 'DEPOSIT' ? 'Depósito' : 'Retiro')}
                                                 </span>
                                             </td>
-                                            <td className={`px-8 py-6 font-mono font-bold ${isPositive ? 'text-green-500' : isNegative ? 'text-red-500' : 'text-white'}`}>
-                                                {isPositive ? '+' : isNegative ? '-' : ''}{Math.abs(item.amount)} {item.currency}
+                                            <td className={`px-8 py-6 font-mono font-black text-sm ${isPositive ? 'text-emerald-500' : isNegative ? 'text-rose-500' : 'text-white'}`}>
+                                                {isPositive ? '+' : isNegative ? '-' : ''}{Math.abs(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} <span className="text-[10px] opacity-50">{item.currency}</span>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-2">
-                                                    {(item.status === 'Pendiente' || item.status === 'En Espera') && <FaClock className="text-yellow-500" size={12} />}
-                                                    {(item.status === 'Aprobado' || item.status === 'Completado' || item.status === 'Exitosa' || item.status === 'Activa') ? <FaCheckCircle className="text-green-500" size={12} /> : null}
-                                                    {(item.status === 'Rechazado' || item.status === 'Fallida') && <FaTimesCircle className="text-red-500" size={12} />}
-                                                    <span className="text-xs font-bold text-slate-300">{item.status}</span>
+                                                    {(item.status === 'Pendiente' || item.status === 'En Espera') && <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]"></div>}
+                                                    {(item.status === 'Aprobado' || item.status === 'Completado' || item.status === 'Exitosa' || item.status === 'Activa') && <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>}
+                                                    {(item.status === 'Rechazado' || item.status === 'Fallida') && <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]"></div>}
+                                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{item.status}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-6 text-right font-mono text-[10px] text-slate-500">
-                                                {item.txHash || item.addressOrId || item.poolId || item.id.substring(0, 8)}
+                                            <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-600 font-bold group-hover:text-slate-400 transition-colors">
+                                                {(item.txHash || item.addressOrId || item.poolId || item.id).substring(0, 16).toUpperCase()}
                                             </td>
                                         </tr>
                                     );
                                 })}
                                 {financialHistory.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" className="px-8 py-20 text-center text-slate-500 italic">No se han encontrado registros de transacciones</td>
+                                        <td colSpan="5" className="px-8 py-32 text-center">
+                                            <div className="opacity-20">
+                                                <FaHistory size={60} className="mx-auto mb-4" />
+                                                <p className="text-xs font-black uppercase tracking-[0.5em]">Sin registros</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
@@ -782,48 +838,50 @@ const WalletHub = ({ initialTab: propTab }) => {
                     </div>
                 </div>
             )}
-            {/* Modal Fondo Colectivo */}
-            {isCollectiveModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                    <div className="bg-slate-900 border border-white/10 rounded-[40px] p-8 md:p-10 w-full max-w-md shadow-2xl animate-scaleIn">
-                        <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-6">
-                            <FaUsers size={30} />
-                        </div>
-                        <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Invertir en Fondo Colectivo</h2>
-                        <p className="text-slate-500 text-sm mb-8">Transfiere saldo de tu billetera principal directamente al fondo gestionado.</p>
 
-                        <form onSubmit={handleCollectiveTransfer} className="space-y-6">
+            {/* Modal Fondo Colectivo - Rediseñado */}
+            {isCollectiveModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+                    <div className="bg-[#1e2329] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
+                            <FaUsers size={32} />
+                        </div>
+                        <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter">Invertir Capital</h2>
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-10 leading-relaxed">Mueve fondos al nodo de inversión colectiva administrado.</p>
+
+                        <form onSubmit={handleCollectiveTransfer} className="space-y-8">
                             <div>
-                                <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 ml-2">Monto a Transferir (USD)</label>
-                                <div className="relative">
+                                <div className="flex justify-between items-center mb-3 px-2">
+                                    <label className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Monto en USD</label>
+                                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Disponible: ${userBalances?.USD?.toLocaleString()}</span>
+                                </div>
+                                <div className="relative group">
                                     <input
                                         type="number"
                                         value={collectiveAmount}
                                         onChange={(e) => setCollectiveAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-6 py-4 text-white text-2xl font-bold outline-none focus:border-emerald-500/50 transition-all font-mono"
+                                        className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-emerald-500 transition-all font-mono shadow-inner"
                                         disabled={isProcessingCollective}
                                     />
-                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase">Saldo Disponible</span>
-                                        <span className="text-emerald-400 font-black text-xs">${userBalances?.USD?.toFixed(2)}</span>
-                                    </div>
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 font-black text-sm">$</div>
                                 </div>
                             </div>
+
                             <div className="flex gap-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setIsCollectiveModalOpen(false)}
-                                    className="flex-1 px-4 py-4 bg-slate-800 text-slate-400 rounded-2xl font-bold hover:bg-slate-700 transition-all"
+                                    className="px-6 py-5 bg-[#12161c] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[#1e2329] transition-all flex-1 border border-white/5"
                                 >
-                                    Cancelar
+                                    Cerrar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isProcessingCollective}
-                                    className="flex-1 px-4 py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-500 transition-all disabled:opacity-50 shadow-lg shadow-emerald-600/20"
+                                    className="px-10 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex-[2] shadow-2xl shadow-emerald-600/20 active:scale-95 disabled:opacity-50"
                                 >
-                                    {isProcessingCollective ? 'Procesando...' : 'Confirmar'}
+                                    {isProcessingCollective ? 'Enviando...' : 'Confirmar Inversión'}
                                 </button>
                             </div>
                         </form>

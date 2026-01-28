@@ -11,6 +11,8 @@
   --text-secondary: #848e9c;
   --glass-border: rgba(255, 255, 255, 0.05);
   --accent-glow: rgba(252, 213, 53, 0.1);
+  --binance-red: #f6465d;
+  --binance-green: #0ecb81;
 }
 
 .userPanelContainer {
@@ -26,6 +28,41 @@
   background: var(--bg-binance-card);
   border: 1px solid var(--glass-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Binance Specific Utilities */
+.binanceCard {
+  background-color: var(--bg-binance-card);
+  border-radius: 1rem;
+  border: 1px solid var(--glass-border);
+  padding: 1.5rem;
+}
+
+.binanceItem {
+  background-color: var(--bg-binance-item);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: background-color 0.2s;
+}
+
+.binanceItem:hover {
+  background-color: #363d47;
+}
+
+.textBinanceYellow {
+  color: var(--binance-yellow);
+}
+
+.bgBinanceYellow {
+  background-color: var(--binance-yellow);
+}
+
+.textBinanceGreen {
+  color: var(--binance-green);
+}
+
+.textBinanceRed {
+  color: var(--binance-red);
 }
 
 /* Header & Title */

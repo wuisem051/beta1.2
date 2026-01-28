@@ -199,54 +199,72 @@ const CollectiveFundContent = () => {
   };
 
   return (
-    <div className={styles.dashboardContent}>
-      <h1 className={styles.mainContentTitle}>Fondo Colectivo</h1>
-      <p className={styles.statTitle} style={{ marginBottom: '2rem' }}>
-        Participa en inversiones conjuntas y obtén rendimientos gestionados por profesionales.
-      </p>
-
-      <div className="flex justify-center mb-8">
+    <div className={`${styles.dashboardContent} animate-in fade-in duration-700`}>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-white italic tracking-tight mb-2 uppercase">Fondo Colectivo</h1>
+          <p className="text-sm text-slate-500 font-bold uppercase tracking-widest max-w-xl">
+            Participa en inversiones conjuntas y obtén rendimientos gestionados por profesionales de la industria.
+          </p>
+        </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-blue-600/20"
+          className="px-10 py-5 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[#fcd535]/10 active:scale-95 text-xs"
         >
-          Participar en el Fondo
+          Participar ahora
         </button>
       </div>
 
-      {success && <p className="text-green-500 font-bold text-center mb-4">{success}</p>}
-      {error && <p className="text-red-500 font-bold text-center mb-4">{error}</p>}
+      {success && (
+        <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4 animate-in zoom-in duration-300">
+          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white"><FaCheckCircle /></div>
+          <p className="text-emerald-500 font-black text-xs uppercase tracking-widest">{success}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-4 animate-in zoom-in duration-300">
+          <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white"><FaExclamationTriangle /></div>
+          <p className="text-rose-500 font-black text-xs uppercase tracking-widest">{error}</p>
+        </div>
+      )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl">
-            <h2 className="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Aportar al Fondo</h2>
-            <form onSubmit={handleDeposit} className="space-y-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="bg-[#1e2329] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+            <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">Aportar Capital</h2>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-10">Los fondos se transfieren de tu balance USD</p>
+
+            <form onSubmit={handleDeposit} className="space-y-8">
               <div>
-                <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Monto (USD)</label>
-                <input
-                  type="number"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500/50 transition-all font-mono"
-                  disabled={isLoading}
-                />
+                <label className="block text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 ml-2">Monto del Aporte (USD)</label>
+                <div className="relative group">
+                  <input
+                    type="number"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-blue-500 transition-all font-mono shadow-inner"
+                    disabled={isLoading}
+                    required
+                  />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 font-black text-sm">$</div>
+                </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-3 bg-slate-800 text-slate-400 rounded-xl font-bold hover:bg-slate-700 transition-all"
+                  className="px-6 py-5 bg-[#12161c] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[#1e2329] transition-all flex-1 border border-white/5"
                 >
-                  Cancelar
+                  Cerrar
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-all disabled:opacity-50"
+                  className="px-6 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex-1 shadow-2xl shadow-blue-600/30 active:scale-95 disabled:opacity-50"
                 >
-                  {isLoading ? 'Procesando...' : 'Confirmar'}
+                  {isLoading ? 'Enviando...' : 'Confirmar'}
                 </button>
               </div>
             </form>
@@ -254,35 +272,39 @@ const CollectiveFundContent = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <div className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle} style={{ textAlign: 'center', marginBottom: '2rem' }}>Distribución de Fondos</h2>
-          <div className={styles.chartContainer} style={{ height: '350px', position: 'relative' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+        <div className="lg:col-span-3 bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
+          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-10 italic">Distribución Global de Fondos</h2>
+          <div className="h-[400px] relative">
             <Pie data={data} options={options} plugins={[ChartDataLabels]} />
           </div>
         </div>
 
-        <div className={styles.sectionCard}>
-          <h2 className={styles.sectionTitle} style={{ textAlign: 'center', marginBottom: '2rem' }}>Aportes Recientes</h2>
-          <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="lg:col-span-2 bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl flex flex-col">
+          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-10 italic text-center">Últimas Participaciones</h2>
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
             {contributions.length === 0 ? (
-              <p className="text-slate-500 text-center italic">No hay aportes registrados.</p>
+              <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                <FaRegClock size={40} className="mb-4" />
+                <p className="text-[10px] font-black uppercase tracking-widest">Esperando datos...</p>
+              </div>
             ) : (
               contributions.map((c) => (
-                <div key={c.id} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-black text-xs">
+                <div key={c.id} className="flex justify-between items-center p-5 bg-[#12161c] rounded-2xl border border-white/5 hover:bg-white/[0.02] transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-400 font-black text-sm border border-blue-500/20 group-hover:scale-110 transition-transform">
                       {c.username ? c.username[0].toUpperCase() : 'U'}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">{c.username}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">
-                        {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString() : 'Reciente'}
+                      <p className="text-xs font-black text-white uppercase tracking-tight">{c.username}</p>
+                      <p className="text-[9px] text-slate-600 font-black uppercase tracking-tighter">
+                        {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString([], { day: '2-digit', month: '2-digit' }) : 'Reciente'}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-emerald-400 font-black tracking-tighter text-lg">+${c.amount.toFixed(2)}</p>
+                    <p className="text-emerald-500 font-black tracking-tighter text-base leading-none mb-1">+${c.amount.toLocaleString()}</p>
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full ml-auto"></div>
                   </div>
                 </div>
               ))
@@ -291,25 +313,30 @@ const CollectiveFundContent = () => {
         </div>
       </div>
 
-      <div className={styles.sectionCard} style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={styles.summaryCard}>
-            <p className={styles.statTitle}>Capital Total</p>
-            <p className={styles.statsValueGreen}>
+      <div className="bg-[#1e2329] p-2 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+          <div className="p-10 text-center hover:bg-white/[0.01] transition-colors group">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Capital Estratégico</p>
+            <p className="text-3xl lg:text-4xl font-black text-white italic tracking-tighter group-hover:scale-105 transition-transform duration-500">
               ${(config.displayMode === 'real' ? realStats.capital : config.manualCapital).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </p>
+            <div className="mt-4 px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[8px] font-black rounded-full inline-block border border-emerald-500/20">AUDITADO</div>
           </div>
-          <div className={styles.summaryCard}>
-            <p className={styles.statTitle}>Rendimiento 30d</p>
-            <p className={styles.statsValueBlue}>
+
+          <div className="p-10 text-center hover:bg-white/[0.01] transition-colors group">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">ROI Proyectado (30D)</p>
+            <p className="text-3xl lg:text-4xl font-black text-blue-400 italic tracking-tighter group-hover:scale-105 transition-transform duration-500">
               {config.displayMode === 'real' ? '+12.4' : config.manualYield}%
             </p>
+            <div className="mt-4 px-3 py-1 bg-blue-500/10 text-blue-400 text-[8px] font-black rounded-full inline-block border border-blue-500/20">RENDIMIENTO</div>
           </div>
-          <div className={styles.summaryCard}>
-            <p className={styles.statTitle}>Miembros</p>
-            <p className={styles.statsTitle} style={{ marginBottom: 0 }}>
+
+          <div className="p-10 text-center hover:bg-white/[0.01] transition-colors group">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Miembros Activos</p>
+            <p className="text-3xl lg:text-4xl font-black text-white italic tracking-tighter group-hover:scale-105 transition-transform duration-500">
               {(config.displayMode === 'real' ? realStats.members : config.manualMembers).toLocaleString()}
             </p>
+            <div className="mt-4 px-3 py-1 bg-slate-500/10 text-slate-400 text-[8px] font-black rounded-full inline-block border border-white/5 uppercase">Global</div>
           </div>
         </div>
       </div>

@@ -1,37 +1,36 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { Link, useMatch, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
+import {
+  FaChevronDown, FaChevronUp, FaWallet, FaChartLine,
+  FaUserCircle, FaHeadset, FaCog, FaBell, FaGem,
+  FaLayout, FaHistory, FaExchangeAlt, FaNetworkWired,
+  FaArrowDown, FaArrowUp, FaUsers, FaShieldAlt
+} from 'react-icons/fa';
 
 import candadoIcon from '../../imagens/candado.png';
 
 const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser, isHidden }) => {
-  const { darkMode, theme } = useContext(ThemeContext);
+  const { darkMode } = useContext(ThemeContext);
   const { pathname } = useLocation();
   const basePath = pathname.split('/').slice(0, 2).join('/');
-  const [showWithdrawals, setShowWithdrawals] = useState(false);
 
-  const isDashboardActive = useMatch(`${basePath}/dashboard`);
-  const isReferralsActive = useMatch(`${basePath}/referrals`);
-  const isBonusActive = useMatch(`${basePath}/bonus`);
-  const isMyWalletActive = useMatch(`${basePath}/my-wallet`);
-  const isWithdrawalsActive = useMatch(`${basePath}/withdrawals`);
-  const isP2PMarketplaceActive = useMatch(`${basePath}/p2p-marketplace`);
-  const isCollectiveFundActive = useMatch(`${basePath}/collective-fund`);
-  const isMiningPortfolioActive = useMatch(`${basePath}/mining-portfolio`);
-  const isMinersActive = useMatch(`${basePath}/miners`);
-  const isSettingsActive = useMatch(`${basePath}/settings`);
-  const isContactSupportActive = useMatch(`${basePath}/contact-support`);
-  const isDepositsActive = useMatch(`${basePath}/deposits`);
-  const isPlanTradingActive = useMatch(`${basePath}/plan-trading`);
-  const isExchangeActive = useMatch(`${basePath}/exchange`);
-  const isVIPChatActive = useMatch(`${basePath}/vip-chat`);
-  const isUpdatesActive = useMatch(`${basePath}/updates`);
+  // States for collapsible menus
+  const [openMenus, setOpenMenus] = useState({
+    wallet: pathname.includes('wallet') || pathname.includes('deposits') || pathname.includes('withdrawals'),
+    trading: pathname.includes('miners') || pathname.includes('mining-portfolio') || pathname.includes('exchange') || pathname.includes('plan-trading'),
+    support: pathname.includes('contact-support') || pathname.includes('updates'),
+    account: pathname.includes('settings')
+  });
+
+  const toggleMenu = (menu) => {
+    setOpenMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
+  };
 
   const isVIP = useMemo(() => {
     if (!displayUser?.vipStatus || displayUser.vipStatus === 'none') return false;
-    if (!displayUser.vipExpiry) return false;
     const now = new Date();
-    const expiry = displayUser.vipExpiry.toDate ? displayUser.vipExpiry.toDate() : new Date(displayUser.vipExpiry);
+    const expiry = displayUser.vipExpiry?.toDate ? displayUser.vipExpiry.toDate() : new Date(displayUser.vipExpiry);
     return expiry > now;
   }, [displayUser.vipStatus, displayUser.vipExpiry]);
 
@@ -42,9 +41,41 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
     }
   };
 
+  const NavLink = ({ to, icon, label, isActive, onClick }) => (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 group ${isActive
+          ? 'bg-[#2b3139] text-[#fcd535]'
+          : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'
+        }`}
+    >
+      <span className={`mr-3 text-sm ${isActive ? 'text-[#fcd535]' : 'text-slate-500 group-hover:text-white'}`}>
+        {icon}
+      </span>
+      {label}
+      {isActive && <div className="ml-auto w-1.5 h-1.5 bg-[#fcd535] rounded-full shadow-[0_0_8px_#fcd535]"></div>}
+    </Link>
+  );
+
+  const CollapsibleHeader = ({ icon, label, isOpen, onClick }) => (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-[#1e2329] group`}
+    >
+      <span className="mr-3 text-sm text-slate-500 group-hover:text-white">
+        {icon}
+      </span>
+      {label}
+      <span className="ml-auto text-[10px] text-slate-500">
+        {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+      </span>
+    </button>
+  );
+
   return (
     <aside
-      className={`p-4 shadow-xl border-r border-white border-opacity-5 flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
+      className={`shadow-xl border-r border-white border-opacity-5 flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
       style={{
         background: '#12161c',
         position: 'fixed',
@@ -52,133 +83,141 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
         left: 0,
         bottom: 0,
         zIndex: 110,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        padding: isHidden ? '0' : '1rem 0.75rem'
       }}
     >
-      <div className="flex flex-col items-center text-center border-b border-white border-opacity-10 pb-6 mb-6">
-        <div className="w-16 h-16 rounded-full overflow-hidden mb-3 shadow-lg bg-[#2b3139] flex items-center justify-center border-2 border-[#fcd535]/20">
+      {/* Header Profile Section */}
+      <div className="flex items-center gap-3 px-3 pb-6 mb-4 border-b border-white border-opacity-5 mt-2">
+        <div className="w-10 h-10 rounded-full bg-[#fcd535] flex items-center justify-center overflow-hidden border-2 border-[#2b3139] relative shrink-0">
           {displayUser?.profilePhotoUrl ? (
             <img src={displayUser.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fcd535 0%, #f0b90b 100%)' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1e2329" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-            </div>
+            <FaUserCircle className="text-[#1e2329] text-3xl" />
           )}
         </div>
-        <h2 className="text-sm font-bold truncate w-full text-white">
-          {displayUser?.displayName || displayUser?.username || displayUser?.email || 'Usuario'}
-        </h2>
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: isVIP ? 'rgba(252, 213, 53, 0.1)' : 'rgba(132, 142, 156, 0.1)', color: isVIP ? '#fcd535' : '#848e9c' }}>
-            {isVIP ? 'VIP Member' : 'Pro Trader'}
-          </span>
+        <div className="min-w-0">
+          <h2 className="text-xs font-black truncate text-white uppercase tracking-tighter">
+            {displayUser?.displayName || displayUser?.username || 'Usuario'}
+          </h2>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[9px] font-black uppercase tracking-widest text-[#fcd535]">
+              {isVIP ? 'VIP ELITE' : 'STANDARD'}
+            </span>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto no-scrollbar">
-        <ul className="space-y-1">
-          <li>
-            <Link to={`/user/dashboard`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isDashboardActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-              Dashboard
-            </Link>
-          </li>
+      <nav className="flex-1 overflow-y-auto no-scrollbar px-1">
+        <div className="space-y-4">
 
-          <li>
-            <Link to={`/user/collective-fund`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isCollectiveFundActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-              Fondo Colectivo
-            </Link>
-          </li>
+          {/* Dashboard Item */}
+          <NavLink
+            to="/user/dashboard"
+            icon={<FaLayout />}
+            label="Dashboard"
+            isActive={pathname.includes('/dashboard')}
+          />
 
-          <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Trading & Crypto</div>
+          {/* Billetera Section */}
+          <div className="space-y-1">
+            <CollapsibleHeader
+              icon={<FaWallet />}
+              label="Billetera"
+              isOpen={openMenus.wallet}
+              onClick={() => toggleMenu('wallet')}
+            />
+            {openMenus.wallet && (
+              <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
+                <NavLink to="/user/my-wallet" label="Resumen" isActive={pathname === '/user/my-wallet'} />
+                <NavLink to="/user/deposits" label="Depósito" isActive={pathname.includes('/deposits')} />
+                <NavLink to="/user/withdrawals" label="Retiro" isActive={pathname.includes('/withdrawals')} />
+                <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
+              </div>
+            )}
+          </div>
 
-          <li>
-            <Link to={`/user/plan-trading`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isPlanTradingActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="3" y="4" width="18" height="16" rx="2" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-              Plan Trading
-            </Link>
-          </li>
+          {/* Trading Section */}
+          <div className="space-y-1">
+            <CollapsibleHeader
+              icon={<FaChartLine />}
+              label="Trading"
+              isOpen={openMenus.trading}
+              onClick={() => toggleMenu('trading')}
+            />
+            {openMenus.trading && (
+              <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
+                <NavLink to="/user/exchange" label="Terminal Spot" isActive={pathname.includes('/exchange')} />
+                <NavLink to="/user/miners" label="Señales VIP" isActive={pathname.includes('/miners')} />
+                <NavLink to="/user/mining-portfolio" label="Mi Portafolio" isActive={pathname.includes('/mining-portfolio')} />
+                <NavLink to="/user/plan-trading" label="Plan de Trading" isActive={pathname.includes('/plan-trading')} />
+              </div>
+            )}
+          </div>
 
-          <li>
-            <Link to={`/user/miners`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMinersActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /></svg>
-              Señales Trading
-            </Link>
-          </li>
+          {/* Fondo Colectivo */}
+          <NavLink
+            to="/user/collective-fund"
+            icon={<FaUsers />}
+            label="Fondo Colectivo"
+            isActive={pathname.includes('/collective-fund')}
+          />
 
-          <li>
-            <Link to={`/user/mining-portfolio`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMiningPortfolioActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
-              Mi Portafolio
-            </Link>
-          </li>
+          {/* Chat VIP */}
+          <NavLink
+            to={isVIP ? "/user/vip-chat" : "#"}
+            icon={<FaGem />}
+            label="Chat Privado VIP"
+            isActive={pathname.includes('/vip-chat')}
+            onClick={handleVIPChatClick}
+          />
 
-          <li>
-            <Link to={`/user/exchange`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isExchangeActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-              Conexión Exchange
-            </Link>
-          </li>
+          <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">SISTEMA</div>
 
-          <li>
-            <Link
-              to={isVIP ? `/user/vip-chat` : '#'}
-              onClick={handleVIPChatClick}
-              className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isVIPChatActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-              Chat Privado VIP
-              {!isVIP && <img src={candadoIcon} alt="Lock" className="ml-auto w-4 h-4 opacity-70" />}
-            </Link>
-          </li>
+          {/* Soporte Section */}
+          <div className="space-y-1">
+            <CollapsibleHeader
+              icon={<FaHeadset />}
+              label="Soporte"
+              isOpen={openMenus.support}
+              onClick={() => toggleMenu('support')}
+            />
+            {openMenus.support && (
+              <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
+                <NavLink to="/user/contact-support" label="Tickets" isActive={pathname.includes('/contact-support')} />
+                <NavLink to="/user/updates" label="Registro" isActive={pathname.includes('/updates')} />
+              </div>
+            )}
+          </div>
 
-          <li>
-            <Link to={`/user/my-wallet`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isMyWalletActive || isWithdrawalsActive || isDepositsActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
-              Mi Billetera
-            </Link>
-          </li>
-
-          <li>
-            <Link to={`/user/p2p-marketplace`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isP2PMarketplaceActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="m8 3 4 8 5-5 5 15H2L8 3z" /></svg>
-              Mercado P2P
-            </Link>
-          </li>
-
-          <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Soporte & Ajustes</div>
-
-          <li>
-            <Link to={`/user/updates`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isUpdatesActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg>
-              Actualizaciones
-            </Link>
-          </li>
-
-          <li>
-            <Link to={`/user/settings`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isSettingsActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-              Ajustes
-            </Link>
-          </li>
-
-          <li>
-            <Link to={`/user/contact-support`} className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-300 ${isContactSupportActive ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-              Soporte
-              {unreadTicketsCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">{unreadTicketsCount}</span>
-              )}
-            </Link>
-          </li>
-        </ul>
+          {/* Configuración Section */}
+          <div className="space-y-1">
+            <CollapsibleHeader
+              icon={<FaCog />}
+              label="Cuenta"
+              isOpen={openMenus.account}
+              onClick={() => toggleMenu('account')}
+            />
+            {openMenus.account && (
+              <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
+                <NavLink to="/user/settings" label="Ajustes" isActive={pathname.includes('/settings')} />
+                <NavLink to="/user/referrals" label="Referidos" isActive={pathname.includes('/referrals')} />
+              </div>
+            )}
+          </div>
+        </div>
       </nav>
 
-      <div className="mt-8 pt-6 border-t border-white border-opacity-10">
-        <div className="bg-white bg-opacity-5 rounded-xl p-3 text-center">
-          <p className="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-tighter">Tu ID Único</p>
-          <p className="text-xs font-black text-white">{displayUser?.uid?.substring(0, 12).toUpperCase()}</p>
+      {/* Footer ID Section */}
+      <div className="mt-4 pt-4 border-t border-white border-opacity-5">
+        <div className="bg-white bg-opacity-5 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/10 transition-all cursor-pointer">
+          <div>
+            <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Tu ID Único</p>
+            <p className="text-[10px] font-black text-white leading-none font-mono">
+              {displayUser?.uid?.substring(0, 10).toUpperCase()}
+            </p>
+          </div>
+          <FaShieldAlt className="text-slate-600 group-hover:text-[#fcd535] transition-colors" />
         </div>
       </div>
     </aside>

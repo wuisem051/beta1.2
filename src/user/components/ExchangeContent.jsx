@@ -801,11 +801,12 @@ const ExchangeContent = () => {
                                                     step="0.00000001"
                                                     value={tradeAmount}
                                                     onChange={e => setTradeAmount(e.target.value)}
-                                                    className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
-                                                    placeholder="0.00"
+                                                    className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
+                                                    placeholder="0.0000"
+                                                    required
                                                 />
                                                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
-                                                <div className="absolute right-6 -bottom-2 px-3 py-1 bg-slate-900 border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
+                                                <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[#1e2329] border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
                                             </div>
 
                                             <div className="grid grid-cols-4 gap-2">
@@ -814,7 +815,7 @@ const ExchangeContent = () => {
                                                         key={p}
                                                         type="button"
                                                         onClick={() => handlePercentageClick(p)}
-                                                        className="py-2.5 bg-slate-950/40 hover:bg-slate-900/60 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
+                                                        className="py-2.5 bg-black/20 hover:bg-white/5 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
                                                     >
                                                         {p}%
                                                     </button>
@@ -824,22 +825,22 @@ const ExchangeContent = () => {
                                     </div>
 
                                     {/* Enhanced Order Metrics */}
-                                    <div className="bg-slate-950/60 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
+                                    <div className="bg-black/20 rounded-3xl p-6 border border-white/5 flex flex-col md:flex-row gap-6 md:divide-x md:divide-white/5">
                                         <div className="flex-1 space-y-4">
                                             <div className="flex justify-between items-center px-1">
                                                 <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
                                                 <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
                                             </div>
                                             <div className="flex justify-between items-center px-1">
-                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Margen Estimado</span>
-                                                <span className="text-xs font-black text-white italic tracking-tighter">SPOT NO LEVERAGE</span>
+                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Modo</span>
+                                                <span className="text-xs font-black text-[#fcd535] italic tracking-tighter">SPOT TERMINAL</span>
                                             </div>
                                         </div>
                                         <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total de Operación</span>
+                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Total Estimado</span>
                                             <div className="flex items-baseline gap-2">
                                                 <span className="text-4xl font-black text-white tracking-tighter italic">{estimatedTotal}</span>
-                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">USDT</span>
+                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">USDT</span>
                                             </div>
                                         </div>
                                     </div>
@@ -847,12 +848,12 @@ const ExchangeContent = () => {
                                     <button
                                         type="submit"
                                         disabled={isTrading}
-                                        className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all duration-500 shadow-2xl active:scale-[0.98] border-b-4 ${tradeSide === 'buy'
-                                            ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/20 border-emerald-700'
-                                            : 'bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20 border-rose-700'
+                                        className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all duration-500 shadow-2xl active:scale-[0.98] ${tradeSide === 'buy'
+                                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20'
+                                            : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20'
                                             }`}
                                     >
-                                        {isTrading ? 'Procesando Operación...' : `EJECUTAR ${tradeSide === 'buy' ? 'COMPRA' : 'VENTA'}`}
+                                        {isTrading ? 'Procesando Operación...' : `${tradeSide === 'buy' ? 'Comprar' : 'Vender'} ${tradeSymbol.split('/')[0]}`}
                                     </button>
                                 </form>
                             </div>
@@ -862,74 +863,90 @@ const ExchangeContent = () => {
             )}
 
             {/* Orders & History Viewers (Modern Lists) */}
-            {
-                (activeTab === 'orders' || activeTab === 'history') && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-10 rounded-[2.5rem]`}>
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                                <div>
-                                    <h2 className="text-2xl font-black text-white italic tracking-tight">{activeTab === 'orders' ? 'ÓRDENES ACTIVAS' : 'HISTORIAL DE TRADING'}</h2>
-                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Registros sincronizados con el Cloud del Exchange</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Filtrar</button>
-                                    <button className="px-5 py-2.5 bg-slate-950/40 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors">Exportar CSV</button>
-                                </div>
-                            </div>
+            {(activeTab === 'orders' || activeTab === 'history') && (
+                <div className="bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="p-10 border-b border-white/5 bg-white/[0.01]">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                            {activeTab === 'orders' ? 'Órdenes Abiertas' : 'Historial de Trading'}
+                        </h3>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                            {activeTab === 'orders' ? 'Gestiona tus posiciones activas en el exchange' : 'Registro de operaciones cerradas y liquidadas'}
+                        </p>
+                    </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-separate border-spacing-y-3">
-                                    <thead>
-                                        <tr className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-                                            <th className="px-6 py-2">Fecha</th>
-                                            <th className="px-6 py-2">Par</th>
-                                            <th className="px-6 py-2">Side</th>
-                                            <th className="px-6 py-2">Precio</th>
-                                            <th className="px-6 py-2">Cantidad</th>
-                                            <th className="px-6 py-2">Total</th>
-                                            <th className="px-6 py-2">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className="group">
-                                            <td colSpan="7" className="py-20 text-center bg-slate-950/20 rounded-[2rem] border border-dashed border-white/5">
-                                                <div className="flex flex-col items-center gap-4">
-                                                    <div className="w-16 h-16 bg-slate-900 border border-white/10 rounded-full flex items-center justify-center text-slate-800 text-2xl">
-                                                        <FaRegClock className="animate-pulse" />
-                                                    </div>
-                                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-[0.2em]">No se detectaron registros recientes</span>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-[#12161c]">
+                                <tr>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Símbolo</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo/Lado</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Monto</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Precio</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
+                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Tiempo</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {(activeTab === 'orders' ? recentOrders : orderHistory).map(order => (
+                                    <tr key={order.id} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-blue-500 border border-white/5">
+                                                    {order.symbol.split('/')[0][0]}
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                                <span className="text-xs font-black text-white">{order.symbol}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="flex flex-col">
+                                                <span className={`text-[9px] font-black uppercase ${order.side === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                    {order.side === 'buy' ? 'Compra' : 'Venta'}
+                                                </span>
+                                                <span className="text-[8px] text-slate-600 font-bold uppercase">{order.type}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.amount}</td>
+                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.price || 'Market'}</td>
+                                        <td className="px-8 py-6">
+                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${order.status === 'open' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border border-white/5'
+                                                }`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-600 font-bold">
+                                            {new Date(order.timestamp).toLocaleString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {(activeTab === 'orders' ? recentOrders : orderHistory).length === 0 && (
+                                    <tr>
+                                        <td colSpan="6" className="px-8 py-32 text-center text-slate-600 italic">
+                                            <div className="opacity-20 flex flex-col items-center">
+                                                <FaRegClock size={48} className="mb-4" />
+                                                <p className="text-[10px] font-black uppercase tracking-[0.4em]">No hay órdenes registradas</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                )
-            }
-            {
-                errorMsg && (
-                    <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10 duration-500">
-                        <div className="bg-slate-900/90 backdrop-blur-2xl border border-rose-500/20 text-rose-400 p-5 rounded-3xl flex items-center gap-4 shadow-[0_20px_50px_rgba(225,29,72,0.1)] max-w-md">
-                            <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shrink-0">
-                                <FaExclamationTriangle />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Error détectado</h4>
-                                <p className="text-xs font-bold leading-relaxed">{errorMsg}</p>
-                            </div>
-                            <button
-                                onClick={() => setErrorMsg('')}
-                                className="text-slate-600 hover:text-white transition-colors p-2"
-                            >
-                                ✕
-                            </button>
-                        </div>
+                </div>
+            )}
+
+            {errorMsg && (
+                <div className="fixed bottom-10 right-10 bg-[#1e2329] text-white px-8 py-4 rounded-3xl shadow-2xl border border-rose-500/20 flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 z-50">
+                    <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500">
+                        <FaExclamationTriangle className="text-xl" />
                     </div>
-                )
-            }
-        </div >
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 text-slate-500">Alerta del Sistema</p>
+                        <p className="text-xs font-bold leading-none">{errorMsg}</p>
+                    </div>
+                    <button onClick={() => setErrorMsg('')} className="ml-4 text-white/20 hover:text-white">✕</button>
+                </div>
+            )}
+        </div>
     );
 };
 
