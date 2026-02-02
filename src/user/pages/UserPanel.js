@@ -30,6 +30,7 @@ import VIPPlanDisplay from '../components/VIPPlanDisplay';
 import { FaHistory, FaUserCircle, FaRegEye, FaRegEyeSlash, FaCrown, FaGem, FaRegClock } from 'react-icons/fa';
 
 import UpdatesContent from '../components/UpdatesContent';
+import CryptoMarketMonitor from '../components/CryptoMarketMonitor';
 
 // Componentes de las sub-secciones
 
@@ -536,70 +537,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
       </div>
 
       {/* Market Watch Section */}
-      <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
-        <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Cotizaciones en tiempo real via Binance Cloud</p>
-          </div>
-          <div className="flex gap-4">
-            <button className="px-5 py-2 bg-[#12161c] text-[#fcd535] text-[9px] font-black uppercase tracking-widest rounded-lg border border-[#fcd535]/20">Populares</button>
-            <button className="px-5 py-2 text-slate-500 text-[9px] font-black uppercase tracking-widest rounded-lg hover:text-white transition-all">Favoritos</button>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-[#12161c]">
-              <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                <th className="px-10 py-5">Activo</th>
-                <th className="px-10 py-5 text-right">Cotización (USDT)</th>
-                <th className="px-10 py-5 text-right">Variación 24H</th>
-                <th className="px-10 py-5 text-right">Tendencia</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {isLoadingSignals ? (
-                <tr><td colSpan="4" className="px-10 py-20 text-center animate-pulse text-slate-500 font-black uppercase text-[10px] tracking-widest">Sincronizando flujos de datos...</td></tr>
-              ) : signals.length === 0 ? (
-                <tr><td colSpan="4" className="px-10 py-20 text-center text-slate-700 italic">No hay señales activas en el nodo actual</td></tr>
-              ) : (
-                signals.map(signal => {
-                  const isPositive = signal.type === 'Compra';
-                  return (
-                    <tr key={signal.id} className="hover:bg-white/[0.02] transition-all cursor-pointer group">
-                      <td className="px-10 py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-[#12161c] border border-white/5 flex items-center justify-center text-[#fcd535] font-black text-xs group-hover:scale-110 transition-transform">
-                            {signal.asset.substring(0, 2)}
-                          </div>
-                          <div>
-                            <p className="text-sm font-black text-white uppercase tracking-tight">{signal.asset}</p>
-                            <p className="text-[9px] text-slate-600 font-bold uppercase">Spot Trading</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-10 py-6 text-right font-mono text-sm font-black text-white">{signal.entryPrice}</td>
-                      <td className="px-10 py-6 text-right">
-                        <span className={`text-xs font-black italic ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {isPositive ? '+' : '-'}{(Math.random() * 5 + 1).toFixed(2)}%
-                        </span>
-                      </td>
-                      <td className="px-10 py-6 text-right">
-                        <div className={`w-24 h-10 ml-auto flex items-center justify-end overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity`}>
-                          <svg className="w-full h-full" viewBox="0 0 100 40">
-                            <path d={`M0 35 Q 25 ${isPositive ? '10' : '35'}, 50 25 T 100 ${isPositive ? '5' : '30'}`} fill="none" stroke={isPositive ? '#10b981' : '#ef4444'} strokeWidth="3" />
-                          </svg>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CryptoMarketMonitor />
     </div>
   );
 };
