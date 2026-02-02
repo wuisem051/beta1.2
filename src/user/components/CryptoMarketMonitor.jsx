@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaBitcoin, FaEthereum, FaChartLine, FaArrowUp, FaArrowDown, FaSync, FaStar, FaRegStar, FaSearch, FaBell, FaRegBell, FaExchangeAlt, FaTimes, FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaBitcoin, FaEthereum, FaChartLine, FaArrowUp, FaArrowDown, FaSync, FaStar, FaRegStar, FaSearch, FaBell, FaRegBell, FaExchangeAlt, FaTimes, FaFilter, FaSort, FaSortUp, FaSortDown, FaChartBar } from 'react-icons/fa';
+import TradingViewWidget from './TradingViewWidget';
 
 const CryptoMarketMonitor = () => {
     const [cryptos, setCryptos] = useState([]);
@@ -18,6 +19,8 @@ const CryptoMarketMonitor = () => {
     const [compareList, setCompareList] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: 'market_cap_rank', direction: 'asc' });
     const [showFilters, setShowFilters] = useState(false);
+    const [showChartModal, setShowChartModal] = useState(false);
+    const [chartCrypto, setChartCrypto] = useState(null);
 
     // Función para obtener datos de CoinGecko
     const fetchCryptoData = async () => {
@@ -328,8 +331,8 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('all')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'all'
-                                        ? 'bg-[#fcd535] text-black'
-                                        : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    ? 'bg-[#fcd535] text-black'
+                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 Todos
@@ -337,8 +340,8 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('favorites')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'favorites'
-                                        ? 'bg-[#fcd535] text-black'
-                                        : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    ? 'bg-[#fcd535] text-black'
+                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 ⭐ Favoritos ({favorites.length})
@@ -346,8 +349,8 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('gainers')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'gainers'
-                                        ? 'bg-emerald-500 text-black'
-                                        : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    ? 'bg-emerald-500 text-black'
+                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 📈 Ganadores 24h
@@ -355,8 +358,8 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('losers')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'losers'
-                                        ? 'bg-rose-500 text-black'
-                                        : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    ? 'bg-rose-500 text-black'
+                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 📉 Perdedores 24h
@@ -576,8 +579,8 @@ const CryptoMarketMonitor = () => {
                                                             onClick={() => toggleCompare(crypto)}
                                                             disabled={!isComparing && compareList.length >= 3}
                                                             className={`p-2 rounded-lg transition-all ${isComparing
-                                                                    ? 'bg-[#fcd535] text-black'
-                                                                    : 'bg-[#12161c] text-slate-400 hover:text-white disabled:opacity-30'
+                                                                ? 'bg-[#fcd535] text-black'
+                                                                : 'bg-[#12161c] text-slate-400 hover:text-white disabled:opacity-30'
                                                                 }`}
                                                             title={isComparing ? 'Quitar de comparación' : 'Agregar a comparación'}
                                                         >
@@ -590,12 +593,22 @@ const CryptoMarketMonitor = () => {
                                                             setShowAlertModal(true);
                                                         }}
                                                         className={`p-2 rounded-lg transition-all ${hasAlert
-                                                                ? 'bg-blue-500 text-white'
-                                                                : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
                                                             }`}
                                                         title="Crear alerta de precio"
                                                     >
                                                         {hasAlert ? <FaBell size={12} /> : <FaRegBell size={12} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setChartCrypto(crypto);
+                                                            setShowChartModal(true);
+                                                        }}
+                                                        className="p-2 bg-[#12161c] text-slate-400 hover:text-white rounded-lg transition-all hover:bg-[#12161c] hover:scale-105"
+                                                        title="Ver Gráfico Avanzado"
+                                                    >
+                                                        <FaChartBar size={12} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -718,8 +731,8 @@ const CryptoMarketMonitor = () => {
                                     <button
                                         onClick={() => setAlertType('above')}
                                         className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${alertType === 'above'
-                                                ? 'bg-emerald-500 text-black'
-                                                : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                            ? 'bg-emerald-500 text-black'
+                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
                                             }`}
                                     >
                                         Por Encima
@@ -727,8 +740,8 @@ const CryptoMarketMonitor = () => {
                                     <button
                                         onClick={() => setAlertType('below')}
                                         className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${alertType === 'below'
-                                                ? 'bg-rose-500 text-black'
-                                                : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                            ? 'bg-rose-500 text-black'
+                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
                                             }`}
                                     >
                                         Por Debajo
@@ -783,6 +796,47 @@ const CryptoMarketMonitor = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Chart Modal */}
+            {showChartModal && chartCrypto && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+                    <div className="bg-[#1e2329] rounded-[30px] border border-white/5 w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-[#12161c]">
+                            <div className="flex items-center gap-4">
+                                <img src={chartCrypto.image} alt={chartCrypto.name} className="w-10 h-10 rounded-full" />
+                                <div>
+                                    <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-2">
+                                        {chartCrypto.name}
+                                        <span className="text-slate-500 text-sm not-italic">({chartCrypto.symbol.toUpperCase()}/USDT)</span>
+                                    </h3>
+                                    <div className="flex items-center gap-4 mt-1">
+                                        <p className="text-lg font-black text-[#fcd535]">{formatPrice(chartCrypto.current_price)}</p>
+                                        <span className={`text-xs font-black ${getChangeColor(chartCrypto.price_change_percentage_24h)}`}>
+                                            {chartCrypto.price_change_percentage_24h > 0 ? '+' : ''}{chartCrypto.price_change_percentage_24h.toFixed(2)}% (24h)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowChartModal(false)}
+                                className="p-2 rounded-full bg-[#1e2329] text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                            >
+                                <FaTimes size={20} />
+                            </button>
+                        </div>
+
+                        {/* Chart Container */}
+                        <div className="flex-1 bg-[#12161c] relative">
+                            <TradingViewWidget
+                                symbol={`BINANCE:${chartCrypto.symbol.toUpperCase()}USDT`}
+                                theme="dark"
+                                interval="60"
+                            />
+                        </div>
                     </div>
                 </div>
             )}

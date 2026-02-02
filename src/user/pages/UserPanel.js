@@ -420,8 +420,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     return expiry > now;
   }, [userBalances.vipStatus, userBalances.vipExpiry]);
 
-  const [signals, setSignals] = useState([]);
-  const [isLoadingSignals, setIsLoadingSignals] = useState(false);
   const [totalProfit, setTotalProfit] = useState(0);
 
   useEffect(() => {
@@ -443,23 +441,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     });
     return () => { unsubscribeTrading(); unsubscribeArbitrage(); };
   }, [currentUser, isVIP]);
-
-  useEffect(() => {
-    setIsLoadingSignals(true);
-    const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'), limit(5));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedSignals = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-      })).filter(s => s.status !== 'Exitosa' && s.status !== 'Finalizada');
-      setSignals(fetchedSignals);
-      setIsLoadingSignals(false);
-    }, (err) => {
-      setIsLoadingSignals(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   const vipStatusLabel = useMemo(() => {
     const status = userBalances.vipStatus || 'none';

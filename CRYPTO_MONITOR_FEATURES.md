@@ -50,7 +50,14 @@ Haz clic en cualquier encabezado de columna para ordenar:
 - Almacenamiento persistente en localStorage
 - Estrellas doradas para favoritos activos
 
-### 7. 📈 **Información Detallada**
+### 7. 📈 **Gráficos Profesionales**
+- **Integración con TradingView**: Gráficos de velas japonesas en tiempo real
+- **Modal de Detalle**: Haz clic en el icono de gráfico (📊) para ver análisis técnico completo
+- **Sincronización Automática**: Muestra el par USDT correspondiente de Binance automáticamente
+- **Datos Detallados**: Precio, cambio %, y gráfico interactivo en pantalla completa
+- **Indicadores Técnicos**: Acceso a todas las herramientas de dibujo e indicadores de TradingView
+
+### 8. 📋 **Información en Tabla**
 Para cada criptomoneda se muestra:
 - **Ranking** por capitalización de mercado
 - **Logo** de la criptomoneda
@@ -65,7 +72,7 @@ Para cada criptomoneda se muestra:
 - **Gráfico sparkline** de tendencia 7 días
 - **Botones de acción**: Favoritos, Comparar, Alertas
 
-### 8. 🎨 **Mejoras de UI/UX**
+### 9. 🎨 **Mejoras de UI/UX**
 - **Colores dinámicos**:
   - Verde (emerald) para cambios positivos
   - Rojo (rose) para cambios negativos
@@ -81,13 +88,13 @@ Para cada criptomoneda se muestra:
   - Estados de error con opción de reintentar
 - **Responsive design**: Se adapta a diferentes tamaños de pantalla
 
-### 9. 🔄 **Actualización Automática**
+### 10. 🔄 **Actualización Automática**
 - Actualización automática cada 60 segundos
 - Botón de actualización manual
 - Indicador de última actualización
 - Spinner animado durante la carga
 
-### 10. 💾 **Persistencia de Datos**
+### 11. 💾 **Persistencia de Datos**
 Todo se guarda en localStorage:
 - Favoritos del usuario
 - Alertas de precio activas
