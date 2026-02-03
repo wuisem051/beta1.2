@@ -17,12 +17,13 @@ const ExchangeContent = () => {
     const [activeTab, setActiveTab] = useState('trading');
     const [configs, setConfigs] = useState({
         binance: { apiKey: '', secret: '', connected: false },
+        binanceus: { apiKey: '', secret: '', connected: false },
         bingx: { apiKey: '', secret: '', connected: false }
     });
     const [activeTradingExchange, setActiveTradingExchange] = useState('binance');
 
     // UI Helpers
-    const [isSaving, setIsSaving] = useState({ binance: false, bingx: false });
+    const [isSaving, setIsSaving] = useState({ binance: false, binanceus: false, bingx: false });
 
     const [balance, setBalance] = useState(null);
     const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -486,7 +487,8 @@ const ExchangeContent = () => {
                             onChange={(e) => setActiveTradingExchange(e.target.value)}
                             className="bg-slate-900 text-white text-xs font-black uppercase py-1.5 px-3 rounded-lg border border-white/10 outline-none focus:border-blue-500 pointer-events-auto cursor-pointer hover:bg-slate-800 transition-colors"
                         >
-                            <option value="binance">BINANCE</option>
+                            <option value="binance">BINANCE (Global)</option>
+                            <option value="binanceus">BINANCE.US</option>
                             <option value="bingx">BINGX</option>
                         </select>
                         <span className="text-slate-600 font-bold ml-1 text-xs">v2.2</span>
@@ -522,8 +524,8 @@ const ExchangeContent = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {['binance', 'bingx'].map(exName => {
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {['binance', 'binanceus', 'bingx'].map(exName => {
                             const isConnected = configs[exName]?.connected;
                             const color = exName === 'binance' ? 'yellow' : 'blue';
 

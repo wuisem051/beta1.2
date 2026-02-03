@@ -141,11 +141,18 @@ exports.handler = async (event, context) => {
 
     } catch (error) {
         console.error('Exchange Balance Error:', error);
+        let errorMsg = error.message || 'Error al obtener balance.';
+
+        // Detectar bloqueo geográfico (Común en Netlify/AWS US)
+        if (errorMsg.includes('451') || errorMsg.includes('restricted location')) {
+            errorMsg = "Bloqueo Geográfico: Binance Global no permite peticiones desde servidores en EE.UU. (Netlify). Si estás en EE.UU., usa la opción 'Binance.US'. Si no, contacta a soporte para soluciones avanzadas.";
+        }
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: error.message || 'Error al obtener balance.'
+                error: errorMsg
             })
         };
     }

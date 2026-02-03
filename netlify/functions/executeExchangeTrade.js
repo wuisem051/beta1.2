@@ -139,11 +139,17 @@ exports.handler = async (event, context) => {
 
     } catch (error) {
         console.error('Exchange Trade Error:', error);
+        let errorMsg = error.message || 'Error al ejecutar orden.';
+
+        if (errorMsg.includes('451') || errorMsg.includes('restricted location')) {
+            errorMsg = "Bloqueo Geográfico: Binance Global no permite peticiones desde servidores en EE.UU. (Netlify). Si estás en EE.UU., usa la opción 'Binance.US'.";
+        }
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: error.message || 'Error al ejecutar orden.'
+                error: errorMsg
             })
         };
     }
