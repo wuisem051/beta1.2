@@ -122,10 +122,16 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 body: JSON.stringify({ symbol, exchange })
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                const data = await response.json();
                 if (data.last) {
                     setCurrentPrice(parseFloat(data.last));
+                }
+            } else {
+                console.error('Error fetching price:', data.error);
+                if (data.error?.includes('restricted location') || data.error?.includes('451')) {
+                    setError('Bloqueo Geográfico: No se puede obtener precio de Binance Global desde Netlify.');
                 }
             }
         } catch (err) {
