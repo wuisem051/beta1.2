@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { FaLayerGroup, FaCalculator, FaChartLine, FaPercentage, FaDollarSign, FaArrowUp, FaArrowDown, FaTrash, FaPlus, FaSave, FaSync, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { db } from '../../services/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const { currentUser } = useAuth();
@@ -22,6 +24,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     // Estados de UI
     const [isCalculating, setIsCalculating] = useState(false);
     const [isExecuting, setIsExecuting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -31,41 +34,73 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         'ADA/USDT', 'DOGE/USDT', 'MATIC/USDT', 'DOT/USDT', 'AVAX/USDT'
     ];
 
-    // Cargar configuración guardada al iniciar
+    // Cargar configuración desde Firebase al iniciar
     useEffect(() => {
-        const savedConfig = localStorage.getItem('scalper_config');
-        if (savedConfig) {
-            try {
-                const config = JSON.parse(savedConfig);
-                if (config.symbol) setSymbol(config.symbol);
-                if (config.strategy) setStrategy(config.strategy);
-                if (config.totalCapital) setTotalCapital(config.totalCapital);
-                if (config.numLevels) setNumLevels(config.numLevels);
-                if (config.priceStep) setPriceStep(config.priceStep);
-                if (config.distribution) setDistribution(config.distribution);
-                if (config.profitMode) setProfitMode(config.profitMode);
-                if (config.levels) setLevels(config.levels);
-                if (config.sellLevels) setSellLevels(config.sellLevels);
-            } catch (e) {
-                console.error('Error al cargar config guardada:', e);
-            }
-        }
-    }, []);
+        const loadConfigFromDb = async () => {
+            if (!currentUser) return;
 
-    // Guardar configuración automáticamente cuando cambie
-    useEffect(() => {
-        const configToSave = {
-            symbol,
-            strategy,
-            totalCapital,
-            numLevels,
-            priceStep,
-            distribution,
-            profitMode,
-            levels,
-            sellLevels
+            try {
+                const docRef = doc(db, 'users', currentUser.uid, 'settings', 'scalper');
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const config = docSnap.data();
+                    if (config.symbol) setSymbol(config.symbol);
+                    if (config.strategy) setStrategy(config.strategy);
+                    if (config.totalCapital) setTotalCapital(config.totalCapital);
+                    if (config.numLevels) setNumLevels(config.numLevels);
+                    if (config.priceStep) setPriceStep(config.priceStep);
+                    if (config.distribution) setDistribution(config.distribution);
+                    if (config.profitMode) setProfitMode(config.profitMode);
+                    if (config.levels) setLevels(config.levels);
+                    if (config.sellLevels) setSellLevels(config.sellLevels);
+                }
+            } catch (e) {
+                console.error('Error al cargar config desde DB:', e);
+            }
         };
-        localStorage.setItem('scalper_config', JSON.stringify(configToSave));
+
+        loadConfigFromDb();
+    }, [currentUser]);
+
+    // Función para guardar en Firebase
+    const saveToDb = async (overrides = {}) => {
+        if (!currentUser) return;
+        setIsSaving(true);
+
+        try {
+            const configToSave = {
+                symbol,
+                strategy,
+                totalCapital,
+                numLevels,
+                priceStep,
+                distribution,
+                profitMode,
+                levels,
+                sellLevels,
+                lastUpdated: new Date().toISOString(),
+                ...overrides
+            };
+
+            const docRef = doc(db, 'users', currentUser.uid, 'settings', 'scalper');
+            await setDoc(docRef, configToSave, { merge: true });
+        } catch (e) {
+            console.error('Error al guardar en DB:', e);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Efecto para auto-guardado suave (debounce para no saturar DB)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (levels.length > 0 || sellLevels.length > 0) {
+                saveToDb();
+            }
+        }, 2000);
+
+        return () => clearTimeout(timer);
     }, [symbol, strategy, totalCapital, numLevels, priceStep, distribution, profitMode, levels, sellLevels]);
 
     // Obtener precio actual
@@ -361,13 +396,25 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         <div className="space-y-6">
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 rounded-3xl p-8 border border-purple-500/20">
-                <div className="flex items-center gap-4 mb-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl">
-                        <FaLayerGroup className="text-white text-2xl" />
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl">
+                            <FaLayerGroup className="text-white text-2xl" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Trading Quirúrgico</h2>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Control Total sobre Lotes y Ejecución</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Trading Quirúrgico</h2>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Control Total sobre Niveles y Ejecución</p>
+
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSaving
+                            ? 'border-blue-500/30 bg-blue-500/10 text-blue-400'
+                            : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                        }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400'}`} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">
+                            {isSaving ? 'Guardando en DB...' : 'Sincronizado con la Nube'}
+                        </span>
                     </div>
                 </div>
 
