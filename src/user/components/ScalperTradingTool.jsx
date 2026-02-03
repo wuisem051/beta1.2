@@ -398,7 +398,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     {/* Número de Niveles */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            Niveles Sugeridos: {numLevels}
+                            Lotes Sugeridos: {numLevels}
                         </label>
                         <input
                             type="range"
@@ -474,7 +474,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         {(strategy === 'buy' ? levels : sellLevels).map((level, idx) => (
                             <div key={idx} className="bg-slate-950/40 rounded-xl p-3 border border-white/5">
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-[10px] font-black text-slate-500 uppercase">Nivel {level.level}</span>
+                                    <span className="text-[10px] font-black text-slate-500 uppercase">Lote {level.level}</span>
                                     <span className="text-[10px] font-black text-white">{level.percentage}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -494,7 +494,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Compras</h3>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Lotes de Compra</h3>
                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Edita los campos antes de ejecutar</p>
                         </div>
                         <button
@@ -503,7 +503,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3"
                         >
                             <FaCheckCircle />
-                            Ejecutar Todas
+                            Ejecutar Todos
                         </button>
                     </div>
 
@@ -511,7 +511,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">
-                                    <th className="px-4 py-4 text-left">Nivel</th>
+                                    <th className="px-4 py-4 text-left">Lote</th>
                                     <th className="px-4 py-4 text-left">Precio de Compra</th>
                                     <th className="px-4 py-4 text-left">Cantidad (Asset)</th>
                                     <th className="px-4 py-4 text-right">Total USD</th>
