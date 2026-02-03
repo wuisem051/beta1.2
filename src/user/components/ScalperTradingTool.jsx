@@ -13,6 +13,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const [numLevels, setNumLevels] = useState(5);
     const [priceStep, setPriceStep] = useState('1'); // Porcentaje entre niveles
     const [distribution, setDistribution] = useState('equal'); // 'equal', 'pyramid', 'reverse-pyramid'
+    const [profitMode, setProfitMode] = useState('dynamic'); // 'dynamic' o 'fixed'
 
     // Niveles calculados
     const [levels, setLevels] = useState([]);
@@ -29,6 +30,43 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         'BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT',
         'ADA/USDT', 'DOGE/USDT', 'MATIC/USDT', 'DOT/USDT', 'AVAX/USDT'
     ];
+
+    // Cargar configuración guardada al iniciar
+    useEffect(() => {
+        const savedConfig = localStorage.getItem('scalper_config');
+        if (savedConfig) {
+            try {
+                const config = JSON.parse(savedConfig);
+                if (config.symbol) setSymbol(config.symbol);
+                if (config.strategy) setStrategy(config.strategy);
+                if (config.totalCapital) setTotalCapital(config.totalCapital);
+                if (config.numLevels) setNumLevels(config.numLevels);
+                if (config.priceStep) setPriceStep(config.priceStep);
+                if (config.distribution) setDistribution(config.distribution);
+                if (config.profitMode) setProfitMode(config.profitMode);
+                if (config.levels) setLevels(config.levels);
+                if (config.sellLevels) setSellLevels(config.sellLevels);
+            } catch (e) {
+                console.error('Error al cargar config guardada:', e);
+            }
+        }
+    }, []);
+
+    // Guardar configuración automáticamente cuando cambie
+    useEffect(() => {
+        const configToSave = {
+            symbol,
+            strategy,
+            totalCapital,
+            numLevels,
+            priceStep,
+            distribution,
+            profitMode,
+            levels,
+            sellLevels
+        };
+        localStorage.setItem('scalper_config', JSON.stringify(configToSave));
+    }, [symbol, strategy, totalCapital, numLevels, priceStep, distribution, profitMode, levels, sellLevels]);
 
     // Obtener precio actual
     useEffect(() => {
@@ -62,7 +100,21 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
     // Calcular niveles de compra escalonados
     const calculateBuyLevels = () => {
-        if (!totalCapital || !currentPrice || numLevels < 1) return;
+        setError('');
+
+        if (!totalCapital) {
+            setError('Por favor indica el capital a distribuir');
+            return;
+        }
+        if (!currentPrice || currentPrice === 0) {
+            setError('Esperando precio del mercado... Intenta de nuevo en unos segundos');
+            fetchCurrentPrice();
+            return;
+        }
+        if (numLevels < 1) {
+            setError('El número de lotes debe ser al menos 1');
+            return;
+        }
 
         setIsCalculating(true);
         const capital = parseFloat(totalCapital);
@@ -72,14 +124,11 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         // Distribución del capital
         let portions = [];
         if (distribution === 'equal') {
-            // Distribución igual
             portions = Array(numLevels).fill(1 / numLevels);
         } else if (distribution === 'pyramid') {
-            // Más capital en niveles inferiores (pirámide)
             const total = (numLevels * (numLevels + 1)) / 2;
             portions = Array.from({ length: numLevels }, (_, i) => (numLevels - i) / total);
         } else if (distribution === 'reverse-pyramid') {
-            // Más capital en niveles superiores (pirámide invertida)
             const total = (numLevels * (numLevels + 1)) / 2;
             portions = Array.from({ length: numLevels }, (_, i) => (i + 1) / total);
         }
@@ -101,12 +150,10 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         }
 
         setLevels(newLevels);
-
-        // Auto-calcular niveles de venta
         calculateSellLevelsFromBuy(newLevels);
 
         setIsCalculating(false);
-        setSuccess('Niveles calculados correctamente');
+        setSuccess('Lotes de compra calculados correctamente');
         setTimeout(() => setSuccess(''), 3000);
     };
 
@@ -116,32 +163,35 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const calculateSellLevelsFromBuy = (buyLevels) => {
         if (!buyLevels || buyLevels.length === 0) return;
 
-        // Ordenamos las compras por precio (de menor a mayor) para asignarles ganancias
-        // La compra más barata será la Nivel 1 de venta, etc.
+        // Ordenamos las compras por precio (de menor a mayor)
         const sortedBuys = [...buyLevels].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
 
         const newSellLevels = [];
-        const profitSteps = [1, 2, 3, 5, 8, 13]; // Escala de ganancias sugeridas
+        const baseProfit = parseFloat(priceStep) || 1;
+        const multipliers = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]; // Escala Fibonacci
 
         sortedBuys.forEach((buyLevel, i) => {
-            if (i >= profitSteps.length && i >= numLevels) return;
+            if (i >= numLevels) return;
 
-            const profit = profitSteps[i] || (profitSteps[profitSteps.length - 1] + (i * 2));
+            // Si el modo es dinámico usa Fibonacci, si es fijo usa solo la base (priceStep)
+            const profitValue = profitMode === 'dynamic'
+                ? baseProfit * multipliers[i]
+                : baseProfit;
+
             const buyPrice = parseFloat(buyLevel.price);
             const qty = parseFloat(buyLevel.quantity);
 
-            // Calculamos precio de venta basado en el precio de compra de ESTE nivel específico
-            const sellPrice = buyPrice * (1 + profit / 100);
+            const sellPrice = buyPrice * (1 + profitValue / 100);
             const potentialProfit = (sellPrice - buyPrice) * qty;
 
             newSellLevels.push({
                 level: i + 1,
                 fromBuyLevel: buyLevel.level,
                 price: sellPrice.toFixed(8),
-                quantity: qty.toFixed(8), // MISMA cantidad que la compra
-                profit: profit,
+                quantity: qty.toFixed(8),
+                profit: profitValue.toFixed(2),
                 potentialProfit: potentialProfit.toFixed(2),
-                percentage: buyLevel.percentage, // Porcentaje relativo al total
+                percentage: buyLevel.percentage,
                 executed: false
             });
         });
@@ -151,7 +201,21 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
     // Calcular niveles de venta escalonados (estrategia de venta directa)
     const calculateSellLevels = () => {
-        if (!totalCapital || !currentPrice || numLevels < 1) return;
+        setError('');
+
+        if (!totalCapital) {
+            setError('Por favor indica la cantidad a distribuir');
+            return;
+        }
+        if (!currentPrice || currentPrice === 0) {
+            setError('Esperando precio del mercado... Intenta de nuevo en unos segundos');
+            fetchCurrentPrice();
+            return;
+        }
+        if (numLevels < 1) {
+            setError('El número de lotes debe ser al menos 1');
+            return;
+        }
 
         setIsCalculating(true);
         const [asset] = symbol.split('/');
@@ -181,6 +245,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 price: sellPrice.toFixed(8),
                 quantity: sellQuantity.toFixed(8),
                 profit: (step * (i + 1) * 100).toFixed(2),
+                potentialProfit: ((sellPrice - currentPrice) * sellQuantity).toFixed(2),
                 percentage: (portions[i] * 100).toFixed(2),
                 executed: false
             });
@@ -188,7 +253,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
         setSellLevels(newSellLevels);
         setIsCalculating(false);
-        setSuccess('Niveles de venta calculados');
+        setSuccess('Lotes de venta calculados correctamente');
         setTimeout(() => setSuccess(''), 3000);
     };
 
@@ -440,6 +505,36 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             <option value="pyramid">Pirámide (DCA)</option>
                             <option value="reverse-pyramid">Pirámide Invertida</option>
                         </select>
+                    </div>
+
+                    {/* Modo de Ganancia */}
+                    <div>
+                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Modo de Ganancia (Ventas)</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setProfitMode('dynamic')}
+                                className={`py-3 rounded-xl font-black uppercase text-[10px] transition-all ${profitMode === 'dynamic'
+                                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
+                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                    }`}
+                            >
+                                Dinámica
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setProfitMode('fixed')}
+                                className={`py-3 rounded-xl font-black uppercase text-[10px] transition-all ${profitMode === 'fixed'
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                    }`}
+                            >
+                                Fija
+                            </button>
+                        </div>
+                        <p className="mt-2 text-[9px] text-slate-600 font-bold uppercase tracking-widest">
+                            {profitMode === 'dynamic' ? 'Escala Fibonacci (1, 2, 3, 5...)' : 'Mismo % para todos los lotes'}
+                        </p>
                     </div>
 
                     {/* Botón Calcular */}
