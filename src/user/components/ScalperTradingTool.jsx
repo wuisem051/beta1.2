@@ -111,28 +111,31 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     };
 
     // Calcular niveles de venta basados en las compras
+    // IMPORTANTE: Cada nivel de venta usa la MISMA cantidad total comprada
+    // El usuario elige en qué nivel vender toda su posición (no es un grid bot)
     const calculateSellLevelsFromBuy = (buyLevels) => {
         if (!buyLevels || buyLevels.length === 0) return;
 
         const newSellLevels = [];
         const totalQuantity = buyLevels.reduce((sum, level) => sum + parseFloat(level.quantity), 0);
-        const avgBuyPrice = buyLevels.reduce((sum, level) =>
-            sum + (parseFloat(level.price) * parseFloat(level.quantity)), 0) / totalQuantity;
+        const totalCapitalInvested = buyLevels.reduce((sum, level) => sum + parseFloat(level.capital), 0);
+        const avgBuyPrice = totalCapitalInvested / totalQuantity;
 
         // Crear niveles de venta con ganancias progresivas
+        // Cada nivel vende la MISMA cantidad total a diferentes precios
         const profitSteps = [1, 2, 3, 5, 8, 13]; // Fibonacci-like profits
-        const sellPortions = [0.3, 0.25, 0.2, 0.15, 0.07, 0.03]; // Vender más en primeros niveles
 
         for (let i = 0; i < Math.min(numLevels, profitSteps.length); i++) {
             const sellPrice = avgBuyPrice * (1 + profitSteps[i] / 100);
-            const sellQuantity = totalQuantity * sellPortions[i];
+            const potentialProfit = (sellPrice - avgBuyPrice) * totalQuantity;
 
             newSellLevels.push({
                 level: i + 1,
                 price: sellPrice.toFixed(8),
-                quantity: sellQuantity.toFixed(8),
+                quantity: totalQuantity.toFixed(8), // MISMA cantidad en todos los niveles
                 profit: profitSteps[i],
-                percentage: (sellPortions[i] * 100).toFixed(2),
+                potentialProfit: potentialProfit.toFixed(2),
+                percentage: '100', // Siempre 100% de la posición
                 executed: false
             });
         }
@@ -311,8 +314,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 type="button"
                                 onClick={() => setStrategy('buy')}
                                 className={`py-4 rounded-xl font-black uppercase text-xs transition-all ${strategy === 'buy'
-                                        ? 'bg-emerald-500 text-black shadow-xl shadow-emerald-500/20'
-                                        : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                    ? 'bg-emerald-500 text-black shadow-xl shadow-emerald-500/20'
+                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
                                     }`}
                             >
                                 <FaArrowDown className="inline mr-2" />
@@ -322,8 +325,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 type="button"
                                 onClick={() => setStrategy('sell')}
                                 className={`py-4 rounded-xl font-black uppercase text-xs transition-all ${strategy === 'sell'
-                                        ? 'bg-rose-500 text-black shadow-xl shadow-rose-500/20'
-                                        : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                    ? 'bg-rose-500 text-black shadow-xl shadow-rose-500/20'
+                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
                                     }`}
                             >
                                 <FaArrowUp className="inline mr-2" />
@@ -586,7 +589,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                     <th className="px-4 py-3 text-right">Precio</th>
                                     <th className="px-4 py-3 text-right">Cantidad</th>
                                     <th className="px-4 py-3 text-right">Ganancia %</th>
-                                    <th className="px-4 py-3 text-right">Porción</th>
+                                    <th className="px-4 py-3 text-right">Ganancia USD</th>
                                     <th className="px-4 py-3 text-center">Acción</th>
                                 </tr>
                             </thead>
@@ -601,7 +604,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                         <td className="px-4 py-4 text-right font-mono text-white font-bold">${level.price}</td>
                                         <td className="px-4 py-4 text-right font-mono text-white font-bold">{level.quantity}</td>
                                         <td className="px-4 py-4 text-right font-bold text-emerald-500">+{level.profit}%</td>
-                                        <td className="px-4 py-4 text-right text-slate-400 font-bold">{level.percentage}%</td>
+                                        <td className="px-4 py-4 text-right font-bold text-emerald-500">${level.potentialProfit || '0.00'}</td>
                                         <td className="px-4 py-4 text-center">
                                             {level.executed ? (
                                                 <span className="text-emerald-500 text-xs font-black uppercase">Ejecutada</span>
