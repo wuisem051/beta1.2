@@ -274,6 +274,24 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         }
     };
 
+    // Manejar cambios manuales en los niveles de COMPRA
+    const handleLevelChange = (index, field, value) => {
+        const newLevels = [...levels];
+        newLevels[index][field] = value;
+        // Si cambia el precio o cantidad, recalculamos el capital de ese nivel
+        if (field === 'price' || field === 'quantity') {
+            newLevels[index].capital = (parseFloat(newLevels[index].price) * parseFloat(newLevels[index].quantity)).toFixed(2);
+        }
+        setLevels(newLevels);
+    };
+
+    // Manejar cambios manuales en los niveles de VENTA
+    const handleSellLevelChange = (index, field, value) => {
+        const newSellLevels = [...sellLevels];
+        newSellLevels[index][field] = value;
+        setSellLevels(newSellLevels);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -283,8 +301,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         <FaLayerGroup className="text-white text-2xl" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Trading Escalonado</h2>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Optimización de Compras/Ventas en Niveles</p>
+                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Trading Quirúrgico</h2>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Control Total sobre Niveles y Ejecución</p>
                     </div>
                 </div>
 
@@ -309,7 +327,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5 space-y-6">
                     <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
                         <FaCalculator className="text-blue-500" />
-                        Configuración
+                        Configuración Base
                     </h3>
 
                     {/* Estrategia */}
@@ -325,7 +343,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                     }`}
                             >
                                 <FaArrowDown className="inline mr-2" />
-                                Compra Escalonada
+                                Compras
                             </button>
                             <button
                                 type="button"
@@ -336,7 +354,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                     }`}
                             >
                                 <FaArrowUp className="inline mr-2" />
-                                Venta Escalonada
+                                Ventas
                             </button>
                         </div>
                     </div>
@@ -362,7 +380,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     {/* Capital Total */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            {strategy === 'buy' ? 'Capital Total (USDT)' : 'Cantidad Total (Asset)'}
+                            {strategy === 'buy' ? 'Capital a Distribuir (USDT)' : 'Cantidad a Distribuir (Asset)'}
                         </label>
                         <div className="relative">
                             <input
@@ -380,7 +398,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     {/* Número de Niveles */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            Número de Niveles: {numLevels}
+                            Niveles Sugeridos: {numLevels}
                         </label>
                         <input
                             type="range"
@@ -390,16 +408,12 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             onChange={(e) => setNumLevels(parseInt(e.target.value))}
                             className="w-full h-2 bg-slate-950/60 rounded-lg appearance-none cursor-pointer accent-blue-500"
                         />
-                        <div className="flex justify-between text-xs text-slate-600 font-bold mt-1">
-                            <span>2</span>
-                            <span>10</span>
-                        </div>
                     </div>
 
                     {/* Paso de Precio */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            Separación entre Niveles (%)
+                            Separación Base (%)
                         </label>
                         <div className="relative">
                             <input
@@ -416,15 +430,15 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
                     {/* Distribución */}
                     <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Distribución de Capital</label>
+                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Distribución</label>
                         <select
                             value={distribution}
                             onChange={(e) => setDistribution(e.target.value)}
                             className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
                         >
-                            <option value="equal">Igual (Uniforme)</option>
-                            <option value="pyramid">Pirámide (Más abajo)</option>
-                            <option value="reverse-pyramid">Pirámide Invertida (Más arriba)</option>
+                            <option value="equal">Uniforme</option>
+                            <option value="pyramid">Pirámide (DCA)</option>
+                            <option value="reverse-pyramid">Pirámide Invertida</option>
                         </select>
                     </div>
 
@@ -434,15 +448,10 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         disabled={isCalculating}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all shadow-xl shadow-blue-600/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2"
                     >
-                        {isCalculating ? (
-                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                        ) : (
-                            <>
-                                <FaCalculator />
-                                Calcular Niveles
-                            </>
-                        )}
+                        <FaCalculator />
+                        Calcular Sugerencia
                     </button>
+                    <p className="text-[9px] text-slate-500 text-center font-bold uppercase tracking-widest">Luego podrás editar cada nivel manualmente</p>
                 </div>
 
                 {/* Panel de Vista Previa */}
@@ -450,51 +459,32 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
                             <FaChartLine className="text-purple-500" />
-                            Vista Previa
+                            Distribución
                         </h3>
                         <button
                             onClick={fetchCurrentPrice}
-                            className="p-2 bg-slate-950/60 hover:bg-blue-600/20 rounded-lg text-slate-400 hover:text-blue-400 transition-all"
+                            className="p-2 bg-slate-950/60 rounded-lg text-slate-400 hover:text-blue-400 transition-all"
                         >
                             <FaSync className="text-sm" />
                         </button>
                     </div>
 
-                    {/* Resumen */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-slate-950/60 rounded-xl p-4 border border-white/5">
-                            <p className="text-xs text-slate-600 font-bold uppercase mb-1">Niveles</p>
-                            <p className="text-2xl font-black text-white">{strategy === 'buy' ? levels.length : sellLevels.length}</p>
-                        </div>
-                        <div className="bg-slate-950/60 rounded-xl p-4 border border-white/5">
-                            <p className="text-xs text-slate-600 font-bold uppercase mb-1">Capital Total</p>
-                            <p className="text-2xl font-black text-white">${totalCapital || '0'}</p>
-                        </div>
-                    </div>
-
                     {/* Indicador Visual */}
-                    <div className="bg-slate-950/60 rounded-xl p-6 border border-white/5">
-                        <div className="space-y-2">
-                            {(strategy === 'buy' ? levels : sellLevels).slice(0, 5).map((level, idx) => (
-                                <div key={idx} className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${strategy === 'buy' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'
-                                        }`}>
-                                        {level.level}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className={`h-2 rounded-full ${strategy === 'buy' ? 'bg-emerald-500/20' : 'bg-rose-500/20'
-                                            }`}>
-                                            <div
-                                                className={`h-full rounded-full ${strategy === 'buy' ? 'bg-emerald-500' : 'bg-rose-500'
-                                                    }`}
-                                                style={{ width: `${level.percentage}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <span className="text-xs text-slate-400 font-bold">{level.percentage}%</span>
+                    <div className="space-y-4">
+                        {(strategy === 'buy' ? levels : sellLevels).map((level, idx) => (
+                            <div key={idx} className="bg-slate-950/40 rounded-xl p-3 border border-white/5">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase">Nivel {level.level}</span>
+                                    <span className="text-[10px] font-black text-white">{level.percentage}%</span>
                                 </div>
-                            ))}
-                        </div>
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all duration-500 ${strategy === 'buy' ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                                        style={{ width: `${level.percentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -502,55 +492,66 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             {/* Tabla de Niveles de Compra */}
             {strategy === 'buy' && levels.length > 0 && (
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-black text-white uppercase tracking-tight">Niveles de Compra</h3>
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Compras</h3>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Edita los campos antes de ejecutar</p>
+                        </div>
                         <button
                             onClick={executeAllOrders}
                             disabled={isExecuting}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-6 py-3 rounded-xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-widest text-xs flex items-center gap-2"
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3"
                         >
-                            {isExecuting ? (
-                                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <FaCheckCircle />
-                                    Ejecutar Todas
-                                </>
-                            )}
+                            <FaCheckCircle />
+                            Ejecutar Todas
                         </button>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-950/60">
-                                <tr className="text-xs font-black text-slate-500 uppercase tracking-widest">
-                                    <th className="px-4 py-3 text-left">Nivel</th>
-                                    <th className="px-4 py-3 text-right">Precio</th>
-                                    <th className="px-4 py-3 text-right">Cantidad</th>
-                                    <th className="px-4 py-3 text-right">Capital</th>
-                                    <th className="px-4 py-3 text-right">%</th>
-                                    <th className="px-4 py-3 text-center">Acción</th>
+                            <thead>
+                                <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">
+                                    <th className="px-4 py-4 text-left">Nivel</th>
+                                    <th className="px-4 py-4 text-left">Precio de Compra</th>
+                                    <th className="px-4 py-4 text-left">Cantidad (Asset)</th>
+                                    <th className="px-4 py-4 text-right">Total USD</th>
+                                    <th className="px-4 py-4 text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {levels.map((level, idx) => (
-                                    <tr key={idx} className={`hover:bg-white/5 transition-colors ${level.executed ? 'opacity-50' : ''}`}>
-                                        <td className="px-4 py-4">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 bg-emerald-500/20 text-emerald-500 rounded-lg font-black text-sm">
+                                    <tr key={idx} className={`hover:bg-white/[0.02] transition-colors ${level.executed ? 'opacity-40' : ''}`}>
+                                        <td className="px-4 py-5">
+                                            <span className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-500 rounded-lg font-black text-xs">
                                                 {level.level}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-4 text-right font-mono text-white font-bold">${level.price}</td>
-                                        <td className="px-4 py-4 text-right font-mono text-white font-bold">{level.quantity}</td>
-                                        <td className="px-4 py-4 text-right font-bold text-emerald-500">${level.capital}</td>
-                                        <td className="px-4 py-4 text-right text-slate-400 font-bold">{level.percentage}%</td>
-                                        <td className="px-4 py-4 text-center">
+                                        <td className="px-4 py-5">
+                                            <input
+                                                type="number"
+                                                value={level.price}
+                                                onChange={(e) => handleLevelChange(idx, 'price', e.target.value)}
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-emerald-500 outline-none"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <input
+                                                type="number"
+                                                value={level.quantity}
+                                                onChange={(e) => handleLevelChange(idx, 'quantity', e.target.value)}
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-emerald-500 outline-none"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5 text-right font-mono text-xs font-bold text-slate-400">
+                                            ${level.capital}
+                                        </td>
+                                        <td className="px-4 py-5 text-center">
                                             {level.executed ? (
-                                                <span className="text-emerald-500 text-xs font-black uppercase">Ejecutada</span>
+                                                <FaCheckCircle className="text-emerald-500 mx-auto" />
                                             ) : (
                                                 <button
                                                     onClick={() => executeSingleOrder(level, 'buy')}
-                                                    className="px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-lg transition-all text-xs font-black uppercase"
+                                                    className="px-4 py-2 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-widest"
                                                 >
                                                     Ejecutar
                                                 </button>
@@ -567,62 +568,69 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             {/* Tabla de Niveles de Venta */}
             {sellLevels.length > 0 && (
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-black text-white uppercase tracking-tight">Niveles de Venta</h3>
-                        {strategy === 'sell' && (
-                            <button
-                                onClick={executeAllOrders}
-                                disabled={isExecuting}
-                                className="bg-rose-600 hover:bg-rose-500 text-white font-black px-6 py-3 rounded-xl transition-all shadow-xl shadow-rose-600/20 uppercase tracking-widest text-xs flex items-center gap-2"
-                            >
-                                {isExecuting ? (
-                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    <>
-                                        <FaCheckCircle />
-                                        Ejecutar Todas
-                                    </>
-                                )}
-                            </button>
-                        )}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Ventas</h3>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Define el precio exacto de salida para cada lote</p>
+                        </div>
+                        <button
+                            onClick={executeAllOrders}
+                            disabled={isExecuting}
+                            className="bg-rose-600 hover:bg-rose-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-rose-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3"
+                        >
+                            <FaCheckCircle />
+                            Ejecutar Todas
+                        </button>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-950/60">
-                                <tr className="text-xs font-black text-slate-500 uppercase tracking-widest">
-                                    <th className="px-4 py-3 text-left">Nivel</th>
-                                    <th className="px-4 py-3 text-right">Precio</th>
-                                    <th className="px-4 py-3 text-right">Cantidad</th>
-                                    <th className="px-4 py-3 text-right">Ganancia %</th>
-                                    <th className="px-4 py-3 text-right">Ganancia USD</th>
-                                    <th className="px-4 py-3 text-center">Acción</th>
+                            <thead>
+                                <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">
+                                    <th className="px-4 py-4 text-left">Lote</th>
+                                    <th className="px-4 py-4 text-left">Precio de Venta</th>
+                                    <th className="px-4 py-4 text-left">Cantidad (Exacta)</th>
+                                    <th className="px-4 py-4 text-right">Ganancia Est.</th>
+                                    <th className="px-4 py-4 text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {sellLevels.map((level, idx) => (
-                                    <tr key={idx} className={`hover:bg-white/5 transition-colors ${level.executed ? 'opacity-50' : ''}`}>
-                                        <td className="px-4 py-4">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 bg-rose-500/20 text-rose-500 rounded-lg font-black text-sm">
+                                    <tr key={idx} className={`hover:bg-white/[0.02] transition-colors ${level.executed ? 'opacity-40' : ''}`}>
+                                        <td className="px-4 py-5">
+                                            <span className="w-8 h-8 flex items-center justify-center bg-rose-500/10 text-rose-500 rounded-lg font-black text-xs">
                                                 {level.level}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-4 text-right font-mono text-white font-bold">${level.price}</td>
-                                        <td className="px-4 py-4 text-right font-mono text-white font-bold">{level.quantity}</td>
-                                        <td className="px-4 py-4 text-right font-bold text-emerald-500">+{level.profit}%</td>
-                                        <td className="px-4 py-4 text-right font-bold text-emerald-500">${level.potentialProfit || '0.00'}</td>
-                                        <td className="px-4 py-4 text-center">
+                                        <td className="px-4 py-5">
+                                            <input
+                                                type="number"
+                                                value={level.price}
+                                                onChange={(e) => handleSellLevelChange(idx, 'price', e.target.value)}
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-rose-500 outline-none"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5">
+                                            <input
+                                                type="number"
+                                                value={level.quantity}
+                                                onChange={(e) => handleSellLevelChange(idx, 'quantity', e.target.value)}
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-rose-500 outline-none"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-5 text-right font-mono text-xs font-bold text-emerald-500">
+                                            +${level.potentialProfit}
+                                        </td>
+                                        <td className="px-4 py-5 text-center">
                                             {level.executed ? (
-                                                <span className="text-emerald-500 text-xs font-black uppercase">Ejecutada</span>
-                                            ) : strategy === 'sell' ? (
+                                                <FaCheckCircle className="text-emerald-500 mx-auto" />
+                                            ) : (
                                                 <button
                                                     onClick={() => executeSingleOrder(level, 'sell')}
-                                                    className="px-4 py-2 bg-rose-600/20 hover:bg-rose-600 text-rose-500 hover:text-white rounded-lg transition-all text-xs font-black uppercase"
+                                                    className="px-4 py-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-widest"
                                                 >
                                                     Ejecutar
                                                 </button>
-                                            ) : (
-                                                <span className="text-slate-600 text-xs font-black uppercase">Sugerida</span>
                                             )}
                                         </td>
                                     </tr>
