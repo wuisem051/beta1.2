@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { FaLayerGroup, FaCalculator, FaChartLine, FaPercentage, FaDollarSign, FaArrowUp, FaArrowDown, FaTrash, FaPlus, FaSave, FaSync, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { db } from '../../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const { currentUser } = useAuth();
@@ -292,6 +292,35 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         setTimeout(() => setSuccess(''), 3000);
     };
 
+    // Registrar operación en el historial de Firebase para que aparezca en el Portafolio
+    const recordTradeToHistory = async (level, side) => {
+        if (!currentUser) return;
+
+        try {
+            const now = new Date();
+            // Formato de fecha para que coincida con lo que espera TradingPortfolioContent
+            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const tradeRecord = {
+                userId: currentUser.uid,
+                date: dateStr,
+                pair: symbol,
+                type: 'Spot Scalper',
+                side: side === 'buy' ? 'Compra' : 'Venta',
+                amount: level.quantity,
+                price: level.price,
+                result: 'Exitosa',
+                profit: side === 'sell' ? (level.potentialProfit || "0.00") : "0.00",
+                timestamp: serverTimestamp()
+            };
+
+            await addDoc(collection(db, 'tradingHistory'), tradeRecord);
+            console.log("Operación registrada en el historial");
+        } catch (err) {
+            console.error("Error al registrar en el historial:", err);
+        }
+    };
+
     // Ejecutar todas las órdenes
     const executeAllOrders = async () => {
         setIsExecuting(true);
@@ -326,6 +355,9 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
                 // Marcar como ejecutado
                 level.executed = true;
+
+                // Registrar en el historial para el Portafolio
+                await recordTradeToHistory(level, strategy);
 
                 // Pequeña pausa entre órdenes
                 await new Promise(resolve => setTimeout(resolve, 500));
@@ -366,7 +398,11 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             }
 
             level.executed = true;
-            setSuccess(`Orden nivel ${level.level} ejecutada`);
+
+            // Registrar en el historial para el Portafolio
+            await recordTradeToHistory(level, side);
+
+            setSuccess(`Orden lote ${level.level} ejecutada`);
             setTimeout(() => setSuccess(''), 3000);
 
         } catch (err) {
@@ -408,8 +444,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     </div>
 
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSaving
-                            ? 'border-blue-500/30 bg-blue-500/10 text-blue-400'
-                            : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                        ? 'border-blue-500/30 bg-blue-500/10 text-blue-400'
+                        : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
                         }`}>
                         <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400'}`} />
                         <span className="text-[10px] font-black uppercase tracking-widest">
