@@ -45,12 +45,7 @@ const getExchange = async (userId, exchangeName) => {
         docSnap = await secretsRef.get();
     }
 
-    if (!docSnap.exists) {
-        throw new Error('API Keys no configuradas.');
-    }
-
-    const data = docSnap.data();
-    // Decrypt keys if they are stored encrypted (likely yes)
+    const data = docSnap.exists ? docSnap.data() : {};
     const apiKey = data.apiKey ? decrypt(data.apiKey) : '';
     const secret = data.secret ? decrypt(data.secret) : '';
     const exchange = data.exchange || targetExchange;
@@ -63,14 +58,17 @@ const getExchange = async (userId, exchangeName) => {
     const exchangeClass = ccxt[exId];
 
     const config = {
-        apiKey,
-        secret,
         enableRateLimit: true,
         options: {
             adjustForTimeDifference: true,
             recvWindow: 60000,
         }
     };
+
+    if (apiKey && secret) {
+        config.apiKey = apiKey;
+        config.secret = secret;
+    }
 
     // BingX-specific configuration overrides
     if (exId === 'bingx') {
@@ -126,7 +124,51 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Get exchange and fetch ticker
+        // Si el exchange solicitado es CoinMarketCap o se desea como fuente global
+        if (exchangeName === 'coinmarketcap') {
+            try {
+                const cmcApiKey = process.env.CMC_API_KEY;
+                if (!cmcApiKey) {
+                    throw new Error('CMC_API_KEY no configurada en el servidor.');
+                }
+
+                // Simplemente obtenemos el símbolo base (ej: BTC de BTC/USDT)
+                const baseSymbol = symbol.split('/')[0].toUpperCase();
+
+                const cmcResponse = await fetch(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${baseSymbol}`, {
+                    headers: {
+                        'X-CMC_PRO_API_KEY': cmcApiKey,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const cmcData = await cmcResponse.json();
+
+                if (cmcData.data && cmcData.data[baseSymbol]) {
+                    const price = cmcData.data[baseSymbol].quote.USD.price;
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            symbol: symbol,
+                            last: price,
+                            source: 'CoinMarketCap'
+                        })
+                    };
+                } else {
+                    throw new Error('Símbolo no encontrado en CoinMarketCap.');
+                }
+            } catch (cmcErr) {
+                console.error('CMC Error:', cmcErr);
+                return {
+                    statusCode: 500,
+                    headers,
+                    body: JSON.stringify({ error: cmcErr.message || 'Error al obtener precio de CMC.' })
+                };
+            }
+        }
+
+        // Get exchange and fetch ticker (Existing CCXT logic)
         const exchangeInst = await getExchange(userId, exchangeName);
         const ticker = await exchangeInst.fetchTicker(symbol);
 
@@ -143,11 +185,18 @@ exports.handler = async (event, context) => {
 
     } catch (error) {
         console.error('Exchange Ticker Error:', error);
+        let errorMsg = error.message || 'Error al obtener precio.';
+
+        // Detect geo-block (Common in Netlify/AWS US)
+        if (errorMsg.includes('451') || errorMsg.includes('restricted location')) {
+            errorMsg = "Bloqueo Geográfico: Binance Global no permite peticiones desde servidores en EE.UU. (Netlify). Si estás en EE.UU., usa la opción 'Binance.US' o cambia a 'BingX'.";
+        }
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: error.message || 'Error al obtener precio.'
+                error: errorMsg
             })
         };
     }

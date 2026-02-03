@@ -318,10 +318,15 @@ const ExchangeContent = () => {
                     exchange: activeTradingExchange
                 })
             });
+            const data = await response.json();
             if (response.ok) {
-                const data = await response.json();
                 if (data.last) {
                     setTradePrice(data.last.toString());
+                }
+            } else {
+                console.error("Error fetching ticker:", data.error);
+                if (data.error && !data.error.includes('configuradas')) {
+                    setErrorMsg(data.error);
                 }
             }
         } catch (error) {

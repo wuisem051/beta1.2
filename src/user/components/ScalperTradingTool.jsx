@@ -16,6 +16,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const [priceStep, setPriceStep] = useState('1'); // Porcentaje entre niveles
     const [distribution, setDistribution] = useState('equal'); // 'equal', 'pyramid', 'reverse-pyramid'
     const [profitMode, setProfitMode] = useState('dynamic'); // 'dynamic' o 'fixed'
+    const [priceSource, setPriceSource] = useState('exchange'); // 'exchange' o 'coinmarketcap'
 
     // Niveles calculados
     const [levels, setLevels] = useState([]);
@@ -52,6 +53,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     if (config.priceStep) setPriceStep(config.priceStep);
                     if (config.distribution) setDistribution(config.distribution);
                     if (config.profitMode) setProfitMode(config.profitMode);
+                    if (config.priceSource) setPriceSource(config.priceSource);
                     if (config.levels) setLevels(config.levels);
                     if (config.sellLevels) setSellLevels(config.sellLevels);
                 }
@@ -77,6 +79,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 priceStep,
                 distribution,
                 profitMode,
+                priceSource,
                 levels,
                 sellLevels,
                 lastUpdated: new Date().toISOString(),
@@ -119,7 +122,10 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ symbol, exchange })
+                body: JSON.stringify({
+                    symbol,
+                    exchange: priceSource === 'coinmarketcap' ? 'coinmarketcap' : exchange
+                })
             });
 
             const data = await response.json();
@@ -127,12 +133,40 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             if (response.ok) {
                 if (data.last) {
                     setCurrentPrice(parseFloat(data.last));
+                    setError('');
                 }
             } else {
-                console.error('Error fetching price:', data.error);
-                if (data.error?.includes('restricted location') || data.error?.includes('451')) {
-                    setError('Bloqueo Geográfico: No se puede obtener precio de Binance Global desde Netlify.');
+                // Fallback: Si el servidor falla por bloqueo geográfico, intentamos fetch directo desde el navegador
+                if (data.error?.includes('Bloqueo Geográfico') || response.status === 451) {
+                    console.log('Intentando fallback de precio via browser...');
+                    try {
+                        const tickerSymbol = symbol.replace('/', '');
+                        let fallbackUrl = '';
+
+                        if (exchange === 'binance' || exchange === 'binanceus') {
+                            const domain = exchange === 'binance' ? 'api.binance.com' : 'api.binance.us';
+                            fallbackUrl = `https://${domain}/api/v3/ticker/price?symbol=${tickerSymbol}`;
+                        } else if (exchange === 'bingx') {
+                            fallbackUrl = `https://open-api.bingx.com/openApi/spot/v1/ticker/24hr?symbol=${symbol.replace('/', '-')}`;
+                        }
+
+                        if (fallbackUrl) {
+                            const res = await fetch(fallbackUrl);
+                            const fallbackData = await res.json();
+                            const price = fallbackData.price || fallbackData.lastPrice || (fallbackData.data && fallbackData.data.lastPrice);
+                            if (price) {
+                                setCurrentPrice(parseFloat(price));
+                                setError('');
+                                return;
+                            }
+                        }
+                    } catch (fallbackErr) {
+                        console.error('Fallback failed:', fallbackErr);
+                    }
                 }
+
+                console.error('Error fetching price:', data.error);
+                setError(data.error || 'Error al obtener precio');
             }
         } catch (err) {
             console.error('Error fetching price:', err);
@@ -525,9 +559,30 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 <option key={pair} value={pair}>{pair}</option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Fuente de Precio */}
+                    <div>
+                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Fuente de Precio</label>
+                        <div className="flex bg-slate-950/60 p-1 rounded-xl border border-white/5">
+                            <button
+                                type="button"
+                                onClick={() => setPriceSource('exchange')}
+                                className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${priceSource === 'exchange' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}
+                            >
+                                Exchange
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPriceSource('coinmarketcap')}
+                                className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${priceSource === 'coinmarketcap' ? 'bg-[#3861fb] text-white' : 'text-slate-500'}`}
+                            >
+                                CoinMarketCap
+                            </button>
+                        </div>
                         <div className="mt-2 flex items-center justify-between">
-                            <span className="text-xs text-slate-600 font-bold">Precio Actual:</span>
-                            <span className="text-sm text-white font-black">${currentPrice.toFixed(8)}</span>
+                            <span className="text-xs text-slate-600 font-bold">Referencia:</span>
+                            <span className="text-sm text-white font-black">${currentPrice.toFixed(currentPrice < 1 ? 8 : 2)}</span>
                         </div>
                     </div>
 
@@ -639,56 +694,108 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 </div>
 
                 {/* Panel de Vista Previa */}
-                <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
+                <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5 flex flex-col">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
                             <FaChartLine className="text-purple-500" />
-                            Distribución
+                            Distribución Visual
                         </h3>
                         <button
                             onClick={fetchCurrentPrice}
                             className="p-2 bg-slate-950/60 rounded-lg text-slate-400 hover:text-blue-400 transition-all"
                         >
-                            <FaSync className="text-sm" />
+                            <FaSync className={`text-sm ${isCalculating ? 'animate-spin' : ''}`} />
                         </button>
                     </div>
 
                     {/* Indicador Visual */}
-                    <div className="space-y-4">
-                        {(strategy === 'buy' ? levels : sellLevels).map((level, idx) => (
-                            <div key={idx} className="bg-slate-950/40 rounded-xl p-3 border border-white/5">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-[10px] font-black text-slate-500 uppercase">Lote {level.level}</span>
-                                    <span className="text-[10px] font-black text-white">{level.percentage}%</span>
+                    <div className="space-y-4 flex-1">
+                        {(strategy === 'buy' ? levels : sellLevels).length > 0 ? (
+                            (strategy === 'buy' ? levels : sellLevels).map((level, idx) => (
+                                <div key={idx} className="bg-slate-950/40 rounded-xl p-3 border border-white/5">
+                                    <div className="flex justify-between items-center mb-2 text-[8px] font-black uppercase tracking-widest">
+                                        <span className="text-slate-500">Lote {level.level}</span>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-slate-600">Vol: {level.quantity}</span>
+                                            <span className="text-white">{level.percentage}%</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full transition-all duration-700 shadow-lg ${strategy === 'buy' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 'bg-gradient-to-r from-rose-600 to-rose-400'}`}
+                                            style={{ width: `${level.percentage}%` }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full transition-all duration-500 ${strategy === 'buy' ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                                        style={{ width: `${level.percentage}%` }}
-                                    />
-                                </div>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-12 text-center opacity-20 h-full border-2 border-dashed border-white/5 rounded-3xl">
+                                <FaCalculator className="text-4xl mb-4" />
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Sin datos calculados</p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* Panel de Resumen General */}
+            {(levels.length > 0 || sellLevels.length > 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Capital Total</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-black text-white italic">
+                                {((strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.capital || (parseFloat(l.price) * parseFloat(l.quantity))), 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-600 uppercase">USDT</span>
+                        </div>
+                    </div>
+                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Precio Promedio (DCA)</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-black text-blue-500 italic">
+                                {(
+                                    (strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.capital || (parseFloat(l.price) * parseFloat(l.quantity))), 0) /
+                                    (strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.quantity), 0)
+                                ).toFixed(8)}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-600 uppercase">USDT</span>
+                        </div>
+                    </div>
+                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Volumen Total (Asset)</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-black text-emerald-500 italic">
+                                {(strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.quantity), 0).toFixed(6)}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-600 uppercase">{symbol.split('/')[0]}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Tabla de Niveles de Compra */}
             {strategy === 'buy' && levels.length > 0 && (
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Lotes de Compra</h3>
-                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Edita los campos antes de ejecutar</p>
+                            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Terminal de Lotes: COMPRAS</h3>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Ajuste manual de niveles de entrada</p>
                         </div>
-                        <button
-                            onClick={executeAllOrders}
-                            disabled={isExecuting}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3"
-                        >
-                            <FaCheckCircle />
-                            Ejecutar Todos
-                        </button>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={executeAllOrders}
+                                disabled={isExecuting}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3 active:scale-95"
+                            >
+                                {isExecuting ? (
+                                    <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <FaCheckCircle />
+                                )}
+                                Ejecutar Escalera completa
+                            </button>
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -752,19 +859,25 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             {/* Tabla de Niveles de Venta */}
             {sellLevels.length > 0 && (
                 <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5">
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ajuste de Ventas</h3>
-                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Define el precio exacto de salida para cada lote</p>
+                            <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Terminal de Lotes: VENTAS</h3>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Definición de salidas estratégicas</p>
                         </div>
-                        <button
-                            onClick={executeAllOrders}
-                            disabled={isExecuting}
-                            className="bg-rose-600 hover:bg-rose-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-rose-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3"
-                        >
-                            <FaCheckCircle />
-                            Ejecutar Todas
-                        </button>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={executeAllOrders}
+                                disabled={isExecuting}
+                                className="bg-rose-600 hover:bg-rose-500 text-white font-black px-8 py-4 rounded-2xl transition-all shadow-xl shadow-rose-600/20 uppercase tracking-[0.2em] text-[10px] flex items-center gap-3 active:scale-95"
+                            >
+                                {isExecuting ? (
+                                    <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <FaCheckCircle />
+                                )}
+                                Ejecutar Escalera de Venta
+                            </button>
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto">
