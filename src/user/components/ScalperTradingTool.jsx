@@ -111,34 +111,40 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     };
 
     // Calcular niveles de venta basados en las compras
-    // IMPORTANTE: Cada nivel de venta usa la MISMA cantidad total comprada
-    // El usuario elige en qué nivel vender toda su posición (no es un grid bot)
+    // NUEVA LÓGICA: Cada porción de compra se mapea 1 a 1 con una porción de venta
+    // Se mantiene la MISMA cantidad (quantity) que se compró en cada nivel
     const calculateSellLevelsFromBuy = (buyLevels) => {
         if (!buyLevels || buyLevels.length === 0) return;
 
+        // Ordenamos las compras por precio (de menor a mayor) para asignarles ganancias
+        // La compra más barata será la Nivel 1 de venta, etc.
+        const sortedBuys = [...buyLevels].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+
         const newSellLevels = [];
-        const totalQuantity = buyLevels.reduce((sum, level) => sum + parseFloat(level.quantity), 0);
-        const totalCapitalInvested = buyLevels.reduce((sum, level) => sum + parseFloat(level.capital), 0);
-        const avgBuyPrice = totalCapitalInvested / totalQuantity;
+        const profitSteps = [1, 2, 3, 5, 8, 13]; // Escala de ganancias sugeridas
 
-        // Crear niveles de venta con ganancias progresivas
-        // Cada nivel vende la MISMA cantidad total a diferentes precios
-        const profitSteps = [1, 2, 3, 5, 8, 13]; // Fibonacci-like profits
+        sortedBuys.forEach((buyLevel, i) => {
+            if (i >= profitSteps.length && i >= numLevels) return;
 
-        for (let i = 0; i < Math.min(numLevels, profitSteps.length); i++) {
-            const sellPrice = avgBuyPrice * (1 + profitSteps[i] / 100);
-            const potentialProfit = (sellPrice - avgBuyPrice) * totalQuantity;
+            const profit = profitSteps[i] || (profitSteps[profitSteps.length - 1] + (i * 2));
+            const buyPrice = parseFloat(buyLevel.price);
+            const qty = parseFloat(buyLevel.quantity);
+
+            // Calculamos precio de venta basado en el precio de compra de ESTE nivel específico
+            const sellPrice = buyPrice * (1 + profit / 100);
+            const potentialProfit = (sellPrice - buyPrice) * qty;
 
             newSellLevels.push({
                 level: i + 1,
+                fromBuyLevel: buyLevel.level,
                 price: sellPrice.toFixed(8),
-                quantity: totalQuantity.toFixed(8), // MISMA cantidad en todos los niveles
-                profit: profitSteps[i],
+                quantity: qty.toFixed(8), // MISMA cantidad que la compra
+                profit: profit,
                 potentialProfit: potentialProfit.toFixed(2),
-                percentage: '100', // Siempre 100% de la posición
+                percentage: buyLevel.percentage, // Porcentaje relativo al total
                 executed: false
             });
-        }
+        });
 
         setSellLevels(newSellLevels);
     };
