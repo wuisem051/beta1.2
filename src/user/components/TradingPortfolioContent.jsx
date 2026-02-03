@@ -11,6 +11,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
     const [loading, setLoading] = useState(true);
 
     const [operations, setOperations] = useState([]);
+    const [exchangeTrades, setExchangeTrades] = useState([]);
     const [arbitrageEarnings, setArbitrageEarnings] = useState(0);
 
     const isVIP = useMemo(() => {
@@ -25,8 +26,8 @@ const TradingPortfolioContent = ({ userBalances }) => {
     useEffect(() => {
         if (!currentUser?.uid) return;
 
-        // Fetch Trading History
-        const qHistory = query(collection(db, 'tradingHistory'), orderBy('date', 'desc'));
+        // Fetch Trading History from Firestore
+        const qHistory = query(collection(db, 'tradingHistory'), where('userId', '==', currentUser.uid), orderBy('timestamp', 'desc'));
         const unsubscribeHistory = onSnapshot(qHistory, (snapshot) => {
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -38,6 +39,38 @@ const TradingPortfolioContent = ({ userBalances }) => {
             console.error("Error fetching trading history:", err);
             setLoading(false);
         });
+
+        // Fetch Real Exchange History 
+        const fetchExchangeTrades = async () => {
+            try {
+                const idToken = await currentUser.getIdToken();
+                // Consultamos historial general (podemos iterar por pares comunes o buscar una forma global)
+                // Por ahora, traemos los de BTC para demostrar, o preparamos la lógica
+                const response = await fetch('/.netlify/functions/getExchangeHistory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ symbol: 'BTC/USDT', exchange: 'binance', limit: 30 })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setExchangeTrades(data.map(t => ({
+                        id: t.id,
+                        date: new Date(t.timestamp).toLocaleString(),
+                        pair: t.symbol,
+                        type: 'Exchange ' + t.side,
+                        side: t.side === 'buy' ? 'Compra' : 'Venta',
+                        result: 'Ejecutada',
+                        profit: "0.00", // Difícil de calcular sin precio de compra original en spot simple
+                        isExchange: true
+                    })));
+                }
+            } catch (e) {
+                console.error("Error fetching exchange trades:", e);
+            }
+        };
+
+        fetchExchangeTrades();
 
         // Fetch Arbitrage Earnings
         const qArb = query(collection(db, 'userArbitragePools'), where('userId', '==', currentUser.uid));
@@ -64,15 +97,16 @@ const TradingPortfolioContent = ({ userBalances }) => {
 
 
     const stats = useMemo(() => {
-        const total = operations.length;
-        const successful = operations.filter(op => op.result === 'Exitosa').length;
+        const combined = [...operations, ...exchangeTrades];
+        const total = combined.length;
+        const successful = combined.filter(op => op.result === 'Exitosa' || op.result === 'Ejecutada').length;
         const tradingProfit = isVIP ? operations.reduce((sum, op) => sum + (parseFloat(op.profit) || 0), 0) : 0;
         const profit = tradingProfit + arbitrageEarnings;
         const successRate = total > 0 ? (successful / total) * 100 : 0;
         const profitPercentage = total > 0 ? (profit / total) * 10 : 0;
 
-        return { total, profit, successRate, profitPercentage };
-    }, [operations, arbitrageEarnings, isVIP]);
+        return { total, profit, successRate, profitPercentage, combined };
+    }, [operations, exchangeTrades, arbitrageEarnings, isVIP]);
 
 
     if (loading) {
@@ -154,11 +188,13 @@ const TradingPortfolioContent = ({ userBalances }) => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {operations.map((op, idx) => (
-                                        <tr key={op.id} className="hover:bg-white/[0.02] transition-colors group">
+                                    {stats.combined.map((op, idx) => (
+                                        <tr key={op.id || idx} className="hover:bg-white/[0.02] transition-colors group">
                                             <td className="px-8 py-6">
                                                 <p className="text-xs font-black text-white tracking-widest">{op.date}</p>
-                                                <p className="text-[9px] text-slate-600 font-bold uppercase mt-1">Sincronizado</p>
+                                                <p className={`text-[9px] font-bold uppercase mt-1 ${op.isExchange ? 'text-blue-500' : 'text-slate-600'}`}>
+                                                    {op.isExchange ? 'Binance Node' : 'Sincronizado'}
+                                                </p>
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-4">

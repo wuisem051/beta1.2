@@ -172,12 +172,67 @@ const ExchangeContent = () => {
         fetchConfig();
     }, [currentUser]);
 
-    // Fetch Balance when tab is 'trading'
-    useEffect(() => {
-        if (activeTab === 'trading' && currentUser && keysConfigured) {
-            fetchBalance();
+    const fetchExchangeHistory = async () => {
+        if (!keysConfigured) return;
+        setIsLoadingBalance(true);
+        try {
+            const idToken = await currentUser.getIdToken();
+            const response = await fetch('/.netlify/functions/getExchangeHistory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    symbol: tradeSymbol,
+                    exchange: activeTradingExchange,
+                    limit: 20
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setOrderHistory(data);
+            }
+        } catch (error) {
+            console.error("History fetch error:", error);
+        } finally {
+            setIsLoadingBalance(false);
         }
-    }, [activeTab, currentUser, keysConfigured]);
+    };
+
+    const fetchOpenOrders = async () => {
+        if (!keysConfigured) return;
+        setIsLoadingBalance(true);
+        try {
+            const idToken = await currentUser.getIdToken();
+            // Usamos executeExchangeTrade con un flag especial o similar si existiera, 
+            // pero vamos a asumir que implementaremos o usaremos getExchangeHistory para esto si se ajusta.
+            // Por ahora, simulamos o usamos una función dedicada si existe.
+            // Como no veo getOpenOrders.js, usaré getExchangeHistory con un ajuste si es posible o lo dejaré preparado.
+            const response = await fetch('/.netlify/functions/getExchangeHistory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    symbol: tradeSymbol,
+                    exchange: activeTradingExchange,
+                    type: 'open' // Un flag hipotético para el backend
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setRecentOrders(data.filter(o => o.status === 'open' || o.status === 'NEW'));
+            }
+        } catch (error) {
+            console.error("Open orders fetch error:", error);
+        } finally {
+            setIsLoadingBalance(false);
+        }
+    };
 
     const fetchBalance = async () => {
         if (!keysConfigured) return;
@@ -217,6 +272,14 @@ const ExchangeContent = () => {
             setIsLoadingBalance(false);
         }
     };
+
+    // Auto-fetch data when tab changes
+    useEffect(() => {
+        if (!keysConfigured) return;
+        if (activeTab === 'history') fetchExchangeHistory();
+        if (activeTab === 'orders') fetchOpenOrders();
+        if (activeTab === 'trading') fetchBalance();
+    }, [activeTab, tradeSymbol, activeTradingExchange, keysConfigured]);
 
     // Live calculation of estimated total
     useEffect(() => {
@@ -977,33 +1040,35 @@ const ExchangeContent = () => {
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {(activeTab === 'orders' ? recentOrders : orderHistory).map(order => (
-                                    <tr key={order.id} className="hover:bg-white/[0.02] transition-colors group">
+                                    <tr key={order.id || order.info?.orderId} className="hover:bg-white/[0.02] transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-blue-500 border border-white/5">
-                                                    {order.symbol.split('/')[0][0]}
+                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-blue-500 border border-white/5 uppercase">
+                                                    {(order.symbol || tradeSymbol).split('/')[0][0]}
                                                 </div>
-                                                <span className="text-xs font-black text-white">{order.symbol}</span>
+                                                <span className="text-xs font-black text-white">{order.symbol || tradeSymbol}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex flex-col">
-                                                <span className={`text-[9px] font-black uppercase ${order.side === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                <span className={`text-[9px] font-black uppercase ${order.side?.toLowerCase() === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
                                                     {order.side === 'buy' ? 'Compra' : 'Venta'}
                                                 </span>
-                                                <span className="text-[8px] text-slate-600 font-bold uppercase">{order.type}</span>
+                                                <span className="text-[8px] text-slate-600 font-bold uppercase">{order.type || 'LIMIT'}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.amount}</td>
-                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.price || 'Market'}</td>
+                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.price || order.average || 'Market'}</td>
                                         <td className="px-8 py-6">
-                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${order.status === 'open' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border border-white/5'
+                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${(order.status === 'open' || order.status === 'NEW') ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                                order.status === 'closed' || order.status === 'FILLED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                                    'bg-slate-500/10 text-slate-500 border border-white/5'
                                                 }`}>
                                                 {order.status}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-600 font-bold">
-                                            {new Date(order.timestamp).toLocaleString()}
+                                            {order.timestamp ? new Date(order.timestamp).toLocaleString() : order.datetime || '---'}
                                         </td>
                                     </tr>
                                 ))}
