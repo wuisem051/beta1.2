@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const ccxt = require('ccxt');
+const { decrypt } = require('./utils/vault');
 
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
@@ -31,15 +32,28 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // Helper function to get exchange instance
-const getExchange = async (userId) => {
-    const secretsRef = db.collection('users').doc(userId).collection('secrets').doc('exchange');
-    const doc = await secretsRef.get();
+const getExchange = async (userId, exchangeName) => {
+    const targetExchange = exchangeName || 'binance';
 
-    if (!doc.exists) {
+    // Try to get specific exchange doc
+    let secretsRef = db.collection('users').doc(userId).collection('secrets').doc(targetExchange);
+    let docSnap = await secretsRef.get();
+
+    // Fallback
+    if (!docSnap.exists) {
+        secretsRef = db.collection('users').doc(userId).collection('secrets').doc('exchange');
+        docSnap = await secretsRef.get();
+    }
+
+    if (!docSnap.exists) {
         throw new Error('API Keys no configuradas.');
     }
 
-    const { apiKey, secret, exchange } = doc.data();
+    const data = docSnap.data();
+    // Decrypt keys if they are stored encrypted (likely yes)
+    const apiKey = data.apiKey ? decrypt(data.apiKey) : '';
+    const secret = data.secret ? decrypt(data.secret) : '';
+    const exchange = data.exchange || targetExchange;
     const exId = exchange ? exchange.toLowerCase() : 'binance';
 
     if (!ccxt[exId]) {
@@ -97,7 +111,7 @@ exports.handler = async (event, context) => {
         const userId = decodedToken.uid;
 
         // Parse request body
-        const { symbol } = JSON.parse(event.body || '{}');
+        const { symbol, exchange: exchangeName } = JSON.parse(event.body || '{}');
 
         if (!symbol) {
             return {
@@ -108,8 +122,8 @@ exports.handler = async (event, context) => {
         }
 
         // Get exchange and fetch ticker
-        const exchange = await getExchange(userId);
-        const ticker = await exchange.fetchTicker(symbol);
+        const exchangeInst = await getExchange(userId, exchangeName);
+        const ticker = await exchangeInst.fetchTicker(symbol);
 
         return {
             statusCode: 200,

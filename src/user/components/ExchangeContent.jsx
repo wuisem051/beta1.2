@@ -7,17 +7,23 @@ import {
     FaBitcoin, FaKey, FaChartLine, FaExchangeAlt,
     FaBolt, FaCheckCircle, FaExclamationTriangle,
     FaRegClock, FaHistory, FaListUl, FaShieldAlt,
-    FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh
+    FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh, FaLayerGroup
 } from 'react-icons/fa';
 import TradingViewWidget from './TradingViewWidget';
+import ScalperTradingTool from './ScalperTradingTool';
 
 const ExchangeContent = () => {
     const { currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('trading');
-    const [exchangeType, setExchangeType] = useState('binance');
-    const [apiKey, setApiKey] = useState('');
-    const [secret, setSecret] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
+    const [configs, setConfigs] = useState({
+        binance: { apiKey: '', secret: '', connected: false },
+        bingx: { apiKey: '', secret: '', connected: false }
+    });
+    const [activeTradingExchange, setActiveTradingExchange] = useState('binance');
+
+    // UI Helpers
+    const [isSaving, setIsSaving] = useState({ binance: false, bingx: false });
+
     const [balance, setBalance] = useState(null);
     const [isLoadingBalance, setIsLoadingBalance] = useState(false);
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT');
@@ -28,7 +34,10 @@ const ExchangeContent = () => {
     const [tradeSide, setTradeSide] = useState('buy');
     const [isTrading, setIsTrading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-    const [keysConfigured, setKeysConfigured] = useState(false);
+
+    // Computed property for convenience
+    const keysConfigured = configs[activeTradingExchange]?.connected;
+
     const [apiPermissions, setApiPermissions] = useState({
         read: true,
         trade: true,
@@ -67,6 +76,7 @@ const ExchangeContent = () => {
 
     const tabs = [
         { id: 'trading', label: 'Terminal', icon: <FaBolt /> },
+        { id: 'scalper', label: 'Escalonado', icon: <FaLayerGroup /> },
         { id: 'orders', label: 'Órdenes', icon: <FaListUl /> },
         { id: 'history', label: 'Historial', icon: <FaHistory /> },
         { id: 'config', label: 'Credenciales', icon: <FaKey /> }
@@ -114,16 +124,48 @@ const ExchangeContent = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             if (currentUser?.uid) {
-                const docRef = doc(db, 'users', currentUser.uid, 'secrets', 'exchange');
-                const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    setApiKey(data.apiKey || '');
-                    setSecret(data.secret || '');
-                    setExchangeType(data.exchange || 'binance');
-                    if (data.apiKey && data.secret) {
-                        setKeysConfigured(true);
+                try {
+                    const binanceRef = doc(db, 'users', currentUser.uid, 'secrets', 'binance');
+                    const bingxRef = doc(db, 'users', currentUser.uid, 'secrets', 'bingx');
+                    const legacyRef = doc(db, 'users', currentUser.uid, 'secrets', 'exchange');
+
+                    const [binSnap, bingSnap, legacySnap] = await Promise.all([
+                        getDoc(binanceRef),
+                        getDoc(bingxRef),
+                        getDoc(legacyRef)
+                    ]);
+
+                    let newConfigs = {
+                        binance: { apiKey: '', secret: '', connected: false },
+                        bingx: { apiKey: '', secret: '', connected: false }
+                    };
+
+                    if (binSnap.exists()) {
+                        const d = binSnap.data();
+                        newConfigs.binance = { apiKey: d.apiKey, secret: '', connected: true };
                     }
+                    if (bingSnap.exists()) {
+                        const d = bingSnap.data();
+                        newConfigs.bingx = { apiKey: d.apiKey, secret: '', connected: true };
+                    }
+
+                    // Legacy fallback
+                    if (legacySnap.exists() && !binSnap.exists() && !bingSnap.exists()) {
+                        const data = legacySnap.data();
+                        const ex = data.exchange || 'binance';
+                        if (ex === 'binance' || ex === 'bingx') {
+                            newConfigs[ex] = { apiKey: data.apiKey, secret: '', connected: true };
+                            setActiveTradingExchange(ex);
+                        }
+                    } else if (binSnap.exists() && !bingSnap.exists()) {
+                        setActiveTradingExchange('binance');
+                    } else if (bingSnap.exists() && !binSnap.exists()) {
+                        setActiveTradingExchange('bingx');
+                    }
+
+                    setConfigs(newConfigs);
+                } catch (err) {
+                    console.error("Error loading configs:", err);
                 }
             }
         };
@@ -148,7 +190,10 @@ const ExchangeContent = () => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
-                }
+                },
+                body: JSON.stringify({
+                    exchange: activeTradingExchange
+                })
             });
 
             if (!response.ok) {
@@ -161,7 +206,10 @@ const ExchangeContent = () => {
         } catch (error) {
             console.error("Balance fetch error:", error);
             if (error.message.includes('not-found') || error.message.includes('API Keys')) {
-                setKeysConfigured(false);
+                setConfigs(prev => ({
+                    ...prev,
+                    [activeTradingExchange]: { ...prev[activeTradingExchange], connected: false }
+                }));
             } else {
                 setErrorMsg("No se pudo conectar con el Exchange. Verifica tus credenciales.");
             }
@@ -191,7 +239,10 @@ const ExchangeContent = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ symbol })
+                body: JSON.stringify({
+                    symbol,
+                    exchange: activeTradingExchange
+                })
             });
             if (response.ok) {
                 const data = await response.json();
@@ -233,10 +284,13 @@ const ExchangeContent = () => {
         }
     };
 
-    const handleSaveKeys = async (e) => {
+    const handleSaveKeys = async (e, exchangeName) => {
         e.preventDefault();
-        setIsSaving(true);
+        setIsSaving(prev => ({ ...prev, [exchangeName]: true }));
         setErrorMsg('');
+
+        const currentConfig = configs[exchangeName];
+
         try {
             if (!currentUser?.uid) return;
 
@@ -248,9 +302,9 @@ const ExchangeContent = () => {
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    apiKey,
-                    secret,
-                    exchange: exchangeType
+                    apiKey: currentConfig.apiKey,
+                    secret: currentConfig.secret,
+                    exchange: exchangeName
                 })
             });
 
@@ -259,16 +313,33 @@ const ExchangeContent = () => {
                 throw new Error(error.error || 'Error al guardar credenciales');
             }
 
-            setKeysConfigured(true);
-            // We clear the secret from local state after saving for extra security
-            setSecret('');
-            setTimeout(() => setActiveTab('trading'), 1000); // Auto switch to trading
+            // Update state to show connected and clear secret
+            setConfigs(prev => ({
+                ...prev,
+                [exchangeName]: { ...prev[exchangeName], secret: '', connected: true }
+            }));
+
+            // If this is the first connection, auto-switch to it
+            if (!keysConfigured) {
+                setActiveTradingExchange(exchangeName);
+                setTimeout(() => setActiveTab('trading'), 1000);
+            }
+
+            alert(`Credenciales de ${exchangeName} guardadas correctamente.`);
+
         } catch (error) {
             console.error("Save error:", error);
             setErrorMsg("Error al guardar claves: " + error.message);
         } finally {
-            setIsSaving(false);
+            setIsSaving(prev => ({ ...prev, [exchangeName]: false }));
         }
+    };
+
+    const handleInputChange = (exchange, field, value) => {
+        setConfigs(prev => ({
+            ...prev,
+            [exchange]: { ...prev[exchange], [field]: value }
+        }));
     };
 
     const handleTrade = async (e) => {
@@ -294,7 +365,8 @@ const ExchangeContent = () => {
                     side: tradeSide,
                     amount: parseFloat(tradeAmount),
                     type: tradeType,
-                    price: tradeType === 'limit' ? parseFloat(tradePrice) : undefined
+                    price: tradeType === 'limit' ? parseFloat(tradePrice) : undefined,
+                    exchange: activeTradingExchange
                 })
             });
 
@@ -334,9 +406,18 @@ const ExchangeContent = () => {
                             </div>
                         )}
                     </div>
-                    <p className="text-sm text-slate-400 font-medium">
-                        Terminal avanzada para {exchangeType === 'binance' ? 'Binance' : 'BingX'} <span className="text-slate-600 font-bold ml-1">v2.1</span>
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-slate-400 font-medium">Terminal activa:</span>
+                        <select
+                            value={activeTradingExchange}
+                            onChange={(e) => setActiveTradingExchange(e.target.value)}
+                            className="bg-slate-900 text-white text-xs font-black uppercase py-1.5 px-3 rounded-lg border border-white/10 outline-none focus:border-blue-500 pointer-events-auto cursor-pointer hover:bg-slate-800 transition-colors"
+                        >
+                            <option value="binance">BINANCE</option>
+                            <option value="bingx">BINGX</option>
+                        </select>
+                        <span className="text-slate-600 font-bold ml-1 text-xs">v2.2</span>
+                    </div>
                 </div>
 
                 {/* Modern Navigation Tabs */}
@@ -360,111 +441,87 @@ const ExchangeContent = () => {
             </div>
 
             {activeTab === 'config' && (
-                <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 lg:!p-12 relative overflow-hidden group`}>
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
-
-                        <div className="relative z-10">
-                            <div className="flex items-center justify-center mb-10">
-                                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl flex items-center justify-center text-white text-4xl shadow-2xl shadow-blue-600/30 transform group-hover:rotate-12 transition-transform duration-500">
-                                    <FaKey />
-                                </div>
-                            </div>
-
-                            <h2 className="text-3xl font-black text-center text-white mb-2 tracking-tight">Vincular Exchange</h2>
-                            <p className="text-slate-400 text-center mb-12 text-sm font-medium max-w-md mx-auto leading-relaxed">
-                                Gestiona tus credenciales con seguridad de grado militar. Tus llaves se cifran localmente antes de ser almacenadas.
-                            </p>
-
-                            <form onSubmit={handleSaveKeys} className="space-y-6">
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Seleccionar Plataforma</label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {[
-                                            { id: 'binance', label: 'Binance', color: 'yellow' },
-                                            { id: 'bingx', label: 'BingX', color: 'blue' }
-                                        ].map(ex => (
-                                            <button
-                                                key={ex.id}
-                                                type="button"
-                                                onClick={() => setExchangeType(ex.id)}
-                                                className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all duration-300 ${exchangeType === ex.id
-                                                    ? `bg-${ex.color}-500/10 border-${ex.color}-500 text-${ex.color}-500 shadow-lg shadow-${ex.color}-500/10`
-                                                    : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40'
-                                                    }`}
-                                            >
-                                                <div className={`w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-lg ${exchangeType === ex.id ? 'animate-bounce' : ''}`}>
-                                                    {ex.id === 'binance' ? 'B' : 'BX'}
-                                                </div>
-                                                <span className="font-black uppercase tracking-widest text-xs">{ex.label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-5">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">API Key (Llave Pública)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={apiKey}
-                                                onChange={e => setApiKey(e.target.value)}
-                                                className="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm placeholder:text-slate-700 shadow-inner"
-                                                placeholder="64+ caracteres..."
-                                            />
-                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700"><FaShieldAlt /></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">API Secret (Llave Privada)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="password"
-                                                value={secret}
-                                                onChange={e => setSecret(e.target.value)}
-                                                className="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-6 py-4 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm placeholder:text-slate-700 shadow-inner"
-                                                placeholder="••••••••••••••••"
-                                            />
-                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700"><FaKey /></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="pt-4">
-                                    <button
-                                        type="submit"
-                                        disabled={isSaving}
-                                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl transition-all shadow-2xl shadow-blue-600/30 transform active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-[0.15em] text-xs"
-                                    >
-                                        {isSaving ? (
-                                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                                        ) : (
-                                            <>
-                                                <FaCheckCircle className="text-lg" /> Guardar y Autenticar
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Gestionar Vinculaciones</h2>
+                        <p className="text-slate-400 text-sm font-medium max-w-md mx-auto leading-relaxed">
+                            Configura y guarda las credenciales para cada exchange por separado.
+                        </p>
                     </div>
 
-                    {/* API Permissions Preview */}
-                    <div className="mt-6 grid grid-cols-3 gap-4">
-                        {[
-                            { label: 'Lectura', status: apiPermissions.read, icon: <FaRegClock /> },
-                            { label: 'Trading', status: apiPermissions.trade, icon: <FaBolt /> },
-                            { label: 'Retiros', status: apiPermissions.withdraw, icon: <FaExchangeAlt /> }
-                        ].map((perm, i) => (
-                            <div key={i} className="bg-slate-900/30 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">
-                                <span className={`text-lg ${perm.status ? 'text-emerald-500' : 'text-slate-700'}`}>{perm.icon}</span>
-                                <span className="text-[9px] font-black uppercase text-slate-500">{perm.label}</span>
-                                <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${perm.status ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-600'}`}>
-                                    {perm.status ? 'Habilitado' : 'Bloqueado'}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {['binance', 'bingx'].map(exName => {
+                            const isConnected = configs[exName]?.connected;
+                            const color = exName === 'binance' ? 'yellow' : 'blue';
+
+                            return (
+                                <div key={exName} className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 relative overflow-hidden group transition-all hover:border-${color}-500/30`}>
+                                    <div className={`absolute -top-24 -right-24 w-64 h-64 bg-${color}-600/5 rounded-full blur-3xl group-hover:bg-${color}-600/10 transition-all duration-700`}></div>
+
+                                    <div className="relative z-10">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-14 h-14 bg-gradient-to-br from-${color}-500/20 to-slate-900 rounded-2xl flex items-center justify-center text-${color}-500 text-2xl border border-${color}-500/20 shadow-lg`}>
+                                                    {exName === 'binance' ? 'B' : 'BX'}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">{exName}</h3>
+                                                    <div className={`flex items-center gap-1.5 mt-1 ${isConnected ? 'text-emerald-500' : 'text-slate-500'}`}>
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">{isConnected ? 'Vinculado' : 'No Vinculado'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <form onSubmit={(e) => handleSaveKeys(e, exName)} className="space-y-5">
+                                            <div>
+                                                <label className="block text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 ml-1">API Key</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={configs[exName]?.apiKey || ''}
+                                                        onChange={e => handleInputChange(exName, 'apiKey', e.target.value)}
+                                                        className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-xs placeholder:text-slate-700 shadow-inner"
+                                                        placeholder={`API Key de ${exName}...`}
+                                                    />
+                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700"><FaShieldAlt /></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 ml-1">API Secret</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="password"
+                                                        value={configs[exName]?.secret || ''}
+                                                        onChange={e => handleInputChange(exName, 'secret', e.target.value)}
+                                                        className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-xs placeholder:text-slate-700 shadow-inner"
+                                                        placeholder="••••••••••••••••"
+                                                    />
+                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700"><FaKey /></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-2">
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSaving[exName]}
+                                                    className={`w-full bg-slate-800 hover:bg-blue-600 text-white font-black py-4 rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-widest text-[10px] border border-white/5 group-hover:border-blue-500/50`}
+                                                >
+                                                    {isSaving[exName] ? (
+                                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                                    ) : (
+                                                        <>
+                                                            <FaCheckCircle /> Guardar {exName}
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -859,6 +916,38 @@ const ExchangeContent = () => {
                             </div>
                         </div>
                     </div >
+                )
+            )}
+
+            {/* Scalper Trading Tool Tab */}
+            {activeTab === 'scalper' && (
+                !keysConfigured ? (
+                    <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in zoom-in-95 duration-500">
+                        <div className="relative mb-8">
+                            <div className="w-32 h-32 bg-purple-600/10 rounded-full flex items-center justify-center border border-purple-500/20 shadow-2xl shadow-purple-600/10">
+                                <FaLayerGroup className="text-5xl text-purple-500/40" />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center shadow-xl">
+                                <FaShieldAlt className="text-rose-500" />
+                            </div>
+                        </div>
+                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Acceso Restringido</h2>
+                        <p className="text-slate-400 max-w-sm mb-10 font-medium leading-relaxed">
+                            Para usar la herramienta de trading escalonado, primero debes configurar tus credenciales API.
+                        </p>
+                        <button
+                            onClick={() => setActiveTab('config')}
+                            className="bg-purple-600 hover:bg-purple-500 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-2xl shadow-purple-600/30 hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-xs"
+                        >
+                            Ir a Configuración
+                        </button>
+                    </div>
+                ) : (
+                    <ScalperTradingTool
+                        exchange={activeTradingExchange}
+                        balance={balance}
+                        onRefresh={fetchBalance}
+                    />
                 )
             )}
 

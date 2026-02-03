@@ -53,7 +53,7 @@ exports.handler = async (event, context) => {
         const encryptedApiKey = encrypt(apiKey);
         const encryptedSecret = encrypt(secret);
 
-        await db.collection('users').doc(userId).collection('secrets').doc('exchange').set({
+        await db.collection('users').doc(userId).collection('secrets').doc(exchange).set({
             apiKey: encryptedApiKey,
             secret: encryptedSecret,
             exchange,

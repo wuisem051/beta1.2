@@ -32,18 +32,28 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // Helper function to get exchange instance
-const getExchange = async (userId) => {
-    const secretsRef = db.collection('users').doc(userId).collection('secrets').doc('exchange');
-    const doc = await secretsRef.get();
+const getExchange = async (userId, exchangeName) => {
+    // Default to binance if not provided
+    const targetExchange = exchangeName || 'binance';
 
-    if (!doc.exists) {
+    // Try to get specific exchange doc
+    let secretsRef = db.collection('users').doc(userId).collection('secrets').doc(targetExchange);
+    let docSnap = await secretsRef.get();
+
+    // Fallback to legacy 'exchange' doc if specific one not found
+    if (!docSnap.exists) {
+        secretsRef = db.collection('users').doc(userId).collection('secrets').doc('exchange');
+        docSnap = await secretsRef.get();
+    }
+
+    if (!docSnap.exists) {
         throw new Error('API Keys no configuradas.');
     }
 
-    const data = doc.data();
+    const data = docSnap.data();
     const apiKey = decrypt(data.apiKey);
     const secret = decrypt(data.secret);
-    const exchange = data.exchange;
+    const exchange = data.exchange || targetExchange;
     const exId = exchange ? exchange.toLowerCase() : 'binance';
 
     if (!ccxt[exId]) {
@@ -103,8 +113,19 @@ exports.handler = async (event, context) => {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const userId = decodedToken.uid;
 
+        // Parse body to get exchange preference
+        let exchangeName = 'binance';
+        if (event.body) {
+            try {
+                const body = JSON.parse(event.body);
+                if (body.exchange) exchangeName = body.exchange;
+            } catch (e) {
+                // Ignore parse error, use default
+            }
+        }
+
         // Get exchange and fetch balance
-        const exchange = await getExchange(userId);
+        const exchange = await getExchange(userId, exchangeName);
         const balance = await exchange.fetchBalance();
 
         return {
