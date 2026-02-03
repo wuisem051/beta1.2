@@ -193,6 +193,9 @@ const ExchangeContent = () => {
             if (response.ok) {
                 const data = await response.json();
                 setOrderHistory(data);
+            } else {
+                const data = await response.json();
+                console.error("History fetch error:", data.error);
             }
         } catch (error) {
             console.error("History fetch error:", error);
@@ -226,6 +229,9 @@ const ExchangeContent = () => {
             if (response.ok) {
                 const data = await response.json();
                 setRecentOrders(data.filter(o => o.status === 'open' || o.status === 'NEW'));
+            } else {
+                const data = await response.json();
+                console.error("Open orders fetch error:", data.error);
             }
         } catch (error) {
             console.error("Open orders fetch error:", error);
@@ -235,7 +241,10 @@ const ExchangeContent = () => {
     };
 
     const fetchBalance = async () => {
-        if (!keysConfigured) return;
+        if (!keysConfigured) {
+            setErrorMsg("Primero debes configurar tu API Key y API Secret en la pestaña 'Credenciales'.");
+            return;
+        }
         setIsLoadingBalance(true);
         setErrorMsg('');
         try {
@@ -251,22 +260,23 @@ const ExchangeContent = () => {
                 })
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al obtener balance');
+                throw new Error(data.error || 'Error al obtener balance');
             }
 
-            const data = await response.json();
             setBalance(data);
         } catch (error) {
             console.error("Balance fetch error:", error);
-            if (error.message.includes('not-found') || error.message.includes('API Keys')) {
+            // Mostrar el error real del exchange para facilitar el diagnóstico
+            setErrorMsg(`Fallo de conexión: ${error.message}`);
+
+            if (error.message.toLowerCase().includes('not configured') || error.message.toLowerCase().includes('keys')) {
                 setConfigs(prev => ({
                     ...prev,
                     [activeTradingExchange]: { ...prev[activeTradingExchange], connected: false }
                 }));
-            } else {
-                setErrorMsg("No se pudo conectar con el Exchange. Verifica tus credenciales.");
             }
         } finally {
             setIsLoadingBalance(false);
@@ -563,6 +573,9 @@ const ExchangeContent = () => {
                                                     />
                                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700"><FaKey /></div>
                                                 </div>
+                                                <p className="text-[8px] text-slate-500 mt-2 ml-1 italic">
+                                                    * Importante: Asegúrate de habilitar <b>"Habilitar lectura"</b> en la configuración de tu API en {exName}.
+                                                </p>
                                             </div>
 
                                             <div className="pt-2">
