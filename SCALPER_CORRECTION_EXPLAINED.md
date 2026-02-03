@@ -16,53 +16,28 @@ Nivel 6: 0.0006 BTC (3%) a $53,810 (+13%)
 
 **Problema**: Esto vendería automáticamente en múltiples niveles, lo cual NO es el objetivo de una estrategia de trading spot escalonado tradicional.
 
-## ✅ Solución Implementada
+## ✅ Solución Final Implementada (Modelo Confirmado)
 
-Ahora cada nivel de venta usa la **MISMA cantidad total comprada**, solo variando el precio:
+Cada porción comprada se trata como un "lote" independiente. El sistema mapea cada compra 1 a 1 con un nivel de venta, manteniendo **exactamente la misma cantidad de monedas**.
 
 ```
-Ejemplo CORRECTO (Trading Spot Escalonado):
-Nivel 1: 0.0210 BTC (100%) a $48,095 (+1%) = $10 ganancia
-Nivel 2: 0.0210 BTC (100%) a $48,571 (+2%) = $20 ganancia
-Nivel 3: 0.0210 BTC (100%) a $49,048 (+3%) = $30 ganancia
-Nivel 4: 0.0210 BTC (100%) a $50,000 (+5%) = $50 ganancia
-Nivel 5: 0.0210 BTC (100%) a $51,429 (+8%) = $80 ganancia
-Nivel 6: 0.0210 BTC (100%) a $53,810 (+13%) = $130 ganancia
+Ejemplo DEFINITIVO (Basado en historial):
+Compra: 0.0634 ETH a $2,288.00  ➔ Venta Sugerida: 0.0634 ETH a $2,310.88 (+1%)
+Compra: 0.0561 ETH a $2,368.00  ➔ Venta Sugerida: 0.0561 ETH a $2,391.68 (+1%)
 ```
 
-**Ventaja**: El usuario **elige UN nivel** para vender toda su posición según su objetivo de ganancia.
+**Ventaja**: Esta estrategia permite cerrar cada operación individualmente con ganancia, tal como se observa en tu historial de trading personal.
 
-## 📊 Comparación Visual
+## 📊 Funcionamiento del Scalper
 
-### Compras Escalonadas (DCA)
-```
-✅ Distribuye capital en diferentes niveles
-✅ Compra diferentes cantidades a diferentes precios
-✅ Mejora el precio promedio de entrada
+### 🟢 Compras (Input)
+Distribuye el capital en niveles (DCA). Cada nivel resulta en una cantidad específica de monedas (`quantity`).
 
-Nivel 1: $333 (33%) → 0.0068 BTC a $49,000
-Nivel 2: $267 (27%) → 0.0056 BTC a $48,020
-Nivel 3: $200 (20%) → 0.0042 BTC a $47,060
-Nivel 4: $133 (13%) → 0.0029 BTC a $46,119
-Nivel 5: $67 (7%) → 0.0015 BTC a $45,196
+### 🔴 Ventas (Output Sugerido)
+El sistema toma cada `quantity` de las compras y le asigna un precio de salida con ganancia. 
+- La compra más barata tiene el primer objetivo de venta.
+- Se mantiene la integridad decimal de cada porción.
 
-Total: 0.0210 BTC comprados con $1,000
-Precio promedio: $47,619
-```
-
-### Ventas Escalonadas (Correcto)
-```
-✅ MISMA cantidad en todos los niveles
-✅ Usuario elige UN nivel según objetivo
-✅ No es grid bot automático
-
-Nivel 1: 0.0210 BTC a $48,095 (+1%) → Ganancia: $10
-Nivel 2: 0.0210 BTC a $48,571 (+2%) → Ganancia: $20
-Nivel 3: 0.0210 BTC a $49,048 (+3%) → Ganancia: $30
-Nivel 4: 0.0210 BTC a $50,000 (+5%) → Ganancia: $50
-Nivel 5: 0.0210 BTC a $51,429 (+8%) → Ganancia: $80
-Nivel 6: 0.0210 BTC a $53,810 (+13%) → Ganancia: $130
-```
 
 ## 🎯 Casos de Uso
 
