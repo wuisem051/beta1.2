@@ -66,11 +66,16 @@ const getExchange = async (userId, exchangeName) => {
         apiKey,
         secret,
         enableRateLimit: true,
+        options: {
+            adjustForTimeDifference: true,
+            recvWindow: 60000,
+        }
     };
 
-    // BingX-specific configuration
+    // BingX-specific configuration overrides
     if (exId === 'bingx') {
         config.options = {
+            ...config.options, // keep time sync if applicable
             defaultType: 'spot',
         };
         // BingX uses different API endpoints
