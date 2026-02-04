@@ -133,6 +133,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 <NavLink to="/user/deposits" label="Depósito" isActive={pathname.includes('/deposits')} />
                 <NavLink to="/user/withdrawals" label="Retiro" isActive={pathname.includes('/withdrawals')} />
                 <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
+                <NavLink to="/user/cajero" label="Cajero Airtm" isActive={pathname.includes('/cajero')} />
               </div>
             )}
           </div>
