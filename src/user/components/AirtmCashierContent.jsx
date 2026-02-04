@@ -122,14 +122,15 @@ const AirtmCashierContent = () => {
             }
 
             const filteredOps = rawOps.filter(op => {
-                // Determine method name from category ID or metadata
-                const categoryId = op.makerPaymentMethod?.category?.id || '';
+                // Determine method name from deep category ID or direct field
+                const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
                 let method = op.payment_method_name || op.paymentMethodName || '';
 
                 if (!method && categoryId) {
-                    if (categoryId.includes('venezuela')) method = 'Banco de Venezuela';
-                    else if (categoryId.includes('paypal')) method = 'Paypal';
-                    else if (categoryId.includes('binance')) method = 'Binance USDT';
+                    const lowCat = categoryId.toLowerCase();
+                    if (lowCat.includes('venezuela')) method = 'Banco de Venezuela';
+                    else if (lowCat.includes('paypal')) method = 'Paypal';
+                    else if (lowCat.includes('binance')) method = 'Binance USDT';
                     else method = categoryId.split(':').pop().replace(/-/g, ' ');
                 }
 
@@ -160,12 +161,13 @@ const AirtmCashierContent = () => {
 
                 return matchesMethod && matchesAmount && matchesProfit;
             }).map(op => {
-                const categoryId = op.makerPaymentMethod?.category?.id || '';
+                const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
                 let method = op.payment_method_name || op.paymentMethodName || '';
                 if (!method && categoryId) {
-                    if (categoryId.includes('venezuela')) method = 'Banco de Venezuela';
-                    else if (categoryId.includes('paypal')) method = 'Paypal';
-                    else if (categoryId.includes('binance')) method = 'Binance USDT';
+                    const lowCat = categoryId.toLowerCase();
+                    if (lowCat.includes('venezuela')) method = 'Banco de Venezuela';
+                    else if (lowCat.includes('paypal')) method = 'Paypal';
+                    else if (lowCat.includes('binance')) method = 'Binance USDT';
                     else method = categoryId.split(':').pop().replace(/-/g, ' ');
                 }
                 return {

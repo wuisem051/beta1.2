@@ -38,12 +38,13 @@ exports.handler = async (event, context) => {
 
         if (action === 'poll') {
             try {
-                // Correct GraphQL query based on current Airtm response structure
+                // Precise GraphQL query matching the latest Airtm internal structure
                 const graphqlQuery = {
                     operationName: "getAvailableOperations",
                     query: `query getAvailableOperations {
                           availableOperations {
                             id
+                            hash
                             operationType
                             status
                             grossAmount
@@ -54,12 +55,17 @@ exports.handler = async (event, context) => {
                               lastName
                               numbers {
                                 score
+                                completedOperations
                               }
                             }
                             makerPaymentMethod {
-                              category {
-                                id
-                                translationTag
+                              id
+                              categoryId
+                              version {
+                                category {
+                                  id
+                                  translationTag
+                                }
                               }
                             }
                           }
@@ -73,7 +79,9 @@ exports.handler = async (event, context) => {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`,
                         'Content-Type': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Referer': 'https://app.airtm.com/peer-transfers/available',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     data: graphqlQuery
                 });
