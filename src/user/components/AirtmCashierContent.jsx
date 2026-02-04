@@ -392,7 +392,13 @@ const AirtmCashierContent = () => {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between p-4 bg-[#12161c] rounded-2xl border border-white/5">
                                 <div className="flex items-center gap-3">
-                                    <FaVolumeUp className="text-slate-500" />
+                                    <button
+                                        onClick={() => audioRef.current?.play()}
+                                        className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-[#fcd535] transition-all"
+                                        title="Probar Sonido"
+                                    >
+                                        <FaVolumeUp />
+                                    </button>
                                     <span className="text-[10px] font-black text-white uppercase tracking-widest">Alerta Sonora</span>
                                 </div>
                                 <button
