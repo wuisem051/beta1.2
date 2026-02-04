@@ -117,6 +117,10 @@ const AirtmCashierContent = () => {
                 rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
             }
 
+            if (rawOps.length > 0) {
+                console.log('Airtm Raw Ops Received:', rawOps);
+            }
+
             const filteredOps = rawOps.filter(op => {
                 // Determine method name from category ID or metadata
                 const categoryId = op.makerPaymentMethod?.category?.id || '';
@@ -173,6 +177,15 @@ const AirtmCashierContent = () => {
                     status: op.status || op.state
                 };
             });
+
+            if (rawOps.length > 0 && filteredOps.length === 0) {
+                // Check if any were "creatable" status to confirm connection is good but filters are tight
+                const hasPotential = rawOps.some(op => ['CREATED', 'OPEN', 'ACCEPTING'].includes((op.status || op.state || '').toUpperCase()));
+                if (hasPotential) {
+                    console.log('Operations detected but filtered out. Check amounts/methods.');
+                    // addLog(`Detectadas ${rawOps.length} solicitudes, pero el monto o método no coinciden con tus filtros.`, 'info');
+                }
+            }
 
             if (filteredOps.length > 0) {
                 const newOps = filteredOps.filter(fop => !operations.some(op => op.id === fop.id));
