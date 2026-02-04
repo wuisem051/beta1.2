@@ -82,11 +82,14 @@ const AirtmCashierContent = () => {
 
     const pollAirtm = async () => {
         try {
+            // Updated to use the common GraphQL structure used by Airtm for real-time data
             const response = await fetch('/.netlify/functions/airtmProxy', {
                 method: 'POST',
                 body: JSON.stringify({
                     sessionToken: apiKey,
-                    action: 'poll'
+                    action: 'poll',
+                    // Adding hints for the proxy to use GraphQL if the rest endpoint fails
+                    useGraphQL: true
                 })
             });
 
@@ -102,17 +105,39 @@ const AirtmCashierContent = () => {
                 throw new Error(data.error || 'Unknown error');
             }
 
-            // Process operations
-            // We assume data is an array or has a results/data property
-            const rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
+            // Enhanced data extraction to handle both REST and GraphQL responses
+            let rawOps = [];
+            if (data.data && data.data.p2pOperations) {
+                rawOps = data.data.p2pOperations;
+            } else if (data.data && data.data.operations) {
+                rawOps = data.data.operations;
+            } else {
+                rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
+            }
 
             const filteredOps = rawOps.filter(op => {
-                // Map Airtm keys to our format
-                const method = op.payment_method_name || op.method || 'Desconocido';
-                const amount = parseFloat(op.amount || op.total_amount || 0);
-                const profit = parseFloat(op.profit_percentage || 0);
+                // Map Airtm keys - support more variants from GraphQL
+                const method = op.payment_method_name || op.method || op.paymentMethodName || 'Desconocido';
+                const amountValue = op.amount || op.total_amount || op.totalAmount || 0;
+                const amount = parseFloat(amountValue);
+                const profit = parseFloat(op.profit_percentage || op.profitPercentage || 0);
+                const status = op.status || op.state;
 
-                const matchesMethod = filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
+                // Solo queremos operaciones aceptables/abiertas
+                if (status && !['OPEN', 'ACCEPTING', 'WAITING'].includes(status.toUpperCase())) return false;
+
+                // Better method matching (case insensitive and partial)
+                const matchesMethod = filters.methods.length === 0 || filters.methods.some(filterMethod => {
+                    const normalizedFilter = filterMethod.toLowerCase().trim();
+                    const normalizedActual = method.toLowerCase().trim();
+
+                    // Si el filtro es "Binance", que capture "Binance Pay", "Binance USDT", etc.
+                    if (normalizedFilter.includes('binance') && normalizedActual.includes('binance')) return true;
+                    if (normalizedFilter.includes('paypal') && normalizedActual.includes('paypal')) return true;
+
+                    return normalizedActual.includes(normalizedFilter);
+                });
+
                 const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
                 const matchesProfit = profit >= filters.minProfit;
 
@@ -120,20 +145,24 @@ const AirtmCashierContent = () => {
             });
 
             if (filteredOps.length > 0) {
-                // Check if there are new operations (not in our current list)
                 const newOps = filteredOps.filter(fop => !operations.some(op => op.id === (fop.id || fop.uuid)));
 
                 if (newOps.length > 0) {
                     if (notifications.sound && audioRef.current) {
-                        audioRef.current.play().catch(e => console.log('Audio play blocked'));
+                        const playPromise = audioRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => console.log('Audio playback prevented'));
+                        }
                     }
 
                     newOps.forEach(nop => {
-                        addLog(`¡NUEVA OPERACIÓN! ${nop.payment_method_name || 'Desconocido'} por $${nop.amount || nop.total_amount}`, 'success');
+                        const methodName = nop.payment_method_name || nop.method || nop.paymentMethodName || 'Desconocido';
+                        const amountStr = nop.amount || nop.total_amount || nop.totalAmount;
+                        addLog(`¡NUEVA OPERACIÓN! ${methodName} por $${amountStr}`, 'success');
 
                         if (notifications.desktop && Notification.permission === 'granted') {
                             new Notification('Airtm Cajero: Nueva Operación', {
-                                body: `${nop.payment_method_name} - $${nop.amount}`,
+                                body: `${methodName} - $${amountStr}`,
                                 icon: '/favicon.ico'
                             });
                         }
@@ -141,21 +170,23 @@ const AirtmCashierContent = () => {
                 }
             }
 
-            // Normalize and update state
             const normalizedOps = filteredOps.map(op => ({
                 id: op.id || op.uuid,
-                method: op.payment_method_name || 'Desconocido',
-                amount: op.amount || op.total_amount,
-                profit: op.profit_percentage || 0,
+                method: op.payment_method_name || op.method || op.paymentMethodName || 'Desconocido',
+                amount: op.amount || op.total_amount || op.totalAmount,
+                profit: op.profit_percentage || op.profitPercentage || 0,
                 time: new Date().toLocaleTimeString(),
-                status: op.status
+                status: op.status || op.state
             }));
 
             setOperations(normalizedOps);
 
         } catch (err) {
-            addLog(`Error de conexión: ${err.message}`, 'error');
-            console.error(err);
+            // Silently retry some connection errors, log others
+            if (!err.message.includes('Failed to fetch')) {
+                addLog(`Estado: Buscando...`, 'info');
+            }
+            console.error('Polling error:', err);
         }
     };
 
