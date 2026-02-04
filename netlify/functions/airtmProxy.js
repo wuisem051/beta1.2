@@ -38,11 +38,11 @@ exports.handler = async (event, context) => {
 
         if (action === 'poll') {
             try {
-                // Try GraphQL first as it is more likely what they use now
+                // Correct GraphQL query for available cashier operations
                 const graphqlQuery = {
-                    query: `
-                        query getP2POperations($status: [String], $limit: Int) {
-                          p2pOperations(status: $status, limit: $limit) {
+                    operationName: "getP2PAvailableOperations",
+                    query: `query getP2PAvailableOperations($limit: Int, $offset: Int) {
+                          p2pAvailableOperations(limit: $limit, offset: $offset) {
                             id
                             uuid
                             amount
@@ -50,14 +50,17 @@ exports.handler = async (event, context) => {
                             paymentMethodName
                             profitPercentage
                             status
-                            createdAt
                             type
+                            user {
+                              firstName
+                              lastName
+                              rating
+                            }
                           }
-                        }
-                    `,
+                        }`,
                     variables: {
-                        status: ["OPEN", "ACCEPTING", "WAITING"],
-                        limit: 20
+                        limit: 20,
+                        offset: 0
                     }
                 };
 

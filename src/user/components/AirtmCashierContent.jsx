@@ -105,14 +105,16 @@ const AirtmCashierContent = () => {
                 throw new Error(data.error || 'Unknown error');
             }
 
-            // Enhanced data extraction to handle both REST and GraphQL responses
+            // Enhanced data extraction to handle the specific p2pAvailableOperations structure
             let rawOps = [];
-            if (data.data && data.data.p2pOperations) {
+            if (data.data && data.data.p2pAvailableOperations) {
+                rawOps = data.data.p2pAvailableOperations;
+            } else if (data.data && data.data.p2pOperations) {
                 rawOps = data.data.p2pOperations;
             } else if (data.data && data.data.operations) {
                 rawOps = data.data.operations;
-            } else if (data.p2pOperations) {
-                rawOps = data.p2pOperations;
+            } else if (data.p2pAvailableOperations) {
+                rawOps = data.p2pAvailableOperations;
             } else {
                 rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
             }
