@@ -13,10 +13,10 @@ const AirtmCashierContent = () => {
     const [isMonitoring, setIsMonitoring] = useState(false);
     const [operations, setOperations] = useState([]);
     const [filters, setFilters] = useState({
-        methods: ['Paypal', 'Binance USDT'],
-        minProfit: 2,
-        maxAmount: 500,
-        minAmount: 5
+        methods: ['Paypal', 'Binance USDT', 'Banco de Venezuela'],
+        minProfit: 0.5,
+        maxAmount: 1000,
+        minAmount: 1
     });
     const [notifications, setNotifications] = useState({
         sound: true,
