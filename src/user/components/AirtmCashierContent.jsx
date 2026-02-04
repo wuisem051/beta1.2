@@ -111,8 +111,21 @@ const AirtmCashierContent = () => {
                 rawOps = data.data.p2pOperations;
             } else if (data.data && data.data.operations) {
                 rawOps = data.data.operations;
+            } else if (data.p2pOperations) {
+                rawOps = data.p2pOperations;
             } else {
                 rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
+            }
+
+            // Log for debugging
+            if (rawOps.length > 0) {
+                console.log('Airtm Raw Ops:', rawOps);
+                // No loguear cada éxito para no saturar, pero sí si hay algo
+                const matchAny = rawOps.some(op => op.status === 'OPEN' || op.state === 'OPEN');
+                if (matchAny && filteredOps.length === 0) {
+                    // Solo avisar si hay operaciones pero no pasan los filtros
+                    // addLog(`Detectadas ${rawOps.length} ops en el mercado, pero no cumplen tus filtros.`, 'info');
+                }
             }
 
             const filteredOps = rawOps.filter(op => {

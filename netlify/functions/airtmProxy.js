@@ -37,22 +37,64 @@ exports.handler = async (event, context) => {
         });
 
         if (action === 'poll') {
-            // Fetch open P2P operations
-            // This endpoint is an estimation based on standard P2P API structures
-            const response = await airtmClient.get('/p2p/operations', {
-                params: {
-                    status: 'OPEN',
-                    type: 'ACCEPT_TRANSACTION',
-                    page: 1,
-                    limit: 20
-                }
-            });
+            try {
+                // Try GraphQL first as it is more likely what they use now
+                const graphqlQuery = {
+                    query: `
+                        query getP2POperations($status: [String], $limit: Int) {
+                          p2pOperations(status: $status, limit: $limit) {
+                            id
+                            uuid
+                            amount
+                            totalAmount
+                            paymentMethodName
+                            profitPercentage
+                            status
+                            createdAt
+                            type
+                          }
+                        }
+                    `,
+                    variables: {
+                        status: ["OPEN", "ACCEPTING", "WAITING"],
+                        limit: 20
+                    }
+                };
 
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify(response.data)
-            };
+                const response = await axios({
+                    method: 'POST',
+                    url: 'https://app.airtm.com/graphql',
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    },
+                    data: graphqlQuery
+                });
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify(response.data)
+                };
+            } catch (gqlError) {
+                console.warn('GraphQL fallback to REST:', gqlError.message);
+                // Fallback to REST if GraphQL fails
+                const response = await airtmClient.get('/p2p/operations', {
+                    params: {
+                        status: 'OPEN',
+                        type: 'ACCEPT_TRANSACTION',
+                        page: 1,
+                        limit: 20
+                    }
+                });
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify(response.data)
+                };
+            }
         } else if (action === 'accept') {
             if (!operationId) {
                 return { statusCode: 400, headers, body: JSON.stringify({ error: 'Operation ID is required' }) };
