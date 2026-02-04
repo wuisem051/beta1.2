@@ -218,28 +218,38 @@ exports.handler = async (event, context) => {
             variables: {
               filter: {
                 status: ["CREATED", "FRAUD_APPROVED", "OPEN", "AVAILABLE", "READY"],
-                operationTypes: ["BUY", "SELL"]
+                operationTypes: ["BUY", "SELL", "ADD", "WITHDRAW", "DEPOSIT"]
               }
             }
           },
           timeout: 10000 // 10s timeout
         });
 
+        const gqlData = response.data?.data || {};
+        const availableOps = gqlData.availableOperations || gqlData.p2pAvailableOperations || gqlData.operations || [];
+
         // Log count if any
-        const ops = response.data?.data?.availableOperations || [];
-        if (ops.length > 0) {
-          console.log(`[Proxy] Detected ${ops.length} operations via GraphQL`);
+        if (availableOps.length > 0) {
+          console.log(`[Proxy] Detected ${availableOps.length} operations via GraphQL`);
         }
 
+        // Return debug info to help identifies keys if empty
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify(response.data)
+          body: JSON.stringify({
+            ...response.data,
+            _debug: {
+              keys: Object.keys(gqlData),
+              count: availableOps.length,
+              source: 'graphql'
+            }
+          })
         };
       } catch (gqlError) {
         console.warn('GraphQL fallback to REST:', gqlError.response?.data || gqlError.message);
 
-        // If it's a 401/403, don't even try REST as it will likely fail too
+        // If it's a 401/403, don't even try REST
         if (gqlError.response?.status === 401 || gqlError.response?.status === 403) {
           throw gqlError;
         }
@@ -257,7 +267,13 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify(response.data)
+          body: JSON.stringify({
+            ...response.data,
+            _debug: {
+              source: 'rest',
+              count: (Array.isArray(response.data) ? response.data.length : (response.data.results?.length || 0))
+            }
+          })
         };
       }
     } else if (action === 'accept') {

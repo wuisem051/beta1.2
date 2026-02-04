@@ -139,11 +139,14 @@ const AirtmCashierContent = () => {
             } else if (data.data && data.data.p2pOperations) {
                 rawOps = data.data.p2pOperations;
             } else {
-                rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
+                rawOps = Array.isArray(data) ? data : (data.results || []);
             }
 
-            if (rawOps.length > 0) {
-                console.log('Airtm Raw Ops Received:', rawOps);
+            if (data._debug) {
+                const { source, count, keys } = data._debug;
+                if (count > 0 || logs.length < 5) {
+                    console.log(`[Airtm] Data from ${source}. Count: ${count}. Keys: ${keys?.join(',')}`);
+                }
             }
 
             const filteredOps = rawOps.filter(op => {
