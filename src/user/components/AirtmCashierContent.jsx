@@ -250,32 +250,84 @@ const AirtmCashierContent = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Column 1: Config & Filters */}
                 <div className="space-y-8">
-                    {/* Connection Card */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <FaLock className="text-[#fcd535]" /> Conexión API
-                        </h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2 ml-2">Session Token / API Key</label>
-                                <input
-                                    type="password"
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    placeholder="Ingrese su token de acceso..."
-                                    className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner"
-                                />
-                            </div>
-                            <button
-                                onClick={handleConnect}
-                                className="w-full py-4 bg-white/5 text-white border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all"
-                            >
-                                {isConnected ? 'Actualizar Conexión' : 'Vincular Cuenta'}
-                            </button>
-                            <p className="text-[8px] text-slate-600 font-bold uppercase text-center leading-relaxed">
-                                Su token se encripta de forma segura y solo se usa para escanear operaciones.
-                            </p>
+                    {/* Modern Connection Assistant (Option A) */}
+                    <div className="bg-[#1e2329] p-1 rounded-[40px] shadow-2xl overflow-hidden">
+                        <div className="bg-[#1e2329] p-8 rounded-[38px] border border-white/5 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                            <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <FaShieldAlt className="text-[#fcd535]" /> Asistente de Conexión
+                            </h2>
+
+                            {!isConnected ? (
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <div className="flex gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[10px] font-black">1</div>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">
+                                                Inicia sesión de forma segura directamente en la web de Airtm.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => window.open('https://app.airtm.com/login', '_blank', 'width=1000,height=700')}
+                                            className="w-full py-4 bg-white/5 text-white border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all flex items-center justify-center gap-2 group"
+                                        >
+                                            <img src="https://static.airtm.com/favicon-32x32.png" alt="A" className="w-4 h-4 grayscale group-hover:grayscale-0 transition-all" />
+                                            Abrir Acceso Seguro Airtm
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t border-white/5">
+                                        <div className="flex gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-[10px] font-black">2</div>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">
+                                                Pega tu token de sesión para vincular el escáner de operaciones.
+                                            </p>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="password"
+                                                value={apiKey}
+                                                onChange={(e) => setApiKey(e.target.value)}
+                                                placeholder="Pegar código de vinculación..."
+                                                className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner"
+                                            />
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[8px] text-slate-600 font-black uppercase pointer-events-none">Cifrado AES-256</div>
+                                        </div>
+                                        <button
+                                            onClick={handleConnect}
+                                            disabled={!apiKey}
+                                            className="w-full py-4 bg-[#fcd535] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#fcd535]/10 disabled:opacity-50 disabled:scale-100"
+                                        >
+                                            Verificar y Vincular Nodo
+                                        </button>
+                                    </div>
+                                    <p className="text-[8px] text-slate-600 font-bold uppercase text-center bg-white/5 py-2 rounded-xl border border-white/5">
+                                        <FaLock className="inline mr-1" /> Tu contraseña nunca sale de Airtm
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6 animate-in zoom-in-95 duration-500">
+                                    <div className="flex flex-col items-center py-6">
+                                        <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 border border-emerald-500/20 mb-4">
+                                            <FaCheckCircle size={32} />
+                                        </div>
+                                        <p className="text-[11px] font-black text-white uppercase tracking-widest">Conexión Establecida</p>
+                                        <p className="text-[9px] text-emerald-500 font-bold uppercase mt-1">Sincronizando con Red P2P</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setIsConnected(false);
+                                            setApiKey('');
+                                            saveSettings({ apiKey: '', isConnected: false });
+                                            addLog('Sesión desconectada por el usuario.', 'info');
+                                        }}
+                                        className="w-full py-3 bg-red-500/10 text-red-500 border border-red-500/10 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                                    >
+                                        Desvincular Cuenta
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
