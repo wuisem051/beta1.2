@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { FaLock, FaWifi, FaBell, FaVolumeUp, FaFilter, FaCheckCircle, FaExclamationTriangle, FaTrash, FaPlus, FaPlay, FaPause } from 'react-icons/fa';
+import { FaLock, FaWifi, FaBell, FaVolumeUp, FaFilter, FaCheckCircle, FaExclamationTriangle, FaTrash, FaPlus, FaPlay, FaPause, FaShieldAlt } from 'react-icons/fa';
 import { ThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../services/firebase';
