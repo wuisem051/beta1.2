@@ -38,39 +38,171 @@ exports.handler = async (event, context) => {
 
         if (action === 'poll') {
             try {
-                // Precise GraphQL query matching the latest Airtm internal structure
+                // Exact GraphQL query used by the Airtm web app
                 const graphqlQuery = {
-                    operationName: "getAvailableOperations",
-                    query: `query getAvailableOperations {
-                          availableOperations {
+                    operationName: "AvailableOperations",
+                    query: `query AvailableOperations($filter: Operations__FilterInput) {
+                      availableOperations(filter: $filter) {
+                        id
+                        hash
+                        operationType
+                        status
+                        isMine
+                        createdAt
+                        updatedAt
+                        grossAmount
+                        netAmount
+                        metadata
+                        walletCurrency {
+                          ...CurrencyData
+                          __typename
+                        }
+                        peer {
+                          ...UserData
+                          __typename
+                        }
+                        ... on Operations__Buy {
+                          rate
+                          rateInfo {
                             id
-                            hash
-                            operationType
-                            status
-                            grossAmount
                             netAmount
-                            createdAt
-                            peer {
-                              firstName
-                              lastName
-                              numbers {
-                                score
-                                completedOperations
-                              }
-                            }
-                            makerPaymentMethod {
-                              id
-                              categoryId
-                              version {
-                                category {
-                                  id
-                                  translationTag
-                                }
-                              }
-                            }
+                            grossAmount
+                            fundsToReceiveMaker
+                            fundsToReceiveTaker
+                            fundsToSendMaker
+                            fundsToSendTaker
+                            __typename
                           }
-                        }`,
-                    variables: {}
+                          displayRate {
+                            direction
+                            rate
+                            __typename
+                          }
+                          currency {
+                            ...CurrencyData
+                            __typename
+                          }
+                          makerPaymentMethod {
+                            ...PaymentMethodInstance
+                            __typename
+                          }
+                          __typename
+                        }
+                        ... on Operations__Sell {
+                          rate
+                          rateInfo {
+                            id
+                            netAmount
+                            grossAmount
+                            fundsToReceiveMaker
+                            fundsToReceiveTaker
+                            fundsToSendMaker
+                            fundsToSendTaker
+                            __typename
+                          }
+                          displayRate {
+                            direction
+                            rate
+                            __typename
+                          }
+                          currency {
+                            ...CurrencyData
+                            __typename
+                          }
+                          makerPaymentMethod {
+                            ...PaymentMethodInstance
+                            __typename
+                          }
+                          __typename
+                        }
+                        __typename
+                      }
+                    }
+
+                    fragment CurrencyData on Catalogs__Currency {
+                      id
+                      symbol
+                      precision
+                      __typename
+                    }
+
+                    fragment UserData on Auth__AnyUser {
+                      ... on Auth__OperationUser {
+                        id
+                        firstName
+                        lastName
+                        createdAt
+                        country
+                        countryInfo {
+                          id
+                          image {
+                            id
+                            urls
+                            __typename
+                          }
+                          __typename
+                        }
+                        securityHub {
+                          id
+                          tierLevel
+                          facialVerified
+                          documentVerified
+                          verificationStatusName
+                          __typename
+                        }
+                        numbers {
+                          id
+                          score
+                          completedOperations
+                          __typename
+                        }
+                        preferences {
+                          id
+                          profile {
+                            id
+                            avatar
+                            language
+                            __typename
+                          }
+                          __typename
+                        }
+                        __typename
+                      }
+                      __typename
+                    }
+
+                    fragment PaymentMethodInstance on PaymentMethods__Instance {
+                      id
+                      data
+                      categoryId
+                      isThirdPartyInstance
+                      version {
+                        id
+                        image {
+                          id
+                          urls
+                          __typename
+                        }
+                        category {
+                          id
+                          translationTag
+                          ancestor(level: 2) {
+                            id
+                            translationTag
+                            __typename
+                          }
+                          __typename
+                        }
+                        __typename
+                      }
+                      __typename
+                    }`,
+                    variables: {
+                        filter: {
+                            status: ["CREATED", "FRAUD_APPROVED"],
+                            operationTypes: ["BUY", "SELL"]
+                        }
+                    }
                 };
 
                 const response = await axios({
