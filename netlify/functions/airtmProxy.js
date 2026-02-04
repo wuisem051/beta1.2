@@ -38,30 +38,33 @@ exports.handler = async (event, context) => {
 
         if (action === 'poll') {
             try {
-                // Correct GraphQL query for available cashier operations
+                // Correct GraphQL query based on current Airtm response structure
                 const graphqlQuery = {
-                    operationName: "getP2PAvailableOperations",
-                    query: `query getP2PAvailableOperations($limit: Int, $offset: Int) {
-                          p2pAvailableOperations(limit: $limit, offset: $offset) {
+                    operationName: "getAvailableOperations",
+                    query: `query getAvailableOperations {
+                          availableOperations {
                             id
-                            uuid
-                            amount
-                            totalAmount
-                            paymentMethodName
-                            profitPercentage
+                            operationType
                             status
-                            type
-                            user {
+                            grossAmount
+                            netAmount
+                            createdAt
+                            peer {
                               firstName
                               lastName
-                              rating
+                              numbers {
+                                score
+                              }
+                            }
+                            makerPaymentMethod {
+                              category {
+                                id
+                                translationTag
+                              }
                             }
                           }
                         }`,
-                    variables: {
-                        limit: 20,
-                        offset: 0
-                    }
+                    variables: {}
                 };
 
                 const response = await axios({

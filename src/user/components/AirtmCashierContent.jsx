@@ -105,63 +105,77 @@ const AirtmCashierContent = () => {
                 throw new Error(data.error || 'Unknown error');
             }
 
-            // Enhanced data extraction to handle the specific p2pAvailableOperations structure
+            // Enhanced data extraction to handle the specific availableOperations structure
             let rawOps = [];
-            if (data.data && data.data.p2pAvailableOperations) {
+            if (data.data && data.data.availableOperations) {
+                rawOps = data.data.availableOperations;
+            } else if (data.data && data.data.p2pAvailableOperations) {
                 rawOps = data.data.p2pAvailableOperations;
             } else if (data.data && data.data.p2pOperations) {
                 rawOps = data.data.p2pOperations;
-            } else if (data.data && data.data.operations) {
-                rawOps = data.data.operations;
-            } else if (data.p2pAvailableOperations) {
-                rawOps = data.p2pAvailableOperations;
             } else {
                 rawOps = Array.isArray(data) ? data : (data.data || data.results || []);
             }
 
-            // Log for debugging
-            if (rawOps.length > 0) {
-                console.log('Airtm Raw Ops:', rawOps);
-                // No loguear cada éxito para no saturar, pero sí si hay algo
-                const matchAny = rawOps.some(op => op.status === 'OPEN' || op.state === 'OPEN');
-                if (matchAny && filteredOps.length === 0) {
-                    // Solo avisar si hay operaciones pero no pasan los filtros
-                    // addLog(`Detectadas ${rawOps.length} ops en el mercado, pero no cumplen tus filtros.`, 'info');
-                }
-            }
-
             const filteredOps = rawOps.filter(op => {
-                // Map Airtm keys - support more variants from GraphQL
-                const method = op.payment_method_name || op.method || op.paymentMethodName || 'Desconocido';
-                const amountValue = op.amount || op.total_amount || op.totalAmount || 0;
-                const amount = parseFloat(amountValue);
-                const profit = parseFloat(op.profit_percentage || op.profitPercentage || 0);
+                // Determine method name from category ID or metadata
+                const categoryId = op.makerPaymentMethod?.category?.id || '';
+                let method = op.payment_method_name || op.paymentMethodName || '';
+
+                if (!method && categoryId) {
+                    if (categoryId.includes('venezuela')) method = 'Banco de Venezuela';
+                    else if (categoryId.includes('paypal')) method = 'Paypal';
+                    else if (categoryId.includes('binance')) method = 'Binance USDT';
+                    else method = categoryId.split(':').pop().replace(/-/g, ' ');
+                }
+
+                method = method || 'Desconocido';
+
+                // Determine amount (Airtm uses grossAmount for the cashier sending funds)
+                const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
+                const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2); // Default profit estimate
                 const status = op.status || op.state;
 
-                // Solo queremos operaciones aceptables/abiertas
-                if (status && !['OPEN', 'ACCEPTING', 'WAITING'].includes(status.toUpperCase())) return false;
+                // Match status (CREATED is common in availableOperations)
+                if (status && !['OPEN', 'ACCEPTING', 'WAITING', 'CREATED'].includes(status.toUpperCase())) return false;
 
-                // Better method matching (case insensitive and partial)
                 const matchesMethod = filters.methods.length === 0 || filters.methods.some(filterMethod => {
                     const normalizedFilter = filterMethod.toLowerCase().trim();
                     const normalizedActual = method.toLowerCase().trim();
+                    const normalizedCat = categoryId.toLowerCase();
 
-                    // Si el filtro es "Binance", que capture "Binance Pay", "Binance USDT", etc.
-                    if (normalizedFilter.includes('binance') && normalizedActual.includes('binance')) return true;
-                    if (normalizedFilter.includes('paypal') && normalizedActual.includes('paypal')) return true;
+                    if (normalizedFilter.includes('binance') && (normalizedActual.includes('binance') || normalizedCat.includes('binance'))) return true;
+                    if (normalizedFilter.includes('paypal') && (normalizedActual.includes('paypal') || normalizedCat.includes('paypal'))) return true;
+                    if (normalizedFilter.includes('venezuela') && (normalizedActual.includes('venezuela') || normalizedCat.includes('venezuela'))) return true;
 
-                    return normalizedActual.includes(normalizedFilter);
+                    return normalizedActual.includes(normalizedFilter) || normalizedCat.includes(normalizedFilter);
                 });
 
                 const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
                 const matchesProfit = profit >= filters.minProfit;
 
                 return matchesMethod && matchesAmount && matchesProfit;
+            }).map(op => {
+                const categoryId = op.makerPaymentMethod?.category?.id || '';
+                let method = op.payment_method_name || op.paymentMethodName || '';
+                if (!method && categoryId) {
+                    if (categoryId.includes('venezuela')) method = 'Banco de Venezuela';
+                    else if (categoryId.includes('paypal')) method = 'Paypal';
+                    else if (categoryId.includes('binance')) method = 'Binance USDT';
+                    else method = categoryId.split(':').pop().replace(/-/g, ' ');
+                }
+                return {
+                    id: op.id || op.uuid,
+                    method: method || 'Desconocido',
+                    amount: op.netAmount || op.grossAmount || op.amount || op.totalAmount,
+                    profit: op.profitPercentage || op.profit_percentage || 2.2,
+                    time: new Date().toLocaleTimeString(),
+                    status: op.status || op.state
+                };
             });
 
             if (filteredOps.length > 0) {
-                const newOps = filteredOps.filter(fop => !operations.some(op => op.id === (fop.id || fop.uuid)));
-
+                const newOps = filteredOps.filter(fop => !operations.some(op => op.id === fop.id));
                 if (newOps.length > 0) {
                     if (notifications.sound && audioRef.current) {
                         const playPromise = audioRef.current.play();
@@ -169,15 +183,11 @@ const AirtmCashierContent = () => {
                             playPromise.catch(e => console.log('Audio playback prevented'));
                         }
                     }
-
                     newOps.forEach(nop => {
-                        const methodName = nop.payment_method_name || nop.method || nop.paymentMethodName || 'Desconocido';
-                        const amountStr = nop.amount || nop.total_amount || nop.totalAmount;
-                        addLog(`¡NUEVA OPERACIÓN! ${methodName} por $${amountStr}`, 'success');
-
+                        addLog(`¡NUEVA OPERACIÓN! ${nop.method} por $${nop.amount}`, 'success');
                         if (notifications.desktop && Notification.permission === 'granted') {
                             new Notification('Airtm Cajero: Nueva Operación', {
-                                body: `${methodName} - $${amountStr}`,
+                                body: `${nop.method} - $${nop.amount}`,
                                 icon: '/favicon.ico'
                             });
                         }
@@ -185,16 +195,7 @@ const AirtmCashierContent = () => {
                 }
             }
 
-            const normalizedOps = filteredOps.map(op => ({
-                id: op.id || op.uuid,
-                method: op.payment_method_name || op.method || op.paymentMethodName || 'Desconocido',
-                amount: op.amount || op.total_amount || op.totalAmount,
-                profit: op.profit_percentage || op.profitPercentage || 0,
-                time: new Date().toLocaleTimeString(),
-                status: op.status || op.state
-            }));
-
-            setOperations(normalizedOps);
+            setOperations(filteredOps);
 
         } catch (err) {
             // Silently retry some connection errors, log others
