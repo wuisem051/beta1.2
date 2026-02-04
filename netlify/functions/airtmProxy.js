@@ -34,168 +34,46 @@ exports.handler = async (event, context) => {
     if (action === 'poll') {
       try {
         // Exact GraphQL query used by the Airtm web app
+        // A more modern, simplified query that fetches "p2pAvailableOperations" 
+        // which is often used in the newer Airtm dashboard versions
         const graphqlQuery = {
-          operationName: "AvailableOperations",
-          query: `query AvailableOperations($filter: Operations__FilterInput) {
-                      availableOperations(filter: $filter) {
+          operationName: "GetP2PAvailableOperations",
+          query: `query GetP2PAvailableOperations($filter: Operations__P2PFilterInput) {
+                      p2pAvailableOperations(filter: $filter) {
                         id
                         hash
-                        operationType
                         status
-                        isMine
                         createdAt
-                        updatedAt
                         grossAmount
                         netAmount
+                        operationType
                         metadata
-                        walletCurrency {
-                          ...CurrencyData
-                          __typename
-                        }
-                        peer {
-                          ...UserData
-                          __typename
-                        }
-                        ... on Operations__Buy {
-                          rate
-                          rateInfo {
+                        makerPaymentMethod {
+                          id
+                          categoryId
+                          data
+                          version {
                             id
-                            netAmount
-                            grossAmount
-                            fundsToReceiveMaker
-                            fundsToReceiveTaker
-                            fundsToSendMaker
-                            fundsToSendTaker
-                            __typename
+                            category {
+                              id
+                              translationTag
+                            }
                           }
-                          displayRate {
-                            direction
-                            rate
-                            __typename
-                          }
-                          currency {
-                            ...CurrencyData
-                            __typename
-                          }
-                          makerPaymentMethod {
-                            ...PaymentMethodInstance
-                            __typename
-                          }
-                          __typename
                         }
-                        ... on Operations__Sell {
-                          rate
-                          rateInfo {
-                            id
-                            netAmount
-                            grossAmount
-                            fundsToReceiveMaker
-                            fundsToReceiveTaker
-                            fundsToSendMaker
-                            fundsToSendTaker
-                            __typename
-                          }
-                          displayRate {
-                            direction
-                            rate
-                            __typename
-                          }
-                          currency {
-                            ...CurrencyData
-                            __typename
-                          }
-                          makerPaymentMethod {
-                            ...PaymentMethodInstance
-                            __typename
-                          }
-                          __typename
-                        }
-                        __typename
                       }
-                    }
-
-                    fragment CurrencyData on Catalogs__Currency {
-                      id
-                      symbol
-                      precision
-                      __typename
-                    }
-
-                    fragment UserData on Auth__AnyUser {
-                      ... on Auth__OperationUser {
+                      availableOperations {
                         id
-                        firstName
-                        lastName
-                        createdAt
-                        country
-                        countryInfo {
-                          id
-                          image {
-                            id
-                            urls
-                            __typename
-                          }
-                          __typename
-                        }
-                        securityHub {
-                          id
-                          tierLevel
-                          facialVerified
-                          documentVerified
-                          verificationStatusName
-                          __typename
-                        }
-                        numbers {
-                          id
-                          score
-                          completedOperations
-                          __typename
-                        }
-                        preferences {
-                          id
-                          profile {
-                            id
-                            avatar
-                            language
-                            __typename
-                          }
-                          __typename
-                        }
-                        __typename
+                        hash
+                        status
+                        grossAmount
+                        netAmount
+                        operationType
                       }
-                      __typename
-                    }
-
-                    fragment PaymentMethodInstance on PaymentMethods__Instance {
-                      id
-                      data
-                      categoryId
-                      isThirdPartyInstance
-                      version {
-                        id
-                        image {
-                          id
-                          urls
-                          __typename
-                        }
-                        category {
-                          id
-                          translationTag
-                          ancestor(level: 2) {
-                            id
-                            translationTag
-                            __typename
-                          }
-                          __typename
-                        }
-                        __typename
-                      }
-                      __typename
                     }`,
           variables: {
             filter: {
-              status: ["CREATED", "FRAUD_APPROVED"],
-              operationTypes: ["BUY", "SELL"]
+              // We leave this mostly empty or broad to ensure we catch everything
+              status: ["CREATED", "OPEN", "AVAILABLE", "READY", "FRAUD_APPROVED"]
             }
           }
         };
@@ -210,23 +88,17 @@ exports.handler = async (event, context) => {
             'Referer': 'https://app.airtm.com/peer-transfers/available',
             'X-Airtm-Platform': 'web',
             'X-Airtm-App-Version': '12.62.30',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+            'X-Requested-With': 'XMLHttpRequest'
           },
-          data: {
-            ...graphqlQuery,
-            variables: {
-              filter: {
-                status: ["CREATED", "FRAUD_APPROVED", "OPEN", "AVAILABLE", "READY"],
-                operationTypes: ["BUY", "SELL", "ADD", "WITHDRAW", "DEPOSIT"]
-              }
-            }
-          },
-          timeout: 10000 // 10s timeout
+          data: graphqlQuery,
+          timeout: 10000
         });
 
         const gqlData = response.data?.data || {};
-        const availableOps = gqlData.availableOperations || gqlData.p2pAvailableOperations || gqlData.operations || [];
+        // Combine results from both possible sources
+        const ops1 = gqlData.p2pAvailableOperations || [];
+        const ops2 = gqlData.availableOperations || [];
+        const availableOps = [...ops1, ...ops2];
 
         // Log count if any
         if (availableOps.length > 0) {
