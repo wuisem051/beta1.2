@@ -84,11 +84,15 @@ exports.handler = async (event, context) => {
           headers: {
             'Authorization': `Bearer ${cleanToken}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
             'Referer': 'https://app.airtm.com/peer-transfers/available',
             'X-Airtm-Platform': 'web',
             'X-Airtm-App-Version': '12.62.30',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'x-webapp-name': 'webapp-milotic',
+            'x-device-type': 'desktop',
+            'apollographql-client-name': 'web',
+            'accept-language': 'es'
           },
           data: graphqlQuery,
           timeout: 10000
