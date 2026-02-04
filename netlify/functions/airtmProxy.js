@@ -208,10 +208,28 @@ exports.handler = async (event, context) => {
             'Content-Type': 'application/json',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Referer': 'https://app.airtm.com/peer-transfers/available',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Airtm-Platform': 'web',
+            'X-Airtm-App-Version': '12.62.30',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
           },
-          data: graphqlQuery
+          data: {
+            ...graphqlQuery,
+            variables: {
+              filter: {
+                status: ["CREATED", "FRAUD_APPROVED", "OPEN", "AVAILABLE", "READY"],
+                operationTypes: ["BUY", "SELL"]
+              }
+            }
+          },
+          timeout: 10000 // 10s timeout
         });
+
+        // Log count if any
+        const ops = response.data?.data?.availableOperations || [];
+        if (ops.length > 0) {
+          console.log(`[Proxy] Detected ${ops.length} operations via GraphQL`);
+        }
 
         return {
           statusCode: 200,
@@ -219,7 +237,13 @@ exports.handler = async (event, context) => {
           body: JSON.stringify(response.data)
         };
       } catch (gqlError) {
-        console.warn('GraphQL fallback to REST:', gqlError.message);
+        console.warn('GraphQL fallback to REST:', gqlError.response?.data || gqlError.message);
+
+        // If it's a 401/403, don't even try REST as it will likely fail too
+        if (gqlError.response?.status === 401 || gqlError.response?.status === 403) {
+          throw gqlError;
+        }
+
         // Fallback to REST if GraphQL fails
         const response = await airtmClient.get('/p2p/operations', {
           params: {

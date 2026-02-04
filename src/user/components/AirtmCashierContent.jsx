@@ -23,9 +23,19 @@ const AirtmCashierContent = () => {
         desktop: true
     });
     const [logs, setLogs] = useState([]);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const audioRef = useRef(null);
     const monitoringInterval = useRef(null);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (monitoringInterval.current) {
+                clearInterval(monitoringInterval.current);
+            }
+        };
+    }, []);
 
     // Mock sound URL for notifications
     const soundUrl = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
@@ -62,22 +72,38 @@ const AirtmCashierContent = () => {
             return;
         }
 
+        if (isProcessing) return; // Prevent double clicks
+        setIsProcessing(true);
+        setTimeout(() => setIsProcessing(false), 500);
+
         if (isMonitoring) {
-            if (monitoringInterval.current) clearInterval(monitoringInterval.current);
-            setIsMonitoring(false);
-            addLog('Monitoreo detenido.', 'info');
+            stopMonitoring();
         } else {
-            setIsMonitoring(true);
-            addLog('Iniciando monitoreo REAL de operaciones...', 'success');
-
-            // Initial poll
-            pollAirtm();
-
-            // Set interval
-            monitoringInterval.current = setInterval(() => {
-                pollAirtm();
-            }, 3000); // Poll every 3 seconds for speed
+            startMonitoring();
         }
+    };
+
+    const startMonitoring = () => {
+        if (monitoringInterval.current) clearInterval(monitoringInterval.current);
+        setIsMonitoring(true);
+        addLog('Iniciando monitoreo REAL de operaciones...', 'success');
+
+        // Initial poll
+        pollAirtm();
+
+        // Set interval
+        monitoringInterval.current = setInterval(() => {
+            pollAirtm();
+        }, 3000); // Poll every 3 seconds for speed
+    };
+
+    const stopMonitoring = () => {
+        if (monitoringInterval.current) {
+            clearInterval(monitoringInterval.current);
+            monitoringInterval.current = null;
+        }
+        setIsMonitoring(false);
+        addLog('Monitoreo detenido.', 'info');
     };
 
     const pollAirtm = async () => {
@@ -98,8 +124,7 @@ const AirtmCashierContent = () => {
             if (!response.ok) {
                 if (response.status === 401) {
                     addLog('Error: Token de sesión expirado o inválido.', 'error');
-                    setIsMonitoring(false);
-                    if (monitoringInterval.current) clearInterval(monitoringInterval.current);
+                    stopMonitoring();
                     return;
                 }
                 throw new Error(data.error || 'Unknown error');
@@ -139,10 +164,11 @@ const AirtmCashierContent = () => {
                 // Determine amount (Airtm uses grossAmount for the cashier sending funds)
                 const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
                 const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2); // Default profit estimate
-                const status = op.status || op.state;
+                const status = (op.status || op.state || '').toUpperCase();
 
-                // Match status (CREATED is common in availableOperations)
-                if (status && !['OPEN', 'ACCEPTING', 'WAITING', 'CREATED'].includes(status.toUpperCase())) return false;
+                // Broaden allowed statuses
+                const allowedStatuses = ['OPEN', 'ACCEPTING', 'WAITING', 'CREATED', 'FRAUD_APPROVED', 'AVAILABLE', 'READY'];
+                if (status && !allowedStatuses.includes(status)) return false;
 
                 const matchesMethod = filters.methods.length === 0 || filters.methods.some(filterMethod => {
                     const normalizedFilter = filterMethod.toLowerCase().trim();
@@ -181,11 +207,19 @@ const AirtmCashierContent = () => {
             });
 
             if (rawOps.length > 0 && filteredOps.length === 0) {
-                // Check if any were "creatable" status to confirm connection is good but filters are tight
-                const hasPotential = rawOps.some(op => ['CREATED', 'OPEN', 'ACCEPTING'].includes((op.status || op.state || '').toUpperCase()));
+                // Determine why they were filtered
+                const hasPotential = rawOps.some(op => {
+                    const status = (op.status || op.state || '').toUpperCase();
+                    return ['CREATED', 'OPEN', 'ACCEPTING', 'READY', 'AVAILABLE'].includes(status);
+                });
+
                 if (hasPotential) {
-                    console.log('Operations detected but filtered out. Check amounts/methods.');
-                    // addLog(`Detectadas ${rawOps.length} solicitudes, pero el monto o método no coinciden con tus filtros.`, 'info');
+                    const firstOp = rawOps[0];
+                    const opMethod = firstOp.payment_method_name || firstOp.paymentMethodName || firstOp.makerPaymentMethod?.version?.category?.id || 'Desconocido';
+                    const opAmount = firstOp.netAmount || firstOp.grossAmount || 0;
+
+                    addLog(`Detectadas ${rawOps.length} ops (ej: ${opMethod} $${opAmount}) pero no cumplen tus filtros.`, 'info');
+                    console.log('Operations detected but filtered out:', rawOps);
                 }
             }
 
@@ -193,21 +227,22 @@ const AirtmCashierContent = () => {
                 const newOps = filteredOps.filter(fop => !operations.some(op => op.id === fop.id));
                 if (newOps.length > 0) {
                     if (notifications.sound && audioRef.current) {
-                        const playPromise = audioRef.current.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(e => console.log('Audio playback prevented'));
-                        }
+                        audioRef.current.play().catch(e => console.log('Audio error:', e));
                     }
                     newOps.forEach(nop => {
                         addLog(`¡NUEVA OPERACIÓN! ${nop.method} por $${nop.amount}`, 'success');
+                        // Desktop notifications
                         if (notifications.desktop && Notification.permission === 'granted') {
-                            new Notification('Airtm Cajero: Nueva Operación', {
-                                body: `${nop.method} - $${nop.amount}`,
-                                icon: '/favicon.ico'
+                            new Notification('Airtm Pro: ¡Oportunidad!', {
+                                body: `${nop.method} - $${nop.amount} (+${nop.profit}%)`,
+                                icon: 'https://static.airtm.com/favicon-32x32.png'
                             });
                         }
                     });
                 }
+            } else if (rawOps.length > 0) {
+                // If we have raw ops but none passed filters, log detail for debugging
+                console.log('Ops detected but filtered:', rawOps.map(o => `${o.paymentMethodName || o.categoryId} ($${o.grossAmount})`));
             }
 
             setOperations(filteredOps);
@@ -258,8 +293,10 @@ const AirtmCashierContent = () => {
     const handleConnect = async () => {
         if (!apiKey.trim()) return;
         setIsConnected(true);
-        addLog('Cuenta Airtm vinculada exitosamente (Modo Simulación)', 'success');
+        addLog('Conexión con Airtm establecida correctamente.', 'success');
         await saveSettings({ apiKey, isConnected: true });
+        // Trigger initial poll to verify
+        pollAirtm();
     };
 
     const handleRequestNotificationPermission = () => {
