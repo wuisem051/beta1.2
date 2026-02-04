@@ -386,7 +386,7 @@ const AirtmCashierContent = () => {
                             <div>
                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3 ml-2">Métodos de Pago</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {['Paypal', 'Binance USDT', 'Zelle', 'Bank Transfer', 'AdvCash'].map(method => (
+                                    {['Paypal', 'Binance USDT', 'Banco de Venezuela', 'Zelle', 'Bank Transfer', 'AdvCash'].map(method => (
                                         <button
                                             key={method}
                                             onClick={() => {
@@ -508,8 +508,10 @@ const AirtmCashierContent = () => {
                                     <div key={op.id} className="bg-[#12161c] p-6 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#fcd535]/30 transition-all animate-in zoom-in-95 duration-300">
                                         <div className="flex items-center gap-6">
                                             <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">
-                                                {op.method.includes('Paypal') ? (
+                                                {op.method.toLowerCase().includes('paypal') ? (
                                                     <span className="text-blue-400 font-black italic">PP</span>
+                                                ) : op.method.toLowerCase().includes('venezuela') || op.method.toLowerCase().includes('ves') ? (
+                                                    <span className="text-emerald-400 font-black italic">VES</span>
                                                 ) : (
                                                     <span className="text-[#fcd535] font-black italic">USDT</span>
                                                 )}
