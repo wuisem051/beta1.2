@@ -126,35 +126,15 @@
     <div class="status-box">
         <div class="label">Puente con Web</div>
         <div id="web-status" class="value">
-            <div class="dot inactive"></div> Esperando Web...
+            <div class="dot inactive"></div> Sincronizado
         </div>
     </div>
 
     <button id="sync-btn" class="btn">Sincronizar Ahora</button>
 
-    <div class="footer">MODO ALTA VELOCIDAD V1.2</div>
+    <div class="footer">MODO ALTA VELOCIDAD V1.4</div>
 
-    <script>
-        // Actualizar UI al abrir popup
-        chrome.storage.local.get(['airtmToken'], (res) => {
-            if (res.airtmToken) {
-                document.getElementById('airtm-status').innerHTML = '<div class="dot active"></div> Sesión Detectada';
-            }
-        });
-
-        document.getElementById('sync-btn').addEventListener('click', () => {
-            chrome.runtime.sendMessage({ type: 'FORCE_SYNC' });
-            const btn = document.getElementById('sync-btn');
-            btn.innerText = '¡Sincronizado!';
-            btn.style.background = '#02c076';
-            btn.style.color = 'white';
-            setTimeout(() => {
-                btn.innerText = 'Sincronizar Ahora';
-                btn.style.background = '#fcd535';
-                btn.style.color = 'black';
-            }, 2000);
-        });
-    </script>
+    <script src="popup.js"></script>
 </body>
 
 </html>
