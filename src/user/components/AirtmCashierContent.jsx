@@ -24,6 +24,7 @@ const AirtmCashierContent = () => {
     });
     const [logs, setLogs] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isExtensionLinked, setIsExtensionLinked] = useState(false);
 
     const audioRef = useRef(null);
     const monitoringInterval = useRef(null);
@@ -427,7 +428,9 @@ const AirtmCashierContent = () => {
                     </button>
                     <div className={`px-4 py-4 rounded-2xl border flex items-center gap-2 ${isConnected ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
                         <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                        <span className="text-[9px] font-black uppercase tracking-widest">{isConnected ? 'Vinculado' : 'Desconectado'}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest">
+                            {isExtensionLinked ? 'Extensión Activa' : (isConnected ? 'Vinculado' : 'Desconectado')}
+                        </span>
                     </div>
                 </div>
             </div>
