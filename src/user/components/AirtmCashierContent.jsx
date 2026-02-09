@@ -97,7 +97,12 @@ const AirtmCashierContent = () => {
         const matchesAmount = true;
         const matchesProfit = true;
 
-        if (matchesMethod && matchesAmount && matchesProfit) {
+        // Validar filtros (DESACTIVADO - SE CONFÍA EN AIRTM WEB)
+        // La extensión ya filtra lo que ve el usuario en pantalla.
+        // Aquí aceptamos todo lo que llegue.
+
+        const isDuplicate = operations.some(existing => existing.id === (op.id || op.uuid));
+        if (!isDuplicate) {
             const newOp = {
                 id: op.id || op.uuid || `dom-${Math.random().toString(36).substring(7)}`,
                 method,
@@ -245,47 +250,13 @@ const AirtmCashierContent = () => {
                 }
             }
 
+            // Sin filtros, pasamos todo lo que sea un estado válido
             const filteredOps = rawOps.filter(op => {
-                // Determine method name from deep category ID or direct field
-                const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
-                let method = op.payment_method_name || op.paymentMethodName || '';
-
-                if (!method && categoryId) {
-                    const lowCat = categoryId.toLowerCase();
-                    if (lowCat.includes('venezuela')) method = 'Banco de Venezuela';
-                    else if (lowCat.includes('paypal')) method = 'Paypal';
-                    else if (lowCat.includes('binance')) method = 'Binance USDT';
-                    else method = categoryId.split(':').pop().replace(/-/g, ' ');
-                }
-
-                method = method || 'Desconocido';
-
-                // Determine amount (Airtm uses grossAmount for the cashier sending funds)
-                const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
-                const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2); // Default profit estimate
                 const status = (op.status || op.state || '').toUpperCase();
-
                 // Broaden allowed statuses
                 const allowedStatuses = ['OPEN', 'ACCEPTING', 'WAITING', 'CREATED', 'FRAUD_APPROVED', 'AVAILABLE', 'READY'];
                 if (status && !allowedStatuses.includes(status)) return false;
-
-                const matchesMethod = filters.methods.length === 0 || filters.methods.some(filterMethod => {
-                    const normalizedFilter = filterMethod.toLowerCase().trim();
-                    const normalizedActual = method.toLowerCase().trim();
-                    const normalizedCat = categoryId.toLowerCase();
-
-                    if (normalizedFilter.includes('binance') && (normalizedActual.includes('binance') || normalizedCat.includes('binance'))) return true;
-                    if (normalizedFilter.includes('paypal') && (normalizedActual.includes('paypal') || normalizedCat.includes('paypal'))) return true;
-                    if (normalizedFilter.includes('venezuela') && (normalizedActual.includes('venezuela') || normalizedCat.includes('venezuela') || normalizedActual.includes('ves'))) return true;
-                    if (normalizedFilter.includes('banco') && normalizedActual.includes('banco')) return true;
-
-                    return normalizedActual.includes(normalizedFilter) || normalizedCat.includes(normalizedFilter);
-                });
-
-                const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
-                const matchesProfit = profit >= filters.minProfit;
-
-                return matchesMethod && matchesAmount && matchesProfit;
+                return true;
             }).map(op => {
                 const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
                 let method = op.payment_method_name || op.paymentMethodName || '';
@@ -532,58 +503,7 @@ const AirtmCashierContent = () => {
                         </div>
                     </div>
 
-                    {/* Filters Card */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <FaFilter className="text-[#fcd535]" /> Filtros Inteligentes
-                        </h2>
-                        <div className="space-y-6">
-                            <div>
-                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3 ml-2">Métodos de Pago</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {['Paypal', 'Binance USDT', 'Banco de Venezuela', 'Zelle', 'Bank Transfer', 'AdvCash'].map(method => (
-                                        <button
-                                            key={method}
-                                            onClick={() => {
-                                                const newMethods = filters.methods.includes(method)
-                                                    ? filters.methods.filter(m => m !== method)
-                                                    : [...filters.methods, method];
-                                                setFilters({ ...filters, methods: newMethods });
-                                                saveSettings({ filters: { ...filters, methods: newMethods } });
-                                            }}
-                                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${filters.methods.includes(method)
-                                                ? 'bg-[#fcd535]/10 border-[#fcd535]/30 text-[#fcd535]'
-                                                : 'bg-[#12161c] border-white/5 text-slate-500 hover:border-white/10'
-                                                }`}
-                                        >
-                                            {method}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2 ml-2">Min. Ganancia (%)</label>
-                                    <input
-                                        type="number"
-                                        value={filters.minProfit}
-                                        onChange={(e) => setFilters({ ...filters, minProfit: e.target.value })}
-                                        className="w-full bg-[#12161c] border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2 ml-2">Monto Máx (USD)</label>
-                                    <input
-                                        type="number"
-                                        value={filters.maxAmount}
-                                        onChange={(e) => setFilters({ ...filters, maxAmount: e.target.value })}
-                                        className="w-full bg-[#12161c] border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold outline-none"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Notifications Card */}
                     <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
