@@ -1,17 +1,16 @@
-console.log('Background v3.3 Iniciado - Protocolo de Captura Dual');
+// background.js - v3.5 (Broadcaster Pro)
+console.log('Background v3.5 Iniciado - Monitor de Tráfico Activo');
 
-// 1. Interceptor de Token Nivel Red (Invisible)
+// 1. Interceptor de Token Nivel Red
 chrome.webRequest.onBeforeSendHeaders.addListener(
     (details) => {
         if (details.requestHeaders) {
             for (const header of details.requestHeaders) {
                 if (header.name.toLowerCase() === 'authorization' && header.value.includes('Bearer')) {
                     const token = header.value.replace('Bearer ', '').trim();
-
-                    // Solo guardar si es nuevo para evitar spam de escritura
                     chrome.storage.local.get(['airtmToken'], (res) => {
                         if (res.airtmToken !== token) {
-                            console.log('¡Token capturado desde la red!', token.substring(0, 10) + '...');
+                            console.log('Token capturado de red');
                             chrome.storage.local.set({ airtmToken: token });
                             broadcastToTradingApps({ type: 'SYNC_AIRTM_TOKEN', token: token });
                         }
@@ -24,15 +23,14 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     ["requestHeaders"]
 );
 
+// 2. Comunicador Central
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'AIRTM_NEW_OPERATION') {
-        const op = message.operation;
-        console.log('¡OPERACIÓN INTERCEPTADA!', op.id || op.paymentMethodName);
+    // console.log('Mensaje recibido en background:', message.type);
 
-        // Enviar a la web
+    if (message.type === 'AIRTM_NEW_OPERATION') {
         broadcastToTradingApps({
             type: 'SYNC_AIRTM_OPERATION',
-            operation: op
+            operation: message.operation
         });
     }
 
@@ -40,7 +38,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const token = message.token;
         chrome.storage.local.get(['airtmToken'], (res) => {
             if (res.airtmToken !== token) {
-                console.log('¡Token capturado vía script!', token.substring(0, 10) + '...');
                 chrome.storage.local.set({ airtmToken: token });
                 broadcastToTradingApps({ type: 'SYNC_AIRTM_TOKEN', token: token });
             }
@@ -50,10 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'FORCE_SYNC') {
         chrome.storage.local.get(['airtmToken'], (res) => {
             if (res.airtmToken) {
-                broadcastToTradingApps({
-                    type: 'SYNC_AIRTM_TOKEN',
-                    token: res.airtmToken
-                });
+                broadcastToTradingApps({ type: 'SYNC_AIRTM_TOKEN', token: res.airtmToken });
             }
         });
     }
@@ -61,10 +55,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function broadcastToTradingApps(data) {
     const tabs = await chrome.tabs.query({});
+    let sentCount = 0;
+
     tabs.forEach(tab => {
         const url = tab.url || "";
         const title = tab.title || "";
 
+        // Criterio de match hiper-amplio para no fallar
         const isTradingApp =
             url.includes('netlify.app') ||
             url.includes('localhost') ||
@@ -75,6 +72,11 @@ async function broadcastToTradingApps(data) {
 
         if (isTradingApp) {
             chrome.tabs.sendMessage(tab.id, data).catch(() => { });
+            sentCount++;
         }
     });
+
+    if (sentCount > 0) {
+        console.log(`Difusión enviada a ${sentCount} pestañas: ${data.type}`);
+    }
 }

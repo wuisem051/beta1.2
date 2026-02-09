@@ -36,6 +36,11 @@ const AirtmCashierContent = () => {
 
     useEffect(() => {
         const handleExtensionMessage = (event) => {
+            // Log de tráfico crudo para depuración
+            if (event.data?.source === 'AIRTM_EXTENSION') {
+                console.log('[App] Mensaje recibido de la extensión:', event.data.payload?.type);
+            }
+
             if (event.source !== window) return;
 
             let data = event.data;
@@ -49,19 +54,19 @@ const AirtmCashierContent = () => {
                 const { type, token, operation } = data;
 
                 if (type === 'SYNC_AIRTM_TOKEN') {
-                    console.log('Token recibido de la extensión');
+                    console.log('[App] Sincronizando Token...');
                     setIsExtensionLinked(true);
                     setLastSyncTime(new Date().toLocaleTimeString());
                     setNodeStats(prev => ({ ...prev, health: 100 }));
                     if (token && token !== apiKey) {
                         setApiKey(token);
                         setIsConnected(true);
-                        addLog('¡Token de Airtm sincronizado automáticamente!', 'success');
+                        addLog('¡Token de Airtm sincronizado!', 'success');
                     }
                 }
 
                 if (type === 'SYNC_AIRTM_OPERATION') {
-                    console.log('Operación recibida de la extensión:', operation.id);
+                    console.log('[App] Nueva operación desde la extensión:', operation.paymentMethodName || operation.method);
                     setLastSyncTime(new Date().toLocaleTimeString());
                     setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
                     processSingleOperation(operation);
@@ -73,11 +78,12 @@ const AirtmCashierContent = () => {
 
         // Solicitar sincronización inicial al cargar
         setTimeout(() => {
+            console.log('[App] Solicitando sincronización inicial...');
             window.postMessage({ type: 'AIRTM_CLIENT_READY' }, '*');
-        }, 1000);
+        }, 1500);
 
         return () => window.removeEventListener('message', handleExtensionMessage);
-    }, [apiKey, operations]);
+    }, [apiKey]);
 
     // Función auxiliar para procesar una operación individual (desde extensión o poll)
     const processSingleOperation = (op) => {

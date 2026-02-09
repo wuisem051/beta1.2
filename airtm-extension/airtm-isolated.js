@@ -1,138 +1,114 @@
-// airtm-isolated.js - Mensajero Seguro v4.5 (ULTRA-AGRESIÓN)
+// airtm-isolated.js - Mensajero Seguro v5.1 (RESURRECCIÓN)
 
-console.log('Mensajero Seguro v4.5 - Escáner de Supervivencia Activo');
+console.log('%c [Airtm Sync] Escáner v5.1 Activo ', 'background: #27ae60; color: #fff; font-weight: bold;');
 
 let isContextValid = true;
-let scanInterval = null;
-let lastDetectedHash = new Set();
+let reportedIds = new Set();
 
-// Helper para enviar mensajes con reintento y validación de contexto
 const safeSendMessage = (message) => {
     if (!isContextValid) return;
     try {
         if (chrome?.runtime?.id) {
-            chrome.runtime.sendMessage(message).catch(err => {
-                if (err.message.includes('context invalidated')) handleContextInvalidated();
-            });
-        } else {
-            handleContextInvalidated();
-        }
-    } catch (e) {
-        handleContextInvalidated();
-    }
+            chrome.runtime.sendMessage(message).catch(() => { isContextValid = false; });
+        } else { isContextValid = false; }
+    } catch (e) { isContextValid = false; }
 };
 
-const handleContextInvalidated = () => {
-    if (!isContextValid) return;
-    isContextValid = false;
-    console.warn('[Airtm Sync] Contexto perdido. Recarga necesaria.');
-    if (scanInterval) clearInterval(scanInterval);
-};
-
-// --- ESTRATEGIA DE DETECCIÓN TOTAL ---
-function totalScan() {
-    if (!isContextValid) return;
-
-    try {
-        // 1. Buscar CUALQUIER elemento que mencione USDC o $
-        // Esto es lo más robusto: si el usuario ve dinero en pantalla, nosotros lo detectamos.
-        const allTextElements = Array.from(document.querySelectorAll('div, span, p, b, td'));
-
-        allTextElements.forEach(el => {
-            const text = el.innerText || "";
-            // Si el elemento contiene el monto exacto "X.XX USDC"
-            if (text.includes('USDC') && /\d+\.\d{2}/.test(text)) {
-
-                // Subimos hasta encontrar el contenedor que parece una "tarjeta"
-                let card = el;
-                for (let i = 0; i < 6; i++) {
-                    if (!card || !card.parentElement) break;
-
-                    // Si el contenedor tiene un botón o es un artículo/fila, es nuestra tarjeta
-                    const hasButton = card.querySelector('button, [role="button"]');
-                    const isCardLike = card.tagName === 'ARTICLE' || card.tagName === 'TR' || card.offsetHeight > 100;
-
-                    if (hasButton && isCardLike) {
-                        processCard(card);
-                        break;
-                    }
-                    card = card.parentElement;
-                }
-            }
-        });
-
-    } catch (e) {
-        // Silent
-    }
-}
-
-function processCard(card) {
-    const text = card.innerText || "";
-
-    // Evitar procesar lo mismo mil veces en un ciclo
-    const opHash = btoa(text.substring(0, 100)).substring(0, 16);
-    // (Limpiar set cada 10 mins para permitir re-detección si cambia algo)
-
-    // Extracción de datos
-    // 1. Monto
-    const amountMatch = text.match(/([0-9,]+\.?[0-9]*)\s*USDC/);
-    if (!amountMatch) return;
-    const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
-    if (isNaN(amount) || amount <= 0) return;
-
-    // 2. Método
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-    const ignore = ['USDC', 'VES', 'BS', 'Aceptar', 'Accept', 'Agregar', 'Retirar', 'Tasa', 'Usuario', '$', 'Talk about', 'Fondos'];
-
-    let method = "Desconocido";
-    for (const line of lines) {
-        if (!ignore.some(ig => line.toLowerCase().includes(ig.toLowerCase())) && !/^[\d$]/.test(line)) {
-            method = line;
-            break;
-        }
-    }
-
-    // 3. Usuario y Rating
-    let username = "Usuario Airtm";
-    let rating = 5.0;
-    const rateLine = lines.find(l => /\d\.\d{1,2}/.test(l));
-    if (rateLine) {
-        const rateMatch = rateLine.match(/(\d\.\d{1,2})/);
-        if (rateMatch) rating = parseFloat(rateMatch[1]);
-
-        const nameMatch = rateLine.match(/^(.*)\s+\d\.\d/);
-        if (nameMatch) username = nameMatch[1].trim();
-    }
-
-    // 4. Tipo
-    const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
-
-    // Reportar
-    const opData = {
-        id: 'dom_' + btoa(method + amount + isBuy).substring(0, 12),
-        paymentMethodName: method,
-        amount: amount,
-        isBuy: isBuy,
-        maker: {
-            username: username,
-            averageRating: rating,
-            completedOperations: 100
-        },
-        source: 'ULTRA_SCANNER'
-    };
-
-    safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
-}
-
-// Iniciar
-scanInterval = setInterval(totalScan, 1500);
-totalScan();
-
-// --- SOPORTE PARA CAPTURA DE TOKEN ---
-// Interceptamos la comunicación interna si el bridge nos envía algo
+// --- 1. ESCUCHAR AL AGENTE ESPÍA (Intercepción de Red) ---
 window.addEventListener('message', (event) => {
-    if (event.data?.type === 'AIRTM_Spy_Token') {
+    if (!isContextValid) return;
+    if (!event.data) return;
+
+    // Recibir operaciones interceptadas por la red
+    if (event.data.type === 'AIRTM_Spy_Data' && event.data.operations) {
+        event.data.operations.forEach(op => {
+            safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
+        });
+    }
+
+    // Recibir token interceptado
+    if (event.data.type === 'AIRTM_Spy_Token' && event.data.token) {
         const token = event.data.token.replace('Bearer ', '').trim();
         safeSendMessage({ type: 'AIRTM_TOKEN_DETECTED', token: token });
     }
 });
+
+// --- 2. ESCÁNER DE DOM (Seguridad Visual) ---
+function scan() {
+    if (!isContextValid) return;
+
+    try {
+        // En lugar de buscar texto exacto, buscamos botones que contengan la palabra clave
+        const buttons = Array.from(document.querySelectorAll('button, [role="button"]'));
+        const actionButtons = buttons.filter(btn => {
+            const txt = (btn.innerText || "").toLowerCase();
+            return txt.includes('aceptar') || txt.includes('accept') || txt.includes('seleccionar') || txt.includes('confirmar');
+        });
+
+        actionButtons.forEach(btn => {
+            let card = btn.parentElement;
+            let depth = 0;
+            while (card && depth < 10) {
+                const text = card.innerText || "";
+                if (text.includes('USDC')) {
+                    processDOMCard(card, text);
+                    break;
+                }
+                card = card.parentElement;
+                depth++;
+            }
+        });
+    } catch (e) { }
+}
+
+function processDOMCard(card, text) {
+    try {
+        // Regex más flexible para montos: puede haber símbolos, espacios, etc.
+        const amountMatch = text.match(/([0-9,]+\.[0-9]{2})/);
+        if (!amountMatch) return;
+        const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
+
+        // El método suele ser el título de la tarjeta o texto cerca de la bandera/icono
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+        let method = "Desconocido";
+        const ignore = ['agregar', 'retirar', 'fondos', 'usdc', 'aceptar', 'accept', '$', 'bs', 'ves', 'tasa', 'rate'];
+
+        for (let line of lines) {
+            if (!ignore.some(ig => line.toLowerCase().includes(ig)) && !/\d\.\d{1,2}/.test(line)) {
+                method = line;
+                break;
+            }
+        }
+
+        const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
+
+        // ID seguro
+        const rawId = `dom_${method}_${amount}_${isBuy}`.replace(/[^a-zA-Z0-9]/g, '_');
+        if (reportedIds.has(rawId)) return;
+        reportedIds.add(rawId);
+
+        // Intentar capturar rating y usuario
+        let rating = 5.0;
+        let username = "Usuario Airtm";
+        const rateMatch = text.match(/(\d\.\d{1,2})/);
+        if (rateMatch) rating = parseFloat(rateMatch[1]);
+
+        const opData = {
+            id: 'atm_' + rawId.substring(0, 25),
+            paymentMethodName: method,
+            amount: amount,
+            isBuy: isBuy,
+            maker: {
+                username: username,
+                averageRating: rating
+            },
+            source: 'DOM_SCANNER_V5'
+        };
+
+        safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+    } catch (e) { }
+}
+
+setInterval(scan, 1500);
+setTimeout(scan, 500);
+setInterval(() => { reportedIds.clear(); }, 1000 * 60 * 5); // Limpiar cada 5 min
