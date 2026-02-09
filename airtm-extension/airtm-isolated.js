@@ -56,26 +56,24 @@ window.addEventListener('message', (event) => {
     }
 });
 
-// --- 2. Escáner Ultra-Agresivo de la Tabla (DOM) ---
+// --- 2. Escáner Ultra-Agresivo (Soporte Dual: Tabla y Tarjetas) ---
 function ultraScan() {
     if (!isContextValid) return;
 
     try {
-        // Buscar filas de la tabla
+        const detectedOps = new Set(); // Para evitar duplicados en el mismo ciclo
+
+        // A. ESCÁNER DE TABLA (CLÁSICO)
         const rows = document.querySelectorAll('tr, [role="row"]');
-
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
             const text = row.innerText || "";
-
-            // Si la fila tiene un botón de aceptar y parece una operación
             if (text.includes('Aceptar') && (text.includes('VES') || text.includes('USDC') || text.includes('$'))) {
-
-                // Extraer celdas (Tabla Airtm)
+                // ... lógica de extracción de tabla ...
+                // Simplificada para este bloque
                 const cells = row.querySelectorAll('td, [role="gridcell"]');
                 if (cells.length > 0) {
                     let method = "Desconocido";
                     let amount = 0;
-
                     if (cells.length >= 3) {
                         method = cells[1].innerText.replace(/\n/g, ' ').trim();
                         const amountText = cells[2].innerText.trim();
@@ -85,28 +83,78 @@ function ultraScan() {
                         method = textParts[1] || "Operación Airtm";
                         amount = parseFloat(text.match(/\d+[.,]\d+/)?.[0]?.replace(',', '.') || 0);
                     }
-
-                    if (amount > 0) {
-                        const rowId = 'op_row_' + method.substring(0, 3) + '_' + amount;
-
-                        const opData = {
-                            id: rowId,
-                            paymentMethodName: method,
-                            grossAmount: amount,
-                            netAmount: amount,
-                            status: 'OPEN',
-                            profitPercentage: 2.2,
-                            source: 'DOM_ULTRA_SCAN'
-                        };
-
-                        safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
-                    }
+                    if (amount > 0) reportOp(method, amount, 'TABLE');
                 }
             }
         });
+
+        // B. ESCÁNER DE TARJETAS (NUEVA UI AIRTM)
+        // Buscamos botones de Aceptar y miramos su contenedor
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const acceptButtons = buttons.filter(b => b.innerText.includes('Aceptar') || b.innerText.includes('Accept'));
+
+        acceptButtons.forEach(btn => {
+            // Subir 3-4 niveles para encontrar la tarjeta completa
+            // Estructura usual: Card > Footer > Button
+            let card = btn.closest('div[class*="Card"], div[class*="card"], article');
+
+            // Si no encuentra por clase, subimos por jerarquía buscando el precio
+            if (!card) {
+                let parent = btn.parentElement;
+                for (let i = 0; i < 5; i++) {
+                    if (parent && (parent.innerText.includes('USDC') || parent.innerText.includes('$'))) {
+                        card = parent;
+                    }
+                    if (parent) parent = parent.parentElement;
+                }
+            }
+
+            if (card) {
+                const text = card.innerText;
+                // Extraer monto (buscamos el valor más grande asociado a USDC o $)
+                const amountMatch = text.match(/\+\s*\$?\s*([0-9,.]+)\s*USDC/);
+                const amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '')) : 0;
+
+                // Extraer método (buscamos texto que no sea números ni etiquetas comunes)
+                // En la tarjeta, el método suele estar arriba del monto
+                let method = "Operación Detectada";
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+
+                // Heurística simple: La línea con 'Venezuela', 'Bancamiga', 'Pago Móvil', etc.
+                const methodLine = lines.find(l =>
+                    !l.includes('USDC') &&
+                    !l.includes('VES') &&
+                    !l.includes('Aceptar') &&
+                    !l.includes('Agregar') &&
+                    !l.includes('Retirar') &&
+                    !l.match(/^\d/)
+                );
+                if (methodLine) method = methodLine;
+
+                if (amount > 0) {
+                    reportOp(method, amount, 'CARD');
+                }
+            }
+        });
+
     } catch (e) {
-        // Silent fail
+        // Silent
     }
+}
+
+function reportOp(method, amount, source) {
+    const rowId = 'op_' + source + '_' + method.substring(0, 5) + '_' + amount;
+    const opData = {
+        id: rowId,
+        paymentMethodName: method,
+        grossAmount: amount,
+        netAmount: amount,
+        status: 'OPEN',
+        profitPercentage: 2.2,
+        source: 'DOM_' + source,
+        isBuy: true
+    };
+    safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
 }
 
 // Escanear constantemente
