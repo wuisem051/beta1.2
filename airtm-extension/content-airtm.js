@@ -10,39 +10,59 @@ function sendToBridge(op) {
 }
 
 // 1. Intercepción de Red Directa (GraphQL)
+// 1. Intercepción de Red Directa (GraphQL)
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
-    const response = await originalFetch(...args);
-    const url = args[0] ? (typeof args[0] === 'string' ? args[0] : args[0].url) : '';
+    try {
+        const response = await originalFetch(...args);
 
-    // Captura de Token (Restaurado)
-    if (args[1] && args[1].headers) {
-        let auth = null;
-        if (args[1].headers instanceof Headers) {
-            auth = args[1].headers.get('Authorization');
-        } else {
-            auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
-        }
+        // Análisis de URL seguro
+        const url = args[0] ? (typeof args[0] === 'string' ? args[0] : (args[0].url || '')) : '';
 
-        if (auth && auth.includes('Bearer')) {
-            window.postMessage({ type: 'AIRTM_Spy_Token', token: auth }, '*');
-        }
-    }
-
-    if (url && url.includes('/graphql')) {
-        const clone = response.clone();
-        clone.json().then(data => {
-            if (data && data.data) {
-                const ops = data.data.p2pAvailableOperations || data.data.availableOperations || data.data.p2pOperations;
-                if (ops && Array.isArray(ops)) {
-                    ops.forEach(op => {
-                        sendToBridge(op);
-                    });
+        // Captura de Token (Restaurado y Seguro)
+        // Verificamos explícitamente args[1] que son las opciones
+        if (args[1] && args[1].headers) {
+            try {
+                let auth = null;
+                if (args[1].headers instanceof Headers) {
+                    auth = args[1].headers.get('Authorization');
+                } else if (typeof args[1].headers === 'object') {
+                    // Manejo insensible a mayúsculas/minúsculas
+                    const headers = args[1].headers;
+                    const authKey = Object.keys(headers).find(k => k.toLowerCase() === 'authorization');
+                    if (authKey) auth = headers[authKey];
                 }
+
+                if (auth && typeof auth === 'string' && auth.includes('Bearer')) {
+                    window.postMessage({ type: 'AIRTM_Spy_Token', token: auth }, '*');
+                }
+            } catch (e) {
+                // Ignorar errores de headers opacos o cross-origin
             }
-        }).catch(() => { });
+        }
+
+        // Intercepción de Operaciones (GraphQL)
+        if (url && url.includes('/graphql')) {
+            try {
+                const clone = response.clone();
+                clone.json().then(data => {
+                    if (data && data.data) {
+                        const ops = data.data.p2pAvailableOperations || data.data.availableOperations || data.data.p2pOperations;
+                        if (ops && Array.isArray(ops)) {
+                            ops.forEach(op => {
+                                sendToBridge(op);
+                            });
+                        }
+                    }
+                }).catch(() => { });
+            } catch (e) { }
+        }
+
+        return response;
+    } catch (err) {
+        // En caso de error en el fetch original, propagar el error
+        throw err;
     }
-    return response;
 };
 
 // 2. Escáner de DOM de Máxima Precisión (Específico para la tabla de Airtm)
