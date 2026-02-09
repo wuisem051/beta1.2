@@ -98,7 +98,6 @@ function ultraScan() {
                 amount = parseFloat(amountMatch[1].replace(/,/g, ''));
             } else {
                 const moneyMatch = text.match(/\$\s*([0-9,.]+)/);
-                const moneyMatch = text.match(/\$\s*([0-9,.]+)/);
                 if (moneyMatch) amount = parseFloat(moneyMatch[1].replace(/,/g, ''));
             }
 
