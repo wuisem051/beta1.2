@@ -8,47 +8,38 @@ import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 const AirtmCashierContent = () => {
     const { darkMode } = useContext(ThemeContext);
     const { currentUser } = useAuth();
-    const [isConnected, setIsConnected] = useState(false);
-    const [apiKey, setApiKey] = useState('');
     const [isMonitoring, setIsMonitoring] = useState(false);
     const [operations, setOperations] = useState([]);
+    const [logs, setLogs] = useState([]);
+    const [apiKey, setApiKey] = useState('');
+    const [isConnected, setIsConnected] = useState(false);
     const [filters, setFilters] = useState({
-        methods: ['Paypal', 'Binance', 'Venezuela', 'VES', 'Zelle'],
-        minProfit: 0.5,
-        maxAmount: 1000,
-        minAmount: 1
+        minProfit: 2.0,
+        maxAmount: 500,
+        methods: []
     });
+    const [isProcessing, setIsProcessing] = useState(false);
     const [notifications, setNotifications] = useState({
         sound: true,
         desktop: true
     });
-    const [logs, setLogs] = useState([]);
-    const [isProcessing, setIsProcessing] = useState(false);
     const [isExtensionLinked, setIsExtensionLinked] = useState(false);
     const [lastSyncTime, setLastSyncTime] = useState(null);
-    const [nodeStats, setNodeStats] = useState({ opsProcessed: 0, health: 100 });
+    const [nodeStats, setNodeStats] = useState({
+        opsProcessed: 0,
+        health: 98
+    });
 
-    const audioRef = useRef(null);
     const monitoringInterval = useRef(null);
+    const audioRef = useRef(null);
+    const soundUrl = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
 
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => {
-            if (monitoringInterval.current) {
-                clearInterval(monitoringInterval.current);
-            }
-        };
-    }, []);
-
-    // Mock sound URL for notifications
-    const soundUrl = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
-
-    // Extension Sync Listener
     useEffect(() => {
         const handleExtensionMessage = (event) => {
-            // Solo aceptar mensajes de nuestra fuente confiable
-            if (event.data && event.data.source === 'AIRTM_EXTENSION') {
-                const { type, token, operation } = event.data.payload;
+            if (event.source !== window) return;
+
+            if (event.data.type && (event.data.type === 'SYNC_AIRTM_TOKEN' || event.data.type === 'SYNC_AIRTM_OPERATION')) {
+                const { type, token, operation } = event.data;
 
                 if (type === 'SYNC_AIRTM_TOKEN') {
                     console.log('Token recibido de la extensión');
@@ -58,15 +49,14 @@ const AirtmCashierContent = () => {
                     if (token && token !== apiKey) {
                         setApiKey(token);
                         setIsConnected(true);
-                        addLog('Token sincronizado automáticamente desde la extensión.', 'success');
-                        saveSettings({ apiKey: token, isConnected: true });
+                        addLog('¡Token de Airtm sincronizado automáticamente!', 'success');
                     }
                 }
 
                 if (type === 'SYNC_AIRTM_OPERATION') {
                     console.log('Operación recibida de la extensión:', operation.id);
-                    setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
                     setLastSyncTime(new Date().toLocaleTimeString());
+                    setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
                     processSingleOperation(operation);
                 }
             }
@@ -81,42 +71,36 @@ const AirtmCashierContent = () => {
         // Evitar duplicados
         if (operations.some(existing => existing.id === (op.id || op.uuid))) return;
 
-        const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
-        let method = op.payment_method_name || op.paymentMethodName || '';
-
-        if (!method && categoryId) {
-            const lowCat = categoryId.toLowerCase();
-            if (lowCat.includes('venezuela')) method = 'Banco de Venezuela';
-            else if (lowCat.includes('paypal')) method = 'Paypal';
-            else if (lowCat.includes('binance')) method = 'Binance USDT';
-            else method = categoryId.split(':').pop().replace(/-/g, ' ');
-        }
-        method = method || 'Desconocido';
-
+        const method = op.payment_method_name || op.paymentMethodName || 'Desconocido';
         const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
         const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
 
-        // Validar filtros Inteligentes con Normalización
-        const normalizedMethod = method.toLowerCase();
+        // Validar filtros (DESACTIVADO TEMPORALMENTE PARA PRUEBAS)
+        // const matchesMethod = filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
+        // const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
+        // const matchesProfit = profit >= filters.minProfit;
 
-        const matchesMethod = filters.methods.length === 0 || filters.methods.some(filter => {
-            const f = filter.toLowerCase();
-            if (f.includes('venezuela') && (normalizedMethod.includes('venezuela') || normalizedMethod.includes('banco') || normalizedMethod.includes('ves') || normalizedMethod.includes('mercantil') || normalizedMethod.includes('provincial') || normalizedMethod.includes('banesco'))) return true;
-            if (f.includes('binance') && normalizedMethod.includes('binance')) return true;
-            return normalizedMethod.includes(f);
-        });
-
-        const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
-        const matchesProfit = profit >= filters.minProfit;
+        const matchesMethod = true;
+        const matchesAmount = true;
+        const matchesProfit = true;
 
         if (matchesMethod && matchesAmount && matchesProfit) {
             const newOp = {
-                id: op.id || op.uuid,
+                id: op.id || op.uuid || `dom-${Math.random().toString(36).substring(7)}`,
                 method,
                 amount,
                 profit,
                 time: new Date().toLocaleTimeString(),
-                status: op.status || op.state
+                status: op.status || op.state,
+                // Metadatos extendidos para la UI Pro
+                userName: op.owner?.displayName || 'Usuario Airtm',
+                userAvatar: op.owner?.avatarUrl || null,
+                userRating: op.owner?.averageRating || 5.0,
+                userTxns: op.owner?.completedOperations || 0,
+                localAmount: op.value || op.amount || 0,
+                localCurrency: op.currency || 'VES',
+                rate: op.exchangeRate || 0,
+                isBuy: true // Por defecto compra/agregar
             };
 
             setOperations(prev => {
@@ -305,7 +289,16 @@ const AirtmCashierContent = () => {
                     amount: op.netAmount || op.grossAmount || op.amount || op.totalAmount,
                     profit: op.profitPercentage || op.profit_percentage || 2.2,
                     time: new Date().toLocaleTimeString(),
-                    status: op.status || op.state
+                    status: op.status || op.state,
+                    // Metadatos extendidos
+                    userName: op.owner?.displayName || 'Usuario Airtm',
+                    userAvatar: op.owner?.avatarUrl || null,
+                    userRating: op.owner?.averageRating || 5.0,
+                    userTxns: op.owner?.completedOperations || 0,
+                    localAmount: op.value || op.amount || 0,
+                    localCurrency: op.currency || 'VES',
+                    rate: op.exchangeRate || 0,
+                    isBuy: true
                 };
             });
 
@@ -390,21 +383,12 @@ const AirtmCashierContent = () => {
             message,
             type,
             time: new Date().toLocaleTimeString()
-        }, ...prev].slice(0, 20));
+        }, ...prev].slice(0, 50));
     };
 
-    const handleConnect = async () => {
-        if (!apiKey.trim()) return;
-        setIsConnected(true);
-        addLog('Conexión con Airtm establecida correctamente.', 'success');
-        await saveSettings({ apiKey, isConnected: true });
-        // Trigger initial poll to verify
-        pollAirtm();
-    };
-
-    const handleRequestNotificationPermission = () => {
+    const enableNotifications = () => {
         if (!('Notification' in window)) {
-            alert('Este navegador no soporta notificaciones de escritorio');
+            addLog('Tu navegador no soporta notificaciones de escritorio.', 'error');
             return;
         }
         Notification.requestPermission().then(permission => {
@@ -419,30 +403,21 @@ const AirtmCashierContent = () => {
             <audio ref={audioRef} src={soundUrl} />
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#1e2329]/50 p-8 rounded-[40px] border border-white/5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#fcd535]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                <div className="relative z-10">
-                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
-                        <div className="relative">
-                            <span className="p-4 bg-[#fcd535] text-black rounded-2xl shadow-2xl shadow-[#fcd535]/30 flex items-center justify-center">
-                                <FaWifi className={isMonitoring ? 'animate-pulse' : ''} />
-                            </span>
-                            {isExtensionLinked && (
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#1e2329] animate-bounce"></div>
-                            )}
-                        </div>
-                        Cajero Airtm Pro
+            <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+                <div>
+                    <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter mb-2 flex items-center gap-3">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Airtm_logo.svg/2560px-Airtm_logo.svg.png" className="h-8 invert opacity-80" alt="Airtm" />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                            Cashier Elite
+                        </span>
                     </h1>
-                    <div className="flex items-center gap-3 mt-3">
-                        <span className="px-3 py-1 bg-white/5 rounded-full text-[8px] font-black text-slate-500 uppercase tracking-widest border border-white/5">v2.0 Elite</span>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                            Monitor de Red P2P de Alta Velocidad
-                        </p>
-                    </div>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Sistema de Alta Frecuencia v3.0
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4 relative z-10">
+                <div className="flex gap-4 w-full lg:w-auto">
                     <button
                         onClick={handleToggleMonitoring}
                         disabled={!isConnected}
@@ -461,7 +436,7 @@ const AirtmCashierContent = () => {
                                 {isExtensionLinked ? 'Sincronizado' : 'Desconectado'}
                             </span>
                         </div>
-                        <span className="text-[8px] font-bold opacity-60 uppercase">Protocolo v2.0</span>
+                        <span className="text-[8px] font-bold opacity-60 uppercase">Protocolo v3.0</span>
                     </div>
                 </div>
             </div>
@@ -630,13 +605,7 @@ const AirtmCashierContent = () => {
                                     <span className="text-[10px] font-black text-white uppercase tracking-widest">Notif. Escritorio</span>
                                 </div>
                                 <button
-                                    onClick={() => {
-                                        if (Notification.permission !== 'granted') {
-                                            handleRequestNotificationPermission();
-                                        }
-                                        setNotifications({ ...notifications, desktop: !notifications.desktop });
-                                        saveSettings({ notifications: { ...notifications, desktop: !notifications.desktop } });
-                                    }}
+                                    onClick={enableNotifications}
                                     className={`w-12 h-6 rounded-full transition-all relative ${notifications.desktop ? 'bg-[#fcd535]' : 'bg-slate-700'}`}
                                 >
                                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${notifications.desktop ? 'left-7' : 'left-1'}`}></div>
@@ -664,99 +633,113 @@ const AirtmCashierContent = () => {
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            {operations.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 opacity-20">
-                                    <FaWifi size={48} className="mb-4 animate-pulse" />
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em]">Esperando Operaciones...</p>
-                                </div>
-                            ) : (
-                                operations.map(op => {
-                                    // Determinar iconos y colores según método y tipo
-                                    const isPaypal = op.method.toLowerCase().includes('paypal');
-                                    const isVez = op.method.toLowerCase().includes('venezuela') || op.method.toLowerCase().includes('ves') || op.method.toLowerCase().includes('mercantil') || op.method.toLowerCase().includes('banesco');
-                                    const isBinance = op.method.toLowerCase().includes('binance');
-                                    const isAdd = true; // Por defecto asumimos agregar, se podría refinar si detectamos 'Retirar'
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#0b0e11]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {operations.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                                        <FaWifi size={48} className="mb-4 animate-pulse" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Esperando Operaciones...</p>
+                                    </div>
+                                ) : (
+                                    operations.map(op => {
+                                        const isPaypal = op.method.toLowerCase().includes('paypal');
+                                        const isVez = op.method.toLowerCase().includes('venezuela') || op.method.toLowerCase().includes('ves') || op.method.toLowerCase().includes('mercantil') || op.method.toLowerCase().includes('banesco');
+                                        const isBinance = op.method.toLowerCase().includes('binance');
 
-                                    let methodIcon = <span className="text-white font-black text-xs">ATM</span>;
-                                    let methodColor = "bg-slate-700/50 text-slate-400";
-                                    let ringColor = "ring-slate-700";
+                                        // Configuración de colores según tipo
+                                        const headerColor = op.isBuy ? 'bg-emerald-500/10 text-emerald-500 border-b border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-b border-red-500/20';
+                                        const amountColor = op.isBuy ? 'text-emerald-400' : 'text-red-400';
 
-                                    if (isPaypal) {
-                                        methodIcon = <span className="text-blue-400 font-black text-xs">PP</span>;
-                                        methodColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                                        ringColor = "ring-blue-500/30";
-                                    } else if (isVez) {
-                                        methodIcon = <span className="text-emerald-400 font-black text-xs">VES</span>;
-                                        methodColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-                                        ringColor = "ring-emerald-500/30";
-                                    } else if (isBinance) {
-                                        methodIcon = <span className="text-[#fcd535] font-black text-xs">BNB</span>;
-                                        methodColor = "bg-[#fcd535]/10 text-[#fcd535] border-[#fcd535]/20";
-                                        ringColor = "ring-[#fcd535]/30";
-                                    }
+                                        let methodIcon = <div className="w-full h-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">ATM</div>;
 
-                                    return (
-                                        <div key={op.id} className="relative group overflow-hidden">
-                                            {/* Fondo con brillo al hover */}
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                                        if (isPaypal) methodIcon = <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">P</div>;
+                                        if (isVez) methodIcon = <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Bandera_de_Venezuela.svg/200px-Bandera_de_Venezuela.svg.png" className="w-full h-full object-cover" alt="VES" />;
+                                        if (isBinance) methodIcon = <div className="w-full h-full bg-[#fcd535] flex items-center justify-center"><svg viewBox="0 0 32 32" className="w-6 h-6"><path fill="#1e2329" d="M16 0l6 6-6 6-6-6 6-6zm0 14l4 4-4 4-4-4 4-4zm0 24l-6-6 6-6 6 6-6 6zM5.333 10.667L8 13.333 5.333 16 2.667 13.333l2.666-2.666zm21.334 0L29.333 13.333 26.667 16 24 13.333l2.667-2.666z" /></svg></div>;
 
-                                            <div className="bg-[#12161c] p-5 rounded-[24px] border border-white/5 flex items-center gap-6 relative z-10 hover:border-white/10 transition-all">
+                                        return (
+                                            <div key={op.id} className="bg-white rounded-t-lg rounded-b-xl overflow-hidden flex flex-col shadow-2xl group transition-transform hover:-translate-y-1 duration-300 relative">
+                                                {/* Header Tipo */}
+                                                <div className={`px-4 py-2 flex justify-between items-center ${headerColor}`}>
+                                                    <span className="font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                                                        {op.isBuy ? <FaPlus size={8} /> : <FaTrash size={8} />}
+                                                        {op.isBuy ? 'Agregar fondos' : 'Retirar fondos'}
+                                                    </span>
+                                                    <span className="text-[9px] font-bold opacity-70">{op.time}</span>
+                                                </div>
 
-                                                {/* Icono del Método */}
-                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${methodColor} shadow-lg relative`}>
-                                                    {methodIcon}
-                                                    {/* Badge de Tipo (Agregar/Retirar) */}
-                                                    <div className={`absolute -top-2 -right-2 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border ${isAdd ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-red-500 text-white border-red-400'}`}>
-                                                        {isAdd ? 'Compra' : 'Venta'}
+                                                {/* Cuerpo de la Tarjeta */}
+                                                <div className="p-5 flex-1 bg-white text-slate-800">
+                                                    {/* Sección Superior: Icono y Nombre */}
+                                                    <div className="flex items-start gap-3 mb-4">
+                                                        <div className="w-10 h-10 rounded-full overflow-hidden shadow-md shrink-0 ring-2 ring-slate-100">
+                                                            {op.userAvatar ? <img src={op.userAvatar} className="w-full h-full object-cover" /> : methodIcon}
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <h3 className="font-bold text-xs text-slate-900 leading-tight uppercase truncate" title={op.method}>
+                                                                {op.method}
+                                                            </h3>
+                                                            <div className="flex items-center gap-1 mt-1">
+                                                                <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">P2P</span>
+                                                                {op.id.includes('dom') && <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">VISUAL</span>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Sección Central: Montos */}
+                                                    <div className="mb-4 space-y-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className={`text-lg font-black ${amountColor} tracking-tight`}>
+                                                                {op.isBuy ? '+' : '-'} ${op.amount} USDC
+                                                            </span>
+                                                        </div>
+                                                        {op.localAmount > 0 && (
+                                                            <div className="flex items-center justify-between text-xs font-medium text-slate-500">
+                                                                <span>{op.isBuy ? '-' : '+'} {op.localCurrency} {op.localAmount.toLocaleString()}</span>
+                                                            </div>
+                                                        )}
+                                                        {op.rate > 0 && (
+                                                            <p className="text-[9px] text-slate-400 font-medium mt-1">
+                                                                1 USDC = {op.rate} {op.localCurrency}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Sección Usuario */}
+                                                    <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+                                                        <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                                            {op.userAvatar ? <img src={op.userAvatar} className="w-full h-full object-cover" /> : <span className="font-bold text-slate-400 text-xs">{op.userName ? op.userName.substring(0, 1) : 'U'}</span>}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-[10px] font-bold text-slate-900 truncate">{op.userName}</p>
+                                                            <div className="flex items-center gap-2 text-[9px] text-slate-500">
+                                                                <span className="flex items-center gap-0.5 text-orange-400 font-bold"><FaCheckCircle size={8} /> {op.userRating}</span>
+                                                                <span>•</span>
+                                                                <span>{op.userTxns} ops</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Detalles Principales */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="text-sm font-black text-white uppercase tracking-tight truncate">{op.method}</h3>
-                                                        {op.id.includes('dom') && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Detectado visualmente"></span>}
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                                                        <span>{op.time}</span>
-                                                        <span className="w-1 h-1 rounded-full bg-slate-700"></span>
-                                                        <span className="text-emerald-500">ID: {op.id.substring(0, 6)}...</span>
-                                                    </div>
+                                                {/* Footer Botón */}
+                                                <div className="p-3 bg-slate-50 text-center border-t border-slate-100">
+                                                    <button
+                                                        onClick={() => handleAcceptOperation(op.id)}
+                                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                                    >
+                                                        Aceptar <FaPlay size={8} />
+                                                    </button>
                                                 </div>
-
-                                                {/* Monto y Ganancia */}
-                                                <div className="text-right flex flex-col items-end">
-                                                    <div className="flex items-baseline gap-1">
-                                                        <span className="text-[10px] font-bold text-slate-500">$</span>
-                                                        <span className="text-2xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">{op.amount}</span>
-                                                        <span className="text-[10px] font-bold text-slate-500">USD</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/10 mt-1">
-                                                        <span className="text-emerald-500 text-[9px] font-black tracking-widest">+{op.profit}%</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Botón de Acción */}
-                                                <button
-                                                    onClick={() => handleAcceptOperation(op.id)}
-                                                    className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all shadow-lg hover:scale-110 active:scale-95 ${isAdd ? 'bg-[#fcd535] text-black shadow-[#fcd535]/10' : 'bg-white text-black shadow-white/10'}`}
-                                                    title="Aceptar Operación Rápidamente"
-                                                >
-                                                    <FaCheckCircle size={18} />
-                                                </button>
                                             </div>
-                                        </div>
-                                    );
-                                })
-                            )}
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
+
                     </div>
-
-
                 </div>
-            </div>
 
+            </div>
         </div>
     );
 };
