@@ -96,10 +96,18 @@ const AirtmCashierContent = () => {
         const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
         const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
 
-        // Validar filtros (DESACTIVADO TEMPORALMENTE PARA PRUEBAS)
-        const matchesMethod = true; // filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
-        const matchesAmount = true; // amount >= filters.minAmount && amount <= filters.maxAmount;
-        const matchesProfit = true; // profit >= filters.minProfit;
+        // Validar filtros Inteligentes con Normalización
+        const normalizedMethod = method.toLowerCase();
+
+        const matchesMethod = filters.methods.length === 0 || filters.methods.some(filter => {
+            const f = filter.toLowerCase();
+            if (f.includes('venezuela') && (normalizedMethod.includes('venezuela') || normalizedMethod.includes('banco') || normalizedMethod.includes('ves') || normalizedMethod.includes('mercantil') || normalizedMethod.includes('provincial') || normalizedMethod.includes('banesco'))) return true;
+            if (f.includes('binance') && normalizedMethod.includes('binance')) return true;
+            return normalizedMethod.includes(f);
+        });
+
+        const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
+        const matchesProfit = profit >= filters.minProfit;
 
         if (matchesMethod && matchesAmount && matchesProfit) {
             const newOp = {

@@ -26,11 +26,10 @@ function ultraScan() {
         // Si la fila tiene un botón de aceptar y parece una operación
         if (text.includes('Aceptar') && (text.includes('VES') || text.includes('USDC') || text.includes('$'))) {
 
-            // MARCAR LA FILA VISUALMENTE (Solo para debugging, verde neón)
-            if (!row.style.borderLeft) {
-                row.style.borderLeft = "5px solid #00ff00"; // Borde Verde para confirmar detección
-                row.style.boxShadow = "inset 5px 0 10px #00ff0030";
-            }
+            // MARCAR LA FILA VISUALMENTE (Desactivado para producción)
+            // if (!row.style.borderLeft) {
+            //    row.style.borderLeft = "5px solid #00ff00"; 
+            // }
 
             // Extraer celdas (Tabla Airtm)
             const cells = row.querySelectorAll('td, [role="gridcell"]');
