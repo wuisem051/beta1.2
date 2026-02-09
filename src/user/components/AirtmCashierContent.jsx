@@ -403,34 +403,49 @@ const AirtmCashierContent = () => {
             <audio ref={audioRef} src={soundUrl} />
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
-                        <span className="p-3 bg-[#fcd535] text-black rounded-2xl shadow-xl shadow-[#fcd535]/20">
-                            <FaWifi className={isMonitoring ? 'animate-pulse' : ''} />
-                        </span>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#1e2329]/50 p-8 rounded-[40px] border border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#fcd535]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                <div className="relative z-10">
+                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
+                        <div className="relative">
+                            <span className="p-4 bg-[#fcd535] text-black rounded-2xl shadow-2xl shadow-[#fcd535]/30 flex items-center justify-center">
+                                <FaWifi className={isMonitoring ? 'animate-pulse' : ''} />
+                            </span>
+                            {isExtensionLinked && (
+                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#1e2329] animate-bounce"></div>
+                            )}
+                        </div>
                         Cajero Airtm Pro
                     </h1>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-2">
-                        Optimiza la aceptación de operaciones con filtros avanzados y alertas en tiempo real
-                    </p>
+                    <div className="flex items-center gap-3 mt-3">
+                        <span className="px-3 py-1 bg-white/5 rounded-full text-[8px] font-black text-slate-500 uppercase tracking-widest border border-white/5">v2.0 Elite</span>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                            Monitor de Red P2P de Alta Velocidad
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex items-center gap-4 relative z-10">
                     <button
                         onClick={handleToggleMonitoring}
-                        className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 shadow-2xl ${isMonitoring
+                        disabled={!isConnected}
+                        className={`px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center gap-3 shadow-2xl disabled:opacity-30 disabled:grayscale ${isMonitoring
                             ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white'
-                            : 'bg-[#fcd535] text-black hover:scale-105 active:scale-95 shadow-[#fcd535]/10'
+                            : 'bg-[#fcd535] text-black hover:scale-105 active:scale-95 shadow-[#fcd535]/20'
                             }`}
                     >
                         {isMonitoring ? <><FaPause /> Detener Escaneo</> : <><FaPlay /> Iniciar Escaneo</>}
                     </button>
-                    <div className={`px-4 py-4 rounded-2xl border flex items-center gap-2 ${isConnected ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
-                        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`}></div>
-                        <span className="text-[9px] font-black uppercase tracking-widest">
-                            {isExtensionLinked ? 'Extensión Activa' : (isConnected ? 'Vinculado' : 'Desconectado')}
-                        </span>
+
+                    <div className={`px-6 py-5 rounded-2xl border flex flex-col items-center justify-center gap-1 min-w-[140px] transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-xl shadow-emerald-500/5' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]' : (isConnected ? 'bg-[#fcd535]' : 'bg-slate-600')}`}></div>
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {isExtensionLinked ? 'Sincronizado' : 'Desconectado'}
+                            </span>
+                        </div>
+                        <span className="text-[8px] font-bold opacity-60 uppercase">Protocolo v2.0</span>
                     </div>
                 </div>
             </div>

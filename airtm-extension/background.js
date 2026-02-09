@@ -1,39 +1,31 @@
-// background.js - El cerebro de la extensión v1.3
+// background.js - El Monitor Silencioso v2.0
 
-// Al iniciar, intentar buscar el token en las cookies de Airtm
-async function checkAirtmCookies() {
-    try {
-        const cookies = await chrome.cookies.getAll({ domain: "airtm.com" });
-        // Buscamos cookies que parezcan tokens JWT
-        for (const cookie of cookies) {
-            if (cookie.value.includes('eyJ') && cookie.value.length > 50) {
-                console.log('Token encontrado en Cookies');
-                saveAndSyncToken(cookie.value);
-                return;
+// Interceptamos los encabezados de salida hacia Airtm
+chrome.webRequest.onBeforeSendHeaders.addListener(
+    (details) => {
+        if (details.requestHeaders) {
+            for (const header of details.requestHeaders) {
+                if (header.name.toLowerCase() === 'authorization' && header.value.includes('Bearer')) {
+                    const token = header.value.replace('Bearer ', '').trim();
+                    console.log('[Airtm Sync] Token capturado desde la red');
+
+                    // Guardar y Sincronizar
+                    chrome.storage.local.set({ airtmToken: token });
+                    broadcastToTradingApps({
+                        type: 'SYNC_AIRTM_TOKEN',
+                        token: token
+                    });
+                }
             }
         }
-    } catch (e) {
-        console.error('Error leyendo cookies:', e);
-    }
-}
+    },
+    { urls: ["https://app.airtm.com/*"] },
+    ["requestHeaders"]
+);
 
-function saveAndSyncToken(token) {
-    const cleanToken = token.replace('Bearer ', '').replace(/"/g, '').trim();
-    chrome.storage.local.set({ airtmToken: cleanToken });
-
-    broadcastToTradingApps({
-        type: 'SYNC_AIRTM_TOKEN',
-        token: cleanToken
-    });
-}
-
+// Responder a peticiones de fuerza manual
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'AIRTM_TOKEN_DETECTED') {
-        saveAndSyncToken(message.token);
-    }
-
     if (message.type === 'FORCE_SYNC') {
-        checkAirtmCookies(); // Re-revisar cookies al forzar
         chrome.storage.local.get(['airtmToken'], (res) => {
             if (res.airtmToken) {
                 broadcastToTradingApps({
@@ -66,6 +58,3 @@ async function broadcastToTradingApps(data) {
         }
     });
 }
-
-// Ejecutar check de cookies al cargar
-checkAirtmCookies();
