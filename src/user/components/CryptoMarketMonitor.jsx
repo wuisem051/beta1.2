@@ -561,7 +561,8 @@ const CryptoMarketMonitor = () => {
                                                                     const x = (i / (arr.length - 1)) * 100;
                                                                     const min = Math.min(...arr);
                                                                     const max = Math.max(...arr);
-                                                                    const y = 35 - ((price - min) / (max - min)) * 30;
+                                                                    const range = max - min;
+                                                                    const y = range === 0 ? 20 : 35 - ((price - min) / range) * 30;
                                                                     return path + (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
                                                                 }, '')}
                                                                 fill="none"

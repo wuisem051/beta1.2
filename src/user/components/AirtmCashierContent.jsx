@@ -138,14 +138,18 @@ const AirtmCashierContent = () => {
         // Load settings from Firebase
         const loadSettings = async () => {
             if (!currentUser) return;
-            const docRef = doc(db, 'airtmSettings', currentUser.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setApiKey(data.apiKey || '');
-                setFilters(data.filters || filters);
-                setNotifications(data.notifications || notifications);
-                if (data.apiKey) setIsConnected(true);
+            try {
+                const docRef = doc(db, 'airtmSettings', currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setApiKey(data.apiKey || '');
+                    setFilters(data.filters || filters);
+                    setNotifications(data.notifications || notifications);
+                    if (data.apiKey) setIsConnected(true);
+                }
+            } catch (err) {
+                console.warn("[App] Error de permisos Firebase (airtmSettings). Usando configuración local.");
             }
         };
         loadSettings();
