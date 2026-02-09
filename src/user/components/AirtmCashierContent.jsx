@@ -38,38 +38,33 @@ const AirtmCashierContent = () => {
         const handleExtensionMessage = (event) => {
             // Log de tráfico crudo para depuración
             if (event.data?.source === 'AIRTM_EXTENSION') {
-                console.log('[App] Mensaje recibido de la extensión:', event.data.payload?.type);
-            }
+                const payload = event.data.payload;
+                console.log('[App] Mensaje desde Extension:', payload?.type);
 
-            if (event.source !== window) return;
+                if (payload?.type === 'CONNECTION_CONFIRMED') {
+                    setIsExtensionLinked(true);
+                    addLog('Comunicación con extensión establecida.', 'success');
+                    return;
+                }
 
-            let data = event.data;
-
-            // Si viene del Bridge, desempaquetar
-            if (data && data.source === 'AIRTM_EXTENSION' && data.payload) {
-                data = data.payload;
-            }
-
-            if (data && (data.type === 'SYNC_AIRTM_TOKEN' || data.type === 'SYNC_AIRTM_OPERATION')) {
-                const { type, token, operation } = data;
-
-                if (type === 'SYNC_AIRTM_TOKEN') {
+                if (payload?.type === 'SYNC_AIRTM_TOKEN') {
                     console.log('[App] Sincronizando Token...');
                     setIsExtensionLinked(true);
                     setLastSyncTime(new Date().toLocaleTimeString());
                     setNodeStats(prev => ({ ...prev, health: 100 }));
-                    if (token && token !== apiKey) {
-                        setApiKey(token);
+                    if (payload.token && payload.token !== apiKey) {
+                        setApiKey(payload.token);
                         setIsConnected(true);
                         addLog('¡Token de Airtm sincronizado!', 'success');
                     }
                 }
 
-                if (type === 'SYNC_AIRTM_OPERATION') {
-                    console.log('[App] Nueva operación desde la extensión:', operation.paymentMethodName || operation.method);
+                if (payload?.type === 'SYNC_AIRTM_OPERATION') {
+                    const op = payload.operation;
+                    console.log('[App] Nueva operación:', op.paymentMethodName || op.method);
                     setLastSyncTime(new Date().toLocaleTimeString());
                     setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
-                    processSingleOperation(operation);
+                    processSingleOperation(op);
                 }
             }
         };
