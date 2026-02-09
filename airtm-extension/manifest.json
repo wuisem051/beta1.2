@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "2.0",
+    "version": "2.3",
     "description": "Sincronización profesional para el cajero de Airtm",
     "permissions": [
         "storage",
@@ -26,7 +26,8 @@
             "js": [
                 "content-airtm.js"
             ],
-            "run_at": "document_start"
+            "run_at": "document_start",
+            "world": "MAIN"
         },
         {
             "matches": [
