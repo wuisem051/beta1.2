@@ -96,10 +96,10 @@ const AirtmCashierContent = () => {
         const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
         const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
 
-        // Validar filtros
-        const matchesMethod = filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
-        const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
-        const matchesProfit = profit >= filters.minProfit;
+        // Validar filtros (DESACTIVADO TEMPORALMENTE PARA PRUEBAS)
+        const matchesMethod = true; // filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
+        const matchesAmount = true; // amount >= filters.minAmount && amount <= filters.maxAmount;
+        const matchesProfit = true; // profit >= filters.minProfit;
 
         if (matchesMethod && matchesAmount && matchesProfit) {
             const newOp = {
