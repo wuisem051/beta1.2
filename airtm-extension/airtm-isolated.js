@@ -61,7 +61,11 @@ function ultraScan() {
                         source: 'DOM_ULTRA_SCAN'
                     };
 
-                    chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+                    try {
+                        chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+                    } catch (e) {
+                        console.warn('[Airtm Sync] Esperando recarga para restablecer conexión...');
+                    }
                 }
             }
         }
