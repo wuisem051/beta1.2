@@ -1,10 +1,22 @@
-// content-bridge.js - Corre en tu App de Trading
+// content-bridge.js - El vigilante de los dos mundos
 
-console.log('%c Airtm Pro Sync: Puente establecido con la App de Trading ', 'background: #00b894; color: #fff; font-weight: bold;');
+// 1. Escuchar mensajes que vienen de la página de Airtm (vía World MAIN)
+window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'TO_EXTENSION_BRIDGE') {
+        const { type, value } = event.data.data;
+        if (type === 'TOKEN') {
+            chrome.runtime.sendMessage({ type: 'AIRTM_TOKEN_DETECTED', token: value });
+        }
+        if (type === 'OPS') {
+            value.forEach(op => {
+                chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
+            });
+        }
+    }
+});
 
-// Escuchar mensajes provenientes del background.js (que vienen de Airtm)
+// 2. Escuchar mensajes que vienen del Background (hacia la web de Trading)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // Reenviar el mensaje al "window" de la página para que React pueda escucharlo
     window.postMessage({
         source: 'AIRTM_EXTENSION',
         payload: message
