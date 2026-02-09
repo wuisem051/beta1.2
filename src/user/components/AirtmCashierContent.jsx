@@ -81,36 +81,23 @@ const AirtmCashierContent = () => {
 
     // Función auxiliar para procesar una operación individual (desde extensión o poll)
     const processSingleOperation = (op) => {
-        // Evitar duplicados
-        if (operations.some(existing => existing.id === (op.id || op.uuid))) return;
+        const opId = op.id || op.uuid || `dom-${Math.random().toString(36).substring(7)}`;
 
-        const method = op.payment_method_name || op.paymentMethodName || 'Desconocido';
-        const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
-        const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
+        setOperations(prev => {
+            // Evitar duplicados por ID
+            if (prev.some(existing => existing.id === opId)) return prev;
 
-        // Validar filtros (DESACTIVADO TEMPORALMENTE PARA PRUEBAS)
-        // const matchesMethod = filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
-        // const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
-        // const matchesProfit = profit >= filters.minProfit;
+            const method = op.payment_method_name || op.paymentMethodName || 'Desconocido';
+            const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
+            const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
 
-        const matchesMethod = true;
-        const matchesAmount = true;
-        const matchesProfit = true;
-
-        // Validar filtros (DESACTIVADO - SE CONFÍA EN AIRTM WEB)
-        // La extensión ya filtra lo que ve el usuario en pantalla.
-        // Aquí aceptamos todo lo que llegue.
-
-        const isDuplicate = operations.some(existing => existing.id === (op.id || op.uuid));
-        if (!isDuplicate) {
             const newOp = {
-                id: op.id || op.uuid || `dom-${Math.random().toString(36).substring(7)}`,
+                id: opId,
                 method,
                 amount,
                 profit,
                 time: new Date().toLocaleTimeString(),
                 status: op.status || op.state,
-                // Metadatos extendidos para la UI Pro
                 userName: op.owner?.displayName || op.maker?.username || 'Usuario Airtm',
                 userAvatar: op.owner?.avatarUrl || op.maker?.avatarUrl || null,
                 userRating: op.owner?.averageRating || op.maker?.averageRating || 5.0,
@@ -118,27 +105,27 @@ const AirtmCashierContent = () => {
                 localAmount: op.value || op.amount || 0,
                 localCurrency: op.currency || 'VES',
                 rate: op.exchangeRate || 0,
-                isBuy: op.isBuy !== undefined ? op.isBuy : true // Respetar dato de la extensión
+                isBuy: op.isBuy !== undefined ? op.isBuy : true
             };
 
-            setOperations(prev => {
-                if (prev.some(p => p.id === newOp.id)) return prev;
+            // Alertar si es realmente nueva
+            handleNewOperationAlert(newOp);
 
-                // Alertar
-                if (notifications.sound && audioRef.current) {
-                    audioRef.current.play().catch(() => { });
-                }
-                if (notifications.desktop && Notification.permission === 'granted') {
-                    new Notification('Airtm Extensión: ¡Nueva Op!', {
-                        body: `${method} - $${amount} (+${profit}%)`,
-                        icon: 'https://static.airtm.com/favicon-32x32.png'
-                    });
-                }
-                addLog(`¡NUEVA OPERACIÓN (vía Extensión)! ${method} por $${amount}`, 'success');
+            return [newOp, ...prev].slice(0, 30); // Mantener solo las 30 más recientes
+        });
+    };
 
-                return [newOp, ...prev];
+    const handleNewOperationAlert = (op) => {
+        if (notifications.sound && audioRef.current) {
+            audioRef.current.play().catch(() => { });
+        }
+        if (notifications.desktop && Notification.permission === 'granted') {
+            new Notification('Airtm PRO: ¡Nueva Op!', {
+                body: `${op.method} - $${op.amount}`,
+                icon: 'https://static.airtm.com/favicon-32x32.png'
             });
         }
+        addLog(`Nueva Op: ${op.method} por $${op.amount}`, 'success');
     };
 
     useEffect(() => {
@@ -311,8 +298,8 @@ const AirtmCashierContent = () => {
                 console.log('Ops detected but filtered:', rawOps);
             }
 
-            // Update state safely to prevent flashing (intermittency)
-            setOperations(filteredOps); // React will optimize if data is same.
+            // MERGE: Añadir las que no existan, no sobreescribir todo
+            filteredOps.forEach(op => processSingleOperation(op));
 
             // Log new discoveries
             if (filteredOps.length > 0) {

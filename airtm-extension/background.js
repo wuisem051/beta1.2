@@ -62,11 +62,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function broadcastToTradingApps(data) {
     const tabs = await chrome.tabs.query({});
     tabs.forEach(tab => {
-        const isTradingApp = tab.url && (
-            tab.url.includes('netlify.app') ||
-            tab.url.includes('localhost') ||
-            tab.url.includes('127.0.0.1')
-        );
+        const url = tab.url || "";
+        const title = tab.title || "";
+
+        const isTradingApp =
+            url.includes('netlify.app') ||
+            url.includes('localhost') ||
+            url.includes('127.0.0.1') ||
+            title.toLowerCase().includes('trading') ||
+            title.toLowerCase().includes('airtm pro') ||
+            title.toLowerCase().includes('cashier');
 
         if (isTradingApp) {
             chrome.tabs.sendMessage(tab.id, data).catch(() => { });

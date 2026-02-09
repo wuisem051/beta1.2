@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "4.4",
-    "description": "Sincronización profesional v4.4 (Enhanced UI Scraper)",
+    "version": "4.5",
+    "description": "Sincronización profesional v4.5 (Ultra Aggressive Detector)",
     "icons": {
         "128": "icons/icon128.png"
     },
@@ -29,7 +29,8 @@
                 "content-airtm.js"
             ],
             "run_at": "document_start",
-            "world": "MAIN"
+            "world": "MAIN",
+            "all_frames": true
         },
         {
             "matches": [
@@ -38,7 +39,8 @@
             "js": [
                 "airtm-isolated.js"
             ],
-            "run_at": "document_end"
+            "run_at": "document_end",
+            "all_frames": true
         },
         {
             "matches": [

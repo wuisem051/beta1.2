@@ -1,70 +1,80 @@
-// content-airtm.js - Detective v3.5 (Corrección de Canal MAIN -> ISOLATED)
-console.log('%c [Airtm Sync] Detective v3.5 (Bridge Repair) ', 'background: #fcd535; color: #000; font-weight: bold;');
+// content-airtm.js - Detective v4.0 (Deep Interceptor)
+console.log('%c [Airtm Sync] Detective v4.0 Active ', 'background: #2ecc71; color: #fff; font-weight: bold;');
 
-// Función auxiliar para enviar datos al script aislado (Bridge)
-function sendToBridge(op) {
-    window.postMessage({
-        type: 'AIRTM_Spy_Data',
-        operations: [op]
-    }, '*');
+// Función para buscar operaciones en CUALQUIER objeto JSON
+function findOperations(obj, depth = 0) {
+    if (depth > 5 || !obj || typeof obj !== 'object') return null;
+
+    let found = [];
+
+    // Si es un array, revisamos si sus elementos parecen operaciones
+    if (Array.isArray(obj)) {
+        if (obj.length > 0 && (obj[0].amount || obj[0].totalAmount || obj[0].uuid)) {
+            return obj;
+        }
+        for (const item of obj) {
+            const nested = findOperations(item, depth + 1);
+            if (nested) found = found.concat(nested);
+        }
+    } else {
+        // Si es un objeto, buscamos llaves sospechosas
+        for (const key in obj) {
+            if (key.toLowerCase().includes('operation') || key === 'nodes' || key === 'edges') {
+                const nested = findOperations(obj[key], depth + 1);
+                if (nested) found = found.concat(nested);
+            } else if (typeof obj[key] === 'object') {
+                const nested = findOperations(obj[key], depth + 1);
+                if (nested) found = found.concat(nested);
+            }
+        }
+    }
+    return found.length > 0 ? found : null;
 }
 
-// 1. Intercepción de Red Directa (GraphQL)
-// 1. Intercepción de Red Directa (GraphQL)
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
     try {
         const response = await originalFetch(...args);
-
-        // Análisis de URL seguro
         const url = args[0] ? (typeof args[0] === 'string' ? args[0] : (args[0].url || '')) : '';
 
-        // Captura de Token (Restaurado y Seguro)
-        // Verificamos explícitamente args[1] que son las opciones
-        if (args[1] && args[1].headers) {
-            try {
-                let auth = null;
-                if (args[1].headers instanceof Headers) {
-                    auth = args[1].headers.get('Authorization');
-                } else if (typeof args[1].headers === 'object') {
-                    // Manejo insensible a mayúsculas/minúsculas
-                    const headers = args[1].headers;
-                    const authKey = Object.keys(headers).find(k => k.toLowerCase() === 'authorization');
-                    if (authKey) auth = headers[authKey];
-                }
+        // Capture Token
+        if (args[1]?.headers) {
+            let auth = null;
+            const h = args[1].headers;
+            if (h instanceof Headers) auth = h.get('Authorization');
+            else auth = h['Authorization'] || h['authorization'];
 
-                if (auth && typeof auth === 'string' && auth.includes('Bearer')) {
-                    window.postMessage({ type: 'AIRTM_Spy_Token', token: auth }, '*');
-                }
-            } catch (e) {
-                // Ignorar errores de headers opacos o cross-origin
+            if (auth?.includes('Bearer')) {
+                window.postMessage({ type: 'AIRTM_Spy_Token', token: auth }, '*');
             }
         }
 
-        // Intercepción de Operaciones (GraphQL)
-        if (url && url.includes('/graphql')) {
-            try {
-                const clone = response.clone();
-                clone.json().then(data => {
-                    if (data && data.data) {
-                        const ops = data.data.p2pAvailableOperations || data.data.availableOperations || data.data.p2pOperations;
-                        if (ops && Array.isArray(ops)) {
-                            ops.forEach(op => {
-                                sendToBridge(op);
-                            });
-                        }
-                    }
-                }).catch(() => { });
-            } catch (e) { }
+        // Deep Intercept
+        if (url.includes('/graphql') || url.includes('/api/')) {
+            const clone = response.clone();
+            clone.json().then(data => {
+                const ops = findOperations(data);
+                if (ops && ops.length > 0) {
+                    window.postMessage({ type: 'AIRTM_Spy_Data', operations: ops }, '*');
+                }
+            }).catch(() => { });
         }
 
         return response;
     } catch (err) {
-        // En caso de error en el fetch original, propagar el error
         throw err;
     }
 };
 
-// 2. Escáner de DOM eliminado en favor de 'airtm-isolated.js' para evitar duplicidad y conflictos.
-// Este script se dedica exclusivamente a la intercepción de red de alta fidelidad.
-console.log('[Airtm Sync] Network Interceptor Active');
+// Reinyección periódica del token si está en localStorage (fallback)
+setInterval(() => {
+    const session = localStorage.getItem('airtm:session');
+    if (session) {
+        try {
+            const parsed = JSON.parse(session);
+            if (parsed.token) {
+                window.postMessage({ type: 'AIRTM_Spy_Token', token: parsed.token }, '*');
+            }
+        } catch (e) { }
+    }
+}, 5000);
