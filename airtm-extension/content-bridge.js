@@ -1,25 +1,31 @@
-// content-bridge.js - v4.5 (Reliable Bridge)
-console.log('%c [Airtm Bridge] Active ', 'background: #3498db; color: #fff; font-weight: bold;');
+// content-bridge.js - v5.0 (Active Bridge)
+console.log('%c [Airtm Bridge] v5.0 ONLINE ', 'background: #3498db; color: #fff; font-weight: bold; padding: 5px;');
 
-let isBridgeContextValid = true;
+let isBridgeValid = true;
 
-// 1. Recibir de la PÁGINA y enviar al BACKGROUND
+// 1. Notificar al Background que esta pestaña es una Aplicación de Trading
+function registerApp() {
+    try {
+        chrome.runtime.sendMessage({ type: 'APP_READY' });
+    } catch (e) {
+        isBridgeValid = false;
+    }
+}
+
+// Escuchar peticiones del cliente React
 window.addEventListener('message', (event) => {
-    if (!isBridgeContextValid) return;
     if (event.data?.type === 'AIRTM_CLIENT_READY') {
-        console.log('[Bridge] Cliente listo, pidiendo sync...');
-        try {
-            chrome.runtime.sendMessage({ type: 'FORCE_SYNC' });
-        } catch (e) { }
+        console.log('[Bridge] React está listo. Registrando app...');
+        registerApp();
     }
 });
 
-// 2. Recibir del BACKGROUND y enviar a la PÁGINA
+// 2. Escuchar mensajes del Background y pasarlos a React
 try {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (!isBridgeContextValid) return;
+        if (!isBridgeValid) return;
 
-        console.log('[Bridge] Recibido de Background:', message.type);
+        console.log(`[Bridge] Reenviando a React: ${message.type}`);
 
         window.postMessage({
             source: 'AIRTM_EXTENSION',
@@ -29,5 +35,11 @@ try {
         return true;
     });
 } catch (e) {
-    isBridgeContextValid = false;
+    isBridgeValid = false;
 }
+
+// Registro inicial
+registerApp();
+
+// Auto-re-registro cada 30 segundos para asegurar conexión
+setInterval(registerApp, 30000);
