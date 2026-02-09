@@ -1,73 +1,160 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <style>
         body {
-            width: 300px;
+            width: 320px;
             padding: 20px;
-            background-color: #12161c;
+            background-color: #0b0e11;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
         }
+
         .header {
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #ffffff10;
+            margin-bottom: 20px;
             padding-bottom: 15px;
-            margin-bottom: 15px;
+            border-bottom: 1px solid #ffffff10;
         }
-        .status {
-            padding: 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        .status.online {
-            background: #fcd53515;
-            color: #fcd535;
-            border: 1px solid #fcd53530;
-        }
-        .info {
-            font-size: 12px;
-            color: #848e9c;
-            line-height: 1.5;
-            margin-top: 15px;
-        }
+
         .logo {
-            width: 32px;
-            height: 32px;
+            width: 35px;
+            height: 35px;
             background: #fcd535;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: black;
             font-weight: 900;
+            font-size: 20px;
+        }
+
+        .status-box {
+            background: #1e2329;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #ffffff05;
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-size: 10px;
+            color: #848e9c;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            items-center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.active {
+            background: #02c076;
+            box-shadow: 0 0 10px #02c07650;
+        }
+
+        .dot.inactive {
+            background: #f84960;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #fcd535;
+            color: black;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px #fcd53530;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 9px;
+            color: #474d57;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="logo">A</div>
-        <div style="font-weight: 900; font-size: 16px;">AIRTM PRO SYNC</div>
-    </div>
-    
-    <div id="status" class="status online">
-        Escaneando Sesiones...
+        <div style="font-size: 16px; font-weight: 900; letter-spacing: -0.5px;">AIRTM PRO SYNC</div>
     </div>
 
-    <div class="info">
-        Esta extensión sincroniza automáticamente tu sesión de Airtm con tu panel de trading. Mantén la pestaña de Airtm abierta para la mejor experiencia.
+    <div class="status-box">
+        <div class="label">Sesión Airtm</div>
+        <div id="airtm-status" class="value">
+            <div class="dot inactive"></div> Desconectado
+        </div>
     </div>
 
-    <div style="margin-top: 20px; text-align: center; font-size: 10px; color: #5e6673;">
-        v1.0.0 - Modo Alta Velocidad
+    <div class="status-box">
+        <div class="label">Puente con Web</div>
+        <div id="web-status" class="value">
+            <div class="dot inactive"></div> Esperando Web...
+        </div>
     </div>
+
+    <button id="sync-btn" class="btn">Sincronizar Ahora</button>
+
+    <div class="footer">MODO ALTA VELOCIDAD V1.2</div>
+
+    <script>
+        // Actualizar UI al abrir popup
+        chrome.storage.local.get(['airtmToken'], (res) => {
+            if (res.airtmToken) {
+                document.getElementById('airtm-status').innerHTML = '<div class="dot active"></div> Sesión Detectada';
+            }
+        });
+
+        document.getElementById('sync-btn').addEventListener('click', () => {
+            chrome.runtime.sendMessage({ type: 'FORCE_SYNC' });
+            const btn = document.getElementById('sync-btn');
+            btn.innerText = '¡Sincronizado!';
+            btn.style.background = '#02c076';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.innerText = 'Sincronizar Ahora';
+                btn.style.background = '#fcd535';
+                btn.style.color = 'black';
+            }, 2000);
+        });
+    </script>
 </body>
+
 </html>

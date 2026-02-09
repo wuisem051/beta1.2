@@ -1,4 +1,4 @@
-// background.js - El cerebro de la extensión v1.1
+// background.js - El cerebro de la extensión v1.2
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'AIRTM_TOKEN_DETECTED') {
@@ -8,6 +8,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         broadcastToTradingApps({
             type: 'SYNC_AIRTM_TOKEN',
             token: cleanToken
+        });
+    }
+
+    if (message.type === 'FORCE_SYNC') {
+        chrome.storage.local.get(['airtmToken'], (res) => {
+            if (res.airtmToken) {
+                broadcastToTradingApps({
+                    type: 'SYNC_AIRTM_TOKEN',
+                    token: res.airtmToken
+                });
+            }
         });
     }
 
@@ -22,7 +33,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function broadcastToTradingApps(data) {
     const tabs = await chrome.tabs.query({});
     tabs.forEach(tab => {
-        // Broadcast a cualquier app de trading potencial
         const isTradingApp = tab.url && (
             tab.url.includes('netlify.app') ||
             tab.url.includes('localhost') ||
