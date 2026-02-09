@@ -111,14 +111,14 @@ const AirtmCashierContent = () => {
                 time: new Date().toLocaleTimeString(),
                 status: op.status || op.state,
                 // Metadatos extendidos para la UI Pro
-                userName: op.owner?.displayName || 'Usuario Airtm',
-                userAvatar: op.owner?.avatarUrl || null,
-                userRating: op.owner?.averageRating || 5.0,
-                userTxns: op.owner?.completedOperations || 0,
+                userName: op.owner?.displayName || op.maker?.username || 'Usuario Airtm',
+                userAvatar: op.owner?.avatarUrl || op.maker?.avatarUrl || null,
+                userRating: op.owner?.averageRating || op.maker?.averageRating || 5.0,
+                userTxns: op.owner?.completedOperations || op.maker?.completedOperations || 0,
                 localAmount: op.value || op.amount || 0,
                 localCurrency: op.currency || 'VES',
                 rate: op.exchangeRate || 0,
-                isBuy: true // Por defecto compra/agregar
+                isBuy: op.isBuy !== undefined ? op.isBuy : true // Respetar dato de la extensión
             };
 
             setOperations(prev => {
@@ -398,7 +398,7 @@ const AirtmCashierContent = () => {
                     <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter mb-2 flex items-center gap-3">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Airtm_logo.svg/2560px-Airtm_logo.svg.png" className="h-8 invert opacity-80" alt="Airtm" />
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                            Cashier Elite
+                            Panel Airtm PRO
                         </span>
                     </h1>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
