@@ -85,11 +85,22 @@ const AirtmCashierContent = () => {
         const opId = op.id || op.uuid || `dom-${Math.random().toString(36).substring(7)}`;
 
         setOperations(prev => {
-            // Evitar duplicados por ID
+            // 1. Evitar duplicados por ID EXACTO
             if (prev.some(existing => existing.id === opId)) return prev;
 
-            const method = op.payment_method_name || op.paymentMethodName || 'Desconocido';
+            const method = op.payment_method_name || op.paymentMethodName || op.method || 'Desconocido';
             const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
+
+            // 2. Evitar duplicados por CONTENIDO (Mismo monto y método en las últimas 30 ops)
+            // Esto previene que si la extensión capta por Red y por DOM lo mismo, se duplique
+            if (prev.some(existing =>
+                existing.method === method &&
+                Math.abs(existing.amount - amount) < 0.01 &&
+                existing.status === (op.status || op.state)
+            )) {
+                return prev;
+            }
+
             const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
 
             const newOp = {
@@ -99,13 +110,13 @@ const AirtmCashierContent = () => {
                 profit,
                 time: new Date().toLocaleTimeString(),
                 status: op.status || op.state,
-                userName: op.owner?.displayName || op.maker?.username || 'Usuario Airtm',
-                userAvatar: op.owner?.avatarUrl || op.maker?.avatarUrl || null,
-                userRating: op.owner?.averageRating || op.maker?.averageRating || 5.0,
-                userTxns: op.owner?.completedOperations || op.maker?.completedOperations || 0,
-                localAmount: op.value || op.amount || 0,
-                localCurrency: op.currency || 'VES',
-                rate: op.exchangeRate || 0,
+                userName: op.owner?.displayName || op.maker?.username || op.userName || 'Usuario Airtm',
+                userAvatar: op.owner?.avatarUrl || op.maker?.avatarUrl || op.userAvatar || null,
+                userRating: op.owner?.averageRating || op.maker?.averageRating || op.userRating || 5.0,
+                userTxns: op.owner?.completedOperations || op.maker?.completedOperations || op.userTxns || 0,
+                localAmount: op.localAmount || op.value || op.amount || 0,
+                localCurrency: op.localCurrency || op.currency || 'VES',
+                rate: op.exchangeRate || op.rate || 0,
                 isBuy: op.isBuy !== undefined ? op.isBuy : true
             };
 
