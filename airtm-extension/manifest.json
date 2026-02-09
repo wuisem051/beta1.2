@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "3.4",
-    "description": "Sincronización profesional v3.4 (Fix Connection)",
+    "version": "3.5",
+    "description": "Sincronización profesional v3.5 (Repair Communication)",
     "permissions": [
         "storage",
         "tabs",
@@ -23,7 +23,7 @@
                 "https://app.airtm.com/*"
             ],
             "js": [
-                "airtm-main.js"
+                "content-airtm.js"
             ],
             "run_at": "document_start",
             "world": "MAIN"
