@@ -41,38 +41,76 @@ exports.handler = async (event, context) => {
           query: `query GetP2PAvailableOperations($filter: Operations__P2PFilterInput) {
                       p2pAvailableOperations(filter: $filter) {
                         id
-                        hash
                         status
                         createdAt
-                        grossAmount
+                        amount
                         netAmount
+                        grossAmount
                         operationType
-                        metadata
+                        paymentMethod {
+                          name
+                          type
+                        }
+                        maker {
+                          id
+                          username
+                          firstName
+                          lastName
+                          averageRating
+                          completedOperations
+                          avatarUrl
+                          createdAt
+                          countryCode
+                        }
+                        exchangeRate
+                        currency {
+                          code
+                          symbol
+                        }
+                        value
                         makerPaymentMethod {
                           id
                           categoryId
+                          name
+                          type
                           data
                           version {
                             id
                             category {
                               id
+                              name
                               translationTag
                             }
                           }
                         }
                       }
                       availableOperations {
-                        id
-                        hash
+                         id
                         status
-                        grossAmount
+                        createdAt
+                        amount
                         netAmount
+                        grossAmount
                         operationType
+                        maker {
+                          id
+                          username
+                          firstName
+                          lastName
+                          averageRating
+                          completedOperations
+                        }
+                        exchangeRate
+                        currency {
+                          code
+                        }
+                        value
                       }
                     }`,
           variables: {
             filter: {
-              // We leave this mostly empty or broad to ensure we catch everything
+              limit: 50,
+              // Broad status filter to catch everything relevant
               status: ["CREATED", "OPEN", "AVAILABLE", "READY", "FRAUD_APPROVED"]
             }
           }
