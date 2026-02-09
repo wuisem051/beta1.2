@@ -1,30 +1,37 @@
-// content-airtm.js - Nueva versión nativa (World: MAIN)
+// content-airtm.js - Interceptor de Red Avanzado v1.6 (World: MAIN)
 
-console.log('%c [Airtm Sync] Iniciando conexión directa... ', 'background: #fcd535; color: #000; font-weight: bold;');
+console.log('%c [Airtm Sync] Vigilando tráfico GraphQL... ', 'background: #fcd535; color: #000; font-weight: bold;');
 
-// Como ahora corremos en el "World Main", podemos interceptar fetch directamente
+// 1. INTERCEPTOR PARA FETCH
 const originalFetch = window.fetch;
-window.fetch = async (...args) => {
+window.fetch = async function (...args) {
     const url = args[0] ? (typeof args[0] === 'string' ? args[0] : args[0].url) : '';
 
-    // Capturar Token desde headers
+    // Capturar Token desde el objeto Headers (Forma correcta)
     if (args[1] && args[1].headers) {
-        const auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
+        let auth = null;
+        if (args[1].headers instanceof Headers) {
+            auth = args[1].headers.get('Authorization');
+        } else {
+            auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
+        }
+
         if (auth && auth.includes('Bearer')) {
-            window.dispatchEvent(new CustomEvent('AIRTM_DATA_FOUND', { detail: { type: 'TOKEN', value: auth } }));
+            console.log('%c [Airtm Sync] ¡Token de sesión interceptado!', 'color: #02c076; font-weight: bold;');
+            window.postMessage({ type: 'TO_EXTENSION_BRIDGE', data: { type: 'TOKEN', value: auth } }, '*');
         }
     }
 
-    const response = await originalFetch(...args);
+    const response = await originalFetch.apply(this, args);
 
-    // Capturar Operaciones
+    // Capturar Operaciones desde GraphQL
     if (url && url.includes('/graphql')) {
         const clone = response.clone();
         clone.json().then(data => {
             if (data && data.data) {
                 const ops = data.data.p2pAvailableOperations || data.data.availableOperations;
                 if (ops && Array.isArray(ops)) {
-                    window.dispatchEvent(new CustomEvent('AIRTM_DATA_FOUND', { detail: { type: 'OPS', value: ops } }));
+                    window.postMessage({ type: 'TO_EXTENSION_BRIDGE', data: { type: 'OPS', value: ops } }, '*');
                 }
             }
         }).catch(() => { });
@@ -33,10 +40,14 @@ window.fetch = async (...args) => {
     return response;
 };
 
-// Enviar datos fuera de la página hacia la extensión
-window.addEventListener('AIRTM_DATA_FOUND', (e) => {
-    // Al correr en World: MAIN, usamos un truco para mandar el mensaje al background
-    // Pero como no tenemos acceso directo a chrome.runtime, simplemente loggeamos y dejamos que el puente haga el resto
-    // NOTA: Para MV3 World Main, la comunicación es via window messaging
-    window.postMessage({ type: 'TO_EXTENSION_BRIDGE', data: e.detail }, '*');
-});
+// 2. INTERCEPTOR PARA XMLHttpRequest (XHR)
+const originalOpen = XMLHttpRequest.prototype.open;
+const originalSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+
+XMLHttpRequest.prototype.setRequestHeader = function (header, value) {
+    if (header.toLowerCase() === 'authorization' && value.includes('Bearer')) {
+        console.log('%c [Airtm Sync] ¡Token interceptado via XHR!', 'color: #02c076; font-weight: bold;');
+        window.postMessage({ type: 'TO_EXTENSION_BRIDGE', data: { type: 'TOKEN', value: value } }, '*');
+    }
+    return originalSetHeader.apply(this, arguments);
+};
