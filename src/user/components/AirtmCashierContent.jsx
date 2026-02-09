@@ -40,6 +40,89 @@ const AirtmCashierContent = () => {
     // Mock sound URL for notifications
     const soundUrl = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 
+    // Extension Sync Listener
+    useEffect(() => {
+        const handleExtensionMessage = (event) => {
+            // Solo aceptar mensajes de nuestra fuente confiable
+            if (event.data && event.data.source === 'AIRTM_EXTENSION') {
+                const { type, token, operation } = event.data.payload;
+
+                if (type === 'SYNC_AIRTM_TOKEN') {
+                    console.log('Token recibido de la extensión');
+                    if (token && token !== apiKey) {
+                        setApiKey(token);
+                        setIsConnected(true);
+                        addLog('Token sincronizado automáticamente desde la extensión.', 'success');
+                        saveSettings({ apiKey: token, isConnected: true });
+                    }
+                }
+
+                if (type === 'SYNC_AIRTM_OPERATION') {
+                    console.log('Operación recibida de la extensión:', operation.id);
+                    processSingleOperation(operation);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleExtensionMessage);
+        return () => window.removeEventListener('message', handleExtensionMessage);
+    }, [apiKey, operations]);
+
+    // Función auxiliar para procesar una operación individual (desde extensión o poll)
+    const processSingleOperation = (op) => {
+        // Evitar duplicados
+        if (operations.some(existing => existing.id === (op.id || op.uuid))) return;
+
+        const categoryId = op.makerPaymentMethod?.version?.category?.id || op.makerPaymentMethod?.categoryId || '';
+        let method = op.payment_method_name || op.paymentMethodName || '';
+
+        if (!method && categoryId) {
+            const lowCat = categoryId.toLowerCase();
+            if (lowCat.includes('venezuela')) method = 'Banco de Venezuela';
+            else if (lowCat.includes('paypal')) method = 'Paypal';
+            else if (lowCat.includes('binance')) method = 'Binance USDT';
+            else method = categoryId.split(':').pop().replace(/-/g, ' ');
+        }
+        method = method || 'Desconocido';
+
+        const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
+        const profit = parseFloat(op.profitPercentage || op.profit_percentage || 2.2);
+
+        // Validar filtros
+        const matchesMethod = filters.methods.length === 0 || filters.methods.some(m => method.toLowerCase().includes(m.toLowerCase()));
+        const matchesAmount = amount >= filters.minAmount && amount <= filters.maxAmount;
+        const matchesProfit = profit >= filters.minProfit;
+
+        if (matchesMethod && matchesAmount && matchesProfit) {
+            const newOp = {
+                id: op.id || op.uuid,
+                method,
+                amount,
+                profit,
+                time: new Date().toLocaleTimeString(),
+                status: op.status || op.state
+            };
+
+            setOperations(prev => {
+                if (prev.some(p => p.id === newOp.id)) return prev;
+
+                // Alertar
+                if (notifications.sound && audioRef.current) {
+                    audioRef.current.play().catch(() => { });
+                }
+                if (notifications.desktop && Notification.permission === 'granted') {
+                    new Notification('Airtm Extensión: ¡Nueva Op!', {
+                        body: `${method} - $${amount} (+${profit}%)`,
+                        icon: 'https://static.airtm.com/favicon-32x32.png'
+                    });
+                }
+                addLog(`¡NUEVA OPERACIÓN (vía Extensión)! ${method} por $${amount}`, 'success');
+
+                return [newOp, ...prev];
+            });
+        }
+    };
+
     useEffect(() => {
         // Load settings from Firebase
         const loadSettings = async () => {
