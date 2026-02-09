@@ -1,30 +1,18 @@
-// background.js - El Monitor Silencioso v2.0
+// background v3.0 - Mensajero Central
+console.log('Background v3.0 Iniciado');
 
-// Interceptamos los encabezados de salida hacia Airtm
-chrome.webRequest.onBeforeSendHeaders.addListener(
-    (details) => {
-        if (details.requestHeaders) {
-            for (const header of details.requestHeaders) {
-                if (header.name.toLowerCase() === 'authorization' && header.value.includes('Bearer')) {
-                    const token = header.value.replace('Bearer ', '').trim();
-                    console.log('[Airtm Sync] Token capturado desde la red');
-
-                    // Guardar y Sincronizar
-                    chrome.storage.local.set({ airtmToken: token });
-                    broadcastToTradingApps({
-                        type: 'SYNC_AIRTM_TOKEN',
-                        token: token
-                    });
-                }
-            }
-        }
-    },
-    { urls: ["https://app.airtm.com/*"] },
-    ["requestHeaders"]
-);
-
-// Responder a peticiones de fuerza manual
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'AIRTM_NEW_OPERATION') {
+        const op = message.operation;
+        console.log('¡OPERACIÓN INTERCEPTADA!', op.id || op.paymentMethodName);
+
+        // Enviar a la web
+        broadcastToTradingApps({
+            type: 'SYNC_AIRTM_OPERATION',
+            operation: op
+        });
+    }
+
     if (message.type === 'FORCE_SYNC') {
         chrome.storage.local.get(['airtmToken'], (res) => {
             if (res.airtmToken) {
@@ -33,13 +21,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     token: res.airtmToken
                 });
             }
-        });
-    }
-
-    if (message.type === 'AIRTM_NEW_OPERATION') {
-        broadcastToTradingApps({
-            type: 'SYNC_AIRTM_OPERATION',
-            operation: message.operation
         });
     }
 });
