@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Sincronización profesional para el cajero de Airtm",
     "permissions": [
         "storage",
@@ -11,7 +11,8 @@
     "host_permissions": [
         "https://app.airtm.com/*",
         "https://*.netlify.app/*",
-        "http://localhost/*"
+        "http://localhost/*",
+        "http://127.0.0.1/*"
     ],
     "background": {
         "service_worker": "background.js"
@@ -29,7 +30,8 @@
         {
             "matches": [
                 "https://*.netlify.app/*",
-                "http://localhost/*"
+                "http://localhost/*",
+                "http://127.0.0.1/*"
             ],
             "js": [
                 "content-bridge.js"
