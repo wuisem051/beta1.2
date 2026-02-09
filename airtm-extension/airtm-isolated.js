@@ -135,39 +135,59 @@ function extractDataFromContainer(el, text) {
 
     if (!amount || amount <= 0) return null;
 
-    // 2. Método de Pago
-    // Heurística: Líneas de texto que NO son el monto, ni "USDC", ni "Aceptar", etc.
+    // 2. Método de Pago y Usuario
     let method = "Desconocido";
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-    const ignore = ['USDC', 'VES', 'BS', 'Aceptar', 'Accept', 'Agregar', 'Retirar', 'Tasa', 'Siguiente', 'Anterior', 'Usuario', '$'];
+    let username = "Usuario Airtm";
 
-    // Buscamos la línea más prometedora
+    // Lista de ignorados
+    const ignore = ['USDC', 'VES', 'BS', 'Aceptar', 'Accept', 'Agregar', 'Retirar', 'Tasa', 'Siguiente', 'Anterior', 'Usuario', '$', 'Talk about', 'Fondos', 'solicitud', 'request'];
+
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+
+    // A. Método: Primera línea válida
     for (const line of lines) {
-        if (!ignore.some(ig => line.includes(ig)) && !/^\d/.test(line)) {
+        if (!ignore.some(ig => line.toLowerCase().includes(ig.toLowerCase())) && !/^[\d$]/.test(line)) {
             method = line;
-            break; // Tomamos la primera línea válida como método (suele ser el título)
+            break;
+        }
+    }
+
+    // B. Usuario: Búsqueda contextual cerca del rating
+    const rateLineIndex = lines.findIndex(l => /\d\.\d{1,2}/.test(l));
+
+    if (rateLineIndex !== -1) {
+        const rateLine = lines[rateLineIndex];
+        const nameMatch = rateLine.match(/^(.*)\s+\d\.\d/);
+
+        if (nameMatch && nameMatch[1].trim().length > 2 && !nameMatch[1].includes('$')) {
+            username = nameMatch[1].trim();
+        } else if (rateLineIndex > 0) {
+            const prevLine = lines[rateLineIndex - 1];
+            if (prevLine !== method && !ignore.some(ig => prevLine.includes(ig)) && !prevLine.includes(amount.toString())) {
+                username = prevLine;
+            }
         }
     }
 
     // 3. Tipo (Compra/Venta)
     const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
 
-    // 4. Maker Info (Avatar/Name)
+    // 4. Maker Info (Avatar)
     let avatarUrl = null;
     const img = el.querySelector('img[src*="avatar"], img[src*="profile"]');
     if (img) avatarUrl = img.src;
 
     let rating = 5.0;
-    const rateMatch = text.match(/(\d\.\d{1,2})\s*\u2605?/); // Busca número seguido opcionalmente de estrella
+    const rateMatch = text.match(/(\d\.\d{1,2})/);
     if (rateMatch) rating = parseFloat(rateMatch[1]);
 
     return {
-        id: 'card_' + btoa(method + amount).substring(0, 10),
+        id: 'card_' + btoa(method + amount + isBuy).substring(0, 10),
         paymentMethodName: method,
         amount: amount,
         isBuy: isBuy,
         maker: {
-            username: 'Usuario Airtm', // Difícil de extraer genéricamente sin clases
+            username: username,
             avatarUrl: avatarUrl,
             averageRating: rating
         }
