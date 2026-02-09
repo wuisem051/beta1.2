@@ -671,37 +671,85 @@ const AirtmCashierContent = () => {
                                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">Esperando Operaciones...</p>
                                 </div>
                             ) : (
-                                operations.map(op => (
-                                    <div key={op.id} className="bg-[#12161c] p-6 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-[#fcd535]/30 transition-all animate-in zoom-in-95 duration-300">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">
-                                                {op.method.toLowerCase().includes('paypal') ? (
-                                                    <span className="text-blue-400 font-black italic">PP</span>
-                                                ) : op.method.toLowerCase().includes('venezuela') || op.method.toLowerCase().includes('ves') ? (
-                                                    <span className="text-emerald-400 font-black italic">VES</span>
-                                                ) : (
-                                                    <span className="text-[#fcd535] font-black italic">USDT</span>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-white uppercase tracking-tight">{op.method}</p>
-                                                <p className="text-[9px] text-slate-500 font-bold uppercase">{op.time}</p>
-                                            </div>
-                                        </div>
+                            ): (
+                                    operations.map(op => {
+                                    // Determinar iconos y colores según método y tipo
+                                    const isPaypal = op.method.toLowerCase().includes('paypal');
+                            const isVez = op.method.toLowerCase().includes('venezuela') || op.method.toLowerCase().includes('ves') || op.method.toLowerCase().includes('mercantil') || op.method.toLowerCase().includes('banesco');
+                            const isBinance = op.method.toLowerCase().includes('binance');
+                            const isAdd = true; // Por defecto asumimos agregar, se podría refinar si detectamos 'Retirar'
 
-                                        <div className="flex-1 px-10 text-center">
-                                            <p className="text-xl font-black text-white italic tracking-tighter">${op.amount}</p>
-                                            <p className="text-[9px] text-emerald-500 font-black uppercase tracking-widest">+{op.profit}% Ganancia</p>
-                                        </div>
+                            let methodIcon = <span className="text-white font-black text-xs">ATM</span>;
+                            let methodColor = "bg-slate-700/50 text-slate-400";
+                            let ringColor = "ring-slate-700";
 
-                                        <button
-                                            onClick={() => handleAcceptOperation(op.id)}
-                                            className="px-10 py-4 bg-[#fcd535] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#fcd535]/10"
-                                        >
-                                            Aceptar Operación
-                                        </button>
+                            if (isPaypal) {
+                                methodIcon = <span className="text-blue-400 font-black text-xs">PP</span>;
+                            methodColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                            ringColor = "ring-blue-500/30";
+                                    } else if (isVez) {
+                                methodIcon = <span className="text-emerald-400 font-black text-xs">VES</span>;
+                            methodColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                            ringColor = "ring-emerald-500/30";
+                                    } else if (isBinance) {
+                                methodIcon = <span className="text-[#fcd535] font-black text-xs">BNB</span>;
+                            methodColor = "bg-[#fcd535]/10 text-[#fcd535] border-[#fcd535]/20";
+                            ringColor = "ring-[#fcd535]/30";
+                                    }
+
+                            return (
+                            <div key={op.id} className="relative group overflow-hidden">
+                                {/* Fondo con brillo al hover */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+
+                                <div className="bg-[#12161c] p-5 rounded-[24px] border border-white/5 flex items-center gap-6 relative z-10 hover:border-white/10 transition-all">
+
+                                    {/* Icono del Método */}
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${methodColor} shadow-lg relative`}>
+                                        {methodIcon}
+                                        {/* Badge de Tipo (Agregar/Retirar) */}
+                                        <div className={`absolute -top-2 -right-2 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border ${isAdd ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-red-500 text-white border-red-400'}`}>
+                                            {isAdd ? 'Compra' : 'Venta'}
+                                        </div>
                                     </div>
-                                ))
+
+                                    {/* Detalles Principales */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className="text-sm font-black text-white uppercase tracking-tight truncate">{op.method}</h3>
+                                            {op.id.includes('dom') && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Detectado visualmente"></span>}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                                            <span>{op.time}</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-700"></span>
+                                            <span className="text-emerald-500">ID: {op.id.substring(0, 6)}...</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Monto y Ganancia */}
+                                    <div className="text-right flex flex-col items-end">
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-[10px] font-bold text-slate-500">$</span>
+                                            <span className="text-2xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">{op.amount}</span>
+                                            <span className="text-[10px] font-bold text-slate-500">USD</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/10 mt-1">
+                                            <span className="text-emerald-500 text-[9px] font-black tracking-widest">+{op.profit}%</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Botón de Acción */}
+                                    <button
+                                        onClick={() => handleAcceptOperation(op.id)}
+                                        className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all shadow-lg hover:scale-110 active:scale-95 ${isAdd ? 'bg-[#fcd535] text-black shadow-[#fcd535]/10' : 'bg-white text-black shadow-white/10'}`}
+                                        title="Aceptar Operación Rápidamente"
+                                    >
+                                        <FaCheckCircle size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                            );
+                                })
                             )}
                         </div>
                     </div>
