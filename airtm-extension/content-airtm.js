@@ -1,8 +1,7 @@
-// content-airtm.js - Super Detective v2.3 (Modo Omnipresente)
+// content-airtm.js - Detective v2.4 (Ultra-Agresivo para Vista de Tabla)
+console.log('%c [Airtm Sync] Detective v2.4 (Ultra-Scan) ', 'background: #fcd535; color: #000; font-weight: bold;');
 
-console.log('%c [Airtm Sync] Detective v2.3 activo - Sin Filtros ', 'background: #fcd535; color: #000; font-weight: bold;');
-
-// --- MODO 1: INTERCEPTOR DE RED (GraphQL) ---
+// 1. Intercepción de Red Directa (GraphQL)
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
     const response = await originalFetch(...args);
@@ -11,10 +10,11 @@ window.fetch = async (...args) => {
         const clone = response.clone();
         clone.json().then(data => {
             if (data && data.data) {
-                const ops = data.data.p2pAvailableOperations || data.data.availableOperations;
+                const ops = data.data.p2pAvailableOperations || data.data.availableOperations || data.data.p2pOperations;
                 if (ops && Array.isArray(ops)) {
-                    console.log(`[Airtm Sync] Capturadas ${ops.length} ops vía Red`);
-                    ops.forEach(op => chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op }));
+                    ops.forEach(op => {
+                        chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
+                    });
                 }
             }
         }).catch(() => { });
@@ -22,51 +22,60 @@ window.fetch = async (...args) => {
     return response;
 };
 
-// --- MODO 2: ESCÁNER VISUAL (DOM Scraping) ---
-function scanScreen() {
-    // Buscar tanto en vista de cuadrícula como en vista de lista (tabla)
-    const elements = document.querySelectorAll('div[class*="OperationCard"], tr, div[role="row"]');
+// 2. Escáner de DOM de Máxima Precisión (Específico para la tabla de Airtm)
+function ultraScan() {
+    // Buscar todas las filas de la tabla
+    const rows = document.querySelectorAll('tr, [role="row"]');
 
-    elements.forEach(el => {
-        const text = el.innerText || "";
-        // Si el elemento tiene un botón de aceptar y parece una operación
-        if (text.includes('Aceptar') && (text.includes('USDC') || text.includes('VES') || text.includes('$'))) {
+    rows.forEach((row, index) => {
+        const text = row.innerText || "";
 
-            // Si es una fila de tabla, intentamos ser más específicos
-            const isTable = el.tagName === 'TR' || el.getAttribute('role') === 'row';
-            let method = "Desconocido";
-            let amount = 0;
+        // Criterio de detección: Debe tener un botón de "Aceptar" y mencionar montos
+        if (text.includes('Aceptar') && (text.includes('VES') || text.includes('USDC') || text.includes('$'))) {
 
-            if (isTable) {
-                // En tabla, el método suele estar en la segunda o tercera columna
-                const cells = el.querySelectorAll('td, div[role="gridcell"]');
-                if (cells.length > 2) {
-                    method = cells[1].innerText.trim();
+            // Extraer celdas
+            const cells = row.querySelectorAll('td, [role="gridcell"]');
+            if (cells.length > 0) {
+                let method = "Desconocido";
+                let amount = 0;
+
+                // En la vista de tabla de Airtm:
+                // Col 1: Tipo (Agregar/Retirar)
+                // Col 2: Método de Pago (Imagen + Texto)
+                // Col 3: Cantidad (Monto)
+
+                if (cells.length >= 3) {
+                    method = cells[1].innerText.replace(/\n/g, ' ').trim();
                     const amountText = cells[2].innerText.trim();
                     amount = parseFloat(amountText.replace(/[^0-9.]/g, '')) || 0;
+                } else {
+                    // Fallback para otros diseños de fila
+                    const textParts = text.split('\n').filter(t => t.trim().length > 2);
+                    method = textParts[1] || "Operación Airtm";
+                    amount = parseFloat(text.match(/\d+[.,]\d+/)?.[0]?.replace(',', '.') || 0);
                 }
-            } else {
-                // En tarjetas
-                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
-                method = lines.find(l => l.includes('Venezuela') || l.includes('Binance') || l.includes('Paypal')) || lines[1] || "Desconocido";
-                const amountLine = lines.find(l => l.includes('$') || l.includes('USDC'));
-                amount = amountLine ? parseFloat(amountLine.replace(/[^0-9.]/g, '')) : 0;
-            }
 
-            // Evitar basura (como el header de la tabla)
-            if (amount > 0 && method !== "MÉTODO DE PAGO") {
-                const mockOp = {
-                    id: 'dom_' + method.substring(0, 3) + '_' + amount,
-                    paymentMethodName: method,
-                    grossAmount: amount,
-                    status: 'OPEN',
-                    profitPercentage: 2.2
-                };
-                chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: mockOp });
+                if (amount > 0) {
+                    // Generar ID único basado en el texto de la fila para evitar duplicados
+                    const rowId = 'row_' + btoa(text.substring(0, 50)).substring(0, 15);
+
+                    const opData = {
+                        id: rowId,
+                        paymentMethodName: method,
+                        grossAmount: amount,
+                        netAmount: amount,
+                        status: 'OPEN',
+                        profitPercentage: 2.2,
+                        source: 'DOM_ULTRA_SCAN'
+                    };
+
+                    chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+                }
             }
         }
     });
 }
 
-// Ejecutar escáner rápido
-setInterval(scanScreen, 2000);
+// Escanear cada segundo para no perder ninguna
+setInterval(ultraScan, 1000);
+ultraScan();
