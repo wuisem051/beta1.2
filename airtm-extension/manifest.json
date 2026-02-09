@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "3.3",
-    "description": "Sincronización profesional v3.3 (Dual Token Capture)",
+    "version": "3.4",
+    "description": "Sincronización profesional v3.4 (Fix Connection)",
     "permissions": [
         "storage",
         "tabs",

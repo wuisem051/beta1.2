@@ -38,8 +38,15 @@ const AirtmCashierContent = () => {
         const handleExtensionMessage = (event) => {
             if (event.source !== window) return;
 
-            if (event.data.type && (event.data.type === 'SYNC_AIRTM_TOKEN' || event.data.type === 'SYNC_AIRTM_OPERATION')) {
-                const { type, token, operation } = event.data;
+            let data = event.data;
+
+            // Si viene del Bridge, desempaquetar
+            if (data && data.source === 'AIRTM_EXTENSION' && data.payload) {
+                data = data.payload;
+            }
+
+            if (data && (data.type === 'SYNC_AIRTM_TOKEN' || data.type === 'SYNC_AIRTM_OPERATION')) {
+                const { type, token, operation } = data;
 
                 if (type === 'SYNC_AIRTM_TOKEN') {
                     console.log('Token recibido de la extensión');
@@ -63,6 +70,12 @@ const AirtmCashierContent = () => {
         };
 
         window.addEventListener('message', handleExtensionMessage);
+
+        // Solicitar sincronización inicial al cargar
+        setTimeout(() => {
+            window.postMessage({ type: 'AIRTM_CLIENT_READY' }, '*');
+        }, 1000);
+
         return () => window.removeEventListener('message', handleExtensionMessage);
     }, [apiKey, operations]);
 
