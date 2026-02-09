@@ -25,6 +25,8 @@ const AirtmCashierContent = () => {
     const [logs, setLogs] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isExtensionLinked, setIsExtensionLinked] = useState(false);
+    const [lastSyncTime, setLastSyncTime] = useState(null);
+    const [nodeStats, setNodeStats] = useState({ opsProcessed: 0, health: 100 });
 
     const audioRef = useRef(null);
     const monitoringInterval = useRef(null);
@@ -50,6 +52,9 @@ const AirtmCashierContent = () => {
 
                 if (type === 'SYNC_AIRTM_TOKEN') {
                     console.log('Token recibido de la extensión');
+                    setIsExtensionLinked(true);
+                    setLastSyncTime(new Date().toLocaleTimeString());
+                    setNodeStats(prev => ({ ...prev, health: 100 }));
                     if (token && token !== apiKey) {
                         setApiKey(token);
                         setIsConnected(true);
@@ -60,6 +65,8 @@ const AirtmCashierContent = () => {
 
                 if (type === 'SYNC_AIRTM_OPERATION') {
                     console.log('Operación recibida de la extensión:', operation.id);
+                    setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
+                    setLastSyncTime(new Date().toLocaleTimeString());
                     processSingleOperation(operation);
                 }
             }
@@ -454,39 +461,79 @@ const AirtmCashierContent = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Column 1: Config & Filters */}
                 <div className="space-y-8">
-                    {/* Extension Status Card */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    {/* Elite Extension Status Card */}
+                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden relative group">
+                        {/* Animated Background Gradients */}
+                        <div className={`absolute top-0 right-0 w-48 h-48 rounded-full blur-[80px] transition-all duration-1000 ${isExtensionLinked ? 'bg-emerald-500/10' : 'bg-red-500/5'}`}></div>
+                        <div className={`absolute bottom-0 left-0 w-32 h-32 rounded-full blur-[60px] transition-all duration-1000 ${isExtensionLinked ? 'bg-blue-500/10' : 'bg-slate-500/5'}`}></div>
 
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <FaShieldAlt className="text-[#fcd535]" /> Estado del Nodo
-                        </h2>
+                        <div className="relative z-10">
+                            <h2 className="text-sm font-black text-white uppercase tracking-widest mb-8 flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                    <FaShieldAlt className={isExtensionLinked ? 'text-emerald-500' : 'text-slate-500'} />
+                                    Estado del Nodo
+                                </span>
+                                {isExtensionLinked && <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] rounded-full border border-emerald-500/20 animate-pulse">LIVE</span>}
+                            </h2>
 
-                        <div className="flex flex-col items-center py-6">
-                            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-500 border ${isExtensionLinked
-                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-xl shadow-emerald-500/10'
-                                : 'bg-slate-800/20 border-white/5 text-slate-600'}`}>
-                                <FaWifi size={32} className={isExtensionLinked ? 'animate-pulse' : ''} />
+                            <div className="flex flex-col items-center mb-8">
+                                <div className="relative">
+                                    <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center transition-all duration-700 border-2 ${isExtensionLinked
+                                        ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]'
+                                        : 'bg-slate-800/20 border-white/5 text-slate-700'}`}>
+                                        <FaWifi size={40} className={isExtensionLinked ? 'animate-pulse' : ''} />
+                                    </div>
+                                    {isExtensionLinked && (
+                                        <div className="absolute -bottom-2 -right-2 bg-[#1e2329] p-1 rounded-full">
+                                            <div className="bg-emerald-500 w-4 h-4 rounded-full shadow-[0_0_10px_#10b981]"></div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-center mt-6 space-y-2">
+                                    <p className={`text-lg font-black uppercase tracking-tighter ${isExtensionLinked ? 'text-white' : 'text-slate-500'}`}>
+                                        {isExtensionLinked ? 'Núcleo Vinculado' : 'Nodo en Espera'}
+                                    </p>
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-ping' : 'bg-slate-700'}`}></div>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                            {isExtensionLinked ? 'Tráfico encriptado AES-256' : 'Abre Airtm para activar el puente'}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-center mt-6 space-y-2">
-                                <p className="text-sm font-black text-white uppercase tracking-widest">
-                                    {isExtensionLinked ? 'Sincronización Activa' : 'Esperando Extensión'}
-                                </p>
-                                <p className={`text-[10px] font-bold uppercase ${isExtensionLinked ? 'text-emerald-500' : 'text-slate-500'}`}>
-                                    {isExtensionLinked ? 'Capturando operaciones en tiempo real' : 'Abre Airtm para vincular automáticamente'}
-                                </p>
+
+                            {/* Node Metrics Panel */}
+                            <div className="grid grid-cols-2 gap-3 mb-8">
+                                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex flex-col items-center">
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ops. Procesadas</span>
+                                    <span className="text-sm font-black text-white">{nodeStats.opsProcessed}</span>
+                                </div>
+                                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex flex-col items-center">
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Salud del Nodo</span>
+                                    <span className="text-sm font-black text-emerald-500">{nodeStats.health}%</span>
+                                </div>
                             </div>
+
+                            {lastSyncTime && (
+                                <div className="text-center mb-6">
+                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                                        Última actividad: <span className="text-slate-400">{lastSyncTime}</span>
+                                    </p>
+                                </div>
+                            )}
+
+                            {!isExtensionLinked && (
+                                <button
+                                    onClick={() => window.open('https://app.airtm.com/login', '_blank')}
+                                    className="w-full py-5 bg-[#fcd535] text-black rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[#fcd535]/20 flex items-center justify-center gap-3"
+                                >
+                                    <div className="w-6 h-6 bg-black/10 rounded-lg flex items-center justify-center">
+                                        <img src="https://static.airtm.com/favicon-32x32.png" alt="A" className="w-4 h-4" />
+                                    </div>
+                                    Sincronizar Airtm Elite
+                                </button>
+                            )}
                         </div>
-
-                        {!isExtensionLinked && (
-                            <button
-                                onClick={() => window.open('https://app.airtm.com/login', '_blank')}
-                                className="w-full py-4 bg-white/5 text-white border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all flex items-center justify-center gap-2 group"
-                            >
-                                <img src="https://static.airtm.com/favicon-32x32.png" alt="A" className="w-4 h-4 grayscale group-hover:grayscale-0 transition-all" />
-                                Abrir Airtm para Sincronizar
-                            </button>
-                        )}
                     </div>
 
                     {/* Filters Card */}
