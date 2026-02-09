@@ -91,12 +91,11 @@ const AirtmCashierContent = () => {
             const method = op.payment_method_name || op.paymentMethodName || op.method || 'Desconocido';
             const amount = parseFloat(op.netAmount || op.grossAmount || op.amount || op.totalAmount || 0);
 
-            // 2. Evitar duplicados por CONTENIDO (Mismo monto y método en las últimas 30 ops)
-            // Esto previene que si la extensión capta por Red y por DOM lo mismo, se duplique
-            if (prev.some(existing =>
+            // 2. Evitar duplicados por CONTENIDO (Mismo monto y método en los últimos segundos)
+            // Si ya existe una operación casi idéntica, no la agregamos
+            if (prev.slice(0, 10).some(existing =>
                 existing.method === method &&
-                Math.abs(existing.amount - amount) < 0.01 &&
-                existing.status === (op.status || op.state)
+                Math.abs(existing.amount - amount) < 0.05
             )) {
                 return prev;
             }
@@ -109,7 +108,7 @@ const AirtmCashierContent = () => {
                 amount,
                 profit,
                 time: new Date().toLocaleTimeString(),
-                status: op.status || op.state,
+                status: op.status || op.state || 'Pendiente',
                 userName: op.owner?.displayName || op.maker?.username || op.userName || 'Usuario Airtm',
                 userAvatar: op.owner?.avatarUrl || op.maker?.avatarUrl || op.userAvatar || null,
                 userRating: op.owner?.averageRating || op.maker?.averageRating || op.userRating || 5.0,
