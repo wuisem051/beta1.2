@@ -1,78 +1,69 @@
-// airtm-isolated.js - Mensajero Seguro v5.1 (RESURRECCIÓN)
-
-console.log('%c [Airtm Sync] Escáner v5.1 Activo ', 'background: #27ae60; color: #fff; font-weight: bold;');
+// airtm-isolated.js - v6.0 (RELIANCE)
+console.log('%c [Airtm Sync] v6.0 ONLINE ', 'background: #27ae60; color: #fff; font-weight: bold;');
 
 let isContextValid = true;
-let reportedIds = new Set();
+let seenIds = new Set();
 
-const safeSendMessage = (message) => {
+const send = (msg) => {
     if (!isContextValid) return;
     try {
-        if (chrome?.runtime?.id) {
-            chrome.runtime.sendMessage(message).catch(() => { isContextValid = false; });
-        } else { isContextValid = false; }
+        if (chrome?.runtime?.id) { chrome.runtime.sendMessage(msg); }
+        else { isContextValid = false; }
     } catch (e) { isContextValid = false; }
 };
 
-// --- 1. ESCUCHAR AL AGENTE ESPÍA (Intercepción de Red) ---
-window.addEventListener('message', (event) => {
-    if (!isContextValid) return;
-    if (!event.data) return;
-
-    // Recibir operaciones interceptadas por la red
-    if (event.data.type === 'AIRTM_Spy_Data' && event.data.operations) {
-        event.data.operations.forEach(op => {
-            safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
+// 1. ESCUCHA DE RED (Vía Agente Espía en MAIN)
+window.addEventListener('message', (e) => {
+    if (!isContextValid || !e.data) return;
+    if (e.data.type === 'AIRTM_Spy_Data' && e.data.operations) {
+        e.data.operations.forEach(op => {
+            const id = op.id || op.uuid;
+            if (id && !seenIds.has(id)) {
+                // seenIds.add(id); // Dejamos que el panel maneje duplicados finales
+                send({ type: 'AIRTM_NEW_OPERATION', operation: op });
+            }
         });
     }
-
-    // Recibir token interceptado
-    if (event.data.type === 'AIRTM_Spy_Token' && event.data.token) {
-        const token = event.data.token.replace('Bearer ', '').trim();
-        safeSendMessage({ type: 'AIRTM_TOKEN_DETECTED', token: token });
+    if (e.data.type === 'AIRTM_Spy_Token' && e.data.token) {
+        send({ type: 'AIRTM_TOKEN_DETECTED', token: e.data.token });
     }
 });
 
-// --- 2. ESCÁNER DE DOM (Seguridad Visual) ---
-function scan() {
+// 2. ESCÁNER DOM (Último recurso, pero infalible)
+function ultraScan() {
     if (!isContextValid) return;
 
-    try {
-        // En lugar de buscar texto exacto, buscamos botones que contengan la palabra clave
-        const buttons = Array.from(document.querySelectorAll('button, [role="button"]'));
-        const actionButtons = buttons.filter(btn => {
-            const txt = (btn.innerText || "").toLowerCase();
-            return txt.includes('aceptar') || txt.includes('accept') || txt.includes('seleccionar') || txt.includes('confirmar');
-        });
+    // Buscamos cualquier botón que diga Aceptar/Accept/Seleccionar
+    const buttons = Array.from(document.querySelectorAll('button, [role="button"]'));
+    buttons.forEach(btn => {
+        const t = (btn.innerText || "").toLowerCase();
+        if (t.includes('aceptar') || t.includes('accept') || t.includes('seleccionar')) {
 
-        actionButtons.forEach(btn => {
+            // Subimos hasta encontrar el contenedor que diga USDC
             let card = btn.parentElement;
             let depth = 0;
-            while (card && depth < 10) {
+            while (card && depth < 12) {
                 const text = card.innerText || "";
-                if (text.includes('USDC')) {
-                    processDOMCard(card, text);
+                if (text.includes('USDC') && text.includes('$')) {
+                    extract(card, text);
                     break;
                 }
                 card = card.parentElement;
                 depth++;
             }
-        });
-    } catch (e) { }
+        }
+    });
 }
 
-function processDOMCard(card, text) {
+function extract(el, text) {
     try {
-        // Regex más flexible para montos: puede haber símbolos, espacios, etc.
         const amountMatch = text.match(/([0-9,]+\.[0-9]{2})/);
         if (!amountMatch) return;
         const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
 
-        // El método suele ser el título de la tarjeta o texto cerca de la bandera/icono
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-        let method = "Desconocido";
         const ignore = ['agregar', 'retirar', 'fondos', 'usdc', 'aceptar', 'accept', '$', 'bs', 'ves', 'tasa', 'rate'];
-
+        let method = "Desconocido";
         for (let line of lines) {
             if (!ignore.some(ig => line.toLowerCase().includes(ig)) && !/\d\.\d{1,2}/.test(line)) {
                 method = line;
@@ -80,35 +71,25 @@ function processDOMCard(card, text) {
             }
         }
 
-        const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
+        const isBuy = text.toLowerCase().includes('agregar');
+        const opId = `scan_${method}_${amount}_${isBuy}`.replace(/[^a-zA-Z0-9]/g, '_');
 
-        // ID seguro
-        const rawId = `dom_${method}_${amount}_${isBuy}`.replace(/[^a-zA-Z0-9]/g, '_');
-        if (reportedIds.has(rawId)) return;
-        reportedIds.add(rawId);
-
-        // Intentar capturar rating y usuario
-        let rating = 5.0;
-        let username = "Usuario Airtm";
-        const rateMatch = text.match(/(\d\.\d{1,2})/);
-        if (rateMatch) rating = parseFloat(rateMatch[1]);
+        if (seenIds.has(opId)) return;
+        seenIds.add(opId);
 
         const opData = {
-            id: 'atm_' + rawId.substring(0, 25),
+            id: opId,
             paymentMethodName: method,
             amount: amount,
             isBuy: isBuy,
-            maker: {
-                username: username,
-                averageRating: rating
-            },
-            source: 'DOM_SCANNER_V5'
+            maker: { username: 'Usuario Airtm', averageRating: 5.0 },
+            source: 'DOM_EXTRACT'
         };
 
-        safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+        send({ type: 'AIRTM_NEW_OPERATION', operation: opData });
     } catch (e) { }
 }
 
-setInterval(scan, 1500);
-setTimeout(scan, 500);
-setInterval(() => { reportedIds.clear(); }, 1000 * 60 * 5); // Limpiar cada 5 min
+setInterval(ultraScan, 2000);
+// Limpiamos memoria cada hora
+setInterval(() => seenIds.clear(), 3600000);
