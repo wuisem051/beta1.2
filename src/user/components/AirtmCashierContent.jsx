@@ -13,7 +13,7 @@ const AirtmCashierContent = () => {
     const [isMonitoring, setIsMonitoring] = useState(false);
     const [operations, setOperations] = useState([]);
     const [filters, setFilters] = useState({
-        methods: ['Paypal', 'Binance USDT', 'Banco de Venezuela'],
+        methods: ['Paypal', 'Binance', 'Venezuela', 'VES', 'Zelle'],
         minProfit: 0.5,
         maxAmount: 1000,
         minAmount: 1
@@ -264,7 +264,8 @@ const AirtmCashierContent = () => {
 
                     if (normalizedFilter.includes('binance') && (normalizedActual.includes('binance') || normalizedCat.includes('binance'))) return true;
                     if (normalizedFilter.includes('paypal') && (normalizedActual.includes('paypal') || normalizedCat.includes('paypal'))) return true;
-                    if (normalizedFilter.includes('venezuela') && (normalizedActual.includes('venezuela') || normalizedCat.includes('venezuela'))) return true;
+                    if (normalizedFilter.includes('venezuela') && (normalizedActual.includes('venezuela') || normalizedCat.includes('venezuela') || normalizedActual.includes('ves'))) return true;
+                    if (normalizedFilter.includes('banco') && normalizedActual.includes('banco')) return true;
 
                     return normalizedActual.includes(normalizedFilter) || normalizedCat.includes(normalizedFilter);
                 });
