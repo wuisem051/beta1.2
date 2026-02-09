@@ -98,81 +98,81 @@ function ultraScan() {
                 amount = parseFloat(amountMatch[1].replace(/,/g, ''));
             } else {
                 const moneyMatch = text.match(/\$\s*([0-9,.]+)/);
+                const moneyMatch = text.match(/\$\s*([0-9,.]+)/);
                 if (moneyMatch) amount = parseFloat(moneyMatch[1].replace(/,/g, ''));
             }
 
-            if (amount === 0) return;
+            if (!amount || amount === 0) return;
 
-            // 2. Determinar Tipo (Compra/Venta)
-            // "Agregar fondos" -> El usuario agrega, nosotros le damos USDC? No.
-            // Si dice "Agregar fondos" en la UI de cajero, significa que hay una solicitud de "Agregar".
-            // El cajero (nosotros) "Acepta".
-            // isBuy = true (generalmente asociado a verde/entrada).
-            const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
+            // 2. Determinar Tipo
+            const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add') || text.toLowerCase().includes('compra');
 
             // 3. Extraer Método
-            // Heurística mejorada: Buscar líneas que no sean montos ni etiquetas
             let method = "Desconocido";
             const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+            const blockedWords = ['USDC', 'VES', 'BS', 'Aceptar', 'Agregar', 'Retirar', 'Fondos', 'Tasa', 'Rate', 'Usuario', 'No disponible'];
 
-            // Intentar encontrar el banco/método
-            // Suele ser la línea más destacada que no es USDC
-            const blockedWords = ['USDC', 'VES', 'BS', 'Aceptar', 'Agregar', 'Retirar', 'Fondos', 'Tasa', 'Rate', 'Usuario'];
             for (let line of lines) {
+                // Heurística: El método suele ser texto corto, sin números al inicio
                 if (!blockedWords.some(w => line.includes(w)) && !line.match(/^\d/)) {
                     method = line;
                     break;
                 }
             }
 
-            // 4. Extraer Usuario (Avatar, Nombre, Rating)
-            // Buscar imagen dentro de la tarjeta que no sea bandera (svg quizas)
-            // A veces el avatar es un img tag con clase 'avatar' o similar
+            // 4. Datos del Usuario
+            let userName = "Usuario Airtm";
             let userAvatar = null;
+            let userRating = 5.0;
+
+            // Avatar por imagen
             const imgs = card.querySelectorAll('img');
             imgs.forEach(img => {
-                if (img.src && (img.src.includes('avatar') || img.src.includes('profile'))) {
+                if (img.src && (img.src.includes('avatar') || img.src.includes('profile') || img.src.includes('user'))) {
                     userAvatar = img.src;
                 }
             });
 
-            // Nombre de usuario: suele estar cerca del rating
-            let userName = "Usuario Airtm";
             // Rating
-            let userRating = 5.0;
-            const ratingMatch = text.match(/(\d\.\d{1,2})/); // 4.98
+            const ratingMatch = text.match(/(\d\.\d{1,2})/);
             if (ratingMatch) userRating = parseFloat(ratingMatch[1]);
 
-            // Construct Op Data matching React UI
-            const rowId = 'dom_' + btoa(method + amount + isBuy).substring(0, 10);
+            // Si el método parece un nombre de banco largo, a veces el usuario es la siguiente línea
+            // Por simplicidad, dejamos "Usuario Airtm" si no es obvio
 
-            const opData = {
-                id: rowId,
-                paymentMethodName: method,
-                // Frontend expects 'paymentMethod' object sometimes or flat props
-                payment_method_name: method,
-                amount: amount,
-                netAmount: amount, // Backup
-                grossAmount: amount, // Backup
-                status: 'OPEN',
-                profitPercentage: 2.5, // Fake default for DOM ops
-                isBuy: isBuy,
-                source: 'DOM_ULTRA_SCAN',
-                // Maker details for UI
-                maker: {
-                    username: userName,
-                    avatarUrl: userAvatar,
-                    averageRating: userRating,
-                    completedOperations: 100 // Placeholder
-                }
-            };
-
-            safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
+            reportOp(method, amount, 'CARD', isBuy, {
+                username: userName,
+                avatarUrl: userAvatar,
+                averageRating: userRating
+            });
         });
 
     } catch (e) {
         // Silent
     }
+}
+
+function reportOp(method, amount, source, isBuy, makerUpdates = {}) {
+    const rowId = 'dom_' + btoa(method + amount + isBuy).substring(0, 10);
+    const opData = {
+        id: rowId,
+        paymentMethodName: method,
+        payment_method_name: method, // Redundancia
+        grossAmount: amount,
+        netAmount: amount,
+        amount: amount,
+        status: 'OPEN',
+        profitPercentage: 2.2,
+        source: 'DOM_' + source,
+        isBuy: isBuy,
+        maker: {
+            username: makerUpdates.username || 'Usuario Airtm',
+            avatarUrl: makerUpdates.avatarUrl || null,
+            averageRating: makerUpdates.averageRating || 5.0,
+            completedOperations: 100
+        }
+    };
+    safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
 }
 
 // Escanear constantemente
