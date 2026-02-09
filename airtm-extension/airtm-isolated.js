@@ -56,124 +56,174 @@ window.addEventListener('message', (event) => {
     }
 });
 
-// --- 2. Escáner Ultra-Agresivo (Soporte Dual: Tabla y Tarjetas) ---
+// --- 2. Escáner Universal (Agnóstico a Clases CSS) ---
 function ultraScan() {
     if (!isContextValid) return;
 
     try {
-        // B. ESCÁNER DE TARJETAS (NUEVA UI AIRTM)
-        // Este es el layout más común ahora.
-        // Buscamos contenedores que parezcan tarjetas de operación
-        // Estrategia: Buscar elementos que contengan "USDC" y un botón "Aceptar" o "Seleccionar"
+        // SET: Evitar duplicados en el mismo ciclo de escaneo
+        const foundIds = new Set();
 
-        // select all articles or divs that might be cards
-        const cards = document.querySelectorAll('div[class*="Card"], article, div[class*="operation-card"]');
+        // --- ESTRATEGIA A: Búsqueda por Botones de Acción (Bottom-Up) ---
+        // Ésta es la más efectiva para interfaces modernas basada en componentes (React/Vue)
+        // Buscamos el botón "Aceptar" y subimos hasta encontrar el contexto de la operación.
 
-        // Fallback: search for buttons and go up
-        const buttons = Array.from(document.querySelectorAll('button'));
-        const relevantButtons = buttons.filter(b => {
-            const t = b.innerText.toLowerCase();
-            return t.includes('aceptar') || t.includes('accept') || t.includes('seleccionar');
+        const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
+        const actionButtons = allButtons.filter(el => {
+            const t = (el.innerText || "").toLowerCase();
+            return t.includes('aceptar') || t.includes('accept') || t.includes('seleccionar') || t.includes('confirmar');
         });
 
-        // Combine sets
-        const candidates = new Set([...cards]);
-        relevantButtons.forEach(btn => {
-            const card = btn.closest('div[class*="Card"], article');
-            if (card) candidates.add(card);
+        actionButtons.forEach(btn => {
+            // Subir niveles buscando el contenedor principal
+            let container = btn.parentElement;
+            let operationData = null;
+
+            // Buscamos hasta 7 niveles arriba
+            for (let i = 0; i < 7; i++) {
+                if (!container) break;
+
+                const text = container.innerText || "";
+
+                // Si el contenedor tiene indicaciones de moneda, es un fuerte candidato
+                if (text.includes('USDC') || text.includes('Talk about amount')) { // 'Talk about amount' es raro, pero USDC es clave
+
+                    // Intentamos extraer datos de este contenedor
+                    const extracted = extractDataFromContainer(container, text);
+                    if (extracted) {
+                        operationData = extracted;
+                        break; // Encontramos la tarjeta, dejamos de subir
+                    }
+                }
+                container = container.parentElement;
+            }
+
+            if (operationData) {
+                reportOp(operationData);
+            }
         });
 
-        candidates.forEach(card => {
-            if (!card.innerText) return;
-            const text = card.innerText;
-
-            // Filtro básico
-            if (!text.includes('USDC') && !text.includes('$')) return;
-
-            // 1. Extraer Monto
-            // Buscamos el patrón: + $15.83 USDC o $15.83
-            let amount = 0;
-            const amountMatch = text.match(/([0-9,.]+)\s*USDC/);
-            if (amountMatch) {
-                amount = parseFloat(amountMatch[1].replace(/,/g, ''));
-            } else {
-                const moneyMatch = text.match(/\$\s*([0-9,.]+)/);
-                if (moneyMatch) amount = parseFloat(moneyMatch[1].replace(/,/g, ''));
-            }
-
-            if (!amount || amount === 0) return;
-
-            // 2. Determinar Tipo
-            const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add') || text.toLowerCase().includes('compra');
-
-            // 3. Extraer Método
-            let method = "Desconocido";
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-            const blockedWords = ['USDC', 'VES', 'BS', 'Aceptar', 'Agregar', 'Retirar', 'Fondos', 'Tasa', 'Rate', 'Usuario', 'No disponible'];
-
-            for (let line of lines) {
-                // Heurística: El método suele ser texto corto, sin números al inicio
-                if (!blockedWords.some(w => line.includes(w)) && !line.match(/^\d/)) {
-                    method = line;
-                    break;
+        // --- ESTRATEGIA B: Búsqueda por Tabla (Legacy/Fallback) ---
+        const rows = document.querySelectorAll('tr, [role="row"]');
+        rows.forEach(row => {
+            const text = row.innerText || "";
+            if ((text.includes('USDC') || text.includes('$')) && !text.includes('Completad') && !text.includes('Cancelad')) {
+                const extracted = extractDataFromRow(row);
+                if (extracted) {
+                    reportOp(extracted);
                 }
             }
-
-            // 4. Datos del Usuario
-            let userName = "Usuario Airtm";
-            let userAvatar = null;
-            let userRating = 5.0;
-
-            // Avatar por imagen
-            const imgs = card.querySelectorAll('img');
-            imgs.forEach(img => {
-                if (img.src && (img.src.includes('avatar') || img.src.includes('profile') || img.src.includes('user'))) {
-                    userAvatar = img.src;
-                }
-            });
-
-            // Rating
-            const ratingMatch = text.match(/(\d\.\d{1,2})/);
-            if (ratingMatch) userRating = parseFloat(ratingMatch[1]);
-
-            // Si el método parece un nombre de banco largo, a veces el usuario es la siguiente línea
-            // Por simplicidad, dejamos "Usuario Airtm" si no es obvio
-
-            reportOp(method, amount, 'CARD', isBuy, {
-                username: userName,
-                avatarUrl: userAvatar,
-                averageRating: userRating
-            });
         });
 
     } catch (e) {
-        // Silent
+        // Silent catch to prevent console flooding
     }
 }
 
-function reportOp(method, amount, source, isBuy, makerUpdates = {}) {
-    const rowId = 'dom_' + btoa(method + amount + isBuy).substring(0, 10);
-    const opData = {
-        id: rowId,
+// Helper: Extraer datos de un contenedor genérico (Tarjeta)
+function extractDataFromContainer(el, text) {
+    // 1. Monto
+    // Prioridad: "10.50 USDC" -> "$10.50"
+    let amount = 0;
+    const usdcMatch = text.match(/([0-9,]+\.?[0-9]*)\s*USDC/);
+    if (usdcMatch) {
+        amount = parseFloat(usdcMatch[1].replace(/,/g, ''));
+    } else {
+        const dollarMatch = text.match(/\$\s*([0-9,]+\.?[0-9]*)/);
+        if (dollarMatch) amount = parseFloat(dollarMatch[1].replace(/,/g, ''));
+    }
+
+    if (!amount || amount <= 0) return null;
+
+    // 2. Método de Pago
+    // Heurística: Líneas de texto que NO son el monto, ni "USDC", ni "Aceptar", etc.
+    let method = "Desconocido";
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+    const ignore = ['USDC', 'VES', 'BS', 'Aceptar', 'Accept', 'Agregar', 'Retirar', 'Tasa', 'Siguiente', 'Anterior', 'Usuario', '$'];
+
+    // Buscamos la línea más prometedora
+    for (const line of lines) {
+        if (!ignore.some(ig => line.includes(ig)) && !/^\d/.test(line)) {
+            method = line;
+            break; // Tomamos la primera línea válida como método (suele ser el título)
+        }
+    }
+
+    // 3. Tipo (Compra/Venta)
+    const isBuy = text.toLowerCase().includes('agregar') || text.toLowerCase().includes('add');
+
+    // 4. Maker Info (Avatar/Name)
+    let avatarUrl = null;
+    const img = el.querySelector('img[src*="avatar"], img[src*="profile"]');
+    if (img) avatarUrl = img.src;
+
+    let rating = 5.0;
+    const rateMatch = text.match(/(\d\.\d{1,2})\s*\u2605?/); // Busca número seguido opcionalmente de estrella
+    if (rateMatch) rating = parseFloat(rateMatch[1]);
+
+    return {
+        id: 'card_' + btoa(method + amount).substring(0, 10),
         paymentMethodName: method,
-        payment_method_name: method, // Redundancia
-        grossAmount: amount,
-        netAmount: amount,
         amount: amount,
-        status: 'OPEN',
-        profitPercentage: 2.2,
-        source: 'DOM_' + source,
         isBuy: isBuy,
         maker: {
-            username: makerUpdates.username || 'Usuario Airtm',
-            avatarUrl: makerUpdates.avatarUrl || null,
-            averageRating: makerUpdates.averageRating || 5.0,
+            username: 'Usuario Airtm', // Difícil de extraer genéricamente sin clases
+            avatarUrl: avatarUrl,
+            averageRating: rating
+        }
+    };
+}
+
+// Helper: Extraer datos de una fila de tabla
+function extractDataFromRow(row) {
+    // Asumimos estructura estándar de tabla: [Método] [Monto] ... [Botón]
+    try {
+        const cells = row.querySelectorAll('td, [role="gridcell"]');
+        if (cells.length < 3) return null;
+
+        const method = cells[1].innerText.split('\n')[0].trim();
+        const amountTxt = cells[2].innerText;
+        const amount = parseFloat(amountTxt.replace(/[^0-9.]/g, ''));
+
+        if (!amount) return null;
+
+        return {
+            id: 'row_' + btoa(method + amount).substring(0, 10),
+            paymentMethodName: method,
+            amount: amount,
+            isBuy: true, // En tablas antiguas suele ser lista de "Agregar"
+            maker: {
+                username: 'Usuario Tabla',
+                avatarUrl: null,
+                averageRating: 5.0
+            }
+        };
+    } catch (e) { return null; }
+}
+
+function reportOp(data) {
+    const opData = {
+        id: data.id,
+        paymentMethodName: data.paymentMethodName,
+        payment_method_name: data.paymentMethodName,
+        grossAmount: data.amount,
+        netAmount: data.amount,
+        amount: data.amount,
+        status: 'OPEN',
+        profitPercentage: 2.2,
+        source: 'DOM_UNIVERSAL',
+        isBuy: data.isBuy,
+        maker: {
+            username: data.maker.username || 'Usuario Airtm',
+            avatarUrl: data.maker.avatarUrl || null,
+            averageRating: data.maker.averageRating || 5.0,
             completedOperations: 100
         }
     };
     safeSendMessage({ type: 'AIRTM_NEW_OPERATION', operation: opData });
 }
 
-// Escanear constantemente
+// Intervalo de escaneo rápido (1s)
 scanInterval = setInterval(ultraScan, 1000);
+// Ejecución inicial
 ultraScan();
