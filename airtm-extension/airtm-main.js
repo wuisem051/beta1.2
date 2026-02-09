@@ -9,6 +9,20 @@ window.fetch = async (...args) => {
     const response = await originalFetch(...args);
     const url = args[0] ? (typeof args[0] === 'string' ? args[0] : args[0].url) : '';
 
+    // 1.1 Capturar Token desde headers (Restaurado)
+    if (args[1] && args[1].headers) {
+        let auth = null;
+        if (args[1].headers instanceof Headers) {
+            auth = args[1].headers.get('Authorization');
+        } else {
+            auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
+        }
+
+        if (auth && auth.includes('Bearer')) {
+            window.postMessage({ type: 'AIRTM_Spy_Token', token: auth }, '*');
+        }
+    }
+
     if (url && url.includes('/graphql')) {
         const clone = response.clone();
         clone.json().then(data => {

@@ -5,12 +5,19 @@ console.log('Mensajero Seguro v3.0 conectado');
 // --- 1. Escuchar al Agente Espía ---
 window.addEventListener('message', (event) => {
     // Escuchar mensajes del Agente Espía (World: MAIN)
-    if (event.data && event.data.type === 'AIRTM_Spy_Data') {
-        const ops = event.data.operations;
-        if (ops && Array.isArray(ops)) {
-            ops.forEach(op => {
-                chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
-            });
+    if (event.data) {
+        if (event.data.type === 'AIRTM_Spy_Data' && event.data.operations) {
+            const ops = event.data.operations;
+            if (Array.isArray(ops)) {
+                ops.forEach(op => {
+                    chrome.runtime.sendMessage({ type: 'AIRTM_NEW_OPERATION', operation: op });
+                });
+            }
+        }
+
+        if (event.data.type === 'AIRTM_Spy_Token' && event.data.token) {
+            const cleanToken = event.data.token.replace('Bearer ', '').trim();
+            chrome.runtime.sendMessage({ type: 'AIRTM_TOKEN_DETECTED', token: cleanToken });
         }
     }
 });
