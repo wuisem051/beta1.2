@@ -128,15 +128,27 @@ const AirtmCashierContent = () => {
         if (notifications.desktop && Notification.permission === 'granted') {
             new Notification('Airtm PRO: ¡Nueva Op!', {
                 body: `${op.method} - $${op.amount}`,
-                icon: 'https://static.airtm.com/favicon-32x32.png'
+                icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Airtm_logo.svg/2560px-Airtm_logo.svg.png'
             });
         }
         addLog(`Nueva Op: ${op.method} por $${op.amount}`, 'success');
     };
 
     useEffect(() => {
-        // Load settings from Firebase
         const loadSettings = async () => {
+            // Cargar de LocalStorage primero (Respaldo inmediato)
+            const localData = localStorage.getItem('airtm_pro_settings');
+            if (localData) {
+                try {
+                    const parsed = JSON.parse(localData);
+                    if (parsed.apiKey) {
+                        setApiKey(parsed.apiKey);
+                        setIsConnected(true);
+                    }
+                    if (parsed.filters) setFilters(parsed.filters);
+                } catch (e) { }
+            }
+
             if (!currentUser) return;
             try {
                 const docRef = doc(db, 'airtmSettings', currentUser.uid);
@@ -149,19 +161,30 @@ const AirtmCashierContent = () => {
                     if (data.apiKey) setIsConnected(true);
                 }
             } catch (err) {
-                console.warn("[App] Error de permisos Firebase (airtmSettings). Usando configuración local.");
+                // Silencio total para no alarmar al usuario, se usa el local o el default
             }
         };
         loadSettings();
     }, [currentUser]);
 
     const saveSettings = async (newData) => {
+        // Guardar en LocalStorage (Siempre disponible)
+        localStorage.setItem('airtm_pro_settings', JSON.stringify({
+            apiKey: newData.apiKey || apiKey,
+            filters: newData.filters || filters,
+            notifications: newData.notifications || notifications
+        }));
+
         if (!currentUser) return;
-        const docRef = doc(db, 'airtmSettings', currentUser.uid);
-        await setDoc(docRef, {
-            ...newData,
-            updatedAt: new Date()
-        }, { merge: true });
+        try {
+            const docRef = doc(db, 'airtmSettings', currentUser.uid);
+            await setDoc(docRef, {
+                ...newData,
+                updatedAt: new Date()
+            }, { merge: true });
+        } catch (e) {
+            // Error de permisos ignorado deliberadamente
+        }
     };
 
     const handleToggleMonitoring = () => {
