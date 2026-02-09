@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Airtm Pro Sync",
-    "version": "4.0",
-    "description": "Sincronización profesional v4.0 (Stable & Safe)",
+    "version": "4.1",
+    "description": "Sincronización profesional v4.1 (Error Handling)",
     "icons": {
         "128": "icons/icon128.png"
     },
