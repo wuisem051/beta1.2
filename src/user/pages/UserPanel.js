@@ -31,6 +31,7 @@ import { FaHistory, FaUserCircle, FaRegEye, FaRegEyeSlash, FaCrown, FaGem, FaReg
 
 import UpdatesContent from '../components/UpdatesContent';
 import CryptoMarketMonitor from '../components/CryptoMarketMonitor';
+import WhaleMonitor from '../components/WhaleMonitor';
 import AirtmCashierContent from '../components/AirtmCashierContent';
 
 // Componentes de las sub-secciones
@@ -1734,6 +1735,7 @@ const UserPanel = () => {
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
           <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
           <Route path="cajero/*" element={<AirtmCashierContent />} /> {/* Nueva ruta para Cajero Airtm */}
+          <Route path="whale-monitor/*" element={<WhaleMonitor />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
