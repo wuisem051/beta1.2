@@ -16,6 +16,7 @@ const WhaleMonitor = () => {
         { symbol: 'LTC', name: 'Litecoin', threshold: 500, icon: 'https://assets.coingecko.com/coins/images/2/small/litecoin.png' },
         { symbol: 'ARK', name: 'Ark', threshold: 10000, icon: 'https://assets.coingecko.com/coins/images/453/small/Ark.png' }
     ]);
+    const [isConnected, setIsConnected] = useState(false);
     const [stats, setStats] = useState({
         totalVol24h: 1250000,
         largeTxCount: 42,
@@ -39,6 +40,7 @@ const WhaleMonitor = () => {
         const connectWS = () => {
             const ws = new WebSocket(url);
             wsRef.current = ws;
+            ws.onopen = () => setIsConnected(true);
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (!data.s) return;
@@ -64,13 +66,17 @@ const WhaleMonitor = () => {
                     setTransactions(prev => [newTx, ...prev].slice(0, 20));
                 }
             };
-            ws.onclose = () => setTimeout(connectWS, 5000);
+            ws.onclose = () => {
+                setIsConnected(false);
+                setTimeout(connectWS, 5000);
+            };
         };
 
         const fUrl = `wss://fstream.binance.com/ws/!forceOrder@arr`;
         const connectFWS = () => {
             const fws = new WebSocket(fUrl);
             fwsRef.current = fws;
+            fws.onopen = () => setIsConnected(true);
             fws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 const order = data.o;
