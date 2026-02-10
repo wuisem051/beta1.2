@@ -29,6 +29,8 @@ const AirtmCashierContent = () => {
         opsProcessed: 0,
         health: 98
     });
+    const [trafficLogs, setTrafficLogs] = useState([]);
+    const [selectedRawData, setSelectedRawData] = useState(null);
 
     const monitoringInterval = useRef(null);
     const audioRef = useRef(null);
@@ -65,6 +67,15 @@ const AirtmCashierContent = () => {
                     setLastSyncTime(new Date().toLocaleTimeString());
                     setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
                     processSingleOperation(op);
+                    // Agregar a logs de tráfico crudo
+                    setTrafficLogs(prev => [{
+                        id: Date.now(),
+                        type: 'EXTENSION_DATA',
+                        method: op.paymentMethodName || op.method || 'Desconocido',
+                        amount: op.amount || 0,
+                        raw: op,
+                        time: new Date().toLocaleTimeString()
+                    }, ...prev].slice(0, 50));
                 }
             }
         };
@@ -337,7 +348,21 @@ const AirtmCashierContent = () => {
             }
 
             // MERGE: Añadir las que no existan, no sobreescribir todo
-            filteredOps.forEach(op => processSingleOperation(op));
+            filteredOps.forEach(op => {
+                processSingleOperation(op);
+                // Agregar a logs de tráfico crudo desde Poll
+                setTrafficLogs(prev => {
+                    if (prev.some(log => log.raw?.id === op.id)) return prev;
+                    return [{
+                        id: Date.now() + Math.random(),
+                        type: 'POLL_DATA',
+                        method: op.method,
+                        amount: op.amount,
+                        raw: op,
+                        time: new Date().toLocaleTimeString()
+                    }, ...prev].slice(0, 50);
+                });
+            });
 
             // Log new discoveries
             if (filteredOps.length > 0) {
@@ -655,19 +680,37 @@ const AirtmCashierContent = () => {
                                                     </div>
 
                                                     {/* Central Amounts */}
-                                                    <div className="space-y-1 pl-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-xl font-black ${amountColor} tracking-tight`}>
-                                                                {op.isBuy ? '+' : '-'} ${parseFloat(op.amount).toFixed(2)} USDC
+                                                    <div className="space-y-3 pl-1">
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                                                {op.isBuy ? 'Monto Solicitado' : 'Monto de Retiro'}
+                                                            </span>
+                                                            <span className={`text-2xl font-black ${amountColor} tracking-tighter leading-none`}>
+                                                                {op.isBuy ? '+' : '-'} ${parseFloat(op.amount).toFixed(2)} <span className="text-xs font-bold opacity-60">USDC</span>
                                                             </span>
                                                         </div>
+
                                                         {op.localAmount > 0 && (
-                                                            <div className="flex flex-col text-xs font-bold text-slate-500">
-                                                                <span>{op.isBuy ? '-' : '+'} {op.localCurrency} {parseFloat(op.localAmount).toLocaleString()} {op.localCurrency}</span>
-                                                                {op.rate > 0 && (
-                                                                    <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-                                                                        $1.00 = {op.localCurrency} {op.rate}
+                                                            <div className="flex flex-col gap-1 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                                                    {op.isBuy ? 'Debes Enviar' : 'Te Llegará'}
+                                                                </span>
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="text-sm font-black text-slate-800">
+                                                                        {op.localCurrency} {parseFloat(op.localAmount).toLocaleString()}
                                                                     </span>
+                                                                    {op.rate > 0 && (
+                                                                        <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                                                            Rate: {op.rate}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                {isPaypal && (
+                                                                    <div className="mt-1 pt-1 border-t border-slate-200/50">
+                                                                        <span className="text-[8px] text-slate-400 font-bold italic">
+                                                                            * Estimado Paypal Net: {op.localCurrency} {(op.localAmount * 0.946 - 0.30).toFixed(2)}
+                                                                        </span>
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                         )}
@@ -732,6 +775,129 @@ const AirtmCashierContent = () => {
                     </div>
                 </div>
 
+            </div>
+
+            {/* Monitor de Operaciones Avanzado (NUEVO) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+                {/* Traffic Monitor Section */}
+                <div className="lg:col-span-2 bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden flex flex-col h-[600px]">
+                    <div className="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
+                        <div>
+                            <h2 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                Monitor de Tráfico en Tiempo Real
+                            </h2>
+                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Inspección profunda de datos entrantes</p>
+                        </div>
+                        <button
+                            onClick={() => setTrafficLogs([])}
+                            className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                        >
+                            <FaTrash />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-[#1e2329] z-10 shadow-md">
+                                <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5">
+                                    <th className="px-6 py-4">Hora</th>
+                                    <th className="px-6 py-4">Origen</th>
+                                    <th className="px-6 py-4">Método</th>
+                                    <th className="px-6 py-4">Monto</th>
+                                    <th className="px-6 py-4 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {trafficLogs.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" className="px-6 py-20 text-center opacity-30">
+                                            <div className="flex flex-col items-center">
+                                                <FaWifi size={32} className="mb-4 animate-pulse" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest">Escuchando tráfico de red...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    trafficLogs.map((log) => (
+                                        <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                                            <td className="px-6 py-4 text-[10px] font-mono text-slate-500">{log.time}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${log.type === 'EXTENSION_DATA' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                                                    {log.type === 'EXTENSION_DATA' ? 'Extension' : 'Polling'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-[11px] font-bold text-slate-300">{log.method}</td>
+                                            <td className="px-6 py-4 text-[11px] font-black text-white">${log.amount} USDC</td>
+                                            <td className="px-6 py-4 text-center">
+                                                <button
+                                                    onClick={() => setSelectedRawData(log.raw)}
+                                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[9px] font-black text-slate-400 hover:text-white uppercase transition-all"
+                                                >
+                                                    Ver JSON
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Inspect / Stats Column */}
+                <div className="space-y-8">
+                    {/* Raw Viewer Panel */}
+                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl h-[400px] flex flex-col">
+                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <FaLock className="text-emerald-500" /> Inspector de Datos
+                        </h2>
+                        {selectedRawData ? (
+                            <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                                <div className="bg-black/40 rounded-2xl p-4 font-mono text-[10px] text-emerald-400 overflow-y-auto flex-1 custom-scrollbar scrollbar-thin scrollbar-thumb-emerald-500/20">
+                                    <pre>{JSON.stringify(selectedRawData, null, 2)}</pre>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedRawData(null)}
+                                    className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest transition-all"
+                                >
+                                    Cerrar Inspector
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/5 rounded-3xl">
+                                <FaSearch size={32} className="mb-4" />
+                                <p className="text-[9px] font-black text-center uppercase leading-relaxed">Selecciona una operación<br />para inspeccionar metadatos</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* PayPal Logic Helper */}
+                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
+                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <div className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center text-[10px] font-black">P</div>
+                            Calculadora Paypal
+                        </h2>
+                        <div className="space-y-4">
+                            <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10">
+                                <p className="text-[10px] text-blue-400 font-bold mb-3 uppercase tracking-widest">Estimación de Comisiones</p>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[11px]">
+                                        <span className="text-slate-500">Comisión Paypal</span>
+                                        <span className="text-white font-bold">5.4% + $0.30</span>
+                                    </div>
+                                    <div className="flex justify-between text-[11px]">
+                                        <span className="text-slate-500">Mínimo Airtm</span>
+                                        <span className="text-white font-bold">$1.00 USDC</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-[9px] text-slate-500 italic leading-relaxed">
+                                * Las operaciones de PayPal suelen retener el 5.4% de la cantidad enviada. Verifica siempre el monto neto en el inspector de datos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
