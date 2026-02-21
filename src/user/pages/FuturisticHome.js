@@ -186,6 +186,70 @@ const FuturisticHome = () => {
         </div>
       </section>
 
+      {/* Community Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tighter leading-tight">
+            Únete a nuestra <span className="text-blue-500">Comunidad Elite</span>
+          </h2>
+          <p className="text-slate-500 text-lg md:text-xl max-w-2xl mx-auto mb-16 font-medium">
+            Forma parte del ecosistema de trading más avanzado. Comparte estrategias, solicita funciones y crece con nosotros.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <CommunityLink icon="📱" title="Telegram" desc="Señales en vivo" color="bg-blue-500" />
+            <CommunityLink icon="💬" title="Discord" desc="Debate & Ideas" color="bg-indigo-600" />
+            <CommunityLink icon="🐦" title="X (Twitter)" desc="Últimas noticias" color="bg-slate-900" />
+            <CommunityLink icon="🚀" title="GitHub" desc="Colabora en código" color="bg-slate-800" />
+          </div>
+        </div>
+      </section>
+      {siteConfig.showRoadmap !== false && (
+        <section className="py-32 relative overflow-hidden bg-white/5 border-y border-white/5">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2"></div>
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-24">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-4 block">Evolución del Proyecto</span>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tight italic">ROADMAP <span className="text-accent text-outline-white">2026</span></h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative">
+              {/* Visual Timeline Line */}
+              <div className="hidden lg:block absolute top-[100px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+              <RoadmapPhase
+                phase="Pase 01"
+                title="Cimientos & Alpha"
+                time="Q1 2026"
+                items={["Lanzamiento Terminal Spot", "Puente Airtm Pro Sync", "Gestión de Portafolio"]}
+                status="Completado"
+              />
+              <RoadmapPhase
+                phase="Pase 02"
+                title="Comunidad & Expansión"
+                time="Q2 2026"
+                items={["Sistema de Referidos VIP", "Hub de Señales Avanzado", "Soporte Multi-Exchange"]}
+                status="En Desarrollo"
+              />
+              <RoadmapPhase
+                phase="Pase 03"
+                title="IA & Automatización"
+                time="Q3 2026"
+                items={["CopyTrading Automatizado", "Asistente de Trading IA", "App Mobile Beta"]}
+                status="Próximamente"
+              />
+              <RoadmapPhase
+                phase="Pase 04"
+                title="Ecosistema Global"
+                time="Q4 2026"
+                items={["Integración DEX/DeFi", "Gobernanza de Comunidad", "Membresías NFT / Rareza"]}
+                status="Futuro"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA Final */}
       <section className="py-32">
         <div className="container mx-auto px-6">
@@ -257,5 +321,51 @@ const StepItem = ({ number, title, description }) => (
     </div>
   </div>
 );
+
+const CommunityLink = ({ icon, title, desc, color }) => (
+  <a href="#" className={`block p-8 rounded-[2rem] border border-white/5 hover:border-white/20 transition-all duration-300 group hover:-translate-y-2 backdrop-blur-sm bg-white/5`}>
+    <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-xl group-hover:scale-110 transition-transform`}>
+      {icon}
+    </div>
+    <h4 className="text-xl font-black mb-1 text-white">{title}</h4>
+    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-accent transition-colors">{desc}</p>
+  </a>
+);
+
+const RoadmapPhase = ({ phase, title, time, items, status }) => {
+  const isCompleted = status === 'Completado';
+  const isDoing = status === 'En Desarrollo';
+
+  return (
+    <div className="relative z-10 group">
+      <div className={`w-8 h-8 rounded-full mb-8 flex items-center justify-center border-2 transition-all duration-500 scale-125 mx-auto lg:mx-0 ${isCompleted ? 'bg-emerald-500 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]' :
+        isDoing ? 'bg-blue-600 border-blue-600 animate-pulse shadow-[0_0_20px_rgba(37,99,235,0.5)]' :
+          'bg-slate-900 border-white/20'
+        }`}>
+        {isCompleted && <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+      </div>
+
+      <div className="bg-white/5 border border-white/5 p-8 rounded-[2rem] hover:bg-white/[0.08] transition-all duration-300 backdrop-blur-sm group-hover:-translate-y-2">
+        <div className="flex justify-between items-start mb-4">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{phase}</span>
+          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${isCompleted ? 'bg-emerald-500/20 text-emerald-500' :
+            isDoing ? 'bg-blue-500/20 text-blue-500' : 'bg-white/5 text-slate-500'
+            }`}>{status}</span>
+        </div>
+        <h3 className="text-xl font-black mb-1 tracking-tight text-white">{title}</h3>
+        <p className="text-accent text-[11px] font-black italic mb-6 uppercase tracking-tighter">{time}</p>
+
+        <ul className="space-y-3">
+          {items.map((item, i) => (
+            <li key={i} className="flex gap-3 items-start text-xs font-bold text-slate-400">
+              <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-700'}`}></span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
 export default FuturisticHome;

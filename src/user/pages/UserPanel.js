@@ -1339,6 +1339,23 @@ const UserPanel = () => {
   const location = useLocation(); // Agregar useLocation para react-router
   const [userMiners, setUserMiners] = useState([]);
   const [unreadTicketsCount, setUnreadTicketsCount] = useState(0);
+  const [siteSettings, setSiteSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSiteSettings = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'siteConfig');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setSiteSettings(docSnap.data());
+        }
+      } catch (err) {
+        console.error("Error fetching site settings:", err);
+      }
+    };
+    fetchSiteSettings();
+  }, [db]);
+
   const [userBalances, setUserBalances] = useState({
     balanceUSD: 0,
     balanceBTC: 0,
@@ -1684,6 +1701,7 @@ const UserPanel = () => {
         unreadTicketsCount={unreadTicketsCount}
         displayUser={displayUser}
         isHidden={isSidebarHidden}
+        siteSettings={siteSettings}
       />
       <MainContent style={{
         marginLeft: isSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
@@ -1733,7 +1751,9 @@ const UserPanel = () => {
           <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
           <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
           <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
-          <Route path="exchange/*" element={<ExchangeContent />} /> {/* Nueva ruta para Exchange API */}
+          {(!siteSettings || siteSettings.showExchangeSection !== false) && (
+            <Route path="exchange/*" element={<ExchangeContent />} />
+          )}
           <Route path="cajero/*" element={<AirtmCashierContent />} /> {/* Nueva ruta para Cajero Airtm */}
           <Route path="whale-monitor/*" element={<WhaleMonitor />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />

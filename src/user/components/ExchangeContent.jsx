@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import styles from '../pages/UserPanel.module.css';
 import {
@@ -414,6 +414,30 @@ const ExchangeContent = () => {
         }
     };
 
+    const handleDeleteConnection = async (exchangeName) => {
+        if (!window.confirm(`¿Estás seguro de que deseas eliminar la vinculación con ${exchangeName.toUpperCase()}?`)) {
+            return;
+        }
+
+        try {
+            if (!currentUser?.uid) return;
+
+            const secretRef = doc(db, 'users', currentUser.uid, 'secrets', exchangeName);
+            await deleteDoc(secretRef);
+
+            // Actualizar estado local
+            setConfigs(prev => ({
+                ...prev,
+                [exchangeName]: { apiKey: '', secret: '', connected: false }
+            }));
+
+            alert(`Vinculación con ${exchangeName.toUpperCase()} eliminada correctamente.`);
+        } catch (error) {
+            console.error("Delete error:", error);
+            setErrorMsg("Error al eliminar vinculación: " + error.message);
+        }
+    };
+
     const handleInputChange = (exchange, field, value) => {
         setConfigs(prev => ({
             ...prev,
@@ -599,6 +623,16 @@ const ExchangeContent = () => {
                                                         </>
                                                     )}
                                                 </button>
+
+                                                {isConnected && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteConnection(exName)}
+                                                        className="w-full mt-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white font-black py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-widest text-[9px] border border-rose-500/20"
+                                                    >
+                                                        <FaHistory className="rotate-45" /> Eliminar Vinculación
+                                                    </button>
+                                                )}
                                             </div>
                                         </form>
                                     </div>

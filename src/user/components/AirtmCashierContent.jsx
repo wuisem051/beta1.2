@@ -31,6 +31,11 @@ const AirtmCashierContent = () => {
     });
     const [trafficLogs, setTrafficLogs] = useState([]);
     const [selectedRawData, setSelectedRawData] = useState(null);
+    const [extensionConfig, setExtensionConfig] = useState({
+        url: '',
+        version: '1.0.0'
+    });
+    const [showGuide, setShowGuide] = useState(false);
 
     const monitoringInterval = useRef(null);
     const audioRef = useRef(null);
@@ -180,7 +185,24 @@ const AirtmCashierContent = () => {
                 // Silencio total para no alarmar al usuario, se usa el local o el default
             }
         };
+        const loadExtensionConfig = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'siteConfig');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setExtensionConfig({
+                        url: data.airtmExtensionUrl || '',
+                        version: data.airtmExtensionVersion || '1.0.0'
+                    });
+                }
+            } catch (err) {
+                console.error("Error loading extension config:", err);
+            }
+        };
+
         loadSettings();
+        loadExtensionConfig();
     }, [currentUser]);
 
     const saveSettings = async (newData) => {
@@ -481,6 +503,39 @@ const AirtmCashierContent = () => {
                 </div>
             </div>
 
+            {/* Quick Setup Guide Modal/Section */}
+            {showGuide && (
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-[30px] p-8 animate-in zoom-in duration-300">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                            <span className="bg-blue-500 p-2 rounded-lg text-sm">📖</span>
+                            Guía de Configuración Airtm Elite
+                        </h2>
+                        <button onClick={() => setShowGuide(false)} className="text-slate-500 hover:text-white transition-colors">
+                            <FaTrash /> Ocultar Guía
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 01</span>
+                            <h3 className="font-bold text-white text-sm">Descargar Puente</h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Descarga el archivo <code>.zip</code> de la extensión desde el botón "Descargar Extensión" en el panel de Estado.</p>
+                        </div>
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 02</span>
+                            <h3 className="font-bold text-white text-sm">Instalar en Chrome</h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Ve a <code>chrome://extensions</code>, activa "Modo Desarrollador" y arrastra o carga la carpeta descomprimida.</p>
+                        </div>
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 03</span>
+                            <h3 className="font-bold text-white text-sm">Login & Sync</h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com y mantén la pestaña abierta. El panel detectará la conexión automáticamente.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Column 1: Config & Filters */}
                 <div className="space-y-8">
@@ -496,7 +551,10 @@ const AirtmCashierContent = () => {
                                     <FaShieldAlt className={isExtensionLinked ? 'text-emerald-500' : 'text-slate-500'} />
                                     Estado del Nodo
                                 </span>
-                                {isExtensionLinked && <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] rounded-full border border-emerald-500/20 animate-pulse">LIVE</span>}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-bold text-slate-500 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">v{extensionConfig.version}</span>
+                                    {isExtensionLinked && <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] rounded-full border border-emerald-500/20 animate-pulse">LIVE</span>}
+                                </div>
                             </h2>
 
                             <div className="flex flex-col items-center mb-8">
@@ -516,11 +574,19 @@ const AirtmCashierContent = () => {
                                     <p className={`text-lg font-black uppercase tracking-tighter ${isExtensionLinked ? 'text-white' : 'text-slate-500'}`}>
                                         {isExtensionLinked ? 'Núcleo Vinculado' : 'Nodo en Espera'}
                                     </p>
-                                    <div className="flex items-center gap-2 justify-center">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-ping' : 'bg-slate-700'}`}></div>
-                                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                                            {isExtensionLinked ? 'Tráfico encriptado AES-256' : 'Abre Airtm para activar el puente'}
-                                        </p>
+                                    <div className="flex flex-col items-center gap-2 justify-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-ping' : 'bg-slate-700'}`}></div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                                {isExtensionLinked ? 'Tráfico encriptado AES-256' : 'Extensión no detectada'}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowGuide(!showGuide)}
+                                            className="text-[9px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest transition-colors mb-2 cursor-pointer"
+                                        >
+                                            {showGuide ? 'Cerrar Instrucciones' : '¿Cómo configurar?'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -554,6 +620,16 @@ const AirtmCashierContent = () => {
                                         <img src="https://static.airtm.com/favicon-32x32.png" alt="A" className="w-4 h-4" />
                                     </div>
                                     Sincronizar Airtm Elite
+                                </button>
+                            )}
+
+                            {extensionConfig.url && (
+                                <button
+                                    onClick={() => window.open(extensionConfig.url, '_blank')}
+                                    className="w-full mt-3 py-4 bg-white/5 hover:bg-white/10 text-white rounded-[24px] text-[9px] font-black uppercase tracking-[0.2em] transition-all border border-white/5 flex items-center justify-center gap-3"
+                                >
+                                    <FaPlus size={12} className="text-blue-400" />
+                                    Descargar Extensión v{extensionConfig.version}
                                 </button>
                             )}
                         </div>

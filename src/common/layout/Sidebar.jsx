@@ -10,7 +10,7 @@ import {
 
 import candadoIcon from '../../imagens/candado.png';
 
-const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser, isHidden }) => {
+const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignalsAsRead, displayUser, isHidden, siteSettings }) => {
   const { darkMode } = useContext(ThemeContext);
   const { pathname } = useLocation();
   const basePath = pathname.split('/').slice(0, 2).join('/');
@@ -148,7 +148,9 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             />
             {openMenus.trading && (
               <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
-                <NavLink to="/user/exchange" label="Terminal Spot" isActive={pathname.includes('/exchange')} />
+                {(!siteSettings || siteSettings.showExchangeSection !== false) && (
+                  <NavLink to="/user/exchange" label="Terminal Spot" isActive={pathname.includes('/exchange')} />
+                )}
                 <NavLink to="/user/whale-monitor" label="Monitor Ballenas" isActive={pathname.includes('/whale-monitor')} />
                 <NavLink to="/user/miners" label="Señales VIP" isActive={pathname.includes('/miners')} />
                 <NavLink to="/user/mining-portfolio" label="Mi Portafolio" isActive={pathname.includes('/mining-portfolio')} />

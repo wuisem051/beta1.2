@@ -13,6 +13,10 @@ const SiteSettingsContent = () => {
   const [faviconUrl, setFaviconUrl] = useState('');
   const [faviconFile, setFaviconFile] = useState(null);
   const [footerText, setFooterText] = useState('');
+  const [airtmExtensionUrl, setAirtmExtensionUrl] = useState('');
+  const [airtmExtensionVersion, setAirtmExtensionVersion] = useState('');
+  const [showExchangeSection, setShowExchangeSection] = useState(true);
+  const [showRoadmap, setShowRoadmap] = useState(true);
 
   // Features
   const [f1Title, setF1Title] = useState('');
@@ -97,6 +101,10 @@ const SiteSettingsContent = () => {
           setFooterLink2Text(data.footerLink2Text || 'Privacidad');
           setFooterLink3Text(data.footerLink3Text || 'Seguridad');
           setFooterLink4Text(data.footerLink4Text || 'Twitter');
+          setAirtmExtensionUrl(data.airtmExtensionUrl || '');
+          setAirtmExtensionVersion(data.airtmExtensionVersion || '1.0.0');
+          setShowExchangeSection(data.showExchangeSection !== undefined ? data.showExchangeSection : true);
+          setShowRoadmap(data.showRoadmap !== undefined ? data.showRoadmap : true);
         } else {
           // Si no existe, crear con valores por defecto
           try {
@@ -130,7 +138,11 @@ const SiteSettingsContent = () => {
               footerLink1Text: 'Legal',
               footerLink2Text: 'Privacidad',
               footerLink3Text: 'Seguridad',
-              footerLink4Text: 'Twitter'
+              footerLink4Text: 'Twitter',
+              airtmExtensionUrl: '',
+              airtmExtensionVersion: '1.0.0',
+              showExchangeSection: true,
+              showRoadmap: true
             });
             setSiteName('MaxiOS');
             setHomeText('Maximiza tus ganancias replicando a los mejores traders en tiempo real.');
@@ -185,7 +197,10 @@ const SiteSettingsContent = () => {
         hiwTitle, s1Title, s1Desc, s2Title, s2Desc, s3Title, s3Desc,
         ctaTitle, ctaText, ctaBtnText,
         heroBtn1Text, heroBtn2Text,
-        footerLink1Text, footerLink2Text, footerLink3Text, footerLink4Text
+        footerLink1Text, footerLink2Text, footerLink3Text, footerLink4Text,
+        airtmExtensionUrl, airtmExtensionVersion,
+        showExchangeSection,
+        showRoadmap
       };
 
       const docRef = doc(db, 'settings', 'siteConfig');
@@ -472,6 +487,75 @@ const SiteSettingsContent = () => {
               <label className="text-[10px] font-bold text-slate-500 px-1">LINK 4</label>
               <input type="text" value={footerLink4Text} onChange={(e) => setFooterLink4Text(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs" />
             </div>
+          </div>
+        </div>
+
+        {/* Sección Airtm Extension */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🧩</span>
+            Configuración de Extensión Airtm
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="airtmExtensionUrl" className="text-sm font-medium text-slate-400">URL de Descarga de la Extensión</label>
+              <input
+                type="text"
+                id="airtmExtensionUrl"
+                value={airtmExtensionUrl}
+                onChange={(e) => setAirtmExtensionUrl(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                placeholder="https://ejemplo.com/extension.zip"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="airtmExtensionVersion" className="text-sm font-medium text-slate-400">Versión de la Extensión</label>
+              <input
+                type="text"
+                id="airtmExtensionVersion"
+                value={airtmExtensionVersion}
+                onChange={(e) => setAirtmExtensionVersion(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                placeholder="Ej: 1.0.5"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Sección Funcionalidades */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-lg space-y-6">
+          <h3 className="text-xl font-semibold text-blue-400 flex items-center gap-2 mb-2">
+            <span className="bg-blue-500/10 p-2 rounded-lg text-sm">🛠️</span>
+            Control de Funcionalidades
+          </h3>
+
+          <div className="flex items-center justify-between p-4 bg-slate-900 border border-slate-700 rounded-2xl">
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-white uppercase tracking-widest">Sección Conexión Exchange</span>
+              <span className="text-[10px] text-slate-500 font-medium">Si se desactiva, los usuarios no verán la opción de vincular exchanges.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowExchangeSection(!showExchangeSection)}
+              className={`w-14 h-7 rounded-full transition-all relative ${showExchangeSection ? 'bg-blue-600' : 'bg-slate-700'}`}
+            >
+              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-md ${showExchangeSection ? 'left-8' : 'left-1'}`}></div>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-slate-900 border border-slate-700 rounded-2xl">
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-white uppercase tracking-widest">Sección Roadmap (Home)</span>
+              <span className="text-[10px] text-slate-500 font-medium">Muestra la hoja de ruta del proyecto en la página de inicio.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRoadmap(!showRoadmap)}
+              className={`w-14 h-7 rounded-full transition-all relative ${showRoadmap ? 'bg-blue-600' : 'bg-slate-700'}`}
+            >
+              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow-md ${showRoadmap ? 'left-8' : 'left-1'}`}></div>
+            </button>
           </div>
         </div>
 
