@@ -516,21 +516,34 @@ const AirtmCashierContent = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 01</span>
-                            <h3 className="font-bold text-white text-sm">Descargar Puente</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Descarga el archivo <code>.zip</code> de la extensión desde el botón "Descargar Extensión" en el panel de Estado.</p>
+                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                                <span className="group-hover:scale-110 transition-transform">📥</span> Descargar Puente
+                            </h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Descarga el archivo <code>.zip</code> de la extensión pro desde el botón "Descargar" en el panel de Estado.</p>
                         </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 02</span>
-                            <h3 className="font-bold text-white text-sm">Instalar en Chrome</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Ve a <code>chrome://extensions</code>, activa "Modo Desarrollador" y arrastra o carga la carpeta descomprimida.</p>
+                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                                <span className="group-hover:scale-110 transition-transform">🛠️</span> Instalar Nodo
+                            </h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">En <code>chrome://extensions</code>, activa "Modo Desarrollador" y carga la carpeta de la extensión descomprimida.</p>
                         </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5">
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 03</span>
-                            <h3 className="font-bold text-white text-sm">Login & Sync</h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com y mantén la pestaña abierta. El panel detectará la conexión automáticamente.</p>
+                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                                <span className="group-hover:scale-110 transition-transform">🔄</span> Sincronización
+                            </h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com. El panel detectará el nodo automáticamente y mostrará el estado "Sincronizado".</p>
+                        </div>
+                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group">
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Paso 04</span>
+                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                                <span className="group-hover:scale-110 transition-transform">⚡</span> Uso & Aceptación
+                            </h3>
+                            <p className="text-xs text-slate-400 leading-relaxed">Haz clic en "Iniciar Escaneo". Las órdenes aparecerán en tiempo real. Usa el botón "Aceptar" para tomarlas al instante.</p>
                         </div>
                     </div>
                 </div>
