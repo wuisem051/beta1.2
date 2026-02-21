@@ -504,46 +504,61 @@ const AirtmCashierContent = () => {
             </div>
 
             {/* Quick Setup Guide Modal/Section */}
-            {showGuide && (
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-[30px] p-8 animate-in zoom-in duration-300">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                            <span className="bg-blue-500 p-2 rounded-lg text-sm">📖</span>
-                            Guía de Configuración Airtm Elite
-                        </h2>
-                        <button onClick={() => setShowGuide(false)} className="text-slate-500 hover:text-white transition-colors">
-                            <FaTrash /> Ocultar Guía
-                        </button>
-                    </div>
+            {(!isExtensionLinked || showGuide) && (
+                <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 rounded-[30px] p-8 animate-in zoom-in duration-300 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6 relative z-10">
+                        <div>
+                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                                <span className="bg-blue-600 p-2 rounded-xl text-sm shadow-lg">📖</span>
+                                Guía de Configuración Airtm Pro
+                            </h2>
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Sigue estos pasos para activar el monitoreo de alta frecuencia</p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            {extensionConfig.url && (
+                                <button
+                                    onClick={() => window.open(extensionConfig.url, '_blank')}
+                                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 animate-bounce"
+                                >
+                                    📥 Descargar Extensión v{extensionConfig.version}
+                                </button>
+                            )}
+                            <button onClick={() => setShowGuide(false)} className="px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
+                                Ocultar Guía
+                            </button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 01</span>
                             <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">📥</span> Descargar Puente
+                                <span className="group-hover:scale-110 transition-transform">📥</span> Obtener Puente
                             </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Descarga el archivo <code>.zip</code> de la extensión pro desde el botón "Descargar" en el panel de Estado.</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">Haz clic en el botón azul para descargar el núcleo <code>.zip</code> de la extensión.</p>
                         </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
+                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 02</span>
                             <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">🛠️</span> Instalar Nodo
+                                <span className="group-hover:scale-110 transition-transform">🛠️</span> Instalación Manual
                             </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">En <code>chrome://extensions</code>, activa "Modo Desarrollador" y carga la carpeta de la extensión descomprimida.</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">En <code>chrome://extensions</code>, activa "Modo Desarrollador" y carga la carpeta descomprimida.</p>
                         </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
+                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
                             <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 03</span>
                             <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">🔄</span> Sincronización
+                                <span className="group-hover:scale-110 transition-transform">🔄</span> Sincronizar Cuenta
                             </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com. El panel detectará el nodo automáticamente y mostrará el estado "Sincronizado".</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com. El panel detectará el nodo automáticamente al instante.</p>
                         </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11] rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all group">
+                        <div className="space-y-3 p-6 bg-emerald-500/5 backdrop-blur-md rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all group">
                             <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Paso 04</span>
                             <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">⚡</span> Uso & Aceptación
+                                <span className="group-hover:scale-110 transition-transform">⚡</span> ¡Listo para Operar!
                             </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Haz clic en "Iniciar Escaneo". Las órdenes aparecerán en tiempo real. Usa el botón "Aceptar" para tomarlas al instante.</p>
+                            <p className="text-xs text-slate-400 leading-relaxed">Presiona "Iniciar Escaneo". El tráfico fluirá en el panel y podrás aceptar órdenes.</p>
                         </div>
                     </div>
                 </div>
