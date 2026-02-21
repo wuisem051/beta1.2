@@ -35,7 +35,7 @@ const AirtmCashierContent = () => {
         url: '',
         version: '1.0.0'
     });
-    const [showGuide, setShowGuide] = useState(false);
+    const [showGuide, setShowGuide] = useState(true);
 
     const monitoringInterval = useRef(null);
     const audioRef = useRef(null);
@@ -504,7 +504,7 @@ const AirtmCashierContent = () => {
             </div>
 
             {/* Quick Setup Guide Modal/Section */}
-            {(!isExtensionLinked || showGuide) && (
+            {showGuide && (
                 <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 rounded-[30px] p-8 animate-in zoom-in duration-300 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
