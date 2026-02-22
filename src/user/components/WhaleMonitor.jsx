@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
     FaFish, FaWater, FaExchangeAlt, FaArrowRight, FaClock,
     FaSearchDollar, FaShieldAlt, FaChartLine, FaBroadcastTower,
-    FaArrowUp, FaArrowDown, FaFireAlt, FaSkull, FaBell, FaVolumeUp, FaEye
+    FaArrowUp, FaArrowDown, FaFireAlt, FaSkull, FaBell, FaVolumeUp, FaEye,
+    FaRadiation, FaExclamationTriangle
 } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -49,7 +50,7 @@ const WhaleMonitor = () => {
         const currentCoinLiqs = liquidations.filter(l => l.symbol === selectedCoin);
 
         currentCoinLiqs.forEach(liq => {
-            const step = selectedCoin === 'ARPA' ? 0.0002 : selectedCoin === 'LTC' ? 0.1 : 0.005;
+            const step = selectedCoin === 'ARPA' ? 0.0001 : selectedCoin === 'LTC' ? 0.1 : 0.005;
             const bucketPrice = Math.round(liq.price / step) * step;
             const key = `${bucketPrice.toFixed(4)}`;
 
@@ -433,21 +434,30 @@ const WhaleMonitor = () => {
                                         ? `rgba(244, 63, 94, ${0.1 + intensity * 0.9})` // Rose
                                         : `rgba(16, 185, 129, ${0.1 + intensity * 0.9})`; // Emerald
 
+                                    const isHighVol = intensity > 0.7;
+                                    const isLongZone = bucket.longs > bucket.shorts * 2 && bucket.longs > 5000;
+                                    const isShortZone = bucket.shorts > bucket.longs * 2 && bucket.shorts > 5000;
+
                                     return (
                                         <motion.div
                                             key={bucket.price}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.01 }}
-                                            className="w-full flex items-center group cursor-pointer py-0.5"
+                                            transition={{ delay: i * 0.005 }}
+                                            className="w-full flex items-center group cursor-pointer py-1"
                                         >
-                                            <div className="w-24 text-right pr-6">
-                                                <p className="text-[10px] font-black text-slate-500 group-hover:text-white transition-colors">
+                                            <div className="w-28 text-right pr-6 relative">
+                                                <p className={`text-[10px] font-black transition-colors ${isHighVol ? 'text-white' : 'text-slate-500 group-hover:text-white'}`}>
                                                     ${selectedCoin === 'ARPA' ? bucket.price.toFixed(5) : bucket.price.toFixed(2)}
                                                 </p>
+                                                {isHighVol && (
+                                                    <div className="absolute -left-4 top-0 animate-pulse">
+                                                        <FaRadiation className="text-orange-500 text-[8px]" />
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            <div className="flex-1 h-3 relative flex items-center">
+                                            <div className="flex-1 h-4 relative flex items-center">
                                                 <div className="absolute inset-0 bg-white/[0.01] rounded-full"></div>
                                                 <motion.div
                                                     className="h-full rounded-full relative overflow-hidden"
@@ -459,18 +469,37 @@ const WhaleMonitor = () => {
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
                                                 </motion.div>
-                                                {intensity > 0.3 && (
-                                                    <span className="ml-4 text-[8px] font-black text-white/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        ${Math.round(bucket.total / 1000)}k
-                                                    </span>
-                                                )}
+
+                                                {/* Labels de Zonas Críticas */}
+                                                <div className="flex items-center gap-3 ml-4">
+                                                    {intensity > 0.3 && (
+                                                        <span className="text-[8px] font-black text-white/40 whitespace-nowrap">
+                                                            ${Math.round(bucket.total / 1000)}k
+                                                        </span>
+                                                    )}
+                                                    {isHighVol && (
+                                                        <span className="px-2 py-0.5 bg-orange-600 text-white text-[7px] font-black rounded-sm animate-pulse tracking-tighter">
+                                                            HIGH VOLUME CLUSTER
+                                                        </span>
+                                                    )}
+                                                    {isLongZone && (
+                                                        <span className="px-2 py-0.5 bg-rose-600/20 text-rose-500 border border-rose-500/30 text-[7px] font-black rounded-sm uppercase tracking-tighter flex items-center gap-1">
+                                                            <FaExclamationTriangle size={6} /> LONG LIQ (SUPPORT)
+                                                        </span>
+                                                    )}
+                                                    {isShortZone && (
+                                                        <span className="px-2 py-0.5 bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 text-[7px] font-black rounded-sm uppercase tracking-tighter flex items-center gap-1">
+                                                            <FaExclamationTriangle size={6} /> SHORT LIQ (CEILING)
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </motion.div>
                                     );
                                 })}
                             </div>
 
-                            <div className="absolute left-0 right-0 top-1/2 border-t-2 border-dashed border-orange-500/30 z-10">
+                            <div className="absolute left-0 right-0 top-1/2 border-t-2 border-dashed border-orange-500/30 z-10 pointer-events-none">
                                 <div className="absolute left-4 -top-3 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded shadow-xl uppercase">
                                     Current Market Zone
                                 </div>
