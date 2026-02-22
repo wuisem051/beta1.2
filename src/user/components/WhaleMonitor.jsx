@@ -22,9 +22,8 @@ const WhaleMonitor = () => {
 
     // --- BREAKOUT LOG STATE ---
     const [breakoutLog, setBreakoutLog] = useState([
-        { id: 1, time: '06:00:24', price: 0.05423, move: '+15.2%', vol: '$1.2M', type: 'EXPLOSIVE' },
-        { id: 2, time: '04:15:10', price: 0.04812, move: '+5.4%', vol: '$450K', type: 'SPIKE' },
-        { id: 3, time: '01:30:05', price: 0.04655, move: '-3.1%', vol: '$320K', type: 'DROP' }
+        { id: 1, time: '06:00:24', price: 0.00978, move: '+15.2%', vol: '$1.2M', type: 'EXPLOSIVE' },
+        { id: 2, time: '04:15:10', price: 0.00845, move: '+5.4%', vol: '$450K', type: 'SPIKE' }
     ]);
 
     // ARPA Specific Metrics
