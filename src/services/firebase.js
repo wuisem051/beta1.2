@@ -16,16 +16,9 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Ajustar authDomain dinámicamente según el dominio actual para soportar múltiples URLs
-const currentHostname = window.location.hostname;
-if (currentHostname !== "localhost" && !currentHostname.includes("127.0.0.1")) {
-  // Si estamos en Netlify o en el dominio propio, usamos ese dominio para Auth
-  if (currentHostname.endsWith("netlify.app") || currentHostname === "lyonkim.site") {
-    firebaseConfig.authDomain = currentHostname;
-  } else if (process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE) {
-    firebaseConfig.authDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE;
-  }
-}
+// Mantener el authDomain original de Firebase para asegurar la compatibilidad con Auth
+// Los dominios permitidos deben agregarse en la consola de Firebase (Autenticación > Configuración > Dominios autorizados)
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
