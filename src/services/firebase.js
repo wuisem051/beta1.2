@@ -16,9 +16,15 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Override authDomain for specific environments (e.g., Netlify preview URLs)
-if (process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE && window.location.hostname !== "localhost") {
-  firebaseConfig.authDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE;
+// Ajustar authDomain dinámicamente según el dominio actual para soportar múltiples URLs
+const currentHostname = window.location.hostname;
+if (currentHostname !== "localhost" && !currentHostname.includes("127.0.0.1")) {
+  // Si estamos en Netlify o en el dominio propio, usamos ese dominio para Auth
+  if (currentHostname.endsWith("netlify.app") || currentHostname === "lyonkim.site") {
+    firebaseConfig.authDomain = currentHostname;
+  } else if (process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE) {
+    firebaseConfig.authDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN_OVERRIDE;
+  }
 }
 
 // Initialize Firebase
