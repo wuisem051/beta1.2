@@ -52,6 +52,8 @@ body {
   /* Por defecto, usa el tema claro */
   background-color: var(--light-bg);
   color: var(--dark-text);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* Aplicar estilos del modo oscuro cuando la clase 'dark' está en el body */

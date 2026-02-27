@@ -456,9 +456,14 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   }, [userBalances]);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8 relative">
+      <div className="absolute top-4 right-4 z-10 hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        Sistema v1.02 Beta
+      </div>
+
       {/* Premium Profile Slot */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 mt-6">
         <div className="lg:col-span-2 bg-[#1e2329] p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
