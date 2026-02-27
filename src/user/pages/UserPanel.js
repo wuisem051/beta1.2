@@ -1704,9 +1704,10 @@ const UserPanel = () => {
         siteSettings={siteSettings}
       />
       <MainContent style={{
-        marginLeft: isSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
-        width: isSidebarHidden ? '100%' : 'calc(100% - var(--sidebar-width, 16rem))',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        paddingLeft: isSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
+        width: '100%',
+        boxSizing: 'border-box',
+        transition: 'padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
         {/* Toggle Sidebar Button - Modern & Floating */}
         <button
