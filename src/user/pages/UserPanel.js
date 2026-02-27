@@ -1743,25 +1743,49 @@ const UserPanel = () => {
         <Routes>
           <Route path="dashboard/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
           <Route path="contact-support/*" element={<ContactSupportContent onUnreadCountChange={handleUnreadCountChange} styles={styles} />} />
-          <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
-          <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} /> {/* Nueva ruta para Portafolio de Trading */}
-          {/* Rutas Unificadas de Billetera */}
-          <Route path="my-wallet/*" element={<WalletHub />} />
-          <Route path="withdrawals/*" element={<WalletHub />} />
-          <Route path="deposits/*" element={<WalletHub />} />
+          <Route path="updates/*" element={<UpdatesContent styles={styles} />} />
 
-          <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} /> {/* Nueva ruta para el Mercado P2P */}
-          <Route path="collective-fund/*" element={<CollectiveFundContent />} /> {/* Nueva ruta para Fondo Colectivo */}
-          <Route path="bonus/*" element={<BonusContent styles={styles} />} /> {/* Nueva ruta para Bonos */}
-          <Route path="updates/*" element={<UpdatesContent styles={styles} />} /> {/* Nueva ruta para Actualizaciones */}
-          <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} /> {/* Nueva ruta para Plan Trading */}
-          <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para Chat VIP */}
-          <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} /> {/* Nueva ruta para el Panel de Copy Trader */}
+          {(!siteSettings || siteSettings.showReferrals !== false) && (
+            <Route path="referrals/*" element={<ReferralsContent styles={styles} />} />
+          )}
+          {(!siteSettings || siteSettings.showTradingPortfolio !== false) && (
+            <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} />
+          )}
+
+          <Route path="my-wallet/*" element={<WalletHub />} />
+          {(!siteSettings || siteSettings.showWithdrawals !== false) && (
+            <Route path="withdrawals/*" element={<WalletHub />} />
+          )}
+          {(!siteSettings || siteSettings.showDeposits !== false) && (
+            <Route path="deposits/*" element={<WalletHub />} />
+          )}
+          {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
+            <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} />
+          )}
+          {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
+            <Route path="collective-fund/*" element={<CollectiveFundContent />} />
+          )}
+
+          <Route path="bonus/*" element={<BonusContent styles={styles} />} />
+
+          {(!siteSettings || siteSettings.showPlanTrading !== false) && (
+            <Route path="plan-trading/*" element={<PlanTradingContent styles={styles} />} />
+          )}
+          {(!siteSettings || siteSettings.showVipChat !== false) && (
+            <Route path="vip-chat/*" element={<VIPChatContent styles={styles} userBalances={userBalances} />} />
+          )}
+          {(!siteSettings || siteSettings.showCopyTrading !== false) && (
+            <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} />
+          )}
           {(!siteSettings || siteSettings.showExchangeSection !== false) && (
             <Route path="exchange/*" element={<ExchangeContent />} />
           )}
-          <Route path="cajero/*" element={<AirtmCashierContent />} /> {/* Nueva ruta para Cajero Airtm */}
-          <Route path="whale-monitor/*" element={<WhaleMonitor />} />
+          {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
+            <Route path="cajero/*" element={<AirtmCashierContent />} />
+          )}
+          {(!siteSettings || siteSettings.showWhaleMonitor !== false) && (
+            <Route path="whale-monitor/*" element={<WhaleMonitor />} />
+          )}
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />

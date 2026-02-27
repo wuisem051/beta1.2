@@ -130,10 +130,18 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             {openMenus.wallet && (
               <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
                 <NavLink to="/user/my-wallet" label="Resumen" isActive={pathname === '/user/my-wallet'} />
-                <NavLink to="/user/deposits" label="Depósito" isActive={pathname.includes('/deposits')} />
-                <NavLink to="/user/withdrawals" label="Retiro" isActive={pathname.includes('/withdrawals')} />
-                <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
-                <NavLink to="/user/cajero" label="Cajero Airtm" isActive={pathname.includes('/cajero')} />
+                {(!siteSettings || siteSettings.showDeposits !== false) && (
+                  <NavLink to="/user/deposits" label="Depósito" isActive={pathname.includes('/deposits')} />
+                )}
+                {(!siteSettings || siteSettings.showWithdrawals !== false) && (
+                  <NavLink to="/user/withdrawals" label="Retiro" isActive={pathname.includes('/withdrawals')} />
+                )}
+                {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
+                  <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
+                )}
+                {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
+                  <NavLink to="/user/cajero" label="Cajero Airtm" isActive={pathname.includes('/cajero')} />
+                )}
               </div>
             )}
           </div>
@@ -151,30 +159,42 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showExchangeSection !== false) && (
                   <NavLink to="/user/exchange" label="Terminal Spot" isActive={pathname.includes('/exchange')} />
                 )}
-                <NavLink to="/user/whale-monitor" label="Monitor Ballenas" isActive={pathname.includes('/whale-monitor')} />
-                <NavLink to="/user/miners" label="Señales VIP" isActive={pathname.includes('/miners')} />
-                <NavLink to="/user/mining-portfolio" label="Mi Portafolio" isActive={pathname.includes('/mining-portfolio')} />
-                <NavLink to="/user/plan-trading" label="Plan de Trading" isActive={pathname.includes('/plan-trading')} />
+                {(!siteSettings || siteSettings.showWhaleMonitor !== false) && (
+                  <NavLink to="/user/whale-monitor" label="Monitor Ballenas" isActive={pathname.includes('/whale-monitor')} />
+                )}
+                {(!siteSettings || siteSettings.showCopyTrading !== false) && (
+                  <NavLink to="/user/miners" label="Señales VIP" isActive={pathname.includes('/miners')} />
+                )}
+                {(!siteSettings || siteSettings.showTradingPortfolio !== false) && (
+                  <NavLink to="/user/mining-portfolio" label="Mi Portafolio" isActive={pathname.includes('/mining-portfolio')} />
+                )}
+                {(!siteSettings || siteSettings.showPlanTrading !== false) && (
+                  <NavLink to="/user/plan-trading" label="Plan de Trading" isActive={pathname.includes('/plan-trading')} />
+                )}
               </div>
             )}
           </div>
 
           {/* Fondo Colectivo */}
-          <NavLink
-            to="/user/collective-fund"
-            icon={<FaUsers />}
-            label="Fondo Colectivo"
-            isActive={pathname.includes('/collective-fund')}
-          />
+          {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
+            <NavLink
+              to="/user/collective-fund"
+              icon={<FaUsers />}
+              label="Fondo Colectivo"
+              isActive={pathname.includes('/collective-fund')}
+            />
+          )}
 
           {/* Chat VIP */}
-          <NavLink
-            to={isVIP ? "/user/vip-chat" : "#"}
-            icon={<FaGem />}
-            label="Chat Privado VIP"
-            isActive={pathname.includes('/vip-chat')}
-            onClick={handleVIPChatClick}
-          />
+          {(!siteSettings || siteSettings.showVipChat !== false) && (
+            <NavLink
+              to={isVIP ? "/user/vip-chat" : "#"}
+              icon={<FaGem />}
+              label="Chat Privado VIP"
+              isActive={pathname.includes('/vip-chat')}
+              onClick={handleVIPChatClick}
+            />
+          )}
 
           <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">SISTEMA</div>
 
@@ -205,7 +225,9 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             {openMenus.account && (
               <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
                 <NavLink to="/user/settings" label="Ajustes" isActive={pathname.includes('/settings')} />
-                <NavLink to="/user/referrals" label="Referidos" isActive={pathname.includes('/referrals')} />
+                {(!siteSettings || siteSettings.showReferrals !== false) && (
+                  <NavLink to="/user/referrals" label="Referidos" isActive={pathname.includes('/referrals')} />
+                )}
               </div>
             )}
           </div>
