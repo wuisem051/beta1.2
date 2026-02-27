@@ -7,6 +7,12 @@
   node_bundler = "esbuild"
 
 [[redirects]]
+  from = "/api/coingecko/*"
+  to = "https://api.coingecko.com/api/v3/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

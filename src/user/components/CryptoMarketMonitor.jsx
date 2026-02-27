@@ -28,9 +28,11 @@ const CryptoMarketMonitor = () => {
         setError(null);
 
         try {
-            const response = await fetch(
-                'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d'
-            );
+            const apiUrl = process.env.NODE_ENV === 'development'
+                ? 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d'
+                : '/api/coingecko/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d';
+
+            const response = await fetch(apiUrl);
 
             if (!response.ok) {
                 throw new Error('Error al obtener datos del mercado');
