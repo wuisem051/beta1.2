@@ -31,7 +31,7 @@ const Footer = () => {
   return (
     <footer className={`border-t ${theme.borderColor}`} style={{ backgroundColor: 'var(--bg-main)' }}> {/* Aplicar clases de tema y fondo dinámico */}
       <div className={`container mx-auto py-6 px-4 text-center ${theme.textSoft}`}> {/* Aplicar clases de tema */}
-        <p>{footerText} <Link to="/admin-login" className={`${theme.textSoft}`}>dev</Link></p> {/* Aplicar clases de tema */}
+        <p>{footerText}</p> {/* Aplicar clases de tema */}
       </div>
     </footer>
   );
