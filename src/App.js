@@ -17,8 +17,7 @@ const FuturisticHome = lazy(() => import('./user/pages/FuturisticHome')); // Nue
 const Login = lazy(() => import('./user/pages/Login'));
 const Signup = lazy(() => import('./user/pages/Signup'));
 const UserPanel = lazy(() => import('./user/pages/UserPanel'));
-const AdminPanel = lazy(() => import('./admin/pages/AdminPanel'));
-const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
+// Admin panel migrado a repositorio separado (panel-admin)
 const AllNewsPage = lazy(() => import('./user/pages/AllNewsPage')); // Nueva página para todas las noticias
 
 function App() {
@@ -101,11 +100,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/admin/*"
-                  element={<AdminPanel />}
-                />
-                <Route path="/admin-login" element={<AdminLogin />} />
+                {/* Rutas admin eliminadas - migradas a repositorio panel-admin */}
                 <Route path="/news" element={<AllNewsPage />} />
               </Routes>
             </Suspense>
