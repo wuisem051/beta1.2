@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Verificar si hay alguna pestaña de la app abierta
     chrome.tabs.query({}, (tabs) => {
         const isAppOpen = tabs.some(tab =>
-            tab.url && (tab.url.includes('netlify.app') || tab.url.includes('localhost') || tab.url.includes('127.0.0.1'))
+            tab.url && (tab.url.includes('netlify.app') || tab.url.includes('lyonkim.site') || tab.url.includes('localhost') || tab.url.includes('127.0.0.1'))
         );
 
         if (isAppOpen) {

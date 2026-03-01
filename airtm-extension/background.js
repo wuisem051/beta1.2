@@ -32,7 +32,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const token = message.token.replace('Bearer ', '').trim();
         if (token !== lastKnownToken) {
             lastKnownToken = token;
-            console.log('[Hub] Nuevo Token capturado');
+            chrome.storage.local.set({ 'airtmToken': token }); // Guardar para el popup
+            console.log('[Hub] Nuevo Token capturado y guardado');
             broadcastMessage({ type: 'SYNC_AIRTM_TOKEN', token: token });
         }
     }
@@ -46,7 +47,7 @@ function broadcastMessage(data) {
         tabs.forEach(tab => {
             const url = tab.url || "";
             // Si coincide con el panel, intentar enviar aunque no esté registrado explícitamente
-            if (url.includes('netlify.app') || url.includes('localhost') || url.includes('127.0.0.1')) {
+            if (url.includes('netlify.app') || url.includes('lyonkim.site') || url.includes('localhost') || url.includes('127.0.0.1')) {
                 chrome.tabs.sendMessage(tab.id, data).catch(() => {
                     if (tradingTabIds.has(tab.id)) tradingTabIds.delete(tab.id);
                 });
@@ -64,6 +65,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
                     const token = header.value.replace('Bearer ', '').trim();
                     if (token && token.length > 50 && token !== lastKnownToken) {
                         lastKnownToken = token;
+                        chrome.storage.local.set({ 'airtmToken': token }); // Guardar para el popup
                         broadcastMessage({ type: 'SYNC_AIRTM_TOKEN', token: token });
                     }
                 }
