@@ -468,7 +468,6 @@ const AirtmCashierContent = () => {
             <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
                 <div>
                     <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter mb-2 flex items-center gap-3">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Airtm_logo.svg/2560px-Airtm_logo.svg.png" className="h-8 invert opacity-80" alt="Airtm" />
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                             Panel Airtm PRO
                         </span>
@@ -479,7 +478,15 @@ const AirtmCashierContent = () => {
                     </p>
                 </div>
 
-                <div className="flex gap-4 w-full lg:w-auto">
+                <div className="flex flex-wrap gap-4 w-full lg:w-auto items-center">
+                    {extensionConfig.url && (
+                        <button
+                            onClick={() => window.open(extensionConfig.url, '_blank')}
+                            className="px-6 py-5 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-blue-600/5 flex items-center gap-3"
+                        >
+                            <FaPlus /> Descargar Extensión
+                        </button>
+                    )}
                     <button
                         onClick={handleToggleMonitoring}
                         disabled={!isConnected}
@@ -727,7 +734,7 @@ const AirtmCashierContent = () => {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#0b0e11]">
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <div className="flex flex-col gap-4">
                                 {operations.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 opacity-20 col-span-full">
                                         <FaWifi size={48} className="mb-4 animate-pulse" />
@@ -759,115 +766,90 @@ const AirtmCashierContent = () => {
                                         const countryCode = op.userCountry || 'VEN'; // Default to VEN for now if missing
                                         const flagUrl = `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`;
 
+                                        const displayName = op.userName === 'Cajero Airtm' ? 'Usuario Airtm' : op.userName;
+
                                         return (
-                                            <div key={op.id} className="bg-white rounded-xl overflow-hidden flex flex-col shadow-lg border border-slate-100 group transition-all hover:shadow-2xl relative">
-                                                {/* Header Tipo */}
-                                                <div className={`px-5 py-3 flex justify-between items-center ${headerColor}`}>
-                                                    <span className="font-bold text-xs uppercase tracking-tight flex items-center gap-2">
-                                                        {op.isBuy ? 'Agregar fondos' : 'Retirar fondos'}
-                                                    </span>
-                                                    <span className="text-[10px] font-bold opacity-80">{op.time}</span>
-                                                    <button className="text-slate-400 hover:text-slate-600"><FaTrash size={10} /></button>
-                                                </div>
+                                            <div key={op.id} className="bg-white rounded-xl overflow-hidden flex flex-col md:flex-row shadow-lg border border-slate-100 group transition-all hover:shadow-2xl relative">
+                                                {/* Indicator Side (Mobile: Top, Desktop: Left) */}
+                                                <div className={`w-full md:w-3 shrink-0 ${op.isBuy ? 'bg-[#00a878]' : 'bg-orange-500'}`}></div>
 
-                                                {/* Cuerpo de la Tarjeta */}
-                                                <div className="p-5 flex-1 bg-white text-slate-800 flex flex-col gap-4">
-
-                                                    {/* Method Name & Icon */}
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0">
-                                                            {methodIcon}
+                                                <div className="flex-1 flex flex-col md:flex-row items-stretch md:items-center p-3 md:p-5 gap-4 md:gap-8 bg-white">
+                                                    {/* Column 1: Info & Type */}
+                                                    <div className="flex flex-col gap-2 min-w-[140px]">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${op.isBuy ? 'bg-[#e6f7f2] text-[#00a878]' : 'bg-orange-50 text-orange-600'}`}>
+                                                                {op.isBuy ? 'Agregar' : 'Retirar'}
+                                                            </span>
+                                                            <span className="text-[9px] font-bold text-slate-400">{op.time}</span>
                                                         </div>
-                                                        <h3 className="font-bold text-sm text-slate-900 leading-tight truncate w-full" title={op.method}>
-                                                            {op.method}
-                                                        </h3>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 border border-slate-100">
+                                                                {methodIcon}
+                                                            </div>
+                                                            <h3 className="font-bold text-xs text-slate-900 truncate max-w-[120px]" title={op.method}>
+                                                                {op.method}
+                                                            </h3>
+                                                        </div>
                                                     </div>
 
-                                                    {/* Central Amounts */}
-                                                    <div className="space-y-3 pl-1">
-                                                        <div className="flex flex-col gap-1">
-                                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                                                {op.isBuy ? 'Monto Solicitado' : 'Monto de Retiro'}
-                                                            </span>
-                                                            <span className={`text-2xl font-black ${amountColor} tracking-tighter leading-none`}>
-                                                                {op.isBuy ? '+' : '-'} ${parseFloat(op.amount).toFixed(2)} <span className="text-xs font-bold opacity-60">USDC</span>
+                                                    {/* Column 2: Amounts */}
+                                                    <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-12 md:items-center">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">USDC</span>
+                                                            <span className={`text-xl font-black ${amountColor} tracking-tighter`}>
+                                                                {op.isBuy ? '+' : '-'} ${parseFloat(op.amount).toFixed(2)}
                                                             </span>
                                                         </div>
 
-                                                        {op.localAmount > 0 && (
-                                                            <div className="flex flex-col gap-1 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                                                    {op.isBuy ? 'Debes Enviar' : 'Te Llegará'}
-                                                                </span>
-                                                                <div className="flex items-center justify-between">
-                                                                    <span className="text-sm font-black text-slate-800">
-                                                                        {op.localCurrency} {parseFloat(op.localAmount).toLocaleString()}
-                                                                    </span>
-                                                                    {op.rate > 0 && (
-                                                                        <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                                                                            Rate: {op.rate}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                                {isPaypal && (
-                                                                    <div className="mt-1 pt-1 border-t border-slate-200/50">
-                                                                        <span className="text-[8px] text-slate-400 font-bold italic">
-                                                                            * Estimado Paypal Net: {op.localCurrency} {(op.localAmount * 0.946 - 0.30).toFixed(2)}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{op.isBuy ? 'Enviando' : 'Recibiendo'}</span>
+                                                            <span className="text-sm font-black text-slate-800">
+                                                                {op.localCurrency} {parseFloat(op.localAmount).toLocaleString()}
+                                                            </span>
+                                                        </div>
+
+                                                        {op.rate > 0 && (
+                                                            <div className="hidden xl:flex flex-col">
+                                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tasa</span>
+                                                                <span className="text-[10px] text-slate-600 font-bold">{op.rate}</span>
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    {/* User Info Section (Replica of Original) */}
-                                                    <div className="flex items-start gap-3 mt-2 pt-3 border-t border-slate-100">
+                                                    {/* Column 3: User Info */}
+                                                    <div className="flex items-center gap-3 min-w-[180px] md:border-l border-slate-100 md:pl-6">
                                                         <div className="w-9 h-9 rounded-full bg-slate-200 overflow-hidden shrink-0 relative">
                                                             {op.userAvatar ?
                                                                 <img src={op.userAvatar} className="w-full h-full object-cover" /> :
-                                                                <div className="w-full h-full flex items-center justify-center bg-slate-800 text-white font-bold">{op.userName ? op.userName.substring(0, 1) : 'U'}</div>
+                                                                <div className="w-full h-full flex items-center justify-center bg-slate-800 text-white font-bold">{displayName ? displayName.substring(0, 1) : 'U'}</div>
                                                             }
                                                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
                                                         </div>
-                                                        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="text-xs font-black text-slate-900 truncate uppercase">{op.userName}</p>
-                                                                <FaShieldAlt className="text-emerald-500 text-[10px]" />
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-1">
+                                                                <p className="text-xs font-black text-slate-900 truncate uppercase">{displayName}</p>
+                                                                <FaShieldAlt className="text-emerald-500 text-[9px]" />
                                                             </div>
-
-                                                            <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500 font-medium">
-                                                                <span className="flex items-center gap-1">
-                                                                    <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                                                    {joinDate}
-                                                                </span>
-                                                                <span className="flex items-center gap-1">
-                                                                    <img src={flagUrl} alt={countryCode} className="w-3 h-auto opacity-80" />
-                                                                    {countryCode}
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-3 text-[10px] mt-1">
-                                                                <span className="font-bold text-slate-600 flex items-center gap-1">
-                                                                    <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                                                                    {op.userTxns} txns
-                                                                </span>
-                                                                <span className="font-bold text-slate-600 flex items-center gap-1">
-                                                                    <svg className="w-3 h-3 text-orange-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1">
+                                                                    <svg className="w-2.5 h-2.5 text-orange-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                                                                     {op.userRating}
                                                                 </span>
+                                                                <span className="text-[9px] font-bold text-slate-400">•</span>
+                                                                <span className="text-[9px] font-bold text-slate-500">{op.userTxns} txns</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Footer Botón */}
-                                                <div className="p-4 bg-slate-50 text-center border-t border-slate-100">
-                                                    <button
-                                                        onClick={() => handleAcceptOperation(op.id)}
-                                                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                                                    >
-                                                        Aceptar
-                                                    </button>
+                                                    {/* Column 4: Action */}
+                                                    <div className="shrink-0 pl-4">
+                                                        <button
+                                                            onClick={() => handleAcceptOperation(op.id)}
+                                                            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.05] active:scale-[0.95]"
+                                                        >
+                                                            Aceptar
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
