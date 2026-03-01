@@ -459,7 +459,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
     <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8 relative">
       <div className="absolute top-4 left-6 z-10 hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        Sistema v1.02 Beta
+        Sistema v1.03 Beta
       </div>
 
       {/* Premium Profile Slot */}

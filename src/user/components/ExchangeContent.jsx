@@ -498,7 +498,7 @@ const ExchangeContent = () => {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
                 <div>
                     <div className="flex items-center gap-3 mb-1">
-                        <h1 className={styles.mainContentTitle}>Conexión Exchange</h1>
+                        <h1 className={styles.mainContentTitle}>Tablero de Trading</h1>
                         {keysConfigured ? (
                             <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -522,7 +522,7 @@ const ExchangeContent = () => {
                             <option value="binanceus">BINANCE.US</option>
                             <option value="bingx">BINGX</option>
                         </select>
-                        <span className="text-slate-600 font-bold ml-1 text-xs">v2.2</span>
+                        <span className="text-slate-600 font-bold ml-1 text-xs">v2.3</span>
                     </div>
                 </div>
 

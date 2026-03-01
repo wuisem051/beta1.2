@@ -136,9 +136,9 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     setError('');
                 }
             } else {
-                // Fallback: Si el servidor falla por bloqueo geográfico, intentamos fetch directo desde el navegador
-                if (data.error?.includes('Bloqueo Geográfico') || response.status === 451) {
-                    console.log('Intentando fallback de precio via browser...');
+                // Fallback: Si el servidor falla por bloqueo geográfico o API keys incorrectas, intentamos fetch directo desde el navegador
+                if (data.error?.includes('Bloqueo Geográfico') || response.status === 451 || data.error?.includes('apiKey') || data.error?.includes('100413')) {
+                    console.log('Intentando fallback de precio via browser por error de conexión o credenciales...');
                     try {
                         const tickerSymbol = symbol.replace('/', '');
                         let fallbackUrl = '';
