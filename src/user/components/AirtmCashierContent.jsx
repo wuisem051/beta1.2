@@ -46,6 +46,12 @@ const AirtmCashierContent = () => {
         isMonitoringRef.current = isMonitoring;
     }, [isMonitoring]);
 
+    const reSyncExtension = () => {
+        console.log('[App] Forzando sincronización con extensión...');
+        window.postMessage({ type: 'AIRTM_CLIENT_READY', source: 'AIRTM_PANEL' }, '*');
+        addLog('Solicitando vinculación con extensión...', 'info');
+    };
+
     useEffect(() => {
         const handleExtensionMessage = (event) => {
             // Log de tráfico crudo para depuración
@@ -94,12 +100,14 @@ const AirtmCashierContent = () => {
         window.addEventListener('message', handleExtensionMessage);
 
         // Solicitar sincronización inicial al cargar
-        setTimeout(() => {
-            console.log('[App] Solicitando sincronización inicial...');
-            window.postMessage({ type: 'AIRTM_CLIENT_READY' }, '*');
+        const timer = setTimeout(() => {
+            reSyncExtension();
         }, 1500);
 
-        return () => window.removeEventListener('message', handleExtensionMessage);
+        return () => {
+            window.removeEventListener('message', handleExtensionMessage);
+            clearTimeout(timer);
+        };
     }, [apiKey]);
 
     // Función auxiliar para procesar una operación individual (desde extensión o poll)
@@ -232,8 +240,9 @@ const AirtmCashierContent = () => {
     };
 
     const handleToggleMonitoring = () => {
-        if (!isConnected) {
-            addLog('Error: Debes conectar tu cuenta de Airtm primero (usando tu token).', 'error');
+        if (!apiKey && !isConnected) {
+            addLog('Error: No se detectó cuenta de Airtm vinculada.', 'error');
+            reSyncExtension(); // Intentar vincular al fallar
             return;
         }
 
@@ -505,12 +514,18 @@ const AirtmCashierContent = () => {
 
                     <div className={`px-6 py-5 rounded-2xl border flex flex-col items-center justify-center gap-1 min-w-[140px] transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-xl shadow-emerald-500/5' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
                         <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]' : (isConnected ? 'bg-[#fcd535]' : 'bg-slate-600')}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]' : (apiKey || isConnected ? 'bg-[#fcd535]' : 'bg-slate-600')}`}></div>
                             <span className="text-[10px] font-black uppercase tracking-widest">
-                                {isExtensionLinked ? 'Sincronizado' : 'Desconectado'}
+                                {isExtensionLinked ? 'Sincronizado' : (apiKey ? 'Modo API' : 'Desconectado')}
                             </span>
                         </div>
-                        <span className="text-[8px] font-bold opacity-60 uppercase">Protocolo v3.0</span>
+                        <button
+                            onClick={reSyncExtension}
+                            className="text-[7px] font-black uppercase tracking-tighter opacity-60 hover:opacity-100 hover:text-blue-400 transition-all"
+                        >
+                            [ Forzar Vinculación ]
+                        </button>
+                        <span className="text-[8px] font-bold opacity-40 uppercase">Protocolo v3.0</span>
                     </div>
                 </div>
             </div>
