@@ -286,6 +286,7 @@ const ExchangeContent = () => {
 
     // Auto-fetch data when tab changes
     useEffect(() => {
+        setErrorMsg(''); // Clear any previous errors when switching tabs or exchange
         if (!keysConfigured) return;
         if (activeTab === 'history') fetchExchangeHistory();
         if (activeTab === 'orders') fetchOpenOrders();
@@ -334,12 +335,12 @@ const ExchangeContent = () => {
         }
     };
 
-    // Auto-fetch price when symbol changes
+    // Auto-fetch price when symbol or exchange changes
     useEffect(() => {
-        if (tradeSymbol) {
+        if (tradeSymbol && keysConfigured) {
             fetchTicker(tradeSymbol);
         }
-    }, [tradeSymbol]);
+    }, [tradeSymbol, activeTradingExchange, keysConfigured]);
 
     const handlePercentageClick = (percentage) => {
         if (!balance || !balance.total) return;
@@ -365,8 +366,8 @@ const ExchangeContent = () => {
 
     const handleSaveKeys = async (e, exchangeName) => {
         e.preventDefault();
-        setIsSaving(prev => ({ ...prev, [exchangeName]: true }));
         setErrorMsg('');
+        setIsSaving(prev => ({ ...prev, [exchangeName]: true }));
 
         const currentConfig = configs[exchangeName];
 
@@ -419,6 +420,7 @@ const ExchangeContent = () => {
             return;
         }
 
+        setErrorMsg('');
         try {
             if (!currentUser?.uid) return;
 
@@ -1038,34 +1040,11 @@ const ExchangeContent = () => {
 
             {/* Scalper Trading Tool Tab */}
             {activeTab === 'scalper' && (
-                !keysConfigured ? (
-                    <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in zoom-in-95 duration-500">
-                        <div className="relative mb-8">
-                            <div className="w-32 h-32 bg-purple-600/10 rounded-full flex items-center justify-center border border-purple-500/20 shadow-2xl shadow-purple-600/10">
-                                <FaLayerGroup className="text-5xl text-purple-500/40" />
-                            </div>
-                            <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-slate-900 border border-white/10 rounded-2xl flex items-center justify-center shadow-xl">
-                                <FaShieldAlt className="text-rose-500" />
-                            </div>
-                        </div>
-                        <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Acceso Restringido</h2>
-                        <p className="text-slate-400 max-w-sm mb-10 font-medium leading-relaxed">
-                            Para usar la herramienta de trading escalonado, primero debes configurar tus credenciales API.
-                        </p>
-                        <button
-                            onClick={() => setActiveTab('config')}
-                            className="bg-purple-600 hover:bg-purple-500 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-2xl shadow-purple-600/30 hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-xs"
-                        >
-                            Ir a Configuración
-                        </button>
-                    </div>
-                ) : (
-                    <ScalperTradingTool
-                        exchange={activeTradingExchange}
-                        balance={balance}
-                        onRefresh={fetchBalance}
-                    />
-                )
+                <ScalperTradingTool
+                    exchange={activeTradingExchange}
+                    balance={balance}
+                    onRefresh={fetchBalance}
+                />
             )}
 
             {/* Orders & History Viewers (Modern Lists) */}
