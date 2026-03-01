@@ -592,7 +592,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         </div>
                         <div className="mt-2 flex items-center justify-between">
                             <span className="text-xs text-slate-600 font-bold">Referencia:</span>
-                            <span className="text-sm text-white font-black">${currentPrice.toFixed(currentPrice < 1 ? 8 : 2)}</span>
+                            <span className="text-sm text-white font-black">${currentPrice.toFixed(4)}</span>
                         </div>
                     </div>
 
@@ -726,8 +726,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                     <div className="flex justify-between items-center mb-2 text-[8px] font-black uppercase tracking-widest">
                                         <span className="text-slate-500">Lote {level.level}</span>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-slate-600">Vol: {level.quantity}</span>
-                                            <span className="text-white">{level.percentage}%</span>
+                                            <span className="text-slate-600">Vol: {parseFloat(level.quantity).toFixed(4)}</span>
+                                            <span className="text-white">{parseFloat(level.percentage).toFixed(2)}%</span>
                                         </div>
                                     </div>
                                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -767,7 +767,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 {(
                                     (strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.capital || (parseFloat(l.price) * parseFloat(l.quantity))), 0) /
                                     (strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.quantity), 0)
-                                ).toFixed(8)}
+                                ).toFixed(4)}
                             </span>
                             <span className="text-[10px] font-bold text-slate-600 uppercase">USDT</span>
                         </div>
@@ -776,7 +776,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Volumen Total (Asset)</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-black text-emerald-500 italic">
-                                {(strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.quantity), 0).toFixed(6)}
+                                {(strategy === 'buy' ? levels : sellLevels).reduce((sum, l) => sum + parseFloat(l.quantity), 0).toFixed(4)}
                             </span>
                             <span className="text-[10px] font-bold text-slate-600 uppercase">{symbol.split('/')[0]}</span>
                         </div>
@@ -844,7 +844,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                             />
                                         </td>
                                         <td className="px-4 py-5 text-right font-mono text-xs font-bold text-slate-400">
-                                            ${level.capital}
+                                            ${parseFloat(level.capital).toFixed(4)}
                                         </td>
                                         <td className="px-4 py-5 text-center">
                                             {level.executed ? (
@@ -926,7 +926,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                             />
                                         </td>
                                         <td className="px-4 py-5 text-right font-mono text-xs font-bold text-emerald-500">
-                                            +${level.potentialProfit}
+                                            +${parseFloat(level.potentialProfit).toFixed(4)}
                                         </td>
                                         <td className="px-4 py-5 text-center">
                                             {level.executed ? (
