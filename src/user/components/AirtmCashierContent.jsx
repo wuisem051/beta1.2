@@ -39,7 +39,12 @@ const AirtmCashierContent = () => {
 
     const monitoringInterval = useRef(null);
     const audioRef = useRef(null);
+    const isMonitoringRef = useRef(isMonitoring);
     const soundUrl = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+
+    useEffect(() => {
+        isMonitoringRef.current = isMonitoring;
+    }, [isMonitoring]);
 
     useEffect(() => {
         const handleExtensionMessage = (event) => {
@@ -67,10 +72,11 @@ const AirtmCashierContent = () => {
                 }
 
                 if (payload?.type === 'SYNC_AIRTM_OPERATION') {
+                    if (!isMonitoringRef.current) return;
                     const op = payload.operation;
                     console.log('[App] Nueva operación:', op.paymentMethodName || op.method);
                     setLastSyncTime(new Date().toLocaleTimeString());
-                    setNodeStats(prev => ({ ...prev, opsProcessed: prev.opsProcessed + 1 }));
+                    setNodeStats(prev => ({ ...prev, health: 100, opsProcessed: prev.opsProcessed + 1 }));
                     processSingleOperation(op);
                     // Agregar a logs de tráfico crudo
                     setTrafficLogs(prev => [{
@@ -479,14 +485,13 @@ const AirtmCashierContent = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4 w-full lg:w-auto items-center">
-                    {extensionConfig.url && (
-                        <button
-                            onClick={() => window.open(extensionConfig.url, '_blank')}
-                            className="px-6 py-5 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-blue-600/5 flex items-center gap-3"
-                        >
-                            <FaPlus /> Descargar Extensión
-                        </button>
-                    )}
+                    <button
+                        onClick={() => window.open(extensionConfig.url || '#', '_blank')}
+                        className={`px-6 py-5 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-blue-600/5 flex items-center gap-3 ${!extensionConfig.url && 'opacity-50 cursor-not-allowed'}`}
+                        title={!extensionConfig.url ? "URL de descarga no configurada" : "Descargar Extensión"}
+                    >
+                        <FaPlus /> Descargar Extensión
+                    </button>
                     <button
                         onClick={handleToggleMonitoring}
                         disabled={!isConnected}
