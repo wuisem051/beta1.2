@@ -476,285 +476,194 @@ const AirtmCashierContent = () => {
     };
 
     return (
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0b0e11] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
             <audio ref={audioRef} src={soundUrl} />
 
-            {/* Header Section */}
-            <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter mb-2 flex items-center gap-3">
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                            Panel Airtm PRO
-                        </span>
-                    </h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Sistema de Alta Frecuencia v3.0
-                    </p>
+            {/* Top Control Bar - Compact & Floating */}
+            <div className="sticky top-4 z-50 bg-[#1e2329]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-3 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4 pl-2">
+                    <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <FaShieldAlt className="text-white text-xl" />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-black text-white uppercase tracking-tight leading-none">
+                            Panel Airtm <span className="text-blue-400">PRO</span>
+                        </h1>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1 flex items-center gap-2">
+                            V3.2 <span className="w-1 h-1 rounded-full bg-slate-700"></span> ALTA FRECUENCIA
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 w-full lg:w-auto items-center">
-                    <button
-                        onClick={() => window.open(extensionConfig.url || '#', '_blank')}
-                        className={`px-6 py-5 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-blue-600 hover:text-white transition-all shadow-xl shadow-blue-600/5 flex items-center gap-3 ${!extensionConfig.url && 'opacity-50 cursor-not-allowed'}`}
-                        title={!extensionConfig.url ? "URL de descarga no configurada" : "Descargar Extensión"}
-                    >
-                        <FaPlus /> Descargar Extensión
-                    </button>
-                    <button
-                        onClick={handleToggleMonitoring}
-                        disabled={!isConnected}
-                        className={`px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center gap-3 shadow-2xl disabled:opacity-30 disabled:grayscale ${isMonitoring
-                            ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white'
-                            : 'bg-[#fcd535] text-black hover:scale-105 active:scale-95 shadow-[#fcd535]/20'
-                            }`}
-                    >
-                        {isMonitoring ? <><FaPause /> Detener Escaneo</> : <><FaPlay /> Iniciar Escaneo</>}
-                    </button>
-
-                    <div className={`px-6 py-5 rounded-2xl border flex flex-col items-center justify-center gap-1 min-w-[140px] transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-xl shadow-emerald-500/5' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
-                        <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]' : (apiKey || isConnected ? 'bg-[#fcd535]' : 'bg-slate-600')}`}></div>
-                            <span className="text-[10px] font-black uppercase tracking-widest">
-                                {isExtensionLinked ? 'Sincronizado' : (apiKey ? 'Modo API' : 'Desconectado')}
-                            </span>
+                <div className="flex items-center gap-3">
+                    {/* Compact Sync Status */}
+                    <div className={`px-4 py-2 rounded-xl border flex items-center gap-3 transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
+                        <div className="flex flex-col items-start leading-none">
+                            <span className="text-[9px] font-black uppercase tracking-widest mb-1">Extensión</span>
+                            <span className="text-[10px] font-bold">{isExtensionLinked ? 'VINCULADA' : (apiKey ? 'MODO API' : 'OFFLINE')}</span>
                         </div>
+                        <div className={`w-2.5 h-2.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : (apiKey ? 'bg-[#fcd535]' : 'bg-slate-700')}`}></div>
+                    </div>
+
+                    <div className="h-10 w-px bg-white/10 mx-1 hidden sm:block"></div>
+
+                    {/* Main Action Buttons */}
+                    <div className="flex items-center gap-2">
                         <button
-                            onClick={reSyncExtension}
-                            className="text-[7px] font-black uppercase tracking-tighter opacity-60 hover:opacity-100 hover:text-blue-400 transition-all"
+                            onClick={() => window.open(extensionConfig.url || '#', '_blank')}
+                            className="p-3 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 hover:text-white rounded-xl transition-all"
+                            title="Descargar Extensión"
                         >
-                            [ Forzar Vinculación ]
+                            <FaPlus />
                         </button>
-                        <span className="text-[8px] font-bold opacity-40 uppercase">Protocolo v3.0</span>
+
+                        <button
+                            onClick={handleToggleMonitoring}
+                            disabled={!apiKey && !isConnected}
+                            className={`pl-4 pr-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center gap-3 shadow-xl disabled:opacity-30 ${isMonitoring
+                                ? 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white shadow-red-500/10'
+                                : 'bg-blue-600 text-white hover:bg-blue-500 hover:scale-[1.02] shadow-blue-600/20'
+                                }`}
+                        >
+                            {isMonitoring ? <><div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> Detener</> : <><FaPlay className="text-[10px]" /> Iniciar Escaneo</>}
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Setup Guide Modal/Section */}
-            {showGuide && (
-                <div className="bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/30 rounded-[30px] p-8 animate-in zoom-in duration-300 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            {/* Main Content Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 pt-2">
 
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6 relative z-10">
-                        <div>
-                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                                <span className="bg-blue-600 p-2 rounded-xl text-sm shadow-lg">📖</span>
-                                Guía de Configuración Airtm Pro
-                            </h2>
-                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Sigue estos pasos para activar el monitoreo de alta frecuencia</p>
-                        </div>
+                {/* Left Sidebar - Status & Setup */}
+                <div className="xl:col-span-3 space-y-6">
 
-                        <div className="flex gap-4">
-                            {extensionConfig.url && (
-                                <button
-                                    onClick={() => window.open(extensionConfig.url, '_blank')}
-                                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2 animate-bounce"
-                                >
-                                    📥 Descargar Extensión v{extensionConfig.version}
-                                </button>
-                            )}
-                            <button onClick={() => setShowGuide(false)} className="px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5">
-                                Ocultar Guía
-                            </button>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 01</span>
-                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">📥</span> Obtener Puente
-                            </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Haz clic en el botón azul para descargar el núcleo <code>.zip</code> de la extensión.</p>
-                        </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 02</span>
-                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">🛠️</span> Instalación Manual
-                            </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">En <code>chrome://extensions</code>, activa "Modo Desarrollador" y carga la carpeta descomprimida.</p>
-                        </div>
-                        <div className="space-y-3 p-6 bg-[#0b0e11]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all group">
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Paso 03</span>
-                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">🔄</span> Sincronizar Cuenta
-                            </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Inicia sesión en Airtm.com. El panel detectará el nodo automáticamente al instante.</p>
-                        </div>
-                        <div className="space-y-3 p-6 bg-emerald-500/5 backdrop-blur-md rounded-2xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all group">
-                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Paso 04</span>
-                            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                                <span className="group-hover:scale-110 transition-transform">⚡</span> ¡Listo para Operar!
-                            </h3>
-                            <p className="text-xs text-slate-400 leading-relaxed">Presiona "Iniciar Escaneo". El tráfico fluirá en el panel y podrás aceptar órdenes.</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Column 1: Config & Filters */}
-                <div className="space-y-8">
-                    {/* Elite Extension Status Card */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden relative group">
-                        {/* Animated Background Gradients */}
-                        <div className={`absolute top-0 right-0 w-48 h-48 rounded-full blur-[80px] transition-all duration-1000 ${isExtensionLinked ? 'bg-emerald-500/10' : 'bg-red-500/5'}`}></div>
-                        <div className={`absolute bottom-0 left-0 w-32 h-32 rounded-full blur-[60px] transition-all duration-1000 ${isExtensionLinked ? 'bg-blue-500/10' : 'bg-slate-500/5'}`}></div>
-
-                        <div className="relative z-10">
-                            <h2 className="text-sm font-black text-white uppercase tracking-widest mb-8 flex items-center justify-between">
-                                <span className="flex items-center gap-2">
-                                    <FaShieldAlt className={isExtensionLinked ? 'text-emerald-500' : 'text-slate-500'} />
-                                    Estado del Nodo
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-bold text-slate-500 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">v{extensionConfig.version}</span>
-                                    {isExtensionLinked && <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] rounded-full border border-emerald-500/20 animate-pulse">LIVE</span>}
+                    {/* Mini Quick Guide */}
+                    {showGuide && (
+                        <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/5 border border-blue-500/20 rounded-[24px] p-6 relative overflow-hidden group">
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-widest">Guía Rápida</h3>
+                                    <button onClick={() => setShowGuide(false)} className="text-slate-500 hover:text-white transition-colors"><FaTrash size={10} /></button>
                                 </div>
-                            </h2>
-
-                            <div className="flex flex-col items-center mb-8">
-                                <div className="relative">
-                                    <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center transition-all duration-700 border-2 ${isExtensionLinked
-                                        ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]'
-                                        : 'bg-slate-800/20 border-white/5 text-slate-700'}`}>
-                                        <FaWifi size={40} className={isExtensionLinked ? 'animate-pulse' : ''} />
+                                <div className="space-y-4">
+                                    <div className="flex gap-3">
+                                        <div className="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0 text-[10px] font-bold text-blue-400">1</div>
+                                        <p className="text-[10px] text-slate-400 leading-relaxed font-medium">Inicia sesión en Airtm y abre tu panel.</p>
                                     </div>
-                                    {isExtensionLinked && (
-                                        <div className="absolute -bottom-2 -right-2 bg-[#1e2329] p-1 rounded-full">
-                                            <div className="bg-emerald-500 w-4 h-4 rounded-full shadow-[0_0_10px_#10b981]"></div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="text-center mt-6 space-y-2">
-                                    <p className={`text-lg font-black uppercase tracking-tighter ${isExtensionLinked ? 'text-white' : 'text-slate-500'}`}>
-                                        {isExtensionLinked ? 'Núcleo Vinculado' : 'Nodo en Espera'}
-                                    </p>
-                                    <div className="flex flex-col items-center gap-2 justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-ping' : 'bg-slate-700'}`}></div>
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                                                {isExtensionLinked ? 'Tráfico encriptado AES-256' : 'Extensión no detectada'}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => setShowGuide(!showGuide)}
-                                            className="text-[9px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest transition-colors mb-2 cursor-pointer"
-                                        >
-                                            {showGuide ? 'Cerrar Instrucciones' : '¿Cómo configurar?'}
-                                        </button>
+                                    <div className="flex gap-3">
+                                        <div className="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0 text-[10px] font-bold text-blue-400">2</div>
+                                        <p className="text-[10px] text-slate-400 leading-relaxed font-medium">Verifica el punto verde en la barra superior.</p>
                                     </div>
+                                    <button
+                                        onClick={reSyncExtension}
+                                        className="w-full mt-2 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase text-blue-400 tracking-widest border border-white/5 transition-all"
+                                    >
+                                        Re-vincular Nodo
+                                    </button>
                                 </div>
                             </div>
+                        </div>
+                    )}
 
-                            {/* Node Metrics Panel */}
-                            <div className="grid grid-cols-2 gap-3 mb-8">
-                                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex flex-col items-center">
-                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Ops. Procesadas</span>
-                                    <span className="text-sm font-black text-white">{nodeStats.opsProcessed}</span>
+                    {/* Node Health Metrics Card */}
+                    <div className="bg-[#1e2329] border border-white/5 rounded-[24px] p-6 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                        <div className="relative z-10 flex flex-col gap-6">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado Vital</span>
+                                <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/10">ESTABLE</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 bg-[#12161c] rounded-2xl border border-white/5">
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Ordenes</span>
+                                    <span className="text-xl font-black text-white">{nodeStats.opsProcessed}</span>
                                 </div>
-                                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex flex-col items-center">
-                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Salud del Nodo</span>
-                                    <span className="text-sm font-black text-emerald-500">{nodeStats.health}%</span>
+                                <div className="p-4 bg-[#12161c] rounded-2xl border border-white/5">
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Salud</span>
+                                    <span className="text-xl font-black text-emerald-500">{nodeStats.health}%</span>
                                 </div>
                             </div>
 
                             {lastSyncTime && (
-                                <div className="text-center mb-6">
-                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                                        Última actividad: <span className="text-slate-400">{lastSyncTime}</span>
-                                    </p>
+                                <div className="flex items-center gap-2 pt-2">
+                                    <FaLock className="text-slate-600 text-[10px]" />
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Activo: {lastSyncTime}</span>
                                 </div>
-                            )}
-
-                            {!isExtensionLinked && (
-                                <button
-                                    onClick={() => window.open('https://app.airtm.com/login', '_blank')}
-                                    className="w-full py-5 bg-[#fcd535] text-black rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-[#fcd535]/20 flex items-center justify-center gap-3"
-                                >
-                                    <div className="w-6 h-6 bg-black/10 rounded-lg flex items-center justify-center">
-                                        <img src="https://static.airtm.com/favicon-32x32.png" alt="A" className="w-4 h-4" />
-                                    </div>
-                                    Sincronizar Airtm Elite
-                                </button>
-                            )}
-
-                            {extensionConfig.url && (
-                                <button
-                                    onClick={() => window.open(extensionConfig.url, '_blank')}
-                                    className="w-full mt-3 py-4 bg-white/5 hover:bg-white/10 text-white rounded-[24px] text-[9px] font-black uppercase tracking-[0.2em] transition-all border border-white/5 flex items-center justify-center gap-3"
-                                >
-                                    <FaPlus size={12} className="text-blue-400" />
-                                    Descargar Extensión v{extensionConfig.version}
-                                </button>
                             )}
                         </div>
                     </div>
 
+                    {/* Alerts & Sound Card */}
+                    <div className="bg-[#1e2329] border border-white/5 rounded-[24px] p-6 shadow-xl space-y-5">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <FaBell className="text-[#fcd535]" /> Preferencias
+                            </h3>
+                        </div>
 
-
-                    {/* Notifications Card */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <FaBell className="text-[#fcd535]" /> Alertas
-                        </h2>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 bg-[#12161c] rounded-2xl border border-white/5">
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => audioRef.current?.play()}
-                                        className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-[#fcd535] transition-all"
-                                        title="Probar Sonido"
-                                    >
-                                        <FaVolumeUp />
-                                    </button>
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Alerta Sonora</span>
+                        <div className="space-y-3">
+                            <div
+                                onClick={() => {
+                                    setNotifications({ ...notifications, sound: !notifications.sound });
+                                    saveSettings({ notifications: { ...notifications, sound: !notifications.sound } });
+                                }}
+                                className="flex items-center justify-between p-3 bg-[#12161c] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
+                            >
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Sonido</span>
+                                <div className={`w-8 h-4 rounded-full relative transition-all ${notifications.sound ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${notifications.sound ? 'left-4.5' : 'left-0.5'}`}></div>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        setNotifications({ ...notifications, sound: !notifications.sound });
-                                        saveSettings({ notifications: { ...notifications, sound: !notifications.sound } });
-                                    }}
-                                    className={`w-12 h-6 rounded-full transition-all relative ${notifications.sound ? 'bg-[#fcd535]' : 'bg-slate-700'}`}
-                                >
-                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${notifications.sound ? 'left-7' : 'left-1'}`}></div>
-                                </button>
                             </div>
-                            <div className="flex items-center justify-between p-4 bg-[#12161c] rounded-2xl border border-white/5">
-                                <div className="flex items-center gap-3">
-                                    <FaBell className="text-slate-500" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Notif. Escritorio</span>
+                            <div
+                                onClick={enableNotifications}
+                                className="flex items-center justify-between p-3 bg-[#12161c] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
+                            >
+                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Escritorio</span>
+                                <div className={`w-8 h-4 rounded-full relative transition-all ${notifications.desktop ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${notifications.desktop ? 'left-4.5' : 'left-0.5'}`}></div>
                                 </div>
-                                <button
-                                    onClick={enableNotifications}
-                                    className={`w-12 h-6 rounded-full transition-all relative ${notifications.desktop ? 'bg-[#fcd535]' : 'bg-slate-700'}`}
-                                >
-                                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${notifications.desktop ? 'left-7' : 'left-1'}`}></div>
-                                </button>
                             </div>
                         </div>
+                    </div>
+
+                    {/* PayPal Tools Mini */}
+                    <div className="bg-blue-600/90 text-white p-6 rounded-[24px] shadow-xl shadow-blue-600/10 group cursor-default">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-black text-xs">P</div>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Cálculo PayPal</span>
+                        </div>
+                        <p className="text-[9px] font-medium leading-relaxed text-blue-100 opacity-90">
+                            Comisión estimada: 5.4% + $0.30. Verifica siempre el saldo neto recibido.
+                        </p>
                     </div>
                 </div>
 
-                {/* Column 2 & 3: Operations & Logs */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Operations List */}
-                    <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden flex flex-col min-h-[500px]">
-                        <div className="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
-                            <div>
+                {/* Main Section - Operations Central */}
+                <div className="xl:col-span-9 space-y-6">
+
+                    {/* Operations List Container */}
+                    <div className="bg-[#1e2329] border border-white/5 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.3)] flex flex-col min-h-[600px] overflow-hidden">
+
+                        {/* List Header */}
+                        <div className="px-8 py-6 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                                 <h2 className="text-sm font-black text-white uppercase tracking-widest">Operaciones Detectadas</h2>
-                                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Sincronizado con el Nodo Central Airtm</p>
                             </div>
                             <button
                                 onClick={() => setOperations([])}
-                                className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+                                className="px-4 py-2 bg-white/5 hover:bg-red-500/10 hover:text-red-500 text-slate-500 rounded-xl transition-all text-[9px] font-black uppercase tracking-widest flex items-center gap-2"
                                 title="Limpiar lista"
                             >
-                                <FaTrash />
+                                <FaTrash /> Borrar Todo
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#0b0e11]">
-                            <div className="flex flex-col gap-4">
+                        {/* Scrolling List */}
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#0b0e11]/30">
+                            <div className="flex flex-col gap-3">
                                 {operations.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 opacity-20 col-span-full">
                                         <FaWifi size={48} className="mb-4 animate-pulse" />
@@ -880,128 +789,64 @@ const AirtmCashierContent = () => {
 
                     </div>
                 </div>
-
             </div>
 
-            {/* Monitor de Operaciones Avanzado (NUEVO) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
-                {/* Traffic Monitor Section */}
-                <div className="lg:col-span-2 bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden flex flex-col h-[600px]">
-                    <div className="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
-                        <div>
-                            <h2 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                Monitor de Tráfico en Tiempo Real
-                            </h2>
-                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Inspección profunda de datos entrantes</p>
-                        </div>
-                        <button
-                            onClick={() => setTrafficLogs([])}
-                            className="p-2 text-slate-500 hover:text-red-500 transition-colors"
-                        >
-                            <FaTrash />
-                        </button>
+            {/* Bottom Traffic Monitor - Integrated & Collapsible */}
+            <div className="bg-[#1e2329] border border-white/5 rounded-[32px] shadow-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                    <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                        Monitor de Tráfico de Red
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setTrafficLogs([])} className="text-[9px] font-black text-slate-600 hover:text-red-500 uppercase transition-colors">Limpiar Logs</button>
                     </div>
+                </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 bg-[#1e2329] z-10 shadow-md">
-                                <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5">
-                                    <th className="px-6 py-4">Hora</th>
-                                    <th className="px-6 py-4">Origen</th>
-                                    <th className="px-6 py-4">Método</th>
-                                    <th className="px-6 py-4">Monto</th>
-                                    <th className="px-6 py-4 text-center">Acción</th>
+                <div className="grid grid-cols-1 lg:grid-cols-12">
+                    <div className="lg:col-span-8 h-[300px] overflow-y-auto custom-scrollbar border-r border-white/5">
+                        <table className="w-full text-left">
+                            <thead className="sticky top-0 bg-[#1e2329] shadow-sm">
+                                <tr className="text-[8px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5">
+                                    <th className="px-6 py-3 text-blue-500">Origen</th>
+                                    <th className="px-6 py-3">Método</th>
+                                    <th className="px-6 py-3">Monto</th>
+                                    <th className="px-6 py-3 text-right">Hora</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className="divide-y divide-white/[0.02]">
                                 {trafficLogs.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="5" className="px-6 py-20 text-center opacity-30">
-                                            <div className="flex flex-col items-center">
-                                                <FaWifi size={32} className="mb-4 animate-pulse" />
-                                                <p className="text-[10px] font-black uppercase tracking-widest">Escuchando tráfico de red...</p>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <tr><td colSpan="4" className="py-20 text-center opacity-20 text-[9px] font-black uppercase tracking-widest">Esperando flujo de datos...</td></tr>
                                 ) : (
                                     trafficLogs.map((log) => (
-                                        <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
-                                            <td className="px-6 py-4 text-[10px] font-mono text-slate-500">{log.time}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${log.type === 'EXTENSION_DATA' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
-                                                    {log.type === 'EXTENSION_DATA' ? 'Extension' : 'Polling'}
+                                        <tr key={log.id} onClick={() => setSelectedRawData(log.raw)} className="hover:bg-white/[0.02] cursor-pointer transition-colors group">
+                                            <td className="px-6 py-3">
+                                                <span className={`px-2 py-0.5 rounded-[4px] text-[7px] font-black uppercase ${log.type === 'EXTENSION_DATA' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                                    {log.type === 'EXTENSION_DATA' ? 'Ext' : 'Poll'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-[11px] font-bold text-slate-300">{log.method}</td>
-                                            <td className="px-6 py-4 text-[11px] font-black text-white">${log.amount} USDC</td>
-                                            <td className="px-6 py-4 text-center">
-                                                <button
-                                                    onClick={() => setSelectedRawData(log.raw)}
-                                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[9px] font-black text-slate-400 hover:text-white uppercase transition-all"
-                                                >
-                                                    Ver JSON
-                                                </button>
-                                            </td>
+                                            <td className="px-6 py-3 text-[10px] font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase">{log.method}</td>
+                                            <td className="px-6 py-3 text-[10px] font-black text-white">${log.amount}</td>
+                                            <td className="px-6 py-3 text-[9px] font-mono text-slate-600 text-right">{log.time}</td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                {/* Inspect / Stats Column */}
-                <div className="space-y-8">
-                    {/* Raw Viewer Panel */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl h-[400px] flex flex-col">
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <FaLock className="text-emerald-500" /> Inspector de Datos
-                        </h2>
+                    <div className="lg:col-span-4 bg-black/20 p-6 flex flex-col h-[300px]">
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-4">Inspector JSON</span>
                         {selectedRawData ? (
-                            <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-                                <div className="bg-black/40 rounded-2xl p-4 font-mono text-[10px] text-emerald-400 overflow-y-auto flex-1 custom-scrollbar scrollbar-thin scrollbar-thumb-emerald-500/20">
-                                    <pre>{JSON.stringify(selectedRawData, null, 2)}</pre>
-                                </div>
-                                <button
-                                    onClick={() => setSelectedRawData(null)}
-                                    className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest transition-all"
-                                >
-                                    Cerrar Inspector
-                                </button>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/40 rounded-xl p-4 border border-white/5">
+                                <pre className="text-[9px] text-emerald-500 font-mono leading-relaxed">{JSON.stringify(selectedRawData, null, 2)}</pre>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/5 rounded-3xl">
-                                <FaSearch size={32} className="mb-4" />
-                                <p className="text-[9px] font-black text-center uppercase leading-relaxed">Selecciona una operación<br />para inspeccionar metadatos</p>
+                            <div className="flex-1 flex flex-col items-center justify-center opacity-10 border border-dashed border-white/10 rounded-xl">
+                                <FaSearch size={24} className="mb-2" />
+                                <span className="text-[8px] font-black uppercase">Sin selección</span>
                             </div>
                         )}
-                    </div>
-
-                    {/* PayPal Logic Helper */}
-                    <div className="bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <div className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center text-[10px] font-black">P</div>
-                            Calculadora Paypal
-                        </h2>
-                        <div className="space-y-4">
-                            <div className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10">
-                                <p className="text-[10px] text-blue-400 font-bold mb-3 uppercase tracking-widest">Estimación de Comisiones</p>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-[11px]">
-                                        <span className="text-slate-500">Comisión Paypal</span>
-                                        <span className="text-white font-bold">5.4% + $0.30</span>
-                                    </div>
-                                    <div className="flex justify-between text-[11px]">
-                                        <span className="text-slate-500">Mínimo Airtm</span>
-                                        <span className="text-white font-bold">$1.00 USDC</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="text-[9px] text-slate-500 italic leading-relaxed">
-                                * Las operaciones de PayPal suelen retener el 5.4% de la cantidad enviada. Verifica siempre el monto neto en el inspector de datos.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
