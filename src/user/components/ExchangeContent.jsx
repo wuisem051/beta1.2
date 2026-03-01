@@ -427,6 +427,16 @@ const ExchangeContent = () => {
             const secretRef = doc(db, 'users', currentUser.uid, 'secrets', exchangeName);
             await deleteDoc(secretRef);
 
+            // También eliminar el documento legado 'exchange' si corresponde a este exchange
+            const legacyRef = doc(db, 'users', currentUser.uid, 'secrets', 'exchange');
+            const legacySnap = await getDoc(legacyRef);
+            if (legacySnap.exists()) {
+                const legacyData = legacySnap.data();
+                if (legacyData.exchange === exchangeName || (!legacyData.exchange && exchangeName === 'binance')) {
+                    await deleteDoc(legacyRef);
+                }
+            }
+
             // Actualizar estado local
             setConfigs(prev => ({
                 ...prev,

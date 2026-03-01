@@ -106,6 +106,12 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         return () => clearTimeout(timer);
     }, [symbol, strategy, totalCapital, numLevels, priceStep, distribution, profitMode, levels, sellLevels]);
 
+    // Limpiar errores al cambiar de par o exchange
+    useEffect(() => {
+        setError('');
+        setSuccess('');
+    }, [exchange, symbol]);
+
     // Obtener precio actual
     useEffect(() => {
         fetchCurrentPrice();
