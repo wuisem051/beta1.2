@@ -136,37 +136,41 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     setError('');
                 }
             } else {
-                // Fallback: Si el servidor falla por bloqueo geográfico o API keys incorrectas, intentamos fetch directo desde el navegador
-                if (data.error?.includes('Bloqueo Geográfico') || response.status === 451 || data.error?.includes('apiKey') || data.error?.includes('100413')) {
-                    console.log('Intentando fallback de precio via browser por error de conexión o credenciales...');
+                // Si el error es de llaves API (como el 100413 de BingX) o bloqueo geográfico, lo silenciamos y buscamos alternativa
+                const isApiKeyError = data.error?.includes('apiKey') || data.error?.includes('100413') || data.error?.includes('keys') || data.error?.includes('API');
+                const isGeoBlock = data.error?.includes('Bloqueo Geográfico') || response.status === 451;
+
+                if (isApiKeyError || isGeoBlock) {
+                    console.log('Error de conexión detectado (API/Geo). Intentando fallback público...');
+
                     try {
                         const tickerSymbol = symbol.replace('/', '');
-                        let fallbackUrl = '';
+                        // Fallback universal a Binance Public API (no requiere llaves)
+                        const fallbackUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${tickerSymbol}`;
+                        const res = await fetch(fallbackUrl);
 
-                        if (exchange === 'binance' || exchange === 'binanceus') {
-                            const domain = exchange === 'binance' ? 'api.binance.com' : 'api.binance.us';
-                            fallbackUrl = `https://${domain}/api/v3/ticker/price?symbol=${tickerSymbol}`;
-                        } else if (exchange === 'bingx') {
-                            fallbackUrl = `https://open-api.bingx.com/openApi/spot/v1/ticker/24hr?symbol=${symbol.replace('/', '-')}`;
-                        }
-
-                        if (fallbackUrl) {
-                            const res = await fetch(fallbackUrl);
+                        if (res.ok) {
                             const fallbackData = await res.json();
-                            const price = fallbackData.price || fallbackData.lastPrice || (fallbackData.data && fallbackData.data.lastPrice);
-                            if (price) {
-                                setCurrentPrice(parseFloat(price));
-                                setError('');
+                            if (fallbackData.price) {
+                                setCurrentPrice(parseFloat(fallbackData.price));
+                                setError(''); // Limpiamos el error porque el fallback funcionó
                                 return;
                             }
+                        }
+
+                        // Si el primer fallback falló, intentamos uno secundario (ej. Crypto.com o solo silenciamos)
+                        if (isApiKeyError) {
+                            setError('Nota: Usando modo sugerencia (Exchange sin vincular)');
                         }
                     } catch (fallbackErr) {
                         console.error('Fallback failed:', fallbackErr);
                     }
                 }
 
-                console.error('Error fetching price:', data.error);
-                setError(data.error || 'Error al obtener precio');
+                // Solo mostramos el error si NO es problema de llaves (porque este modo es para sugerencias)
+                if (!isApiKeyError) {
+                    setError(data.error || 'Error al obtener precio');
+                }
             }
         } catch (err) {
             console.error('Error fetching price:', err);
