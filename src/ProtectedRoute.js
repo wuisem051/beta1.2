@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import Loader from './common/components/Loader';
 
 const ProtectedRoute = ({ children }) => {
   const { currentUser, loading } = useAuth(); // Obtener el estado de carga
@@ -10,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     // Mostrar un indicador de carga mientras se verifica el estado de autenticación
-    return <div>Cargando autenticación...</div>;
+    return <Loader text="Verificando Sesión..." />;
   }
 
   if (!currentUser && !isDevMode) {

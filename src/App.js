@@ -10,6 +10,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { ThemeContext } from './context/ThemeContext'; // Importar ThemeContext
 import { ColorPaletteProvider } from './context/ColorPaletteContext'; // Importar ColorPaletteProvider
 import { useContext, useEffect } from 'react'; // Importar useContext y useEffect
+import Loader from './common/components/Loader';
 
 // Carga perezosa de componentes de página
 const Home = lazy(() => import('./user/pages/Home')); // Mantener el Home original por ahora, pero no se usará en la ruta principal
@@ -79,7 +80,7 @@ function AppContent() {
       <main className="flex-grow">
         <ColorPaletteProvider>
           <AuthProvider>
-            <Suspense fallback={<div>Cargando...</div>}>
+            <Suspense fallback={<Loader text="Iniciando Plataforma..." />}>
               <Routes>
                 <Route path="/" element={<FuturisticHome />} />
                 <Route path="/login" element={<Login />} />
