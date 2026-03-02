@@ -117,26 +117,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
     // 1. Cargar Balances en Tiempo Real
     useEffect(() => {
-        // Fallback for local development without Firebase
-        const fallbackTimer = setTimeout(() => {
-            if (loading) {
-                console.log("[WalletHub] Usando datos de respaldo por tiempo de espera...");
-                setUserBalances({
-                    BTC: 0.254192,
-                    LTC: 15.5,
-                    DOGE: 5240,
-                    'USDT-TRC20': 1250.50,
-                    TRX: 1200,
-                    VES: 45000,
-                    USDTFiat: 250,
-                    USD: 5280.45,
-                    paymentAddresses: {}
-                });
-                setLoading(false);
-            }
-        }, 1500);
-
-        if (!currentUser?.uid) return () => clearTimeout(fallbackTimer);
+        if (!currentUser?.uid) return;
         const userDocRef = doc(db, 'users', currentUser.uid);
         const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -152,12 +133,16 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                     USD: data.balanceUSD || 0, // Añadido balance general en USD
                     paymentAddresses: data.paymentAddresses || {}
                 });
+            } else {
+                // Si el documento no existe por alguna razón, usar 0
+                setUserBalances({
+                    BTC: 0, LTC: 0, DOGE: 0, 'USDT-TRC20': 0, TRX: 0, VES: 0, USDTFiat: 0, USD: 0, paymentAddresses: {}
+                });
             }
             setLoading(false);
         });
         return () => {
             unsubscribe();
-            clearTimeout(fallbackTimer);
         };
     }, [currentUser]);
 
@@ -184,18 +169,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
     // 4. Cargar Historial Unificado (Depósitos, Retiros, Fondo, Arbitraje, Trading)
     useEffect(() => {
-        // Fallback History for local env
-        const historyFallbackTimer = setTimeout(() => {
-            if (financialHistory.length === 0) {
-                setFinancialHistory([
-                    { id: 'mock-1', type: 'DEPOSIT', amount: 500, currency: 'USDT', status: 'Completado', createdAt: new Date() },
-                    { id: 'mock-2', type: 'WITHDRAW', amount: 50, currency: 'BTC', status: 'Pendiente', createdAt: new Date(Date.now() - 86400000) },
-                    { id: 'mock-3', type: 'TRADING', label: 'Trading: BTC/USDT', amount: 15.5, currency: 'USD', status: 'Exitosa', createdAt: new Date(Date.now() - 172800000) },
-                ]);
-            }
-        }, 1500);
-
-        if (!currentUser?.uid) return () => clearTimeout(historyFallbackTimer);
+        if (!currentUser?.uid) return;
 
         const historyState = {
             DEPOSITS: [],
