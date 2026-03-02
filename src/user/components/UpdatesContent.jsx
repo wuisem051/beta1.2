@@ -11,6 +11,21 @@ const UpdatesContent = ({ styles }) => {
 
     const systemUpdates = [
         {
+            id: 'layout-stability-v1.03',
+            title: "Estabilidad de Layout & Modo Local v1.03",
+            description: "Corrección masiva de la estabilidad visual en las secciones de Ajustes y Billetera. Hemos implementado un sistema de ancho dinámico para evitar saltos horizontales y un modo de datos de respaldo para facilitar el desarrollo y pruebas en entornos locales.",
+            type: "improvement",
+            version: "v1.03",
+            tag: "INTERFAZ",
+            changes: [
+                "Eliminación de saltos de margen en Ajustes y Billetera",
+                "Sincronización de ancho con el Dashboard central",
+                "Modo de datos Mock para Billetera (Offline/Local)",
+                "Optimización de contenedores para resoluciones altas"
+            ],
+            createdAt: new Date()
+        },
+        {
             id: 'trading-suite-v2.6',
             title: "Suite de Trading Profesional 2.6",
             description: "Actualización masiva de la experiencia de trading. Hemos limpiado el Dashboard principal para un enfoque más minimalista y potenciado la sección de Exchange con herramientas de análisis técnico y gestión de pares personalizada.",

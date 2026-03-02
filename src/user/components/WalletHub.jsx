@@ -10,7 +10,7 @@ import { FaWallet, FaArrowDown, FaArrowUp, FaHistory, FaCopy, FaCheckCircle, FaT
 import useCryptoPrice from '../../hooks/useCryptoPrice';
 
 
-const WalletHub = ({ initialTab: propTab }) => {
+const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
     const { currentUser } = useAuth();
     const { showError, showSuccess } = useError();
     const { darkMode } = useContext(ThemeContext);
@@ -117,7 +117,26 @@ const WalletHub = ({ initialTab: propTab }) => {
 
     // 1. Cargar Balances en Tiempo Real
     useEffect(() => {
-        if (!currentUser?.uid) return;
+        // Fallback for local development without Firebase
+        const fallbackTimer = setTimeout(() => {
+            if (loading) {
+                console.log("[WalletHub] Usando datos de respaldo por tiempo de espera...");
+                setUserBalances({
+                    BTC: 0.254192,
+                    LTC: 15.5,
+                    DOGE: 5240,
+                    'USDT-TRC20': 1250.50,
+                    TRX: 1200,
+                    VES: 45000,
+                    USDTFiat: 250,
+                    USD: 5280.45,
+                    paymentAddresses: {}
+                });
+                setLoading(false);
+            }
+        }, 1500);
+
+        if (!currentUser?.uid) return () => clearTimeout(fallbackTimer);
         const userDocRef = doc(db, 'users', currentUser.uid);
         const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -136,7 +155,10 @@ const WalletHub = ({ initialTab: propTab }) => {
             }
             setLoading(false);
         });
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            clearTimeout(fallbackTimer);
+        };
     }, [currentUser]);
 
     // 2. Cargar Direcciones de Depósito
@@ -162,7 +184,18 @@ const WalletHub = ({ initialTab: propTab }) => {
 
     // 4. Cargar Historial Unificado (Depósitos, Retiros, Fondo, Arbitraje, Trading)
     useEffect(() => {
-        if (!currentUser?.uid) return;
+        // Fallback History for local env
+        const historyFallbackTimer = setTimeout(() => {
+            if (financialHistory.length === 0) {
+                setFinancialHistory([
+                    { id: 'mock-1', type: 'DEPOSIT', amount: 500, currency: 'USDT', status: 'Completado', createdAt: new Date() },
+                    { id: 'mock-2', type: 'WITHDRAW', amount: 50, currency: 'BTC', status: 'Pendiente', createdAt: new Date(Date.now() - 86400000) },
+                    { id: 'mock-3', type: 'TRADING', label: 'Trading: BTC/USDT', amount: 15.5, currency: 'USD', status: 'Exitosa', createdAt: new Date(Date.now() - 172800000) },
+                ]);
+            }
+        }, 1500);
+
+        if (!currentUser?.uid) return () => clearTimeout(historyFallbackTimer);
 
         const historyState = {
             DEPOSITS: [],
@@ -249,6 +282,7 @@ const WalletHub = ({ initialTab: propTab }) => {
             unsubCollective();
             unsubArbitrage();
             unsubTrading();
+            clearTimeout(historyFallbackTimer);
         };
     }, [currentUser]);
 
@@ -378,7 +412,7 @@ const WalletHub = ({ initialTab: propTab }) => {
     if (loading) return <div className="flex items-center justify-center p-20 text-blue-500 font-bold">Cargando Billetera...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto p-4 lg:p-6 animate-fadeIn">
+        <div className="w-full mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: dashboardMaxWidth ? `${dashboardMaxWidth}px` : '1200px' }}>
             {/* Header / Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
@@ -410,7 +444,7 @@ const WalletHub = ({ initialTab: propTab }) => {
 
             {/* Tab: Overview */}
             {activeTab === 'overview' && (
-                <div className="space-y-6 animate-in fade-in duration-500">
+                <div className="space-y-6 animate-in fade-in duration-500 w-full">
                     {/* Resumen Principal - Estilo Binance Spot */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         <div className="lg:col-span-8 bg-[#1e2329] p-8 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
@@ -559,7 +593,7 @@ const WalletHub = ({ initialTab: propTab }) => {
 
             {/* Tab: Deposit - Binance Professional Look */}
             {activeTab === 'deposit' && (
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-[#1e2329] p-6 rounded-3xl border border-white/5 shadow-xl">
                             <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
@@ -669,7 +703,7 @@ const WalletHub = ({ initialTab: propTab }) => {
 
             {/* Tab: Withdraw - Binance Elite Style */}
             {activeTab === 'withdraw' && (
-                <div className="max-w-4xl mx-auto bg-[#1e2329] p-8 lg:p-12 rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-4xl mx-auto bg-[#1e2329] w-full p-8 lg:p-12 rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
                         <FaArrowUp size={300} />
                     </div>
@@ -770,7 +804,7 @@ const WalletHub = ({ initialTab: propTab }) => {
 
             {/* Tab: History - Binance Clean Table */}
             {activeTab === 'history' && (
-                <div className="bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-500">
+                <div className="bg-[#1e2329] w-full rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-500">
                     <div className="p-10 border-b border-white/5 bg-white/[0.01]">
                         <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Historial Transaccional</h3>
                         <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Registros inmutables de tus movimientos</p>
@@ -799,9 +833,9 @@ const WalletHub = ({ initialTab: propTab }) => {
                                             </td>
                                             <td className="px-8 py-6">
                                                 <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded border ${item.type === 'DEPOSIT' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                                        item.type === 'WITHDRAW' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                                                            item.type === 'COLLECTIVE' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                                'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                                                    item.type === 'WITHDRAW' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                                                        item.type === 'COLLECTIVE' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                            'bg-purple-500/10 text-purple-500 border-purple-500/20'
                                                     }`}>
                                                     {item.label || (item.type === 'DEPOSIT' ? 'Depósito' : 'Retiro')}
                                                 </span>

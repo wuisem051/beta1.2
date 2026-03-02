@@ -958,7 +958,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700">
+    <div className="w-full mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: `${dashboardMaxWidth}px` }}>
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-4">
           <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
@@ -978,7 +978,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-10 items-start">
+      <div className="flex flex-col lg:flex-row gap-10 items-start w-full">
         {/* Modern Sidebar Tabs */}
         <aside className="w-full lg:w-[320px] flex flex-row lg:flex-col gap-3 p-2 bg-[#1e2329] border border-white/5 rounded-[2.5rem] lg:sticky lg:top-10 z-10 overflow-x-auto no-scrollbar shadow-2xl">
           {tabs.map((tab) => (
@@ -1004,7 +1004,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
         {/* Tab Content Area */}
         <div className="flex-1 w-full min-h-[700px] animate-in fade-in slide-in-from-right-4 duration-700">
           {activeTab === 'profile' && (
-            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
                 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
               </div>
@@ -1115,7 +1115,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'account' && (
-            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
@@ -1193,7 +1193,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'payments' && (
-            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
@@ -1242,7 +1242,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'appearance' && (
-            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
@@ -1289,7 +1289,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'notifications' && (
-            <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
@@ -1752,12 +1752,12 @@ const UserPanel = () => {
             <Route path="mining-portfolio/*" element={<TradingPortfolioContent userBalances={userBalances} />} />
           )}
 
-          <Route path="my-wallet/*" element={<WalletHub />} />
+          <Route path="my-wallet/*" element={<WalletHub dashboardMaxWidth={dashboardMaxWidth} />} />
           {(!siteSettings || siteSettings.showWithdrawals !== false) && (
-            <Route path="withdrawals/*" element={<WalletHub />} />
+            <Route path="withdrawals/*" element={<WalletHub dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showDeposits !== false) && (
-            <Route path="deposits/*" element={<WalletHub />} />
+            <Route path="deposits/*" element={<WalletHub dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
             <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} />
