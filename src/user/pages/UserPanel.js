@@ -460,7 +460,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
       <div className="absolute top-4 left-6 z-20 hidden md:flex flex-col gap-2">
         <Link to="/user/updates" className="flex items-center gap-2 px-3 py-1.5 bg-[#fcd535]/10 border border-[#fcd535]/20 rounded-lg text-[9px] font-black text-[#fcd535] uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all group">
           <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
-          Update v1.03 New
+          Update
         </Link>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>

@@ -55,14 +55,6 @@ const P2P_MarketplacePage = () => {
     }
   }, [currentUser, db]);
 
-  if (!currentUser) {
-    return (
-      <div className={`p-6 rounded-lg shadow-xl max-w-4xl mx-auto my-8 ${theme.backgroundAlt} ${theme.text}`}>
-        <p className="text-center text-red-500">Por favor, inicia sesión para acceder al Mercado P2P.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <P2P_Marketplace userBalances={userBalances} />

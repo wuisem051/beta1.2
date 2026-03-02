@@ -11,6 +11,21 @@ const UpdatesContent = ({ styles }) => {
 
     const systemUpdates = [
         {
+            id: 'p2p-marketplace-remodel',
+            title: "Mercado P2P Estilo Binance - Acceso Público",
+            description: "Hemos remodelado completamente la sección de Mercado P2P para ofrecer una experiencia similar a Binance. Además, el mercado ahora soporta acceso para usuarios invitados (sin estar logueados) integrando un redireccionamiento inteligente.",
+            type: "feature",
+            version: "v1.03",
+            tag: "P2P ELITE",
+            changes: [
+                "Nuevo sistema de navegación por pestañas de Compra/Venta",
+                "Integración visual estilo dark mode con acentos de color Binance",
+                "Acceso de lectura a las órdenes del mercado para usuarios sin loguear",
+                "Mapeo y filtros integrales de criptoactivos y métodos de pago"
+            ],
+            createdAt: new Date()
+        },
+        {
             id: 'layout-stability-v1.03',
             title: "Estabilidad de Layout & Modo Local v1.03",
             description: "Corrección masiva de la estabilidad visual en las secciones de Ajustes y Billetera. Hemos implementado un sistema de ancho dinámico para evitar saltos horizontales y un modo de datos de respaldo para facilitar el desarrollo y pruebas en entornos locales.",

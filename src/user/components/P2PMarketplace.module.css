@@ -1,422 +1,361 @@
-/* P2P Marketplace Premium Styles */
+/* P2P Marketplace Binance-Style Premium Styles */
 
 .marketplaceContainer {
     padding: 2rem 1.5rem;
     max-width: 1600px;
     margin: 0 auto;
+    min-height: 100vh;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .marketplaceHeader {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    gap: 2rem;
     flex-wrap: wrap;
-    gap: 1rem;
 }
 
-.marketplaceTitle {
-    font-size: 2.5rem;
-    font-weight: 900;
-    letter-spacing: -0.025em;
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+/* Buy/Sell Tab Switcher */
+.tabSwitcher {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.5rem;
 }
 
-.createOfferButton {
-    padding: 0.875rem 2rem;
-    background: var(--gradient-accent);
-    color: white;
-    font-weight: 700;
-    border-radius: 0.75rem;
+.tabButton {
+    background: none;
     border: none;
+    padding: 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    color: #64748b;
+}
+
+.tabButtonActiveBuy {
+    color: #10b981;
+}
+
+.tabButtonActiveBuy::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #10b981;
+    border-radius: 99px;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.tabButtonActiveSell {
+    color: #f43f5e;
+}
+
+.tabButtonActiveSell::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #f43f5e;
+    border-radius: 99px;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+}
+
+/* Asset Pills */
+.assetList {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+}
+
+.assetList::-webkit-scrollbar {
+    display: none;
+}
+
+.assetPill {
+    padding: 0.6rem 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    color: #94a3b8;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
 }
 
-.createOfferButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+.assetPill:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
 }
 
-.createOfferButton:active {
-    transform: translateY(0);
+.assetPillActive {
+    background: #fcd535 !important;
+    color: #000 !important;
+    border-color: #fcd535;
+    box-shadow: 0 4px 15px rgba(252, 213, 53, 0.2);
 }
 
-/* Offers Section */
-.offersSection {
-    background: var(--light-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--gray-border);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
+/* Filter Bar */
+.filterBar {
+    display: grid;
+    grid-template-cols: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    background: #1e2329;
+    padding: 1.5rem 2rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+    align-items: center;
 }
 
-body.dark .offersSection {
-    background: var(--dark-card);
-    border: 1px solid var(--dark-border);
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.offersTitle {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 1.5rem;
-    color: var(--dark-text);
+.filterLabel {
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
-body.dark .offersTitle {
-    color: var(--light-text);
-}
-
-/* Table Styles */
-.tableWrapper {
-    overflow-x: auto;
+.filterInput, .filterSelect {
+    background: #0b0e11;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
-    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.2s;
 }
 
-.offersTable {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 900px;
+.filterInput:focus {
+    border-color: #fcd535;
 }
 
-.tableHead {
-    background: rgba(0, 0, 0, 0.02);
-}
-
-body.dark .tableHead {
-    background: rgba(255, 255, 255, 0.02);
+/* Offers Table Area */
+.offersSection {
+    background: #1e2329;
+    border-radius: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 .tableHeader {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 800;
+    padding: 1.25rem 2rem;
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--gray-text);
-    border-bottom: 2px solid var(--gray-border);
-    white-space: nowrap;
-}
-
-body.dark .tableHeader {
-    border-bottom-color: var(--dark-border);
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .tableRow {
-    transition: all 0.2s ease;
-    border-bottom: 1px solid var(--gray-border);
-}
-
-body.dark .tableRow {
-    border-bottom-color: var(--dark-border);
+    padding: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
 }
 
 .tableRow:hover {
-    background: rgba(245, 158, 11, 0.05);
-    transform: scale(1.005);
+    background: rgba(255, 255, 255, 0.01);
 }
 
-.tableCell {
-    padding: 1.25rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--dark-text);
-    vertical-align: middle;
-}
-
-body.dark .tableCell {
-    color: var(--light-text);
-}
-
-/* Type Badges */
-.typeBadge {
-    display: inline-flex;
+/* Advertiser Info */
+.advertiserInfo {
+    display: flex;
     align-items: center;
-    padding: 0.375rem 0.875rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    box-shadow: 0 2px 8px currentColor;
+    gap: 1rem;
 }
 
-.typeBadgeSell {
-    composes: typeBadge;
-    background: var(--gradient-green);
+.avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #2b3139;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.advertiserName {
+    font-size: 1rem;
+    font-weight: 900;
     color: white;
-}
-
-.typeBadgeBuy {
-    composes: typeBadge;
-    background: var(--gradient-red);
-    color: white;
-}
-
-/* Online Status */
-.userCell {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.onlineIndicator {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.onlineIndicatorActive {
-    composes: onlineIndicator;
-    background: var(--green-check);
-    animation: pulse-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 8px var(--green-check);
-}
-
-.onlineIndicatorInactive {
-    composes: onlineIndicator;
-    background: var(--gray-text);
-    opacity: 0.5;
-}
-
-/* Action Buttons */
-.actionButton {
-    padding: 0.5rem 1.25rem;
-    font-size: 0.875rem;
+.trustMetrics {
+    font-size: 0.7rem;
+    color: #64748b;
     font-weight: 700;
+    margin-top: 0.25rem;
+}
+
+/* Price & Limits */
+.priceText {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: white;
+    font-style: italic;
+    letter-spacing: -0.02em;
+}
+
+.fiatUnit {
+    font-size: 0.75rem;
+    color: #475569;
+    margin-left: 0.25rem;
+}
+
+.limitRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.limitValue {
+    color: #94a3b8;
+}
+
+/* Payment Methods */
+.paymentList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.paymentTag {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: #94a3b8;
+    border-left: 3px solid transparent;
+}
+
+.paymentTag[data-method="Binance Pay"] { border-left-color: #fcd535; }
+.paymentTag[data-method="Pago Móvil"] { border-left-color: #ef4444; }
+.paymentTag[data-method="Zelle"] { border-left-color: #6d28d9; }
+
+/* Buttons */
+.buyButtonBinance {
+    padding: 0.75rem 2rem;
+    background: #10b981;
+    color: white;
     border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.buyButton {
-    composes: actionButton;
-    background: var(--gradient-green);
-    color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.buyButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-}
-
-.sellButton {
-    composes: actionButton;
-    background: var(--gradient-red);
-    color: white;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.sellButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-.cancelButton {
-    composes: actionButton;
-    background: linear-gradient(135deg, #64748b, #475569);
-    color: white;
-    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
-}
-
-.cancelButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
-}
-
-/* Modal Styles */
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-}
-
-.modalContent {
-    background: var(--light-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--gray-border);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    animation: fade-in-scale 0.3s ease-out forwards;
-}
-
-body.dark .modalContent {
-    background: var(--dark-card);
-    border: 1px solid var(--dark-border);
-}
-
-.modalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.modalTitle {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--dark-text);
-}
-
-body.dark .modalTitle {
-    color: var(--light-text);
-}
-
-.closeButton {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--gray-text);
-    transition: color 0.2s ease;
-    padding: 0.25rem;
-}
-
-.closeButton:hover {
-    color: var(--red-error);
-}
-
-/* Form Styles */
-.formGroup {
-    margin-bottom: 1.5rem;
-}
-
-.formLabel {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--gray-text);
-    margin-bottom: 0.5rem;
+    border-radius: 1rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.formInput,
-.formSelect {
-    width: 100%;
-    padding: 0.875rem 1.25rem;
-    border: 2px solid var(--gray-border);
-    border-radius: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    background: var(--light-bg);
-    color: var(--dark-text);
-    transition: all 0.2s ease;
-}
-
-body.dark .formInput,
-body.dark .formSelect {
-    background: var(--dark-bg);
-    color: var(--light-text);
-    border-color: var(--dark-border);
-}
-
-.formInput:focus,
-.formSelect:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
-}
-
-.submitButton {
-    width: 100%;
-    padding: 1rem 2rem;
-    background: var(--gradient-accent);
-    color: white;
-    font-weight: 700;
-    font-size: 1rem;
-    border-radius: 0.75rem;
-    border: none;
+    font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    margin-top: 1rem;
+    transition: all 0.2s;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
 }
 
-.submitButton:hover {
+.buyButtonBinance:hover {
+    background: #059669;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.25);
 }
 
-.submitButton:active {
-    transform: translateY(0);
+.sellButtonBinance {
+    padding: 0.75rem 2rem;
+    background: #f43f5e;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 10px 20px rgba(244, 63, 94, 0.15);
 }
 
-/* Loading & Error States */
-.loadingText,
-.errorText {
-    text-align: center;
-    padding: 2rem;
-    font-size: 1rem;
-    font-weight: 600;
+.sellButtonBinance:hover {
+    background: #e11d48;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(244, 63, 94, 0.25);
 }
 
-.loadingText {
-    color: var(--gray-text);
+.publishButton {
+    background: #2b3139;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
 }
 
-.errorText {
-    color: var(--red-error);
+.publishButton:hover {
+    background: #3a414b;
+    border-color: #fcd535;
 }
 
-.noOffersText {
-    text-align: center;
-    padding: 3rem;
-    color: var(--gray-text);
-    font-size: 1.125rem;
-    font-weight: 500;
+/* Modal Styling Overrides */
+.binanceModal {
+    background: #1e2329 !important;
+    border-radius: 2.5rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 0 !important;
+    overflow: hidden;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .marketplaceHeader {
-        flex-direction: column;
-        align-items: stretch;
-    }
+.modalInner {
+    padding: 2.5rem;
+}
 
-    .marketplaceTitle {
-        font-size: 2rem;
-    }
+@media (max-width: 1024px) {
+    .hideMobile { display: none; }
+    .tableRow { grid-template-columns: 1fr 1fr; gap: 1rem; display: grid; }
+}
 
-    .createOfferButton {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .tableWrapper {
-        margin: 0 -2rem;
-        padding: 0 2rem;
-    }
+@media (max-width: 640px) {
+    .marketplaceHeader { flex-direction: column; align-items: stretch; }
 }
