@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
 import candadoIcon from '../../imagens/candado.png';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext'; // Importar ThemeContext
-import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
+import { useNavigate, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import { countMinersByUser } from '../../utils/miners';
@@ -457,9 +457,15 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
   return (
     <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8 relative">
-      <div className="absolute top-4 left-6 z-10 hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        Sistema v1.03 Beta
+      <div className="absolute top-4 left-6 z-20 hidden md:flex flex-col gap-2">
+        <Link to="/user/updates" className="flex items-center gap-2 px-3 py-1.5 bg-[#fcd535]/10 border border-[#fcd535]/20 rounded-lg text-[9px] font-black text-[#fcd535] uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all group">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
+          Update v1.03 New
+        </Link>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Sistema v1.03 Beta
+        </div>
       </div>
 
       {/* Premium Profile Slot */}

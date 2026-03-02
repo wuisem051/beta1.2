@@ -119,6 +119,14 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             isActive={pathname.includes('/dashboard')}
           />
 
+          {/* Update Item */}
+          <NavLink
+            to="/user/updates"
+            icon={<FaHistory />}
+            label="Update"
+            isActive={pathname.includes('/updates')}
+          />
+
           {/* Billetera Section */}
           <div className="space-y-1">
             <CollapsibleHeader
@@ -209,7 +217,6 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             {openMenus.support && (
               <div className="pl-9 space-y-1 animate-in slide-in-from-top-1 duration-200">
                 <NavLink to="/user/contact-support" label="Tickets" isActive={pathname.includes('/contact-support')} />
-                <NavLink to="/user/updates" label="Registro" isActive={pathname.includes('/updates')} />
               </div>
             )}
           </div>
