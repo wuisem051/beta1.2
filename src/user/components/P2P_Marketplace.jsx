@@ -97,6 +97,15 @@ const P2P_Marketplace = ({ userBalances }) => {
     const price = parseFloat(newOffer.price);
     if (!amount || amount <= 0 || !price || price <= 0) return showError("Monto y precio inválidos");
 
+    // Block sell if no balance
+    if (newOffer.type === 'sell') {
+      const balanceKey = `balance${newOffer.coin.split('-')[0]}`;
+      const balance = userBalances[balanceKey] || 0;
+      if (balance < amount) {
+        return showError(`Saldo insuficiente. Tienes ${balance} ${newOffer.coin}`);
+      }
+    }
+
     try {
       await addDoc(collection(db, 'p2p_offers'), {
         ...newOffer,
@@ -299,10 +308,19 @@ const P2P_Marketplace = ({ userBalances }) => {
                       </button>
                     ) : (
                       <button
-                        onClick={() => !currentUser && (window.location.hash = '#/login')}
-                        className={activeSide === 'sell' ? styles.buyButtonBinance : styles.sellButtonBinance}
+                        onClick={() => {
+                          if (!currentUser) return (window.location.hash = '#/login');
+                          if (activeSide === 'buy') { // User wants to sell their crypto
+                            const balanceKey = `balance${offer.coin.split('-')[0]}`;
+                            const balance = userBalances[balanceKey] || 0;
+                            if (balance <= 0) return showError(`No tienes saldo para vender ${offer.coin}`);
+                          }
+                          // Logica real de compra/venta iria aqui
+                        }}
+                        disabled={activeSide === 'buy' && currentUser && (userBalances[`balance${offer.coin.split('-')[0]}`] || 0) <= 0}
+                        className={`${activeSide === 'sell' ? styles.buyButtonBinance : styles.sellButtonBinance} ${activeSide === 'buy' && currentUser && (userBalances[`balance${offer.coin.split('-')[0]}`] || 0) <= 0 ? 'opacity-50 cursor-not-allowed saturate-0' : ''}`}
                       >
-                        {activeSide === 'sell' ? `Comprar ${offer.coin}` : `Vender ${offer.coin}`}
+                        {activeSide === 'sell' ? `Comprar ${offer.coin}` : (currentUser && (userBalances[`balance${offer.coin.split('-')[0]}`] || 0) <= 0 ? 'Sin Saldo' : `Vender ${offer.coin}`)}
                       </button>
                     )}
                   </div>
@@ -330,8 +348,8 @@ const P2P_Marketplace = ({ userBalances }) => {
                   value={newOffer.type}
                   onChange={e => setNewOffer({ ...newOffer, type: e.target.value })}
                 >
-                  <option value="sell">QUIERO COMPRAR (Publicar Compra)</option>
-                  <option value="buy">QUIERO VENDER (Publicar Venta)</option>
+                  <option value="sell">QUIERO VENDER (Publicar Venta)</option>
+                  <option value="buy">QUIERO COMPRAR (Publicar Compra)</option>
                 </select>
               </div>
               <div className={styles.filterGroup}>
