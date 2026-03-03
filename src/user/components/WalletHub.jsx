@@ -256,7 +256,6 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
             unsubCollective();
             unsubArbitrage();
             unsubTrading();
-            clearTimeout(historyFallbackTimer);
         };
     }, [currentUser]);
 
