@@ -43,7 +43,7 @@ function App() {
             link.rel = 'icon';
             document.head.appendChild(link);
           }
-          link.href = faviconUrl;
+          link.href = faviconUrl + (faviconUrl.includes('?') ? '&' : '?') + 'v=2';
           // Actualizar título del documento
           if (data.siteName) {
             document.title = data.siteName;
