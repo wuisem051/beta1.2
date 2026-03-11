@@ -33,16 +33,17 @@ function App() {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          // Actualizar favicon
-          if (data.faviconUrl) {
-            let link = document.querySelector("link[rel~='icon']");
-            if (!link) {
-              link = document.createElement('link');
-              link.rel = 'icon';
-              document.head.appendChild(link);
-            }
-            link.href = data.faviconUrl;
+          // Actualizar favicon (usar local si en Firebase está el antiguo o no hay uno)
+          const faviconUrl = (data.faviconUrl && !data.faviconUrl.includes('blogger.googleusercontent.com'))
+            ? data.faviconUrl
+            : '/favicon.png';
+          let link = document.querySelector("link[rel~='icon']");
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
           }
+          link.href = faviconUrl;
           // Actualizar título del documento
           if (data.siteName) {
             document.title = data.siteName;
