@@ -29,8 +29,8 @@ const CryptoMarketMonitor = () => {
 
         try {
             const apiUrl = process.env.NODE_ENV === 'development'
-                ? 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d'
-                : '/api/coingecko/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true&price_change_percentage=1h,24h,7d';
+                ? 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true&price_change_percentage=1h,24h,7d'
+                : '/api/coingecko/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true&price_change_percentage=1h,24h,7d';
 
             const response = await fetch(apiUrl);
 
@@ -274,7 +274,7 @@ const CryptoMarketMonitor = () => {
                         <div>
                             <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
-                                Top 50 Criptomonedas • Actualizado: {lastUpdate?.toLocaleTimeString()}
+                                Top 10 Criptomonedas • Actualizado: {lastUpdate?.toLocaleTimeString()}
                             </p>
                         </div>
 
