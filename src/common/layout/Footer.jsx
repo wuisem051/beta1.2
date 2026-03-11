@@ -31,6 +31,9 @@ const Footer = () => {
   return (
     <footer className={`border-t ${theme.borderColor}`} style={{ backgroundColor: 'var(--bg-main)' }}> {/* Aplicar clases de tema y fondo dinámico */}
       <div className={`container mx-auto py-6 px-4 text-center ${theme.textSoft}`}> {/* Aplicar clases de tema */}
+        <div className="flex justify-center mb-4">
+          <img src="/logo.png" alt="MaxiOS Logo" className="w-12 h-12 object-contain opacity-80 hover:opacity-100 transition-opacity" />
+        </div>
         <p>{footerText}</p> {/* Aplicar clases de tema */}
       </div>
     </footer>

@@ -64,6 +64,10 @@ const FuturisticHome = () => {
         </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center animate-fade-in-up">
+          <div className="animate-float mb-8">
+            <img src="/logo.png" alt="MaxiOS Logo" className="w-32 h-32 mx-auto drop-shadow-[0_0_25px_rgba(37,99,235,0.3)]" />
+          </div>
+
           <div className="animate-float">
             <span className="inline-flex items-center py-2 px-5 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-10 backdrop-blur-sm">
               <span className="relative flex h-2 w-2 mr-3">
@@ -271,7 +275,8 @@ const FuturisticHome = () => {
       <footer className="py-16 border-t border-white border-opacity-5">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="text-2xl font-black italic tracking-tighter">
+            <div className="flex items-center text-2xl font-black italic tracking-tighter">
+              <img src="/logo.png" alt="Logo" className="w-10 h-10 mr-3 object-contain" />
               <span className="text-accent">{siteConfig.siteName.charAt(0)}</span>{siteConfig.siteName.substring(1)}
             </div>
             <div className="flex gap-10 text-slate-500 font-bold text-sm">

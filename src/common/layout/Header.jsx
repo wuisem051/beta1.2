@@ -52,7 +52,8 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo y botón de modo dev */}
           <div className="flex items-center">
-            <Link to="/" className={`flex-shrink-0 text-xl font-bold mr-4 ${theme.text}`}> {/* Aplicar clases de tema */}
+            <Link to="/" className={`flex items-center flex-shrink-0 text-xl font-bold mr-4 ${theme.text}`}> {/* Aplicar clases de tema */}
+              <img src="/logo.png" alt="Logo" className="w-8 h-8 mr-2 object-contain" />
               <span className="text-accent">{siteName.charAt(0)}</span>{siteName.substring(1)}
             </Link>
             {/* Botón para alternar modo oscuro/claro (desactivado por petición del usuario) */}
