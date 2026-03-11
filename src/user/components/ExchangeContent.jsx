@@ -987,12 +987,12 @@ const ExchangeContent = () => {
                                                     step="0.00000001"
                                                     value={tradeAmount}
                                                     onChange={e => setTradeAmount(e.target.value)}
-                                                    className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
+                                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
                                                     placeholder="0.0000"
                                                     required
                                                 />
                                                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
-                                                <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[#1e2329] border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
+                                                <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[var(--bg-card)] border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
                                             </div>
 
                                             <div className="grid grid-cols-4 gap-2">
@@ -1059,7 +1059,7 @@ const ExchangeContent = () => {
 
             {/* Orders & History Viewers (Modern Lists) */}
             {(activeTab === 'orders' || activeTab === 'history') && (
-                <div className="bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="p-10 border-b border-white/5 bg-white/[0.01]">
                         <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
                             {activeTab === 'orders' ? 'Órdenes Abiertas' : 'Historial de Trading'}
@@ -1071,7 +1071,7 @@ const ExchangeContent = () => {
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-[#12161c]">
+                            <thead className="bg-[var(--bg-main)]">
                                 <tr>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Símbolo</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo/Lado</th>
@@ -1132,7 +1132,7 @@ const ExchangeContent = () => {
             )}
 
             {errorMsg && (
-                <div className="fixed bottom-10 right-10 bg-[#1e2329] text-white px-8 py-4 rounded-3xl shadow-2xl border border-rose-500/20 flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 z-50">
+                <div className="fixed bottom-10 right-10 bg-[var(--bg-card)] text-white px-8 py-4 rounded-3xl shadow-2xl border border-rose-500/20 flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 z-50">
                     <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500">
                         <FaExclamationTriangle className="text-xl" />
                     </div>

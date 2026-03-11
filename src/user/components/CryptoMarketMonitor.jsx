@@ -229,7 +229,7 @@ const CryptoMarketMonitor = () => {
 
     if (loading && cryptos.length === 0) {
         return (
-            <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+            <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
                 <div className="px-10 py-8 border-b border-white/5">
                     <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
@@ -248,7 +248,7 @@ const CryptoMarketMonitor = () => {
 
     if (error) {
         return (
-            <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+            <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
                 <div className="px-10 py-8 border-b border-white/5">
                     <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
                 </div>
@@ -267,7 +267,7 @@ const CryptoMarketMonitor = () => {
 
     return (
         <>
-            <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+            <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
                 {/* Header */}
                 <div className="px-10 py-8 border-b border-white/5">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -287,7 +287,7 @@ const CryptoMarketMonitor = () => {
                                     placeholder="Buscar criptomoneda..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-[#12161c] border border-white/5 rounded-xl pl-12 pr-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
+                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl pl-12 pr-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
                                 />
                                 {searchTerm && (
                                     <button
@@ -304,14 +304,14 @@ const CryptoMarketMonitor = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`p-3 rounded-xl transition-all ${showFilters ? 'bg-[#fcd535] text-black' : 'bg-[#12161c] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-3 rounded-xl transition-all ${showFilters ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
                                 title="Filtros"
                             >
                                 <FaFilter />
                             </button>
                             <button
                                 onClick={() => setCompareMode(!compareMode)}
-                                className={`p-3 rounded-xl transition-all ${compareMode ? 'bg-[#fcd535] text-black' : 'bg-[#12161c] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-3 rounded-xl transition-all ${compareMode ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
                                 title="Modo Comparación"
                             >
                                 <FaExchangeAlt />
@@ -319,7 +319,7 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={fetchCryptoData}
                                 disabled={loading}
-                                className="p-3 bg-[#12161c] text-[#fcd535] rounded-xl hover:bg-[#fcd535]/10 transition-all disabled:opacity-50"
+                                className="p-3 bg-[var(--bg-main)] text-[#fcd535] rounded-xl hover:bg-[#fcd535]/10 transition-all disabled:opacity-50"
                                 title="Actualizar datos"
                             >
                                 <FaSync className={loading ? 'animate-spin' : ''} />
@@ -334,7 +334,7 @@ const CryptoMarketMonitor = () => {
                                 onClick={() => setFilter('all')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'all'
                                     ? 'bg-[#fcd535] text-black'
-                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 Todos
@@ -343,7 +343,7 @@ const CryptoMarketMonitor = () => {
                                 onClick={() => setFilter('favorites')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'favorites'
                                     ? 'bg-[#fcd535] text-black'
-                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 ⭐ Favoritos ({favorites.length})
@@ -352,7 +352,7 @@ const CryptoMarketMonitor = () => {
                                 onClick={() => setFilter('gainers')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'gainers'
                                     ? 'bg-emerald-500 text-black'
-                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 📈 Ganadores 24h
@@ -361,7 +361,7 @@ const CryptoMarketMonitor = () => {
                                 onClick={() => setFilter('losers')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'losers'
                                     ? 'bg-rose-500 text-black'
-                                    : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                    : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
                                 📉 Perdedores 24h
@@ -404,7 +404,7 @@ const CryptoMarketMonitor = () => {
                         {compareList.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
                                 {compareList.map(crypto => (
-                                    <div key={crypto.id} className="flex items-center gap-2 bg-[#12161c] px-4 py-2 rounded-lg">
+                                    <div key={crypto.id} className="flex items-center gap-2 bg-[var(--bg-main)] px-4 py-2 rounded-lg">
                                         <img src={crypto.image} alt={crypto.name} className="w-5 h-5 rounded-full" />
                                         <span className="text-xs font-bold text-white">{crypto.symbol.toUpperCase()}</span>
                                         <button
@@ -423,7 +423,7 @@ const CryptoMarketMonitor = () => {
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-[#12161c]">
+                        <thead className="bg-[var(--bg-main)]">
                             <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
                                 <th className="px-6 py-5 text-center w-12">★</th>
                                 <th className="px-4 py-5 text-center w-16 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap_rank')}>
@@ -583,7 +583,7 @@ const CryptoMarketMonitor = () => {
                                                             disabled={!isComparing && compareList.length >= 3}
                                                             className={`p-2 rounded-lg transition-all ${isComparing
                                                                 ? 'bg-[#fcd535] text-black'
-                                                                : 'bg-[#12161c] text-slate-400 hover:text-white disabled:opacity-30'
+                                                                : 'bg-[var(--bg-main)] text-slate-400 hover:text-white disabled:opacity-30'
                                                                 }`}
                                                             title={isComparing ? 'Quitar de comparación' : 'Agregar a comparación'}
                                                         >
@@ -597,7 +597,7 @@ const CryptoMarketMonitor = () => {
                                                         }}
                                                         className={`p-2 rounded-lg transition-all ${hasAlert
                                                             ? 'bg-blue-500 text-white'
-                                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                                            : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                                             }`}
                                                         title="Crear alerta de precio"
                                                     >
@@ -608,7 +608,7 @@ const CryptoMarketMonitor = () => {
                                                             setChartCrypto(crypto);
                                                             setShowChartModal(true);
                                                         }}
-                                                        className="p-2 bg-[#12161c] text-slate-400 hover:text-white rounded-lg transition-all hover:bg-[#12161c] hover:scale-105"
+                                                        className="p-2 bg-[var(--bg-main)] text-slate-400 hover:text-white rounded-lg transition-all hover:bg-[var(--bg-main)] hover:scale-105"
                                                         title="Ver Gráfico Avanzado"
                                                     >
                                                         <FaChartBar size={12} />
@@ -624,7 +624,7 @@ const CryptoMarketMonitor = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-10 py-6 border-t border-white/5 bg-[#12161c]/30">
+                <div className="px-10 py-6 border-t border-white/5 bg-[var(--bg-main)]/30">
                     <div className="flex justify-between items-center">
                         <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
                             Mostrando {filteredCryptos.length} de {cryptos.length} criptomonedas
@@ -638,7 +638,7 @@ const CryptoMarketMonitor = () => {
 
             {/* Comparison Panel */}
             {compareMode && compareList.length > 1 && (
-                <div className="bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="px-10 py-8 border-b border-white/5">
                         <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Comparación de Criptomonedas</h3>
                         <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
@@ -648,7 +648,7 @@ const CryptoMarketMonitor = () => {
                     <div className="p-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {compareList.map(crypto => (
-                                <div key={crypto.id} className="bg-[#12161c] rounded-2xl p-6 border border-white/5">
+                                <div key={crypto.id} className="bg-[var(--bg-main)] rounded-2xl p-6 border border-white/5">
                                     <div className="flex items-center gap-4 mb-6">
                                         <img src={crypto.image} alt={crypto.name} className="w-12 h-12 rounded-full" />
                                         <div>
@@ -700,7 +700,7 @@ const CryptoMarketMonitor = () => {
             {/* Price Alert Modal */}
             {showAlertModal && selectedCrypto && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-                    <div className="bg-[#1e2329] rounded-[40px] border border-white/5 max-w-md w-full p-8 animate-in zoom-in-95 duration-300">
+                    <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 max-w-md w-full p-8 animate-in zoom-in-95 duration-300">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Crear Alerta de Precio</h3>
                             <button
@@ -715,7 +715,7 @@ const CryptoMarketMonitor = () => {
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-4 mb-6 p-4 bg-[#12161c] rounded-xl">
+                        <div className="flex items-center gap-4 mb-6 p-4 bg-[var(--bg-main)] rounded-xl">
                             <img src={selectedCrypto.image} alt={selectedCrypto.name} className="w-10 h-10 rounded-full" />
                             <div>
                                 <p className="text-sm font-black text-white uppercase">{selectedCrypto.symbol.toUpperCase()}</p>
@@ -735,7 +735,7 @@ const CryptoMarketMonitor = () => {
                                         onClick={() => setAlertType('above')}
                                         className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${alertType === 'above'
                                             ? 'bg-emerald-500 text-black'
-                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                            : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                             }`}
                                     >
                                         Por Encima
@@ -744,7 +744,7 @@ const CryptoMarketMonitor = () => {
                                         onClick={() => setAlertType('below')}
                                         className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${alertType === 'below'
                                             ? 'bg-rose-500 text-black'
-                                            : 'bg-[#12161c] text-slate-400 hover:text-white'
+                                            : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                             }`}
                                     >
                                         Por Debajo
@@ -760,7 +760,7 @@ const CryptoMarketMonitor = () => {
                                     value={alertPrice}
                                     onChange={(e) => setAlertPrice(e.target.value)}
                                     placeholder="Ej: 50000.00"
-                                    className="w-full bg-[#12161c] border border-white/5 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
+                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
                                 />
                             </div>
 
@@ -779,7 +779,7 @@ const CryptoMarketMonitor = () => {
                                 <p className="text-xs font-black text-slate-600 uppercase tracking-widest mb-3">Alertas Activas</p>
                                 <div className="space-y-2">
                                     {priceAlerts.filter(a => a.coinId === selectedCrypto.id && !a.triggered).map(alert => (
-                                        <div key={alert.id} className="flex items-center justify-between p-3 bg-[#12161c] rounded-lg">
+                                        <div key={alert.id} className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-lg">
                                             <div>
                                                 <p className="text-xs font-bold text-white">
                                                     {alert.type === 'above' ? '📈' : '📉'} {formatPrice(alert.targetPrice)}
@@ -806,9 +806,9 @@ const CryptoMarketMonitor = () => {
             {/* Chart Modal */}
             {showChartModal && chartCrypto && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-                    <div className="bg-[#1e2329] rounded-[30px] border border-white/5 w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
+                    <div className="bg-[var(--bg-card)] rounded-[30px] border border-white/5 w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 shadow-2xl">
                         {/* Modal Header */}
-                        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-[#12161c]">
+                        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-[var(--bg-main)]">
                             <div className="flex items-center gap-4">
                                 <img src={chartCrypto.image} alt={chartCrypto.name} className="w-10 h-10 rounded-full" />
                                 <div>
@@ -826,14 +826,14 @@ const CryptoMarketMonitor = () => {
                             </div>
                             <button
                                 onClick={() => setShowChartModal(false)}
-                                className="p-2 rounded-full bg-[#1e2329] text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                                className="p-2 rounded-full bg-[var(--bg-card)] text-slate-400 hover:text-white hover:bg-white/5 transition-all"
                             >
                                 <FaTimes size={20} />
                             </button>
                         </div>
 
                         {/* Chart Container */}
-                        <div className="flex-1 bg-[#12161c] relative">
+                        <div className="flex-1 bg-[var(--bg-main)] relative">
                             <TradingViewWidget
                                 symbol={`BINANCE:${chartCrypto.symbol.toUpperCase()}USDT`}
                                 theme="dark"

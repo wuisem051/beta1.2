@@ -200,7 +200,7 @@ const WhaleMonitor = () => {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in duration-700">
                 {/* Lateral: Breakout Timeline */}
                 <div className="xl:col-span-3 space-y-8">
-                    <div className="bg-[#1e2329] p-8 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="bg-[var(--bg-card)] p-8 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-white">
                                 <FaClock className="text-orange-500" />
@@ -227,7 +227,7 @@ const WhaleMonitor = () => {
                         </div>
                     </div>
 
-                    <div className="bg-[#1e2329] p-8 rounded-[3rem] border border-white/5 shadow-2xl">
+                    <div className="bg-[var(--bg-card)] p-8 rounded-[3rem] border border-white/5 shadow-2xl">
                         <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 text-white">
                             <FaTachometerAlt className="text-emerald-500" />
                             Momentum Matrix
@@ -250,7 +250,7 @@ const WhaleMonitor = () => {
                 {/* Central: Charts & Main Metrics */}
                 <div className="xl:col-span-6 space-y-8">
                     {/* Main Radar Card with Chart */}
-                    <div className="bg-[#1e2329] rounded-[4rem] border border-white/10 overflow-hidden shadow-2xl relative">
+                    <div className="bg-[var(--bg-card)] rounded-[4rem] border border-white/10 overflow-hidden shadow-2xl relative">
                         <div className="p-10 pb-0">
                             <div className="flex items-center justify-between mb-10">
                                 <div className="flex items-center gap-6">
@@ -305,7 +305,7 @@ const WhaleMonitor = () => {
                     </div>
 
                     {/* Live Feed Exclusive */}
-                    <div className="bg-[#1e2329] rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl">
+                    <div className="bg-[var(--bg-card)] rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl">
                         <div className="p-8 border-b border-white/5 flex items-center justify-between">
                             <h3 className="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-3 text-white">
                                 <FaLayerGroup className="text-blue-500" />
@@ -315,7 +315,7 @@ const WhaleMonitor = () => {
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-[#0b0e11]/50 border-b border-white/5">
+                                <thead className="bg-[var(--bg-main)]/50 border-b border-white/5">
                                     <tr>
                                         <th className="px-10 py-6 text-[9px] font-black text-slate-500 uppercase tracking-widest">Qty (ARPA)</th>
                                         <th className="px-10 py-6 text-[9px] font-black text-slate-500 uppercase tracking-widest">USD Value</th>
@@ -357,7 +357,7 @@ const WhaleMonitor = () => {
 
                 {/* Lateral: Alerts & Extra Scanners */}
                 <div className="xl:col-span-3 space-y-8">
-                    <div className="bg-[#1e2329] p-8 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="bg-[var(--bg-card)] p-8 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
                         <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-8 flex items-center gap-2 text-white">
                             <FaBell className="text-orange-500" />
                             Tactical Stream
@@ -409,7 +409,7 @@ const WhaleMonitor = () => {
     };
 
     const MetricCard = ({ label, value, status, icon }) => (
-        <div className="bg-[#0b0e11] p-8 rounded-[2.5rem] border border-white/5 hover:border-orange-500/20 transition-all group overflow-hidden relative">
+        <div className="bg-[var(--bg-main)] p-8 rounded-[2.5rem] border border-white/5 hover:border-orange-500/20 transition-all group overflow-hidden relative">
             <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
                 {icon}
             </div>
@@ -425,7 +425,7 @@ const WhaleMonitor = () => {
         const maxIntensity = Math.max(...priceBuckets.map(b => b.total), 1);
         return (
             <div className="animate-in fade-in duration-700">
-                <div className="bg-[#1e2329] rounded-[4rem] border border-white/5 p-12 shadow-2xl relative overflow-hidden">
+                <div className="bg-[var(--bg-card)] rounded-[4rem] border border-white/5 p-12 shadow-2xl relative overflow-hidden">
                     <div className="flex items-center justify-between mb-12">
                         <h2 className="text-sm font-black uppercase tracking-[0.4em] text-white flex items-center gap-4">
                             <div className="w-2 h-10 bg-orange-600 rounded-full"></div>
@@ -473,11 +473,11 @@ const WhaleMonitor = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0b0e11] text-white p-4 lg:p-12 font-sans selection:bg-orange-600/30">
+        <div className="min-h-screen text-white p-4 lg:p-12 font-sans selection:bg-orange-600/30" style={{ backgroundColor: 'var(--bg-main)' }}>
             <header className="mb-12">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-12">
                     <div className="flex items-center gap-10">
-                        <div className="relative group p-8 bg-[#1e2329] rounded-[3rem] border border-white/10 shadow-2xl">
+                        <div className="relative group p-8 bg-[var(--bg-card)] rounded-[3rem] border border-white/10 shadow-2xl">
                             <div className="absolute inset-0 bg-orange-600 rounded-[3rem] blur-3xl opacity-10 group-hover:opacity-30 transition-opacity"></div>
                             <img src="https://assets.coingecko.com/coins/images/8821/small/ARPA_Chain.png" className="w-14 h-14 relative z-10" alt="ARPA" />
                         </div>
@@ -489,7 +489,7 @@ const WhaleMonitor = () => {
                             <h1 className="text-6xl font-black italic uppercase tracking-tighter leading-none">ARPA <span className="text-orange-600">Breakout</span> Sniper</h1>
                         </div>
                     </div>
-                    <div className="flex bg-[#1e2329] p-3 rounded-[3rem] border border-white/5 shadow-2xl">
+                    <div className="flex bg-[var(--bg-card)] p-3 rounded-[3rem] border border-white/5 shadow-2xl">
                         <button onClick={() => setActiveTab('arpa_pro')} className={`px-12 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'arpa_pro' ? 'bg-orange-600 text-white shadow-2xl shadow-orange-600/40' : 'text-slate-500 hover:text-white'}`}>Tactical Radar</button>
                         <button onClick={() => setActiveTab('liquidations')} className={`px-12 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'liquidations' ? 'bg-[#fcd535] text-black shadow-2xl shadow-yellow-500/40' : 'text-slate-500 hover:text-white'}`}>Liquidity Maps</button>
                     </div>

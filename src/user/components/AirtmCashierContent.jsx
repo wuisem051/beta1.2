@@ -476,11 +476,11 @@ const AirtmCashierContent = () => {
     };
 
     return (
-        <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0b0e11] text-slate-200 min-h-screen font-sans selection:bg-blue-500/30">
+        <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 text-slate-200 min-h-screen font-sans selection:bg-blue-500/30" style={{ backgroundColor: 'var(--bg-main)' }}>
             <audio ref={audioRef} src={soundUrl} />
 
             {/* Top Control Bar - Compact & Floating */}
-            <div className="sticky top-4 z-50 bg-[#1e2329]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-3 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
+            <div className="sticky top-4 z-50 bg-[var(--bg-card)]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-3 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4 pl-2">
                     <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <FaShieldAlt className="text-white text-xl" />
@@ -566,7 +566,7 @@ const AirtmCashierContent = () => {
                     )}
 
                     {/* Node Health Metrics Card */}
-                    <div className="bg-[#1e2329] border border-white/5 rounded-[24px] p-6 shadow-xl relative overflow-hidden">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[24px] p-6 shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
                         <div className="relative z-10 flex flex-col gap-6">
@@ -576,11 +576,11 @@ const AirtmCashierContent = () => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-[#12161c] rounded-2xl border border-white/5">
+                                <div className="p-4 bg-[var(--bg-main)] rounded-2xl border border-white/5">
                                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Ordenes</span>
                                     <span className="text-xl font-black text-white">{nodeStats.opsProcessed}</span>
                                 </div>
-                                <div className="p-4 bg-[#12161c] rounded-2xl border border-white/5">
+                                <div className="p-4 bg-[var(--bg-main)] rounded-2xl border border-white/5">
                                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1">Salud</span>
                                     <span className="text-xl font-black text-emerald-500">{nodeStats.health}%</span>
                                 </div>
@@ -596,7 +596,7 @@ const AirtmCashierContent = () => {
                     </div>
 
                     {/* Alerts & Sound Card */}
-                    <div className="bg-[#1e2329] border border-white/5 rounded-[24px] p-6 shadow-xl space-y-5">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[24px] p-6 shadow-xl space-y-5">
                         <div className="flex items-center justify-between">
                             <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
                                 <FaBell className="text-[#fcd535]" /> Preferencias
@@ -609,7 +609,7 @@ const AirtmCashierContent = () => {
                                     setNotifications({ ...notifications, sound: !notifications.sound });
                                     saveSettings({ notifications: { ...notifications, sound: !notifications.sound } });
                                 }}
-                                className="flex items-center justify-between p-3 bg-[#12161c] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
+                                className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
                             >
                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Sonido</span>
                                 <div className={`w-8 h-4 rounded-full relative transition-all ${notifications.sound ? 'bg-blue-600' : 'bg-slate-700'}`}>
@@ -618,7 +618,7 @@ const AirtmCashierContent = () => {
                             </div>
                             <div
                                 onClick={enableNotifications}
-                                className="flex items-center justify-between p-3 bg-[#12161c] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
+                                className="flex items-center justify-between p-3 bg-[var(--bg-main)] rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
                             >
                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Escritorio</span>
                                 <div className={`w-8 h-4 rounded-full relative transition-all ${notifications.desktop ? 'bg-blue-600' : 'bg-slate-700'}`}>
@@ -644,7 +644,7 @@ const AirtmCashierContent = () => {
                 <div className="xl:col-span-9 space-y-6">
 
                     {/* Operations List Container */}
-                    <div className="bg-[#1e2329] border border-white/5 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.3)] flex flex-col min-h-[600px] overflow-hidden">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.3)] flex flex-col min-h-[600px] overflow-hidden">
 
                         {/* List Header */}
                         <div className="px-8 py-6 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
@@ -662,7 +662,7 @@ const AirtmCashierContent = () => {
                         </div>
 
                         {/* Scrolling List */}
-                        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#0b0e11]/30">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[var(--bg-main)]/30">
                             <div className="flex flex-col gap-3">
                                 {operations.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-20 opacity-20 col-span-full">
@@ -792,7 +792,7 @@ const AirtmCashierContent = () => {
             </div>
 
             {/* Bottom Traffic Monitor - Integrated & Collapsible */}
-            <div className="bg-[#1e2329] border border-white/5 rounded-[32px] shadow-2xl overflow-hidden">
+            <div className="bg-[var(--bg-card)] border border-white/5 rounded-[32px] shadow-2xl overflow-hidden">
                 <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
                     <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-3">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
@@ -806,7 +806,7 @@ const AirtmCashierContent = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12">
                     <div className="lg:col-span-8 h-[300px] overflow-y-auto custom-scrollbar border-r border-white/5">
                         <table className="w-full text-left">
-                            <thead className="sticky top-0 bg-[#1e2329] shadow-sm">
+                            <thead className="sticky top-0 bg-[var(--bg-card)] shadow-sm">
                                 <tr className="text-[8px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5">
                                     <th className="px-6 py-3 text-blue-500">Origen</th>
                                     <th className="px-6 py-3">Método</th>

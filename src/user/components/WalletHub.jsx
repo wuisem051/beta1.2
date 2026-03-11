@@ -385,7 +385,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
     if (loading) return <div className="flex items-center justify-center p-20 text-blue-500 font-bold">Cargando Billetera...</div>;
 
     return (
-        <div className="w-full mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: dashboardMaxWidth ? `${dashboardMaxWidth}px` : '1200px' }}>
+        <div className="w-full mx-auto p-4 lg:p-10 min-h-screen animate-in fade-in duration-700" style={{ maxWidth: dashboardMaxWidth ? `${dashboardMaxWidth}px` : '1200px', backgroundColor: 'var(--bg-main)' }}>
             {/* Header / Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
@@ -420,7 +420,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                 <div className="space-y-6 animate-in fade-in duration-500 w-full">
                     {/* Resumen Principal - Estilo Binance Spot */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div className="lg:col-span-8 bg-[#1e2329] p-8 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
+                        <div className="lg:col-span-8 bg-[var(--bg-card)] p-8 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
                             <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
                                 <FaWallet size={200} />
                             </div>
@@ -447,7 +447,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('withdraw')}
-                                        className="px-6 py-3 bg-[#2b3139] hover:bg-[#363d47] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-white/5"
+                                        className="px-6 py-3 bg-[var(--bg-sidebar)] hover:bg-[#363d47] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-white/5"
                                     >
                                         Retirar
                                     </button>
@@ -461,7 +461,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                             </div>
                         </div>
 
-                        <div className="lg:col-span-4 bg-[#1e2329] p-6 rounded-3xl border border-white/5 shadow-xl">
+                        <div className="lg:col-span-4 bg-[var(--bg-card)] p-6 rounded-3xl border border-white/5 shadow-xl">
                             <div className="flex justify-between items-center mb-6">
                                 <h4 className="text-white text-sm font-black uppercase tracking-widest flex items-center gap-2">
                                     <FaHistory className="text-[#fcd535] text-xs" /> Recientes
@@ -494,7 +494,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                     </div>
 
                     {/* Lista de Activos - Estilo Tabla Binance */}
-                    <div className="bg-[#1e2329] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+                    <div className="bg-[var(--bg-card)] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
                         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
                             <div>
                                 <h3 className="text-white font-black uppercase tracking-widest text-sm">Activos Spot</h3>
@@ -506,7 +506,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-[#12161c]">
+                                <thead className="bg-[var(--bg-main)]">
                                     <tr>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Moneda</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Saldo Total</th>
@@ -568,7 +568,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
             {activeTab === 'deposit' && (
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-[#1e2329] p-6 rounded-3xl border border-white/5 shadow-xl">
+                        <div className="bg-[var(--bg-card)] p-6 rounded-3xl border border-white/5 shadow-xl">
                             <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
                                 <span className="w-6 h-6 bg-[#fcd535] text-[#0b0e11] rounded-full flex items-center justify-center text-[10px]">1</span>
                                 Seleccionar Moneda
@@ -605,7 +605,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                         )}
                     </div>
 
-                    <div className="lg:col-span-3 bg-[#1e2329] p-8 rounded-3xl border border-white/5 shadow-xl">
+                    <div className="lg:col-span-3 bg-[var(--bg-card)] p-8 rounded-3xl border border-white/5 shadow-xl">
                         <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
                             <span className="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px]">2</span>
                             Detalles de Depósito
@@ -641,7 +641,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                             placeholder="0.00"
                                             value={depositAmount}
                                             onChange={(e) => setDepositAmount(e.target.value)}
-                                            className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white font-black outline-none focus:border-blue-500 transition-all font-mono text-xl"
+                                            className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-4 text-white font-black outline-none focus:border-blue-500 transition-all font-mono text-xl"
                                         />
                                         <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 font-black text-xs">{selectedDepositCrypto.split('-')[0]}</div>
                                     </div>
@@ -653,7 +653,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                         placeholder="Pega el TxID aquí..."
                                         value={txHash}
                                         onChange={(e) => setTxHash(e.target.value)}
-                                        className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all"
+                                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-4 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all"
                                     />
                                 </div>
                             </div>
@@ -676,7 +676,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
             {/* Tab: Withdraw - Binance Elite Style */}
             {activeTab === 'withdraw' && (
-                <div className="max-w-4xl mx-auto bg-[#1e2329] w-full p-8 lg:p-12 rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-4xl mx-auto bg-[var(--bg-card)] w-full p-8 lg:p-12 rounded-[40px] border border-white/5 relative overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
                         <FaArrowUp size={300} />
                     </div>
@@ -693,11 +693,11 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                         <select
                                             value={withdrawCurrency}
                                             onChange={(e) => setWithdrawCurrency(e.target.value)}
-                                            className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-black outline-none focus:border-blue-500 appearance-none bg-no-repeat transition-all shadow-inner"
+                                            className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-5 text-white font-black outline-none focus:border-blue-500 appearance-none bg-no-repeat transition-all shadow-inner"
                                             style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'white\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
                                         >
                                             {[...cryptoOptions, ...fiatOptions].map(c => (
-                                                <option key={c.value} value={c.value} className="bg-[#1e2329] font-bold">{c.label}</option>
+                                                <option key={c.value} value={c.value} className="bg-[var(--bg-card)] font-bold">{c.label}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -713,7 +713,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                                 placeholder="0.00"
                                                 value={withdrawAmount}
                                                 onChange={(e) => setWithdrawAmount(e.target.value)}
-                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-6 text-white text-4xl font-black outline-none focus:border-blue-500 transition-all placeholder-slate-800 shadow-inner"
+                                                className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-6 text-white text-4xl font-black outline-none focus:border-blue-500 transition-all placeholder-slate-800 shadow-inner"
                                             />
                                             <button
                                                 type="button"
@@ -727,7 +727,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                 </div>
 
                                 <div className="space-y-8 flex flex-col justify-center">
-                                    <div className="flex items-center gap-4 bg-[#12161c] p-5 rounded-3xl border border-white/5 shadow-inner">
+                                    <div className="flex items-center gap-4 bg-[var(--bg-main)] p-5 rounded-3xl border border-white/5 shadow-inner">
                                         <div className="flex items-center gap-3 cursor-pointer select-none w-full" onClick={() => setUseBinancePay(!useBinancePay)}>
                                             <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${useBinancePay ? 'bg-blue-600 border-blue-500 shadow-lg' : 'border-slate-700 bg-black/20'}`}>
                                                 {useBinancePay && <FaCheckCircle className="text-white text-xs" />}
@@ -744,7 +744,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                                 value={withdrawBinanceId}
                                                 onChange={(e) => setWithdrawBinanceId(e.target.value)}
                                                 placeholder="UID del destinatario"
-                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono outline-none focus:border-blue-500 transition-all shadow-inner"
+                                                className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono outline-none focus:border-blue-500 transition-all shadow-inner"
                                             />
                                             <p className="mt-4 text-[9px] text-slate-500 font-bold px-4 italic leading-relaxed">Retiros instantáneos y sin comisiones entre usuarios de Binance.</p>
                                         </div>
@@ -756,7 +756,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                                 value={withdrawAddress}
                                                 onChange={(e) => setWithdrawAddress(e.target.value)}
                                                 placeholder=" bc1q..."
-                                                className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all shadow-inner"
+                                                className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-sm outline-none focus:border-blue-500 transition-all shadow-inner"
                                             />
                                             <p className="mt-4 text-[9px] text-slate-500 font-bold px-4 italic leading-relaxed text-rose-400">Asegúrate de que la red sea la correcta para evitar pérdida de fondos.</p>
                                         </div>
@@ -777,14 +777,14 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
             {/* Tab: History - Binance Clean Table */}
             {activeTab === 'history' && (
-                <div className="bg-[#1e2329] w-full rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-500">
+                <div className="bg-[var(--bg-card)] w-full rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in duration-500">
                     <div className="p-10 border-b border-white/5 bg-white/[0.01]">
                         <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Historial Transaccional</h3>
                         <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Registros inmutables de tus movimientos</p>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-[#12161c]">
+                            <thead className="bg-[var(--bg-main)]">
                                 <tr>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Fecha y Hora</th>
                                     <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo</th>
@@ -849,7 +849,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
             {/* Modal Fondo Colectivo - Rediseñado */}
             {isCollectiveModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-                    <div className="bg-[#1e2329] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
                         <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-8 border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
                             <FaUsers size={32} />
                         </div>
@@ -868,7 +868,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                         value={collectiveAmount}
                                         onChange={(e) => setCollectiveAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-emerald-500 transition-all font-mono shadow-inner"
+                                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-emerald-500 transition-all font-mono shadow-inner"
                                         disabled={isProcessingCollective}
                                     />
                                     <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700 font-black text-sm">$</div>
@@ -879,7 +879,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                 <button
                                     type="button"
                                     onClick={() => setIsCollectiveModalOpen(false)}
-                                    className="px-6 py-5 bg-[#12161c] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[#1e2329] transition-all flex-1 border border-white/5"
+                                    className="px-6 py-5 bg-[var(--bg-main)] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[var(--bg-card)] transition-all flex-1 border border-white/5"
                                 >
                                     Cerrar
                                 </button>

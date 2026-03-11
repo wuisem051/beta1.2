@@ -46,22 +46,26 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
       to={to}
       onClick={onClick}
       className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 group ${isActive
-        ? 'bg-[#2b3139] text-[#fcd535]'
-        : 'text-slate-400 hover:bg-[#1e2329] hover:text-white'
+        ? 'text-[var(--accent)]'
+        : 'text-slate-400 hover:text-white'
         }`}
+      style={isActive ? { backgroundColor: 'var(--bg-card)' } : {}}
     >
-      <span className={`mr-3 text-sm ${isActive ? 'text-[#fcd535]' : 'text-slate-500 group-hover:text-white'}`}>
+      <span className={`mr-3 text-sm`} style={{ color: isActive ? 'var(--accent)' : undefined }}>
         {icon}
       </span>
       {label}
-      {isActive && <div className="ml-auto w-1.5 h-1.5 bg-[#fcd535] rounded-full shadow-[0_0_8px_#fcd535]"></div>}
+      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full shadow-lg" style={{ backgroundColor: 'var(--accent)', boxShadow: '0 0 8px var(--accent)' }}></div>}
     </Link>
   );
 
   const CollapsibleHeader = ({ icon, label, isOpen, onClick }) => (
     <button
       onClick={onClick}
-      className={`w-full flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white hover:bg-[#1e2329] group`}
+      className={`w-full flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white group`}
+      style={{ ':hover': { backgroundColor: 'var(--bg-card)' } }}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-card)'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
     >
       <span className="mr-3 text-sm text-slate-500 group-hover:text-white">
         {icon}
@@ -77,7 +81,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
     <aside
       className={`shadow-xl border-r border-white border-opacity-5 flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
       style={{
-        background: '#12161c',
+        background: 'var(--bg-sidebar)',
         position: 'fixed',
         top: 0,
         left: 0,

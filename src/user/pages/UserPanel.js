@@ -104,7 +104,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
 
   if (!isVIP) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-10 bg-[#1e2329] rounded-[40px] border border-white/5 shadow-2xl">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-10 bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl">
         <div className="w-20 h-20 bg-[#fcd535]/10 rounded-full flex items-center justify-center text-[#fcd535] mb-6 border border-[#fcd535]/20 animate-pulse">
           <FaGem size={40} />
         </div>
@@ -118,15 +118,15 @@ const VIPChatContent = ({ styles, userBalances }) => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-[#1e2329] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-[var(--bg-card)] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
       <div className="p-6 border-b border-white/5 bg-white/[0.01] flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">COMUNIDAD ELITE VIP</h2>
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Canal Directo con Traders Expertos</p>
         </div>
-        <div className="flex bg-[#12161c] p-1 rounded-xl border border-white/5">
-          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-500'}`}>General</button>
-          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[#2b3139] text-[#fcd535]' : 'text-slate-500'}`}>Soporte Directo</button>
+        <div className="flex bg-[var(--bg-main)] p-1 rounded-xl border border-white/5">
+          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-slate-500'}`}>General</button>
+          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-slate-500'}`}>Soporte Directo</button>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
                 </div>
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{msg.displayName || msg.username}</span>
-                  <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[#fcd535] text-black rounded-tr-none' : 'bg-[#12161c] text-white border border-white/5 rounded-tl-none'}`}>
+                  <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[var(--accent)] text-black rounded-tr-none' : 'bg-[var(--bg-sidebar)] text-white border border-white/5 rounded-tl-none'}`}>
                     {msg.text}
                   </div>
                   <span className="text-[8px] text-slate-600 font-black mt-1 uppercase tracking-tighter">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -160,7 +160,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder="Escribe un mensaje en el hub VIP..."
-              className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all resize-none min-h-[60px]"
+              className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-8 py-5 text-white text-sm font-bold outline-none focus:border-[var(--accent)]/30 transition-all resize-none min-h-[60px]"
               rows="1"
             />
           </div>
@@ -462,7 +462,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
           <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
           Update
         </Link>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#12161c] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-main)] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           Sistema v1.03 Beta
         </div>
@@ -470,12 +470,12 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
       {/* Premium Profile Slot */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 mt-6">
-        <div className="lg:col-span-2 bg-[#1e2329] p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
+        <div className="lg:col-span-2 bg-[var(--bg-card)] p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
           <div className="relative flex flex-col md:flex-row items-center gap-8">
             <div className="w-24 h-24 rounded-full bg-[#fcd535] p-1 shadow-2xl">
-              <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#1e2329] bg-[#12161c] flex items-center justify-center">
+              <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#1e2329] bg-[var(--bg-main)] flex items-center justify-center">
                 {userBalances.profilePhotoUrl ? <img src={userBalances.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle size={48} className="text-slate-700" />}
               </div>
             </div>
@@ -505,7 +505,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
         </div>
 
         <div className="bg-[#fcd535] p-1 rounded-[40px] shadow-2xl">
-          <div className="w-full h-full bg-[#1e2329] rounded-[38px] p-10 flex flex-col justify-between border border-white/5 hover:bg-[#2b3139] transition-all cursor-pointer group">
+          <div className="w-full h-full bg-[var(--bg-card)] rounded-[38px] p-10 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
             <div>
               <div className="flex justify-between items-center mb-6">
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Balance Estimado</span>
@@ -524,7 +524,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
             <div className="mt-8 pt-6 border-t border-white/5 flex gap-4">
               <button onClick={() => navigate('/user/deposits')} className="flex-1 py-3 bg-[#fcd535] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
-              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-3 bg-[#12161c] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
+              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-3 bg-[var(--bg-main)] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
             </div>
           </div>
         </div>
@@ -612,7 +612,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] gap-6 animate-in fade-in duration-500">
-      <div className="w-full lg:w-[400px] bg-[#1e2329] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
+      <div className="w-full lg:w-[400px] bg-[var(--bg-card)] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
         <div className="p-8 border-b border-white/5 bg-white/[0.01]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Mis Solicitudes</h2>
@@ -627,22 +627,22 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             <div className="text-center py-20 opacity-20"><FaRegClock size={40} className="mx-auto mb-4" /><p className="text-[10px] font-black uppercase tracking-widest">Sin solicitudes activas</p></div>
           ) : (
             tickets.map(t => (
-              <div key={t.id} onClick={() => handleSelectTicket(t)} className={`p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${selectedTicket?.id === t.id ? 'bg-[#2b3139] border-[#fcd535]/30' : 'bg-[#12161c] border-white/5 hover:border-white/10'}`}>
+              <div key={t.id} onClick={() => handleSelectTicket(t)} className={`p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${selectedTicket?.id === t.id ? 'bg-[var(--bg-sidebar)] border-[var(--accent)]/30' : 'bg-[var(--bg-main)] border-white/5 hover:border-white/10'}`}>
                 <div className="flex justify-between items-start mb-3">
                   <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[#fcd535]' : 'text-white'}`}>{t.subject}</p>
-                  <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${t.status === 'Respondido' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}>{t.status}</span>
+                  <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${t.status === 'Respondido' ? 'bg-[var(--green-check)] text-black' : 'bg-slate-800 text-slate-400'}`}>{t.status}</span>
                 </div>
                 <p className="text-[10px] text-slate-500 line-clamp-1 font-bold lowercase mb-3">{t.conversation[t.conversation.length - 1].text}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-[8px] text-slate-700 font-black uppercase">{t.updatedAt.toLocaleDateString()}</span>
-                  {t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser) && (<div className="w-2 h-2 bg-[#fcd535] rounded-full shadow-[0_0_10px_#fcd535] animate-pulse"></div>)}
+                  {t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser) && (<div className="w-2 h-2 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent)] animate-pulse"></div>)}
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
-      <div className="flex-1 bg-[#1e2329] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
+      <div className="flex-1 bg-[var(--bg-card)] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
         {selectedTicket ? (
           <>
             <div className="p-8 border-b border-white/5 bg-white/[0.01]">
@@ -653,12 +653,12 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                 <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Estado: {selectedTicket.status}</span>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar bg-[#12161c]/30">
+            <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar bg-[var(--bg-main)]/30">
               {selectedTicket.conversation.map((msg, idx) => {
                 const isAdmin = msg.sender === 'admin';
                 return (
                   <div key={idx} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[75%] p-6 rounded-[2rem] text-sm font-bold shadow-xl ${isAdmin ? 'bg-slate-800 text-white rounded-tl-none border border-white/5' : 'bg-[#fcd535] text-black rounded-tr-none'}`}>
+                    <div className={`max-w-[75%] p-6 rounded-[2rem] text-sm font-bold shadow-xl ${isAdmin ? 'bg-slate-800 text-white rounded-tl-none border border-white/5' : 'bg-[var(--accent)] text-black rounded-tr-none'}`}>
                       <p className="leading-relaxed">{msg.text}</p>
                       <p className={`text-[8px] mt-4 font-black uppercase tracking-tighter ${isAdmin ? 'text-slate-500' : 'text-black/50'}`}> {isAdmin ? '🛡️ Agente de Soporte' : 'Tu consulta'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </p>
                     </div>
@@ -668,8 +668,8 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             </div>
             <div className="p-8 border-t border-white/5 bg-white/[0.02]">
               <form onSubmit={handleSendMessage} className="flex gap-4">
-                <input type="text" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Enviar respuesta al nodo de soporte..." className="flex-1 bg-[#12161c] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all" />
-                <button type="submit" disabled={!messageContent.trim() || isLoading} className="px-8 py-4 bg-[#fcd535] text-black rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-lg active:scale-95 disabled:opacity-50">Enviar</button>
+                <input type="text" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Enviar respuesta al nodo de soporte..." className="flex-1 bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all" />
+                <button type="submit" disabled={!messageContent.trim() || isLoading} className="px-8 py-4 bg-[var(--accent)] text-black rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-lg active:scale-95 disabled:opacity-50">Enviar</button>
               </form>
             </div>
           </>
@@ -681,11 +681,11 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
               <form onSubmit={handleSendMessage} className="space-y-8">
                 <div>
                   <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Asunto Global</label>
-                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Problemas con el retiro API" className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-6 py-5 text-white text-xs font-black outline-none focus:border-[#fcd535]/30 transition-all shadow-inner" />
+                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Problemas con el retiro API" className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white text-xs font-black outline-none focus:border-[var(--accent)]/30 transition-all shadow-inner" />
                 </div>
                 <div>
                   <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Descripción Detallada</label>
-                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[#12161c] border border-white/5 rounded-[2rem] px-6 py-5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
+                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[2rem] px-6 py-5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
                 </div>
                 <button type="submit" className="w-full py-5 bg-[#fcd535] text-black rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl active:scale-95">Iniciar Solicitud de Soporte</button>
               </form>
@@ -964,7 +964,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
   ];
 
   return (
-    <div className="w-full mx-auto p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: `${dashboardMaxWidth}px` }}>
+    <div className="w-full mx-auto p-4 lg:p-10 bg-[var(--bg-main)] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: `${dashboardMaxWidth}px` }}>
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-4">
           <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
@@ -986,7 +986,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
       <div className="flex flex-col lg:flex-row gap-10 items-start w-full">
         {/* Modern Sidebar Tabs */}
-        <aside className="w-full lg:w-[320px] flex flex-row lg:flex-col gap-3 p-2 bg-[#1e2329] border border-white/5 rounded-[2.5rem] lg:sticky lg:top-10 z-10 overflow-x-auto no-scrollbar shadow-2xl">
+        <aside className="w-full lg:w-[320px] flex flex-row lg:flex-col gap-3 p-2 bg-[var(--bg-card)] border border-white/5 rounded-[2.5rem] lg:sticky lg:top-10 z-10 overflow-x-auto no-scrollbar shadow-2xl">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -1001,7 +1001,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
               </div>
               <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0b0e11]' : 'text-slate-400 group-hover:text-white'}`}>{tab.label}</span>
               {activeTab === tab.id && (
-                <div className="absolute right-4 w-1.5 h-1.5 bg-[#0b0e11] rounded-full animate-pulse"></div>
+                <div className="absolute right-4 w-1.5 h-1.5 bg-[var(--bg-main)] rounded-full animate-pulse"></div>
               )}
             </button>
           ))}
@@ -1010,7 +1010,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
         {/* Tab Content Area */}
         <div className="flex-1 w-full min-h-[700px] animate-in fade-in slide-in-from-right-4 duration-700">
           {activeTab === 'profile' && (
-            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+            <div className="bg-[var(--bg-card)] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
                 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
               </div>
@@ -1027,9 +1027,9 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 </div>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-10">
-                  <div className="flex flex-col items-center p-12 bg-[#0b0e11]/50 rounded-[3rem] border border-white/5 shadow-inner">
+                  <div className="flex flex-col items-center p-12 bg-[var(--bg-main)]/50 rounded-[3rem] border border-white/5 shadow-inner">
                     <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
-                      <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-[#1e2329] bg-[#1e2329] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all group-hover:scale-105 group-hover:border-[#fcd535]/30">
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-[#1e2329] bg-[var(--bg-card)] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all group-hover:scale-105 group-hover:border-[#fcd535]/30">
                         {profilePhotoUrl ? (
                           <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
                         ) : (
@@ -1047,7 +1047,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     </div>
                   </div>
 
-                  <div className="bg-[#0b0e11]/30 p-8 lg:p-10 rounded-[2.5rem] border border-white/5">
+                  <div className="bg-[var(--bg-main)]/30 p-8 lg:p-10 rounded-[2.5rem] border border-white/5">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="p-2.5 rounded-xl bg-[#fcd535]/10 border border-[#fcd535]/20">
                         <FaCrown size={20} className="text-[#fcd535]" />
@@ -1079,7 +1079,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#fcd535] font-black text-lg">@</span>
                         <input
                           type="text"
-                          className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                          className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           placeholder="alias_elite"
@@ -1090,7 +1090,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Nombre de Visualización</label>
                       <input
                         type="text"
-                        className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.5rem] px-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] px-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Nombre Real o Pseudónimo"
@@ -1101,7 +1101,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Firma Biográfica</label>
                     <textarea
-                      className="w-full bg-[#0b0e11] border border-white/5 rounded-[1.8rem] px-8 py-6 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.8rem] px-8 py-6 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       placeholder="Describe tu trayectoria de inversión..."
@@ -1121,7 +1121,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'account' && (
-            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[var(--bg-card)] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
@@ -1139,7 +1139,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Email de Acceso</label>
                     <input
                       type="email"
-                      className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       disabled={true}
@@ -1154,7 +1154,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Contraseña Actual</label>
                       <input
                         type="password"
-                        className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Confirmación Requerida"
@@ -1164,7 +1164,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Nueva Contraseña</label>
                       <input
                         type="password"
-                        className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-emerald-500/40 transition-all"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-emerald-500/40 transition-all"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Nueva Master Key"
@@ -1173,7 +1173,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   </div>
                 </div>
 
-                <div className="p-10 bg-[#0b0e11]/50 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="p-10 bg-[var(--bg-main)]/50 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="flex items-center gap-6">
                     <div className="w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20 flex items-center justify-center text-blue-400">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
@@ -1199,7 +1199,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'payments' && (
-            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[var(--bg-card)] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
@@ -1212,15 +1212,15 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {Object.entries(paymentAddresses).map(([currency, address]) => (
-                  <div key={currency} className="bg-[#0b0e11]/50 p-8 rounded-[2rem] border border-white/5 group hover:border-[#fcd535]/30 transition-all">
+                  <div key={currency} className="bg-[var(--bg-main)]/50 p-8 rounded-[2rem] border border-white/5 group hover:border-[#fcd535]/30 transition-all">
                     <div className="flex justify-between items-center mb-6">
-                      <span className="px-3 py-1 bg-[#1e2329] text-[#fcd535] rounded-lg text-[10px] font-black border border-white/5">{currency} Network</span>
+                      <span className="px-3 py-1 bg-[var(--bg-card)] text-[#fcd535] rounded-lg text-[10px] font-black border border-white/5">{currency} Network</span>
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                     </div>
                     <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 block ml-2">Dirección de Destino</label>
                     <input
                       type="text"
-                      className="w-full bg-[#12161c] border border-white/5 rounded-2xl px-5 py-4 text-white text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-5 py-4 text-white text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
                       value={address}
                       onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
                       placeholder={`bc1.. / 0x.. / @uid`}
@@ -1248,7 +1248,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'appearance' && (
-            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[var(--bg-card)] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
@@ -1259,7 +1259,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 </div>
               </div>
 
-              <div className="bg-[#0b0e11]/50 p-10 rounded-[2.5rem] border border-white/5">
+              <div className="bg-[var(--bg-main)]/50 p-10 rounded-[2.5rem] border border-white/5">
                 <div className="flex items-center justify-between mb-10">
                   <div>
                     <h4 className="text-sm font-black text-white uppercase tracking-widest">Ampliación de Pantalla</h4>
@@ -1295,7 +1295,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           )}
 
           {activeTab === 'notifications' && (
-            <div className="bg-[#1e2329] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="bg-[var(--bg-card)] w-full rounded-[3rem] border border-white/5 p-10 lg:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-6 mb-12">
                 <div className="p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
@@ -1312,7 +1312,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   { label: 'Integridad del Nodo', desc: 'Alertas críticas de inicio de sesión y acceso.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
                   { label: 'Señales de Alta Frecuencia', desc: 'Oportunidades de entrada al nodo de trading.', state: receiveSignalsNotifications, setter: setReceiveSignalsNotifications, locked: !isVIP },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-8 bg-[#0b0e11]/50 rounded-[2.2rem] border border-white/5 group hover:border-[#fcd535]/20 transition-all">
+                  <div key={i} className="flex items-center justify-between p-8 bg-[var(--bg-main)]/50 rounded-[2.2rem] border border-white/5 group hover:border-[#fcd535]/20 transition-all">
                     <div className="flex-1 pr-10">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="text-xs font-black text-white uppercase tracking-[0.1em]">{item.label}</h4>
@@ -1322,7 +1322,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={item.state} onChange={() => !item.locked && item.setter(!item.state)} disabled={item.locked} />
-                      <div className="w-14 h-7 bg-slate-800 rounded-full peer peer-checked:bg-[#fcd535] transition-all after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 peer-checked:after:bg-[#0b0e11] shadow-inner"></div>
+                      <div className="w-14 h-7 bg-slate-800 rounded-full peer peer-checked:bg-[#fcd535] transition-all after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 peer-checked:after:bg-[var(--bg-main)] shadow-inner"></div>
                     </label>
                   </div>
                 ))}

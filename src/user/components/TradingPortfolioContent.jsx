@@ -119,7 +119,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
     }
 
     return (
-        <div className="p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-700">
+        <div className="p-4 lg:p-10 bg-[var(--bg-main)] min-h-screen animate-in fade-in duration-700">
             <div className="max-w-7xl mx-auto">
                 <header className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
@@ -138,7 +138,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
                         { label: 'Tasa de Éxito', value: `${stats.successRate.toFixed(1)}%`, icon: <FaChartLine />, color: 'amber' },
                         { label: 'Profit Est. %', value: `${stats.profitPercentage >= 0 ? '+' : ''}${stats.profitPercentage.toFixed(2)}%`, icon: <FaExternalLinkAlt />, color: stats.profitPercentage >= 0 ? 'emerald' : 'rose' }
                     ].map((stat, idx) => (
-                        <div key={idx} className="bg-[#1e2329] border border-white/5 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group hover:bg-[#2b3139] transition-all duration-500">
+                        <div key={idx} className="bg-[var(--bg-card)] border border-white/5 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group hover:bg-[var(--bg-sidebar)] transition-all duration-500">
                             <div className={`absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity text-${stat.color}-500`}>
                                 {stat.icon}
                             </div>
@@ -150,7 +150,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
                     ))}
                 </div>
 
-                <div className="bg-[#1e2329] rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
+                <div className="bg-[var(--bg-card)] rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
                     <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
                         <div>
                             <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Historial de Operaciones</h2>
@@ -178,7 +178,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-[#12161c]">
+                                <thead className="bg-[var(--bg-main)]">
                                     <tr>
                                         <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Fecha / Nodo</th>
                                         <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Activo / Par</th>

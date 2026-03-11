@@ -232,7 +232,7 @@ const CollectiveFundContent = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-          <div className="bg-[#1e2329] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-[var(--bg-card)] border border-white/5 rounded-[40px] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
             <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">Aportar Capital</h2>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-10">Los fondos se transfieren de tu balance USD</p>
 
@@ -245,7 +245,7 @@ const CollectiveFundContent = () => {
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-[#12161c] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-blue-500 transition-all font-mono shadow-inner"
+                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-8 py-6 text-white text-3xl font-black outline-none focus:border-blue-500 transition-all font-mono shadow-inner"
                     disabled={isLoading}
                     required
                   />
@@ -256,7 +256,7 @@ const CollectiveFundContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-5 bg-[#12161c] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[#1e2329] transition-all flex-1 border border-white/5"
+                  className="px-6 py-5 bg-[var(--bg-main)] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-[var(--bg-card)] transition-all flex-1 border border-white/5"
                 >
                   Cerrar
                 </button>
@@ -274,14 +274,14 @@ const CollectiveFundContent = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-        <div className="lg:col-span-3 bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl">
+        <div className="lg:col-span-3 bg-[var(--bg-card)] p-8 rounded-[40px] border border-white/5 shadow-2xl">
           <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-10 italic">Distribución Global de Fondos</h2>
           <div className="h-[400px] relative">
             <Pie data={data} options={options} plugins={[ChartDataLabels]} />
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-[#1e2329] p-8 rounded-[40px] border border-white/5 shadow-2xl flex flex-col">
+        <div className="lg:col-span-2 bg-[var(--bg-card)] p-8 rounded-[40px] border border-white/5 shadow-2xl flex flex-col">
           <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-10 italic text-center">Últimas Participaciones</h2>
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
             {contributions.length === 0 ? (
@@ -291,7 +291,7 @@ const CollectiveFundContent = () => {
               </div>
             ) : (
               contributions.map((c) => (
-                <div key={c.id} className="flex justify-between items-center p-5 bg-[#12161c] rounded-2xl border border-white/5 hover:bg-white/[0.02] transition-colors group">
+                <div key={c.id} className="flex justify-between items-center p-5 bg-[var(--bg-main)] rounded-2xl border border-white/5 hover:bg-white/[0.02] transition-colors group">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-400 font-black text-sm border border-blue-500/20 group-hover:scale-110 transition-transform">
                       {c.username ? c.username[0].toUpperCase() : 'U'}
@@ -314,7 +314,7 @@ const CollectiveFundContent = () => {
         </div>
       </div>
 
-      <div className="bg-[#1e2329] p-2 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] p-2 rounded-[40px] border border-white/5 shadow-2xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
           <div className="p-10 text-center hover:bg-white/[0.01] transition-colors group">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Capital Estratégico</p>

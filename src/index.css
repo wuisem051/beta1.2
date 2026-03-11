@@ -16,7 +16,9 @@
   --binance-border: rgba(255, 255, 255, 0.05);
 
   --bg-main: var(--binance-bg);
-  --card-bg: var(--binance-card);
+  --card-bg: rgba(255, 255, 255, 0.02);
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --bg-sidebar: var(--binance-bg);
   --accent: var(--binance-yellow);
 
   --light-bg: #f8fafc;

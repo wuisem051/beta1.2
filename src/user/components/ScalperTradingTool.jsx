@@ -751,7 +751,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             {/* Panel de Resumen General */}
             {(levels.length > 0 || sellLevels.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                    <div className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-white/5 shadow-xl">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Capital Total</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-black text-white italic">
@@ -760,7 +760,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             <span className="text-[10px] font-bold text-slate-600 uppercase">USDT</span>
                         </div>
                     </div>
-                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                    <div className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-white/5 shadow-xl">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Precio Promedio (DCA)</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-black text-blue-500 italic">
@@ -772,7 +772,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             <span className="text-[10px] font-bold text-slate-600 uppercase">USDT</span>
                         </div>
                     </div>
-                    <div className="bg-[#1e2329] p-6 rounded-[2rem] border border-white/5 shadow-xl">
+                    <div className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-white/5 shadow-xl">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Volumen Total (Asset)</p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-black text-emerald-500 italic">

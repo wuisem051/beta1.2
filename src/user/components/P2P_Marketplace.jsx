@@ -225,7 +225,7 @@ const P2P_Marketplace = ({ userBalances }) => {
 
       {/* Offers Table */}
       <div className={styles.offersSection}>
-        <div className="hidden lg:grid grid-cols-12 px-8 py-5 border-b border-white/5 bg-[#12161c]">
+        <div className="hidden lg:grid grid-cols-12 px-8 py-5 border-b border-white/5 bg-[var(--bg-main)]">
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Anunciante (Ordenes | %)</div>
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Precio por Unidad</div>
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Límite / Disponible</div>
@@ -419,7 +419,7 @@ const P2P_Marketplace = ({ userBalances }) => {
                           : [...newOffer.paymentMethods, pm]
                       });
                     }}
-                    className={`px-3 py-3 rounded-xl text-[9px] font-black uppercase border transition-all ${newOffer.paymentMethods.includes(pm) ? 'bg-[#fcd535]/10 border-[#fcd535] text-[#fcd535]' : 'bg-[#12161c] border-white/5 text-slate-600'}`}
+                    className={`px-3 py-3 rounded-xl text-[9px] font-black uppercase border transition-all ${newOffer.paymentMethods.includes(pm) ? 'bg-[#fcd535]/10 border-[#fcd535] text-[#fcd535]' : 'bg-[var(--bg-main)] border-white/5 text-slate-600'}`}
                   >
                     {pm}
                   </button>

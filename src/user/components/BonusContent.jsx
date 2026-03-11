@@ -12,7 +12,7 @@ const BonusContent = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] p-4 lg:p-10 animate-in fade-in duration-700">
+    <div className="min-h-screen bg-[var(--bg-main)] p-4 lg:p-10 animate-in fade-in duration-700">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
@@ -26,7 +26,7 @@ const BonusContent = () => {
             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] ml-1">Optimiza tu rendimiento con activos exclusivos</p>
           </div>
 
-          <div className="bg-[#1e2329] border border-white/5 p-6 rounded-[2.5rem] flex items-center gap-6 shadow-2xl">
+          <div className="bg-[var(--bg-card)] border border-white/5 p-6 rounded-[2.5rem] flex items-center gap-6 shadow-2xl">
             <div className="text-right">
               <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest mb-1">Nivel Actual</p>
               <p className="text-xl font-black text-white italic">ELITE INVESTOR</p>
@@ -43,7 +43,7 @@ const BonusContent = () => {
         </div>
 
         {/* Progress Bar Section */}
-        <div className="bg-[#1e2329] border border-white/5 rounded-[3rem] p-10 mb-10 relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
+        <div className="bg-[var(--bg-card)] border border-white/5 rounded-[3rem] p-10 mb-10 relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
           <div className="relative z-10">
             <div className="flex justify-between items-end mb-6">
@@ -53,7 +53,7 @@ const BonusContent = () => {
               </div>
               <p className="text-4xl font-black text-white italic">75%</p>
             </div>
-            <div className="w-full h-4 bg-[#0b0e11] rounded-full p-1 shadow-inner">
+            <div className="w-full h-4 bg-[var(--bg-main)] rounded-full p-1 shadow-inner">
               <div className="h-full bg-gradient-to-r from-[#fcd535] via-[#ffeb3b] to-[#fcd535] rounded-full shadow-[0_0_20px_rgba(252,213,53,0.3)] w-[75%] relative">
                 <div className="absolute top-0 right-0 w-2 h-2 bg-white rounded-full animate-ping"></div>
               </div>
@@ -68,7 +68,7 @@ const BonusContent = () => {
         {/* Rewards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {rewards.map((reward, idx) => (
-            <div key={idx} className="bg-[#1e2329] border border-white/5 rounded-[2.5rem] p-8 hover:bg-[#2b3139] transition-all duration-500 shadow-xl group cursor-pointer border-b-4 border-b-transparent hover:border-b-[#fcd535]">
+            <div key={idx} className="bg-[var(--bg-card)] border border-white/5 rounded-[2.5rem] p-8 hover:bg-[var(--bg-sidebar)] transition-all duration-500 shadow-xl group cursor-pointer border-b-4 border-b-transparent hover:border-b-[#fcd535]">
               <div className="flex justify-between items-start mb-8">
                 <div className="p-4 bg-white/5 rounded-2xl group-hover:bg-[#fcd535]/10 transition-all">
                   {reward.icon}

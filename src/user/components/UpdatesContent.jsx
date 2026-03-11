@@ -146,7 +146,7 @@ const UpdatesContent = ({ styles }) => {
     };
 
     return (
-        <div className="p-4 lg:p-10 bg-[#0b0e11] min-h-screen animate-in fade-in duration-500">
+        <div className="p-4 lg:p-10 bg-[var(--bg-main)] min-h-screen animate-in fade-in duration-500">
             <div className="max-w-5xl mx-auto">
                 <div className="mb-16">
                     <div className="flex items-center gap-4 mb-4">
@@ -165,17 +165,17 @@ const UpdatesContent = ({ styles }) => {
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Sincronizando Nodos...</p>
                         </div>
                     ) : updates.length === 0 ? (
-                        <div className="text-center py-20 bg-[#1e2329] rounded-[3rem] border border-white/5">
+                        <div className="text-center py-20 bg-[var(--bg-card)] rounded-[3rem] border border-white/5">
                             <p className="text-white font-black uppercase tracking-widest italic">Iniciando protocolo de actualización...</p>
                         </div>
                     ) : (
                         updates.map((update, index) => (
                             <div key={update.id} className="relative group animate-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
-                                <div className="absolute -left-[45px] top-0 w-8 h-8 bg-[#1e2329] border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:border-[#fcd535]/50 transition-all z-10">
+                                <div className="absolute -left-[45px] top-0 w-8 h-8 bg-[var(--bg-card)] border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:border-[#fcd535]/50 transition-all z-10">
                                     <div className="w-2 h-2 bg-[#fcd535] rounded-full animate-pulse"></div>
                                 </div>
 
-                                <div className="bg-[#1e2329] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl group-hover:bg-[#2b3139] transition-all duration-500 relative overflow-hidden backdrop-blur-sm">
+                                <div className="bg-[var(--bg-card)] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl group-hover:bg-[var(--bg-sidebar)] transition-all duration-500 relative overflow-hidden backdrop-blur-sm">
                                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                                         {getIcon(update.type)}
                                     </div>
