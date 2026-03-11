@@ -28,7 +28,7 @@ export const colorPalettes = {
         // Fondos
         bgMain: '#0b0e11',
         bgSidebar: '#0b0e11',
-        bgCard: 'rgba(255, 255, 255, 0.02)',
+        bgCard: '#1e2329',
     },
 
     ocean: {
