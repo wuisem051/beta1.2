@@ -495,29 +495,15 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         if (field === 'price' || field === 'quantity') {
             const price = parseFloat(newSellLevels[index].price) || 0;
             const qty = parseFloat(newSellLevels[index].quantity) || 0;
-            const buyPrice = currentPrice; // Usamos el precio actual como base de costo para esta estimación
+            const buyPrice = currentPrice;
 
             newSellLevels[index].totalUSD = (price * qty).toFixed(2);
             newSellLevels[index].potentialProfit = ((price - buyPrice) * qty).toFixed(2);
 
-            // Recalcular el % de ganancia basado en el precio nuevo
             if (buyPrice > 0) {
                 newSellLevels[index].profit = (((price / buyPrice) - 1) * 100).toFixed(2);
             }
         }
-
-        // Si cambia el % de ganancia, recalculamos el precio
-        if (field === 'profit') {
-            const profitPct = parseFloat(value) || 0;
-            const buyPrice = currentPrice;
-            const qty = parseFloat(newSellLevels[index].quantity) || 0;
-
-            const newPrice = buyPrice * (1 + profitPct / 100);
-            newSellLevels[index].price = newPrice.toFixed(8);
-            newSellLevels[index].totalUSD = (newPrice * qty).toFixed(2);
-            newSellLevels[index].potentialProfit = ((newPrice - buyPrice) * qty).toFixed(2);
-        }
-
         setSellLevels(newSellLevels);
     };
 
@@ -945,9 +931,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                     <th className="px-4 py-4 text-left">Lote</th>
                                     <th className="px-4 py-4 text-left">Precio Venta</th>
                                     <th className="px-4 py-4 text-left">Cant. Asset</th>
-                                    <th className="px-4 py-3 text-left">Ganancia %</th>
                                     <th className="px-4 py-4 text-right">Venta Total (USD)</th>
-                                    <th className="px-4 py-4 text-right">Ganancia Est.</th>
                                     <th className="px-4 py-4 text-center">Acción</th>
                                 </tr>
                             </thead>
@@ -964,7 +948,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                                 type="number"
                                                 value={level.price}
                                                 onChange={(e) => handleSellLevelChange(idx, 'price', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-24 focus:border-rose-500 outline-none"
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-28 focus:border-rose-500 outline-none"
                                             />
                                         </td>
                                         <td className="px-4 py-5">
@@ -972,25 +956,14 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                                 type="number"
                                                 value={level.quantity}
                                                 onChange={(e) => handleSellLevelChange(idx, 'quantity', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-24 focus:border-rose-500 outline-none"
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-28 focus:border-rose-500 outline-none"
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
-                                            <div className="relative">
-                                                <input
-                                                    type="number"
-                                                    value={level.profit}
-                                                    onChange={(e) => handleSellLevelChange(idx, 'profit', e.target.value)}
-                                                    className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-emerald-500 font-mono text-[10px] w-16 focus:border-emerald-500 outline-none pr-5"
-                                                />
-                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600">%</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-5 text-right font-mono text-xs font-bold text-white">
-                                            ${level.totalUSD || (parseFloat(level.price) * parseFloat(level.quantity)).toFixed(2)}
-                                        </td>
                                         <td className="px-4 py-5 text-right font-mono text-xs font-bold text-emerald-500">
-                                            +${parseFloat(level.potentialProfit).toFixed(2)}
+                                            <div className="flex flex-col items-end">
+                                                <span>${parseFloat(level.totalUSD || (parseFloat(level.price) * parseFloat(level.quantity))).toFixed(2)}</span>
+                                                <span className="text-[9px] text-slate-500 font-bold opacity-60">+{parseFloat(level.potentialProfit).toFixed(2)} Ganancia</span>
+                                            </div>
                                         </td>
                                         <td className="px-4 py-5 text-center">
                                             {level.executed ? (
