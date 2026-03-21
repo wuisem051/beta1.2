@@ -251,17 +251,13 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const calculateSellLevelsFromBuy = (buyLevels) => {
         if (!buyLevels || buyLevels.length === 0) return;
 
-        // Ordenamos las compras por precio (de menor a mayor)
-        const sortedBuys = [...buyLevels].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-
+        // Mantenemos el orden original de los lotes 1 a 1 para que sea más intuitivo
+        // Lote 1 de Compra -> Lote 1 de Venta, etc.
         const newSellLevels = [];
-        const baseProfit = parseFloat(priceStep) || 1;
+        const baseProfit = parseFloat(sellProfit) || 7.5; // Usamos el nuevo objetivo de ganancia por defecto
         const multipliers = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]; // Escala Fibonacci
 
-        sortedBuys.forEach((buyLevel, i) => {
-            if (i >= numLevels) return;
-
-            // Si el modo es dinámico usa Fibonacci, si es fijo usa solo la base (priceStep)
+        buyLevels.forEach((buyLevel, i) => {
             const profitValue = profitMode === 'dynamic'
                 ? baseProfit * multipliers[i]
                 : baseProfit;
@@ -270,15 +266,18 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             const qty = parseFloat(buyLevel.quantity);
 
             const sellPrice = buyPrice * (1 + profitValue / 100);
-            const potentialProfit = (sellPrice - buyPrice) * qty;
+            const totalUSD = sellPrice * qty;
+            const absoluteProfit = (sellPrice - buyPrice) * qty;
 
             newSellLevels.push({
                 level: i + 1,
                 fromBuyLevel: buyLevel.level,
+                buyPrice: buyPrice,
                 price: sellPrice.toFixed(8),
                 quantity: qty.toFixed(8),
                 profit: profitValue.toFixed(2),
-                potentialProfit: potentialProfit.toFixed(2),
+                potentialProfit: absoluteProfit.toFixed(2),
+                totalUSD: totalUSD.toFixed(2),
                 percentage: buyLevel.percentage,
                 executed: false
             });
@@ -938,9 +937,9 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             <thead>
                                 <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">
                                     <th className="px-4 py-4 text-left">Lote</th>
-                                    <th className="px-4 py-4 text-left">Precio Venta</th>
-                                    <th className="px-4 py-4 text-left">Cant. Asset</th>
-                                    <th className="px-4 py-4 text-right">Venta Total (USD)</th>
+                                    <th className="px-4 py-4 text-left">Inversión &rarr; Venta</th>
+                                    <th className="px-4 py-4 text-left">Asignación Asset</th>
+                                    <th className="px-4 py-4 text-right">Resultado USD</th>
                                     <th className="px-4 py-4 text-center">Acción</th>
                                 </tr>
                             </thead>
@@ -953,25 +952,42 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                             </span>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <input
-                                                type="number"
-                                                value={level.price}
-                                                onChange={(e) => handleSellLevelChange(idx, 'price', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-28 focus:border-rose-500 outline-none"
-                                            />
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Entrada:</span>
+                                                    <span className="text-[10px] text-slate-400 font-mono">${parseFloat(level.buyPrice || (parseFloat(level.price) / (1 + parseFloat(level.profit) / 100))).toFixed(6)}</span>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    value={level.price}
+                                                    onChange={(e) => handleSellLevelChange(idx, 'price', e.target.value)}
+                                                    className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[11px] w-32 focus:border-rose-500 outline-none"
+                                                />
+                                            </div>
                                         </td>
                                         <td className="px-4 py-5">
-                                            <input
-                                                type="number"
-                                                value={level.quantity}
-                                                onChange={(e) => handleSellLevelChange(idx, 'quantity', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-28 focus:border-rose-500 outline-none"
-                                            />
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[9px] text-slate-500 font-bold uppercase">Lote Compra:</span>
+                                                    <span className="text-[10px] text-blue-400 font-black">#{level.fromBuyLevel || level.level}</span>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    value={level.quantity}
+                                                    onChange={(e) => handleSellLevelChange(idx, 'quantity', e.target.value)}
+                                                    className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[11px] w-32 focus:border-rose-500 outline-none"
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-5 text-right font-mono text-xs font-bold text-emerald-500">
-                                            <div className="flex flex-col items-end">
-                                                <span>${parseFloat(level.totalUSD || (parseFloat(level.price) * parseFloat(level.quantity))).toFixed(2)}</span>
-                                                <span className="text-[9px] text-slate-500 font-bold opacity-60">+{parseFloat(level.potentialProfit).toFixed(2)} Ganancia</span>
+                                        <td className="px-4 py-5 text-right font-mono text-emerald-500">
+                                            <div className="flex flex-col items-end gap-1">
+                                                <div className="bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                                                    <span className="text-sm font-black italic tracking-tighter">${parseFloat(level.totalUSD).toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex gap-2 items-baseline">
+                                                    <span className="text-[10px] text-slate-400 font-bold italic">Profit:</span>
+                                                    <span className="text-xs font-black">+${parseFloat(level.potentialProfit).toFixed(2)}</span>
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-5 text-center">
