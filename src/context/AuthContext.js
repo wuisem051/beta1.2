@@ -31,29 +31,11 @@ export function AuthProvider({ children }) {
     return userCredential;
   }
 
-  async function signupWithPayeer(email, password, payeerAccount) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Crear documento de usuario en Firestore después del registro con Payeer
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      payeerAccount: payeerAccount,
-      email: email, // Guardamos el email generado para referencia
-      role: 'user', // Rol por defecto
-      // Otros campos iniciales si son necesarios
-    });
-    return userCredential;
-  }
 
-  async function login(identifier, password) {
-    let emailToSignIn = identifier;
 
-    // Check if the identifier is a Payeer account number
-    const isPayeerAccount = /^P\d{8}$/.test(identifier);
-    if (isPayeerAccount) {
-      emailToSignIn = `${identifier}@payeer.com`;
-    }
-
+  async function login(email, password) {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, emailToSignIn, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       // Verify if the user exists in Firestore (important for consistency with onAuthStateChanged)
@@ -160,7 +142,7 @@ export function AuthProvider({ children }) {
     isAdmin,
     login,
     signup,
-    signupWithPayeer, // Exportar la nueva función
+
     logout,
     loginAdmin,
     loading

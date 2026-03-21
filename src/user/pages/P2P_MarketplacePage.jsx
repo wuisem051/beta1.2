@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
 import P2P_Marketplace from '../components/P2P_Marketplace';
 
-const P2P_MarketplacePage = () => {
+const P2P_MarketplacePage = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) => {
   const { currentUser } = useAuth();
   const { theme } = useContext(ThemeContext);
   const [userBalances, setUserBalances] = useState({
@@ -57,7 +57,7 @@ const P2P_MarketplacePage = () => {
 
   return (
     <div className="space-y-8">
-      <P2P_Marketplace userBalances={userBalances} />
+      <P2P_Marketplace userBalances={userBalances} isSidebarHidden={isSidebarHidden} dashboardMaxWidth={dashboardMaxWidth} />
     </div>
   );
 };

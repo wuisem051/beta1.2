@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import styles from './P2PMarketplace.module.css';
 
-const P2P_Marketplace = ({ userBalances }) => {
+const P2P_Marketplace = ({ userBalances, isSidebarHidden = false, dashboardMaxWidth = 1600 }) => {
   const { currentUser } = useAuth();
   const { darkMode } = useContext(ThemeContext);
   const { showError, showSuccess } = useError();
@@ -143,7 +143,7 @@ const P2P_Marketplace = ({ userBalances }) => {
   };
 
   return (
-    <div className={styles.marketplaceContainer}>
+    <div className={styles.marketplaceContainer} style={{ maxWidth: isSidebarHidden ? '100%' : `${dashboardMaxWidth}px`, margin: isSidebarHidden ? '0' : '0 auto', transition: 'all 0.3s ease' }}>
       {/* Header Binance Style */}
       <div className={styles.marketplaceHeader}>
         <div className="flex-1">
@@ -225,7 +225,7 @@ const P2P_Marketplace = ({ userBalances }) => {
 
       {/* Offers Table */}
       <div className={styles.offersSection}>
-        <div className="hidden lg:grid grid-cols-12 px-8 py-5 border-b border-white/5 bg-[var(--bg-main)]">
+        <div className="hidden lg:grid grid-cols-12 px-6 py-3 border-b border-white/5 bg-[var(--bg-main)]">
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Anunciante (Ordenes | %)</div>
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Precio por Unidad</div>
           <div className="col-span-3 text-[10px] font-black uppercase text-slate-600 tracking-widest">Límite / Disponible</div>
@@ -248,20 +248,20 @@ const P2P_Marketplace = ({ userBalances }) => {
             const isOnline = profile?.lastSeen && (new Date() - profile.lastSeen.toDate()) < 10 * 60 * 1000;
 
             return (
-              <div key={offer.id} className="grid grid-cols-1 lg:grid-cols-12 px-8 py-10 items-center hover:bg-white/[0.01] transition-all border-b border-white/5">
+              <div key={offer.id} className="grid grid-cols-1 lg:grid-cols-12 px-6 py-6 items-center hover:bg-white/[0.01] transition-all border-b border-white/5">
                 {/* Advertiser */}
                 <div className="col-span-3">
                   <div className={styles.advertiserInfo}>
                     <div className="relative">
                       <div className={styles.avatar}>
-                        <FaUserCircle size={36} />
+                        <FaUserCircle size={30} />
                         <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#1e2329] ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-slate-600'}`}></div>
                       </div>
                     </div>
                     <div>
                       <h4 className={styles.advertiserName}>
                         {profile?.displayName || profile?.username || offer.ownerEmail.split('@')[0]}
-                        <FaCheckCircle className="text-[#fcd535]" size={12} title="Verificado Elite" />
+                        <FaCheckCircle className="text-[#fcd535]" size={10} title="Verificado Elite" />
                       </h4>
                       <p className={styles.trustMetrics}>
                         1.258 Órdenes | 98.40% Completado
@@ -272,7 +272,7 @@ const P2P_Marketplace = ({ userBalances }) => {
                 </div>
 
                 {/* Price */}
-                <div className="col-span-3 py-6 lg:py-0">
+                <div className="col-span-3 py-4 lg:py-0">
                   <h3 className={styles.priceText}>
                     {offer.price.toLocaleString()} <span className={styles.fiatUnit}>{offer.fiatCurrency}</span>
                   </h3>

@@ -12,7 +12,7 @@ import {
 import TradingViewWidget from './TradingViewWidget';
 import ScalperTradingTool from './ScalperTradingTool';
 
-const ExchangeContent = () => {
+const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) => {
     const { currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('trading');
     const [configs, setConfigs] = useState({
@@ -347,7 +347,7 @@ const ExchangeContent = () => {
 
         const [asset, base] = tradeSymbol.split('/');
         const targetAsset = tradeSide === 'buy' ? base : asset;
-        const available = parseFloat(balance.total[targetAsset]) || 0;
+        const available = (balance.total && balance.total[targetAsset]) ? parseFloat(balance.total[targetAsset]) : 0;
 
         if (tradeSide === 'buy') {
             // For buy, we use % of USDT (base)
@@ -503,21 +503,26 @@ const ExchangeContent = () => {
     };
 
     return (
-        <div className={`${styles.dashboardContent} animate-in fade-in duration-700`}>
+        <div className={`${styles.dashboardContent} animate-in fade-in duration-700 !p-1 !md:p-2 !max-w-none`} style={{
+            maxWidth: isSidebarHidden ? '100vw' : `${dashboardMaxWidth}px`,
+            width: isSidebarHidden ? '100vw' : 'auto',
+            margin: isSidebarHidden ? '0' : '0 auto',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}>
             {/* New Modern Header */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-3">
                 <div>
-                    <div className="flex items-center gap-3 mb-1">
-                        <h1 className={styles.mainContentTitle}>Tablero de Trading</h1>
+                    <div className="flex items-center gap-2 mb-0.5">
+                        <h1 className={`${styles.mainContentTitle} !text-xl`}>Tablero de Trading</h1>
                         {keysConfigured ? (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter">Conectado</span>
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                                <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-tighter">Conectado</span>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-500/10 border border-white/5 rounded-full">
-                                <div className="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Sin Conexión</span>
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-500/10 border border-white/5 rounded-full">
+                                <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Sin Conexión</span>
                             </div>
                         )}
                     </div>
@@ -537,17 +542,17 @@ const ExchangeContent = () => {
                 </div>
 
                 {/* Modern Navigation Tabs */}
-                <div className="flex bg-slate-900/40 backdrop-blur-xl p-1.5 rounded-2xl border border-white/5 overflow-x-auto max-w-full">
+                <div className="flex bg-slate-900/40 backdrop-blur-xl p-1 rounded-xl border border-white/5 overflow-x-auto max-w-full">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 transform active:scale-95 whitespace-nowrap ${activeTab === tab.id
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-300 transform active:scale-95 whitespace-nowrap ${activeTab === tab.id
                                 ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 border border-white/10'
                                 : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
                                 }`}
                         >
-                            <span className={activeTab === tab.id ? 'scale-110 duration-500' : 'opacity-60'}>
+                            <span className={activeTab === tab.id ? 'scale-105 duration-500' : 'opacity-60'}>
                                 {tab.icon}
                             </span>
                             {tab.label}
@@ -557,21 +562,21 @@ const ExchangeContent = () => {
             </div>
 
             {activeTab === 'config' && (
-                <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Gestionar Vinculaciones</h2>
-                        <p className="text-slate-400 text-sm font-medium max-w-md mx-auto leading-relaxed">
+                <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="text-center mb-6">
+                        <h2 className="text-2xl font-black text-white mb-1 tracking-tight">Gestionar Vinculaciones</h2>
+                        <p className="text-slate-400 text-xs font-medium max-w-md mx-auto leading-relaxed">
                             Configura y guarda las credenciales para cada exchange por separado.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {['binance', 'binanceus', 'bingx'].map(exName => {
                             const isConnected = configs[exName]?.connected;
                             const color = exName === 'binance' ? 'yellow' : 'blue';
 
                             return (
-                                <div key={exName} className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-8 relative overflow-hidden group transition-all hover:border-${color}-500/30`}>
+                                <div key={exName} className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-6 relative overflow-hidden group transition-all hover:border-${color}-500/30`}>
                                     <div className={`absolute -top-24 -right-24 w-64 h-64 bg-${color}-600/5 rounded-full blur-3xl group-hover:bg-${color}-600/10 transition-all duration-700`}></div>
 
                                     <div className="relative z-10">
@@ -656,9 +661,9 @@ const ExchangeContent = () => {
             )}
 
             {activeTab === 'trading' && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="lg:col-span-12 mb-8">
-                        <div className="flex justify-between items-center mb-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="lg:col-span-12 mb-4">
+                        <div className="flex justify-between items-center mb-3">
                             <h2 className="text-xl font-black text-white italic tracking-tight flex items-center gap-2">
                                 <FaChartLine className="text-blue-500" />
                                 ANÁLISIS DE MERCADO
@@ -708,9 +713,9 @@ const ExchangeContent = () => {
                                         ? 'border-blue-500 ring-1 ring-blue-500/50 shadow-blue-500/20'
                                         : 'border-white/5 hover:border-white/10'
                                         }`}
-                                    style={{ height: layout === '1' ? '500px' : '400px' }}
+                                    style={{ height: layout === '1' ? '450px' : '350px' }}
                                 >
-                                    <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start pointer-events-none">
+                                    <div className="absolute top-3 left-3 right-3 z-10 flex justify-between items-start pointer-events-none">
                                         <div className="flex gap-2 pointer-events-auto">
                                             <select
                                                 value={chart.symbol}
@@ -760,20 +765,20 @@ const ExchangeContent = () => {
                     </div>
 
                     {/* Balance Section - 4 Columns */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-6 h-full relative overflow-hidden group`}>
+                    <div className="lg:col-span-4 space-y-4">
+                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-5 h-full relative overflow-hidden group`}>
                             <div className="absolute top-0 right-0 p-32 bg-blue-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-600/10 transition-colors duration-700"></div>
 
-                            <div className="flex justify-between items-center mb-8 relative z-10">
+                            <div className="flex justify-between items-center mb-6 relative z-10">
                                 <div>
-                                    <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Portfolio Balance</h2>
-                                    <p className="text-lg font-black text-white flex items-center gap-2 italic">
+                                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Portfolio Balance</h2>
+                                    <p className="text-base font-black text-white flex items-center gap-2 italic">
                                         <FaBitcoin className="text-yellow-500" /> RESUMEN
                                     </p>
                                 </div>
                                 <button
                                     onClick={fetchBalance}
-                                    className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-blue-600/20 rounded-xl text-slate-400 hover:text-blue-400 transition-all border border-white/5 active:rotate-180 duration-500"
+                                    className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-blue-600/20 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/5 active:rotate-180 duration-500"
                                 >
                                     <FaSync className={isLoadingBalance ? 'animate-spin' : ''} />
                                 </button>
@@ -791,13 +796,13 @@ const ExchangeContent = () => {
                                         if (parseFloat(amount) > 0) {
                                             const isUSDT = asset === 'USDT';
                                             return (
-                                                <div key={asset} className="bg-slate-950/40 border border-white/5 p-5 rounded-2xl flex justify-between items-center group-hover:border-white/10 transition-all hover:bg-slate-900/40">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${isUSDT ? 'from-emerald-500/20 to-emerald-800/20' : 'from-slate-800 to-slate-900'} flex items-center justify-center text-sm font-black text-white border border-white/5 shadow-inner`}>
+                                                <div key={asset} className="bg-slate-950/40 border border-white/5 p-4 rounded-xl flex justify-between items-center group-hover:border-white/10 transition-all hover:bg-slate-900/40">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${isUSDT ? 'from-emerald-500/20 to-emerald-800/20' : 'from-slate-800 to-slate-900'} flex items-center justify-center text-xs font-black text-white border border-white/5 shadow-inner`}>
                                                             {asset}
                                                         </div>
                                                         <div>
-                                                            <span className="block font-black text-white text-base tracking-tight">{parseFloat(amount).toFixed(asset === 'USDT' ? 2 : 6)}</span>
+                                                            <span className="block font-black text-white text-sm tracking-tight">{parseFloat(amount).toFixed(asset === 'USDT' ? 2 : 6)}</span>
                                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{isUSDT ? 'Stablecoin' : 'Asset'}</span>
                                                         </div>
                                                     </div>

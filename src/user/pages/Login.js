@@ -50,10 +50,10 @@ const Login = () => {
                 ref={identifierRef}
                 id="identifier"
                 name="identifier"
-                type="text"
+                type="email"
                 required
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${theme.borderColor} ${theme.inputBackground} ${theme.text} rounded-t-md focus:outline-none focus:ring-accent focus:border-accent`}
-                placeholder="Correo electrónico o número de cuenta Payeer (ej. P12345678)"
+                placeholder="Correo electrónico"
               />
             </div>
             <div>

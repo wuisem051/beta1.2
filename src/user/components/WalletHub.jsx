@@ -385,14 +385,14 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
     if (loading) return <div className="flex items-center justify-center p-20 text-blue-500 font-bold">Cargando Billetera...</div>;
 
     return (
-        <div className="w-full mx-auto p-4 lg:p-10 min-h-screen animate-in fade-in duration-700" style={{ maxWidth: dashboardMaxWidth ? `${dashboardMaxWidth}px` : '1200px', backgroundColor: 'var(--bg-main)' }}>
+        <div className="w-full mx-auto p-4 lg:p-6 min-h-screen animate-in fade-in duration-700" style={{ maxWidth: dashboardMaxWidth ? `${dashboardMaxWidth}px` : '100%', backgroundColor: 'var(--bg-main)' }}>
             {/* Header / Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h2 className="text-3xl font-black text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-white flex items-center gap-3">
                         <FaWallet className="text-blue-500" /> Mi Billetera
                     </h2>
-                    <p className="text-slate-400 text-sm mt-1">Centro unificado de activos y transacciones</p>
+                    <p className="text-slate-400 text-xs mt-1">Centro unificado de activos y transacciones</p>
                 </div>
 
                 <div className="flex bg-slate-900/50 p-1 rounded-2xl border border-white/5 backdrop-blur-xl">
@@ -420,9 +420,9 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                 <div className="space-y-6 animate-in fade-in duration-500 w-full">
                     {/* Resumen Principal - Estilo Binance Spot */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <div className="lg:col-span-8 bg-[var(--bg-card)] p-8 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
-                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
-                                <FaWallet size={200} />
+                        <div className="lg:col-span-8 bg-[var(--bg-card)] p-6 rounded-3xl border border-white/5 relative overflow-hidden group shadow-2xl">
+                            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity pointer-events-none">
+                                <FaWallet size={160} />
                             </div>
 
                             <div className="relative z-10">
@@ -431,29 +431,29 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                     <div className="px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded text-[9px] font-black text-green-500 uppercase tracking-tighter">Spot</div>
                                 </div>
 
-                                <div className="flex items-baseline gap-3 mb-8">
-                                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                                <div className="flex items-baseline gap-3 mb-6">
+                                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
                                         {totalEstimatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </h2>
-                                    <span className="text-xl font-bold text-slate-500">USDT</span>
+                                    <span className="text-lg font-bold text-slate-500">USDT</span>
                                 </div>
 
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => setActiveTab('deposit')}
-                                        className="px-6 py-3 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[#fcd535]/10 active:scale-95"
+                                        className="px-5 py-2.5 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-[#fcd535]/10 active:scale-95"
                                     >
                                         Depositar
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('withdraw')}
-                                        className="px-6 py-3 bg-[var(--bg-sidebar)] hover:bg-[#363d47] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 border border-white/5"
+                                        className="px-5 py-2.5 bg-[var(--bg-sidebar)] hover:bg-[#363d47] text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-white/5"
                                     >
                                         Retirar
                                     </button>
                                     <button
                                         onClick={() => setIsCollectiveModalOpen(true)}
-                                        className="px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+                                        className="px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
                                     >
                                         Transferir
                                     </button>
@@ -495,10 +495,10 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
                     {/* Lista de Activos - Estilo Tabla Binance */}
                     <div className="bg-[var(--bg-card)] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
                             <div>
-                                <h3 className="text-white font-black uppercase tracking-widest text-sm">Activos Spot</h3>
-                                <p className="text-[10px] text-slate-500 font-bold mt-0.5">Valores actualizados en tiempo real</p>
+                                <h3 className="text-white font-black uppercase tracking-widest text-xs">Activos Spot</h3>
+                                <p className="text-[9px] text-slate-500 font-bold mt-0.5">Valores actualizados en tiempo real</p>
                             </div>
                             <div className="flex gap-2">
                                 <div className="px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-slate-400 uppercase">Filtro: Balance {'>'} 0</div>
@@ -508,10 +508,10 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                             <table className="w-full text-left">
                                 <thead className="bg-[var(--bg-main)]">
                                     <tr>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Moneda</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Saldo Total</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Valor USD</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Acción</th>
+                                        <th className="px-5 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Moneda</th>
+                                        <th className="px-5 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Saldo Total</th>
+                                        <th className="px-5 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Valor USD</th>
+                                        <th className="px-5 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -519,26 +519,26 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                         const balance = userBalances?.[coin.value] || 0;
                                         return (
                                             <tr key={coin.value} className="hover:bg-white/[0.03] transition-colors group cursor-default">
-                                                <td className="px-6 py-5">
+                                                <td className="px-5 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-inner" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: `1px solid ${coin.color}40` }}>
+                                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-inner" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: `1px solid ${coin.color}40` }}>
                                                             <span style={{ color: coin.color }}>{coin.icon}</span>
                                                         </div>
                                                         <div>
-                                                            <p className="text-white font-black text-sm tracking-tight">{coin.label.split(' ')[0]}</p>
-                                                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">{coin.network || 'Asset'}</p>
+                                                            <p className="text-white font-black text-xs tracking-tight">{coin.label.split(' ')[0]}</p>
+                                                            <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">{coin.network || 'Asset'}</p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <p className="text-white font-mono font-black text-sm">{balance.toFixed(coin.type === 'fiat' ? 2 : 8)}</p>
+                                                <td className="px-5 py-3">
+                                                    <p className="text-white font-mono font-black text-xs">{balance.toFixed(coin.type === 'fiat' ? 2 : 8)}</p>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <p className="text-slate-400 font-mono text-[11px] font-bold">
+                                                <td className="px-5 py-3">
+                                                    <p className="text-slate-400 font-mono text-[10px] font-bold">
                                                         $ {(balance * (rates[coin.value.split('-')[0]] || rates[coin.value] || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </p>
                                                 </td>
-                                                <td className="px-6 py-5 text-right">
+                                                <td className="px-5 py-3 text-right">
                                                     <div className="flex justify-end gap-3">
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); setSelectedDepositCrypto(coin.value); setActiveTab('deposit'); }}

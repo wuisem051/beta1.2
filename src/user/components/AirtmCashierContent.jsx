@@ -476,33 +476,33 @@ const AirtmCashierContent = () => {
     };
 
     return (
-        <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 text-slate-200 min-h-screen font-sans selection:bg-blue-500/30" style={{ backgroundColor: 'var(--bg-main)' }}>
+        <div className="p-4 max-w-[100%] mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 text-slate-200 min-h-screen font-sans selection:bg-blue-500/30" style={{ backgroundColor: 'var(--bg-main)' }}>
             <audio ref={audioRef} src={soundUrl} />
 
             {/* Top Control Bar - Compact & Floating */}
-            <div className="sticky top-4 z-50 bg-[var(--bg-card)]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-3 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4 pl-2">
-                    <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                        <FaShieldAlt className="text-white text-xl" />
+            <div className="sticky top-4 z-50 bg-[var(--bg-card)]/80 backdrop-blur-xl border border-white/10 rounded-[20px] p-2.5 md:p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3 pl-2">
+                    <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <FaShieldAlt className="text-white text-lg" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-black text-white uppercase tracking-tight leading-none">
+                        <h1 className="text-base font-black text-white uppercase tracking-tight leading-none">
                             Panel Airtm <span className="text-blue-400">PRO</span>
                         </h1>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1 flex items-center gap-2">
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1 flex items-center gap-2">
                             V3.2 <span className="w-1 h-1 rounded-full bg-slate-700"></span> ALTA FRECUENCIA
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     {/* Compact Sync Status */}
-                    <div className={`px-4 py-2 rounded-xl border flex items-center gap-3 transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
+                    <div className={`px-3 py-1.5 rounded-lg border flex items-center gap-2.5 transition-all duration-500 ${isExtensionLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-slate-800/50 border-white/5 text-slate-500'}`}>
                         <div className="flex flex-col items-start leading-none">
-                            <span className="text-[9px] font-black uppercase tracking-widest mb-1">Extensión</span>
-                            <span className="text-[10px] font-bold">{isExtensionLinked ? 'VINCULADA' : (apiKey ? 'MODO API' : 'OFFLINE')}</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest mb-1">Extensión</span>
+                            <span className="text-[9px] font-bold">{isExtensionLinked ? 'VINCULADA' : (apiKey ? 'MODO API' : 'OFFLINE')}</span>
                         </div>
-                        <div className={`w-2.5 h-2.5 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : (apiKey ? 'bg-[#fcd535]' : 'bg-slate-700')}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : (apiKey ? 'bg-[#fcd535]' : 'bg-slate-700')}`}></div>
                     </div>
 
                     <div className="h-10 w-px bg-white/10 mx-1 hidden sm:block"></div>
@@ -539,7 +539,7 @@ const AirtmCashierContent = () => {
 
                     {/* Mini Quick Guide */}
                     {showGuide && (
-                        <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/5 border border-blue-500/20 rounded-[24px] p-6 relative overflow-hidden group">
+                        <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/5 border border-blue-500/20 rounded-[20px] p-5 relative overflow-hidden group">
                             <div className="relative z-10">
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="text-xs font-black text-white uppercase tracking-widest">Guía Rápida</h3>
@@ -566,7 +566,7 @@ const AirtmCashierContent = () => {
                     )}
 
                     {/* Node Health Metrics Card */}
-                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[24px] p-6 shadow-xl relative overflow-hidden">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[20px] p-5 shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
                         <div className="relative z-10 flex flex-col gap-6">
@@ -644,13 +644,13 @@ const AirtmCashierContent = () => {
                 <div className="xl:col-span-9 space-y-6">
 
                     {/* Operations List Container */}
-                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[32px] shadow-[0_30px_60px_rgba(0,0,0,0.3)] flex flex-col min-h-[600px] overflow-hidden">
+                    <div className="bg-[var(--bg-card)] border border-white/5 rounded-[24px] shadow-[0_30px_60px_rgba(0,0,0,0.3)] flex flex-col min-h-[500px] overflow-hidden">
 
                         {/* List Header */}
-                        <div className="px-8 py-6 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                                <h2 className="text-sm font-black text-white uppercase tracking-widest">Operaciones Detectadas</h2>
+                        <div className="px-6 py-4 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                                <h2 className="text-xs font-black text-white uppercase tracking-widest">Operaciones Detectadas</h2>
                             </div>
                             <button
                                 onClick={() => setOperations([])}
@@ -702,20 +702,20 @@ const AirtmCashierContent = () => {
                                                 {/* Indicator Side (Mobile: Top, Desktop: Left) */}
                                                 <div className={`w-full md:w-3 shrink-0 ${op.isBuy ? 'bg-[#00a878]' : 'bg-orange-500'}`}></div>
 
-                                                <div className="flex-1 flex flex-col md:flex-row items-stretch md:items-center p-3 md:p-5 gap-4 md:gap-8 bg-white">
+                                                <div className="flex-1 flex flex-col md:flex-row items-stretch md:items-center p-3 md:p-4 gap-4 md:gap-6 bg-white">
                                                     {/* Column 1: Info & Type */}
-                                                    <div className="flex flex-col gap-2 min-w-[140px]">
+                                                    <div className="flex flex-col gap-1.5 min-w-[120px]">
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${op.isBuy ? 'bg-[#e6f7f2] text-[#00a878]' : 'bg-orange-50 text-orange-600'}`}>
+                                                            <span className={`px-1.5 py-0.5 rounded-[4px] text-[7px] font-black uppercase tracking-widest ${op.isBuy ? 'bg-[#e6f7f2] text-[#00a878]' : 'bg-orange-50 text-orange-600'}`}>
                                                                 {op.isBuy ? 'Agregar' : 'Retirar'}
                                                             </span>
-                                                            <span className="text-[9px] font-bold text-slate-400">{op.time}</span>
+                                                            <span className="text-[8px] font-bold text-slate-400">{op.time}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 border border-slate-100">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-7 h-7 rounded-full overflow-hidden shadow-sm shrink-0 border border-slate-100">
                                                                 {methodIcon}
                                                             </div>
-                                                            <h3 className="font-bold text-xs text-slate-900 truncate max-w-[120px]" title={op.method}>
+                                                            <h3 className="font-bold text-[11px] text-slate-900 truncate max-w-[100px]" title={op.method}>
                                                                 {op.method}
                                                             </h3>
                                                         </div>

@@ -80,33 +80,31 @@ function AppContent() {
       <Header />
       <main className="flex-grow">
         <ColorPaletteProvider>
-          <AuthProvider>
-            <Suspense fallback={<Loader text="Iniciando Plataforma..." />}>
-              <Routes>
-                <Route path="/" element={<FuturisticHome />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route
-                  path="/test-user-settings/*"
-                  element={
-                    <ProtectedRoute>
-                      <UserPanel />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/user/*"
-                  element={
-                    <ProtectedRoute>
-                      <UserPanel />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Rutas admin eliminadas - migradas a repositorio panel-admin */}
-                <Route path="/news" element={<AllNewsPage />} />
-              </Routes>
-            </Suspense>
-          </AuthProvider>
+          <Suspense fallback={<Loader text="Iniciando Plataforma..." />}>
+            <Routes>
+              <Route path="/" element={<FuturisticHome />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route
+                path="/test-user-settings/*"
+                element={
+                  <ProtectedRoute>
+                    <UserPanel />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user/*"
+                element={
+                  <ProtectedRoute>
+                    <UserPanel />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Rutas admin eliminadas - migradas a repositorio panel-admin */}
+              <Route path="/news" element={<AllNewsPage />} />
+            </Routes>
+          </Suspense>
         </ColorPaletteProvider>
       </main>
       {!isHomePage && <Footer />}

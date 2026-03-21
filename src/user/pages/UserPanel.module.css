@@ -66,20 +66,21 @@
 }
 
 .mainContentTitle {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 900;
   letter-spacing: -0.04em;
   color: #ffffff;
   background: linear-gradient(to right, #fff, #94a3b8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 /* Dashboard Grid */
 .dashboardContent {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: 1.5rem;
+  max-width: 100%;
   margin: 0 auto;
   animation: fadeIn 0.8s ease-out;
 }
@@ -112,15 +113,15 @@
 /* Modern Elite Stat Cards */
 .statCard {
   composes: glassBase;
-  padding: 2rem;
-  border-radius: 2rem;
+  padding: 1.25rem;
+  border-radius: 1.5rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 160px;
+  min-height: 130px;
 }
 
 .statCard::before {
@@ -160,7 +161,7 @@
 .statValueBlue,
 .statValueGreen,
 .statValueAccent {
-  font-size: 2.75rem;
+  font-size: 2rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -186,11 +187,11 @@
 .statIconGreen,
 .statIconAccent {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 1.25rem;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;

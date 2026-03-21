@@ -229,16 +229,16 @@ const CryptoMarketMonitor = () => {
 
     if (loading && cryptos.length === 0) {
         return (
-            <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
-                <div className="px-10 py-8 border-b border-white/5">
-                    <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
+            <div className="bg-[var(--bg-card)] rounded-[32px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+                <div className="px-6 py-5 border-b border-white/5">
+                    <h2 className="text-lg font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
+                    <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
                         Cotizaciones en tiempo real via CoinGecko API
                     </p>
                 </div>
-                <div className="px-10 py-20 text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#fcd535] border-t-transparent mb-4"></div>
-                    <p className="text-slate-500 font-black uppercase text-[10px] tracking-widest animate-pulse">
+                <div className="px-10 py-16 text-center">
+                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#fcd535] border-t-transparent mb-4"></div>
+                    <p className="text-slate-500 font-black uppercase text-[9px] tracking-widest animate-pulse">
                         Sincronizando datos del mercado...
                     </p>
                 </div>
@@ -267,13 +267,13 @@ const CryptoMarketMonitor = () => {
 
     return (
         <>
-            <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10">
+            <div className="bg-[var(--bg-card)] rounded-[32px] border border-white/5 shadow-2xl overflow-hidden mb-10">
                 {/* Header */}
-                <div className="px-10 py-8 border-b border-white/5">
+                <div className="px-6 py-5 border-b border-white/5">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
-                            <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
-                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
+                            <h2 className="text-lg font-black text-white uppercase italic tracking-tighter">Monitor de Mercados</h2>
+                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
                                 Top 10 Criptomonedas • Actualizado: {lastUpdate?.toLocaleTimeString()}
                             </p>
                         </div>
@@ -287,7 +287,7 @@ const CryptoMarketMonitor = () => {
                                     placeholder="Buscar criptomoneda..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl pl-12 pr-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
+                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl pl-12 pr-4 py-2.5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all"
                                 />
                                 {searchTerm && (
                                     <button
@@ -301,28 +301,28 @@ const CryptoMarketMonitor = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-2">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`p-3 rounded-xl transition-all ${showFilters ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-2.5 rounded-xl transition-all ${showFilters ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
                                 title="Filtros"
                             >
-                                <FaFilter />
+                                <FaFilter size={14} />
                             </button>
                             <button
                                 onClick={() => setCompareMode(!compareMode)}
-                                className={`p-3 rounded-xl transition-all ${compareMode ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-2.5 rounded-xl transition-all ${compareMode ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
                                 title="Modo Comparación"
                             >
-                                <FaExchangeAlt />
+                                <FaExchangeAlt size={14} />
                             </button>
                             <button
                                 onClick={fetchCryptoData}
                                 disabled={loading}
-                                className="p-3 bg-[var(--bg-main)] text-[#fcd535] rounded-xl hover:bg-[#fcd535]/10 transition-all disabled:opacity-50"
+                                className="p-2.5 bg-[var(--bg-main)] text-[#fcd535] rounded-xl hover:bg-[#fcd535]/10 transition-all disabled:opacity-50"
                                 title="Actualizar datos"
                             >
-                                <FaSync className={loading ? 'animate-spin' : ''} />
+                                <FaSync size={14} className={loading ? 'animate-spin' : ''} />
                             </button>
                         </div>
                     </div>
@@ -424,50 +424,50 @@ const CryptoMarketMonitor = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--bg-main)]">
-                            <tr className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                                <th className="px-6 py-5 text-center w-12">★</th>
-                                <th className="px-4 py-5 text-center w-16 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap_rank')}>
+                            <tr className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                                <th className="px-4 py-3 text-center w-12">★</th>
+                                <th className="px-2 py-3 text-center w-14 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap_rank')}>
                                     <div className="flex items-center justify-center gap-2">
                                         # {getSortIcon('market_cap_rank')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('name')}>
+                                <th className="px-4 py-3 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('name')}>
                                     <div className="flex items-center gap-2">
                                         Activo {getSortIcon('name')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('current_price')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('current_price')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Precio (USD) {getSortIcon('current_price')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_1h_in_currency')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_1h_in_currency')}>
                                     <div className="flex items-center justify-end gap-2">
                                         1h % {getSortIcon('price_change_percentage_1h_in_currency')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_24h')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_24h')}>
                                     <div className="flex items-center justify-end gap-2">
                                         24h % {getSortIcon('price_change_percentage_24h')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_7d_in_currency')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_7d_in_currency')}>
                                     <div className="flex items-center justify-end gap-2">
                                         7d % {getSortIcon('price_change_percentage_7d_in_currency')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Cap. Mercado {getSortIcon('market_cap')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('total_volume')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('total_volume')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Volumen 24h {getSortIcon('total_volume')}
                                     </div>
                                 </th>
-                                <th className="px-6 py-5 text-right">Tendencia 7d</th>
-                                <th className="px-6 py-5 text-center">Acciones</th>
+                                <th className="px-4 py-3 text-right">Tendencia 7d</th>
+                                <th className="px-4 py-3 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -491,44 +491,44 @@ const CryptoMarketMonitor = () => {
                                             key={crypto.id}
                                             className={`hover:bg-white/[0.02] transition-all cursor-pointer group ${isComparing ? 'bg-[#fcd535]/5' : ''}`}
                                         >
-                                            <td className="px-6 py-6 text-center">
+                                            <td className="px-4 py-3 text-center">
                                                 <button
                                                     onClick={() => toggleFavorite(crypto.id)}
                                                     className="text-slate-600 hover:text-[#fcd535] transition-colors"
                                                 >
                                                     {favorites.includes(crypto.id) ? (
-                                                        <FaStar className="text-[#fcd535]" />
+                                                        <FaStar className="text-[#fcd535]" size={14} />
                                                     ) : (
-                                                        <FaRegStar />
+                                                        <FaRegStar size={14} />
                                                     )}
                                                 </button>
                                             </td>
-                                            <td className="px-4 py-6 text-center">
-                                                <span className="text-xs font-black text-slate-600">
+                                            <td className="px-2 py-3 text-center">
+                                                <span className="text-[10px] font-black text-slate-600">
                                                     {crypto.market_cap_rank}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-6">
-                                                <div className="flex items-center gap-4">
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-3">
                                                     <img
                                                         src={crypto.image}
                                                         alt={crypto.name}
-                                                        className="w-8 h-8 rounded-full"
+                                                        className="w-6 h-6 rounded-full"
                                                     />
                                                     <div>
-                                                        <p className="text-sm font-black text-white uppercase tracking-tight">
+                                                        <p className="text-xs font-black text-white uppercase tracking-tight">
                                                             {crypto.symbol.toUpperCase()}
                                                         </p>
-                                                        <p className="text-[9px] text-slate-600 font-bold">
+                                                        <p className="text-[8px] text-slate-600 font-bold">
                                                             {crypto.name}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-6 text-right font-mono text-sm font-black text-white">
+                                            <td className="px-4 py-3 text-right font-mono text-xs font-black text-white">
                                                 {formatPrice(crypto.current_price)}
                                             </td>
-                                            <td className={`px-6 py-6 text-right text-xs font-black italic ${getChangeColor(crypto.price_change_percentage_1h_in_currency)}`}>
+                                            <td className={`px-4 py-3 text-right text-[10px] font-black italic ${getChangeColor(crypto.price_change_percentage_1h_in_currency)}`}>
                                                 {crypto.price_change_percentage_1h_in_currency ? (
                                                     <>
                                                         {crypto.price_change_percentage_1h_in_currency > 0 ? <FaArrowUp className="inline mr-1" /> : <FaArrowDown className="inline mr-1" />}
@@ -536,11 +536,11 @@ const CryptoMarketMonitor = () => {
                                                     </>
                                                 ) : '-'}
                                             </td>
-                                            <td className={`px-6 py-6 text-right text-xs font-black italic ${getChangeColor(crypto.price_change_percentage_24h)}`}>
+                                            <td className={`px-4 py-3 text-right text-[10px] font-black italic ${getChangeColor(crypto.price_change_percentage_24h)}`}>
                                                 {crypto.price_change_percentage_24h > 0 ? <FaArrowUp className="inline mr-1" /> : <FaArrowDown className="inline mr-1" />}
                                                 {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
                                             </td>
-                                            <td className={`px-6 py-6 text-right text-xs font-black italic ${getChangeColor(crypto.price_change_percentage_7d_in_currency)}`}>
+                                            <td className={`px-4 py-3 text-right text-[10px] font-black italic ${getChangeColor(crypto.price_change_percentage_7d_in_currency)}`}>
                                                 {crypto.price_change_percentage_7d_in_currency ? (
                                                     <>
                                                         {crypto.price_change_percentage_7d_in_currency > 0 ? <FaArrowUp className="inline mr-1" /> : <FaArrowDown className="inline mr-1" />}
@@ -548,14 +548,14 @@ const CryptoMarketMonitor = () => {
                                                     </>
                                                 ) : '-'}
                                             </td>
-                                            <td className="px-6 py-6 text-right text-xs font-bold text-slate-400">
+                                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-400">
                                                 {formatNumber(crypto.market_cap)}
                                             </td>
-                                            <td className="px-6 py-6 text-right text-xs font-bold text-slate-400">
+                                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-400">
                                                 {formatNumber(crypto.total_volume)}
                                             </td>
-                                            <td className="px-6 py-6 text-right">
-                                                <div className="w-24 h-10 ml-auto flex items-center justify-end overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity">
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="w-20 h-8 ml-auto flex items-center justify-end overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity">
                                                     {crypto.sparkline_in_7d?.price && (
                                                         <svg className="w-full h-full" viewBox="0 0 100 40">
                                                             <path
@@ -575,19 +575,19 @@ const CryptoMarketMonitor = () => {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-6 text-center">
-                                                <div className="flex items-center justify-center gap-2">
+                                            <td className="px-4 py-3 text-center">
+                                                <div className="flex items-center justify-center gap-1.5">
                                                     {compareMode && (
                                                         <button
                                                             onClick={() => toggleCompare(crypto)}
                                                             disabled={!isComparing && compareList.length >= 3}
-                                                            className={`p-2 rounded-lg transition-all ${isComparing
+                                                            className={`p-1.5 rounded-lg transition-all ${isComparing
                                                                 ? 'bg-[#fcd535] text-black'
                                                                 : 'bg-[var(--bg-main)] text-slate-400 hover:text-white disabled:opacity-30'
                                                                 }`}
                                                             title={isComparing ? 'Quitar de comparación' : 'Agregar a comparación'}
                                                         >
-                                                            <FaExchangeAlt size={12} />
+                                                            <FaExchangeAlt size={10} />
                                                         </button>
                                                     )}
                                                     <button

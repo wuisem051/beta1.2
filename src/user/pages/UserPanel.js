@@ -456,7 +456,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   }, [userBalances]);
 
   return (
-    <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-4 py-8 relative">
+    <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-700 mx-auto px-1 md:px-4 py-6 relative" style={{ maxWidth: isSidebarHidden ? '100vw' : `${dashboardMaxWidth}px`, transition: 'max-width 0.3s ease' }}>
       <div className="absolute top-4 left-6 z-20 hidden md:flex flex-col gap-2">
         <Link to="/user/updates" className="flex items-center gap-2 px-3 py-1.5 bg-[#fcd535]/10 border border-[#fcd535]/20 rounded-lg text-[9px] font-black text-[#fcd535] uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all group">
           <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
@@ -468,63 +468,63 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
         </div>
       </div>
 
-      {/* Premium Profile Slot */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 mt-6">
-        <div className="lg:col-span-2 bg-[var(--bg-card)] p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden group">
+      {/* Premium Profile Slot - Reduced padding for more professional look */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-6">
+        <div className="lg:col-span-2 bg-[var(--bg-card)] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-          <div className="relative flex flex-col md:flex-row items-center gap-8">
-            <div className="w-24 h-24 rounded-full bg-[#fcd535] p-1 shadow-2xl">
+          <div className="relative flex flex-col md:flex-row items-center gap-6">
+            <div className="w-20 h-20 rounded-full bg-[#fcd535] p-1 shadow-2xl">
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#1e2329] bg-[var(--bg-main)] flex items-center justify-center">
-                {userBalances.profilePhotoUrl ? <img src={userBalances.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle size={48} className="text-slate-700" />}
+                {userBalances.profilePhotoUrl ? <img src={userBalances.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle size={40} className="text-slate-700" />}
               </div>
             </div>
 
             <div className="flex-1 text-center md:text-left">
-              <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-2">
-                <h1 className="text-2xl font-black text-white uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
-                <span className="px-3 py-1 bg-[#fcd535] text-black text-[9px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-1">
+                <h1 className="text-xl font-black text-white uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
+                <span className="px-3 py-1 bg-[#fcd535] text-black text-[8px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
               </div>
-              <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-6 flex items-center justify-center md:justify-start gap-2">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4 flex items-center justify-center md:justify-start gap-2">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                 Identidad Verificada • ID: {currentUser?.uid?.substring(0, 12).toUpperCase()}
               </p>
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-10">
+              <div className="flex flex-wrap justify-center md:justify-start gap-8">
                 <div>
-                  <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest mb-1">Rango Global</p>
-                  <p className="text-lg font-black text-white italic tracking-tighter">ELITE VIP</p>
+                  <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-0.5">Rango Global</p>
+                  <p className="text-sm font-black text-white italic tracking-tighter">ELITE VIP</p>
                 </div>
                 <div>
-                  <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest mb-1">Activos Seguidores</p>
-                  <p className="text-lg font-black text-[#fcd535] italic tracking-tighter">3.2K+</p>
+                  <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-0.5">Activos Seguidores</p>
+                  <p className="text-sm font-black text-[#fcd535] italic tracking-tighter">3.2K+</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#fcd535] p-1 rounded-[40px] shadow-2xl">
-          <div className="w-full h-full bg-[var(--bg-card)] rounded-[38px] p-10 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
+        <div className="bg-[#fcd535] p-[2px] rounded-[32px] shadow-2xl">
+          <div className="w-full h-full bg-[var(--bg-card)] rounded-[30px] p-8 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
             <div>
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Balance Estimado</span>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Balance Estimado</span>
                 <button onClick={() => setShowBalance(!showBalance)} className="text-[#fcd535]">
-                  {showBalance ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
+                  {showBalance ? <FaRegEye size={16} /> : <FaRegEyeSlash size={16} />}
                 </button>
               </div>
               <div className="flex items-baseline gap-2">
-                <p className="text-4xl font-black text-white italic tracking-tighter">
+                <p className="text-3xl font-black text-white italic tracking-tighter">
                   {showBalance ? totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '********'}
                 </p>
-                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">USDT</span>
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">USDT</span>
               </div>
-              <p className="text-xs text-slate-600 font-bold mt-2">≈ {showBalance ? totalEquity.toFixed(2) : '********'} USD</p>
+              <p className="text-[10px] text-slate-600 font-bold mt-1">≈ {showBalance ? totalEquity.toFixed(2) : '********'} USD</p>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-white/5 flex gap-4">
-              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-3 bg-[#fcd535] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
-              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-3 bg-[var(--bg-main)] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
+            <div className="mt-6 pt-4 border-t border-white/5 flex gap-3">
+              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-2.5 bg-[#fcd535] text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
+              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-2.5 bg-[var(--bg-main)] text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
             </div>
           </div>
         </div>
@@ -1766,7 +1766,7 @@ const UserPanel = () => {
             <Route path="deposits/*" element={<WalletHub dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
-            <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} />} />
+            <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} isSidebarHidden={isSidebarHidden} dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
             <Route path="collective-fund/*" element={<CollectiveFundContent />} />
@@ -1784,7 +1784,7 @@ const UserPanel = () => {
             <Route path="miners/*" element={<CopyTraderContent styles={styles} userBalances={userBalances} />} />
           )}
           {(!siteSettings || siteSettings.showExchangeSection !== false) && (
-            <Route path="exchange/*" element={<ExchangeContent />} />
+            <Route path="exchange/*" element={<ExchangeContent isSidebarHidden={isSidebarHidden} dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
             <Route path="cajero/*" element={<AirtmCashierContent />} />
