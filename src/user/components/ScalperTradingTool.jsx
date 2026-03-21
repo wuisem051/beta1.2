@@ -305,7 +305,19 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         setIsCalculating(true);
         const [asset] = symbol.split('/');
         const availableAsset = balance?.total?.[asset] || 0;
-        const quantity = parseFloat(totalCapital) || availableAsset;
+
+        let quantityVal = parseFloat(totalCapital) || availableAsset;
+
+        // HEURÍSTICA: Si el usuario coloca un número pequeño (ej. 80) y tiene un balance mayor de ese asset, 
+        // probablemente se refiere a USD. 
+        if (strategy === 'sell' && quantityVal < 1000 && currentPrice > 0) {
+            // Si el valor ingresado es menor que el balance de ARPA pero tiene sentido como USD
+            // O si queremos ser explícitos, podríamos preguntar. Pero aquí lo asumiremos si el valor es < 1000
+            // y el precio actual hace que 80 USD sea un número coherente de tokens.
+            quantityVal = quantityVal / currentPrice;
+        }
+
+        const quantity = quantityVal;
         const step = parseFloat(priceStep) / 100;
         const newSellLevels = [];
 
@@ -324,13 +336,16 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         for (let i = 0; i < numLevels; i++) {
             const sellPrice = currentPrice * (1 + step * (i + 1));
             const sellQuantity = quantity * portions[i];
+            const totalUSD = sellPrice * sellQuantity;
+            const absoluteProfit = (sellPrice - currentPrice) * sellQuantity;
 
             newSellLevels.push({
                 level: i + 1,
                 price: sellPrice.toFixed(8),
                 quantity: sellQuantity.toFixed(8),
                 profit: (step * (i + 1) * 100).toFixed(2),
-                potentialProfit: ((sellPrice - currentPrice) * sellQuantity).toFixed(2),
+                potentialProfit: absoluteProfit.toFixed(2),
+                totalUSD: totalUSD.toFixed(2),
                 percentage: (portions[i] * 100).toFixed(2),
                 executed: false
             });
@@ -475,6 +490,34 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const handleSellLevelChange = (index, field, value) => {
         const newSellLevels = [...sellLevels];
         newSellLevels[index][field] = value;
+
+        // Si cambia el precio o la cantidad, recalculamos el total USD y la ganancia
+        if (field === 'price' || field === 'quantity') {
+            const price = parseFloat(newSellLevels[index].price) || 0;
+            const qty = parseFloat(newSellLevels[index].quantity) || 0;
+            const buyPrice = currentPrice; // Usamos el precio actual como base de costo para esta estimación
+
+            newSellLevels[index].totalUSD = (price * qty).toFixed(2);
+            newSellLevels[index].potentialProfit = ((price - buyPrice) * qty).toFixed(2);
+
+            // Recalcular el % de ganancia basado en el precio nuevo
+            if (buyPrice > 0) {
+                newSellLevels[index].profit = (((price / buyPrice) - 1) * 100).toFixed(2);
+            }
+        }
+
+        // Si cambia el % de ganancia, recalculamos el precio
+        if (field === 'profit') {
+            const profitPct = parseFloat(value) || 0;
+            const buyPrice = currentPrice;
+            const qty = parseFloat(newSellLevels[index].quantity) || 0;
+
+            const newPrice = buyPrice * (1 + profitPct / 100);
+            newSellLevels[index].price = newPrice.toFixed(8);
+            newSellLevels[index].totalUSD = (newPrice * qty).toFixed(2);
+            newSellLevels[index].potentialProfit = ((newPrice - buyPrice) * qty).toFixed(2);
+        }
+
         setSellLevels(newSellLevels);
     };
 
@@ -599,7 +642,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     {/* Capital Total */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            {strategy === 'buy' ? 'Capital a Distribuir (USDT)' : 'Cantidad a Distribuir (Asset)'}
+                            {strategy === 'buy' ? 'Capital a Distribuir (USDT)' : 'Capital a Distribuir (USDT o Asset)'}
                         </label>
                         <div className="relative">
                             <input
@@ -608,10 +651,15 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 value={totalCapital}
                                 onChange={(e) => setTotalCapital(e.target.value)}
                                 className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
-                                placeholder="100.00"
+                                placeholder={strategy === 'buy' ? "100.00" : "Cant. Asset u 80.00 USD"}
                             />
-                            <FaDollarSign className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                <span className="text-[10px] text-slate-600 font-black uppercase">{strategy === 'buy' ? 'USDT' : symbol.split('/')[0]}</span>
+                            </div>
                         </div>
+                        {strategy === 'sell' && (
+                            <p className="mt-2 text-[9px] text-slate-600 font-bold uppercase tracking-widest">Tip: Si indicas un valor menor a 1000, el sistema asumirá que es USD si el balance lo permite.</p>
+                        )}
                     </div>
 
                     {/* Número de Niveles */}
@@ -895,8 +943,10 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             <thead>
                                 <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5">
                                     <th className="px-4 py-4 text-left">Lote</th>
-                                    <th className="px-4 py-4 text-left">Precio de Venta</th>
-                                    <th className="px-4 py-4 text-left">Cantidad (Exacta)</th>
+                                    <th className="px-4 py-4 text-left">Precio Venta</th>
+                                    <th className="px-4 py-4 text-left">Cant. Asset</th>
+                                    <th className="px-4 py-3 text-left">Ganancia %</th>
+                                    <th className="px-4 py-4 text-right">Venta Total (USD)</th>
                                     <th className="px-4 py-4 text-right">Ganancia Est.</th>
                                     <th className="px-4 py-4 text-center">Acción</th>
                                 </tr>
@@ -914,7 +964,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                                 type="number"
                                                 value={level.price}
                                                 onChange={(e) => handleSellLevelChange(idx, 'price', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-rose-500 outline-none"
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-24 focus:border-rose-500 outline-none"
                                             />
                                         </td>
                                         <td className="px-4 py-5">
@@ -922,11 +972,25 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                                 type="number"
                                                 value={level.quantity}
                                                 onChange={(e) => handleSellLevelChange(idx, 'quantity', e.target.value)}
-                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-3 py-2 text-white font-mono text-xs w-32 focus:border-rose-500 outline-none"
+                                                className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-[10px] w-24 focus:border-rose-500 outline-none"
                                             />
                                         </td>
+                                        <td className="px-4 py-5">
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    value={level.profit}
+                                                    onChange={(e) => handleSellLevelChange(idx, 'profit', e.target.value)}
+                                                    className="bg-slate-950/60 border border-white/10 rounded-lg px-2 py-2 text-emerald-500 font-mono text-[10px] w-16 focus:border-emerald-500 outline-none pr-5"
+                                                />
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600">%</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-5 text-right font-mono text-xs font-bold text-white">
+                                            ${level.totalUSD || (parseFloat(level.price) * parseFloat(level.quantity)).toFixed(2)}
+                                        </td>
                                         <td className="px-4 py-5 text-right font-mono text-xs font-bold text-emerald-500">
-                                            +${parseFloat(level.potentialProfit).toFixed(4)}
+                                            +${parseFloat(level.potentialProfit).toFixed(2)}
                                         </td>
                                         <td className="px-4 py-5 text-center">
                                             {level.executed ? (
