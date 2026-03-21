@@ -17,6 +17,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     const [distribution, setDistribution] = useState('equal'); // 'equal', 'pyramid', 'reverse-pyramid'
     const [profitMode, setProfitMode] = useState('dynamic'); // 'dynamic' o 'fixed'
     const [priceSource, setPriceSource] = useState('exchange'); // 'exchange' o 'coinmarketcap'
+    const [sellProfit, setSellProfit] = useState('7.5'); // Objetivo de ganancia fijo para ventas
 
     // Niveles calculados
     const [levels, setLevels] = useState([]);
@@ -56,6 +57,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     if (config.priceSource) setPriceSource(config.priceSource);
                     if (config.levels) setLevels(config.levels);
                     if (config.sellLevels) setSellLevels(config.sellLevels);
+                    if (config.sellProfit) setSellProfit(config.sellProfit);
                 }
             } catch (e) {
                 console.error('Error al cargar config desde DB:', e);
@@ -82,6 +84,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 priceSource,
                 levels,
                 sellLevels,
+                sellProfit,
                 lastUpdated: new Date().toISOString(),
                 ...overrides
             };
@@ -334,7 +337,13 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
         }
 
         for (let i = 0; i < numLevels; i++) {
-            const sellPrice = currentPrice * (1 + step * (i + 1));
+            // Si el modo es fijo, usamos el sellProfit para cada nivel
+            // Si es dinámico, mantenemos la escalera incremental
+            const currentStep = profitMode === 'fixed'
+                ? (parseFloat(sellProfit) / 100)
+                : (step * (i + 1));
+
+            const sellPrice = currentPrice * (1 + currentStep);
             const sellQuantity = quantity * portions[i];
             const totalUSD = sellPrice * sellQuantity;
             const absoluteProfit = (sellPrice - currentPrice) * sellQuantity;
@@ -343,7 +352,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                 level: i + 1,
                 price: sellPrice.toFixed(8),
                 quantity: sellQuantity.toFixed(8),
-                profit: (step * (i + 1) * 100).toFixed(2),
+                profit: (currentStep * 100).toFixed(2),
                 potentialProfit: absoluteProfit.toFixed(2),
                 totalUSD: totalUSD.toFixed(2),
                 percentage: (portions[i] * 100).toFixed(2),
@@ -663,17 +672,17 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                         />
                     </div>
 
-                    {/* Paso de Precio */}
+                    {/* Paso de Precio / Objetivo Ganancia */}
                     <div>
                         <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            Separación Base (%)
+                            {strategy === 'buy' ? 'Separación Base (%)' : 'Objetivo de Ganancia (%)'}
                         </label>
                         <div className="relative">
                             <input
                                 type="number"
                                 step="0.1"
-                                value={priceStep}
-                                onChange={(e) => setPriceStep(e.target.value)}
+                                value={strategy === 'buy' ? priceStep : sellProfit}
+                                onChange={(e) => strategy === 'buy' ? setPriceStep(e.target.value) : setSellProfit(e.target.value)}
                                 className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
                                 placeholder="1.0"
                             />
