@@ -32,7 +32,7 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
     // Pares disponibles
     const availablePairs = [
-        'BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT',
+        'BTC/USDT', 'ETH/USDT', 'NAS100USD', 'BTC.D', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT',
         'ADA/USDT', 'DOGE/USDT', 'MATIC/USDT', 'DOT/USDT', 'AVAX/USDT', 'ARPA/USDT'
     ];
 

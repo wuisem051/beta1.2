@@ -52,9 +52,9 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const [charts, setCharts] = useState([
         { id: 1, symbol: 'BTC/USDT' },
         { id: 2, symbol: 'ETH/USDT' },
-        { id: 3, symbol: 'BNB/USDT' },
-        { id: 4, symbol: 'LTC/USDT' },
-        { id: 5, symbol: 'DOGE/USDT' },
+        { id: 3, symbol: 'NAS100USD' },
+        { id: 4, symbol: 'BTC.D' },
+        { id: 5, symbol: 'BNB/USDT' },
         { id: 6, symbol: 'SOL/USDT' }
     ]);
     const [activeChartId, setActiveChartId] = useState(1);
@@ -87,6 +87,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const [availablePairs, setAvailablePairs] = useState([
         'BTC/USDT',
         'ETH/USDT',
+        'NAS100USD',
+        'BTC.D',
         'LTC/USDT',
         'DOGE/USDT',
         'BNB/USDT',
