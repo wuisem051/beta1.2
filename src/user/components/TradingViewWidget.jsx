@@ -12,11 +12,7 @@ function TradingViewWidget({ symbol, theme = 'dark', interval = '15' }) {
             script.innerHTML = `
         {
           "autosize": true,
-          "symbol": "${symbol.includes(':') ? symbol :
-                    symbol === 'NAS100USD' ? 'TVC:NAS100USD' :
-                        symbol === 'BTC.D' ? 'CRYPTOCAP:BTC.D' :
-                            symbol.includes('.') ? symbol :
-                                'BINANCE:' + symbol
+          "symbol": "${(symbol.includes(':') || symbol.includes('.') || symbol === 'NAS100USD') ? symbol : 'BINANCE:' + symbol
                 }",
           "interval": "${interval}",
           "timezone": "Etc/UTC",
