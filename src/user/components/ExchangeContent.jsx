@@ -7,7 +7,7 @@ import {
     FaBitcoin, FaKey, FaChartLine, FaExchangeAlt,
     FaBolt, FaCheckCircle, FaExclamationTriangle,
     FaRegClock, FaHistory, FaListUl, FaShieldAlt,
-    FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh, FaLayerGroup
+    FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh, FaLayerGroup, FaSave
 } from 'react-icons/fa';
 import TradingViewWidget from './TradingViewWidget';
 import ScalperTradingTool from './ScalperTradingTool';
@@ -24,6 +24,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
 
     // UI Helpers
     const [isSaving, setIsSaving] = useState({ binance: false, binanceus: false, bingx: false });
+    const [isSavingLayout, setIsSavingLayout] = useState(false);
 
     const [balance, setBalance] = useState(null);
     const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -50,12 +51,12 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     // Chart Layout State
     const [layout, setLayout] = useState('1'); // '1', '2v', '4', '6'
     const [charts, setCharts] = useState([
-        { id: 1, symbol: 'BTC/USDT' },
-        { id: 2, symbol: 'ETH/USDT' },
-        { id: 3, symbol: 'NAS100USD' },
-        { id: 4, symbol: 'BTC.D' },
-        { id: 5, symbol: 'BNB/USDT' },
-        { id: 6, symbol: 'SOL/USDT' }
+        { id: 1, symbol: 'BTC/USDT', interval: '15' },
+        { id: 2, symbol: 'ETH/USDT', interval: '15' },
+        { id: 3, symbol: 'NAS100USD', interval: '15' },
+        { id: 4, symbol: 'BTC.D', interval: '15' },
+        { id: 5, symbol: 'BNB/USDT', interval: '15' },
+        { id: 6, symbol: 'SOL/USDT', interval: '15' }
     ]);
     const [activeChartId, setActiveChartId] = useState(1);
 
@@ -71,6 +72,29 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
         setCharts(prev => prev.map(c => c.id === chartId ? { ...c, symbol: newSymbol } : c));
         if (chartId === activeChartId) {
             setTradeSymbol(newSymbol);
+        }
+    };
+
+    const updateChartInterval = (chartId, newInterval) => {
+        setCharts(prev => prev.map(c => c.id === chartId ? { ...c, interval: newInterval } : c));
+    };
+
+    const saveExchangeLayout = async () => {
+        if (!currentUser?.uid) return;
+        setIsSavingLayout(true);
+        try {
+            const layoutRef = doc(db, 'users', currentUser.uid, 'settings', 'exchangeLayout');
+            await setDoc(layoutRef, {
+                layout,
+                charts,
+                updatedAt: new Date().toISOString()
+            });
+            alert('Configuración de gráficos guardada correctamente.');
+        } catch (error) {
+            console.error("Error saving layout:", error);
+            setErrorMsg("Error al guardar la configuración: " + error.message);
+        } finally {
+            setIsSavingLayout(false);
         }
     };
 
@@ -167,6 +191,22 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                     }
 
                     setConfigs(newConfigs);
+
+                    // Load Layout
+                    const layoutRef = doc(db, 'users', currentUser.uid, 'settings', 'exchangeLayout');
+                    const layoutSnap = await getDoc(layoutRef);
+                    if (layoutSnap.exists()) {
+                        const data = layoutSnap.data();
+                        if (data.layout) setLayout(data.layout);
+                        if (data.charts) {
+                            // Ensure all charts have intervals if they coming from old data
+                            const loadedCharts = data.charts.map(c => ({
+                                ...c,
+                                interval: c.interval || '15'
+                            }));
+                            setCharts(loadedCharts);
+                        }
+                    }
                 } catch (err) {
                     console.error("Error loading configs:", err);
                 }
@@ -699,6 +739,15 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 >
                                     <FaTh />
                                 </button>
+                                <button
+                                    onClick={saveExchangeLayout}
+                                    disabled={isSavingLayout}
+                                    className="ml-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                    title="Guardar Configuración"
+                                >
+                                    {isSavingLayout ? <FaSync className="animate-spin text-xs" /> : <FaSave className="text-xs" />}
+                                    <span className="text-[9px] font-black uppercase tracking-tighter hidden sm:inline">Guardar Config</span>
+                                </button>
                             </div>
                         </div>
 
@@ -731,6 +780,25 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     <option key={p} value={p} className="bg-slate-900 text-white">{p}</option>
                                                 ))}
                                             </select>
+                                            <div className="flex bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden ml-1 pointer-events-auto">
+                                                {[
+                                                    { label: '1m', value: '1' },
+                                                    { label: '5m', value: '5' },
+                                                    { label: '15m', value: '15' },
+                                                    { label: '30m', value: '30' },
+                                                    { label: '1h', value: '60' },
+                                                    { label: '4h', value: '240' },
+                                                    { label: '1D', value: 'D' }
+                                                ].map(int => (
+                                                    <button
+                                                        key={int.value}
+                                                        onClick={(e) => { e.stopPropagation(); updateChartInterval(chart.id, int.value); }}
+                                                        className={`px-1.5 py-1 text-[8px] font-black uppercase tracking-tighter border-r border-white/5 last:border-0 transition-all ${chart.interval === int.value ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                                    >
+                                                        {int.label}
+                                                    </button>
+                                                ))}
+                                            </div>
                                             {activeChartId === chart.id && (
                                                 <div className="flex items-center gap-2">
                                                     <div className="px-2 py-1 bg-blue-500 rounded-lg text-[8px] font-black text-white uppercase tracking-widest flex items-center animate-in zoom-in">
@@ -760,7 +828,11 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                             )}
                                         </div>
                                     </div>
-                                    <TradingViewWidget symbol={chart.symbol.replace('/', '')} theme="dark" />
+                                    <TradingViewWidget 
+                                        symbol={chart.symbol.replace('/', '')} 
+                                        theme="dark" 
+                                        interval={chart.interval || '15'}
+                                    />
                                 </div>
                             ))}
                         </div>
