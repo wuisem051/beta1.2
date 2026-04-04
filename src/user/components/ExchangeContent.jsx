@@ -83,12 +83,14 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
         if (!currentUser?.uid) return;
         setIsSavingLayout(true);
         try {
-            const layoutRef = doc(db, 'users', currentUser.uid, 'settings', 'exchangeLayout');
-            await setDoc(layoutRef, {
-                layout,
-                charts,
-                updatedAt: new Date().toISOString()
-            });
+            const userRef = doc(db, 'users', currentUser.uid);
+            await setDoc(userRef, {
+                exchangeLayout: {
+                    layout,
+                    charts,
+                    updatedAt: new Date().toISOString()
+                }
+            }, { merge: true });
             alert('Configuración de gráficos guardada correctamente.');
         } catch (error) {
             console.error("Error saving layout:", error);
@@ -192,19 +194,22 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
 
                     setConfigs(newConfigs);
 
-                    // Load Layout
-                    const layoutRef = doc(db, 'users', currentUser.uid, 'settings', 'exchangeLayout');
-                    const layoutSnap = await getDoc(layoutRef);
-                    if (layoutSnap.exists()) {
-                        const data = layoutSnap.data();
-                        if (data.layout) setLayout(data.layout);
-                        if (data.charts) {
-                            // Ensure all charts have intervals if they coming from old data
-                            const loadedCharts = data.charts.map(c => ({
-                                ...c,
-                                interval: c.interval || '15'
-                            }));
-                            setCharts(loadedCharts);
+                    // Load Layout from user document
+                    const userRef = doc(db, 'users', currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        const layoutData = userData.exchangeLayout;
+                        if (layoutData) {
+                            if (layoutData.layout) setLayout(layoutData.layout);
+                            if (layoutData.charts) {
+                                // Ensure all charts have intervals if they coming from old data
+                                const loadedCharts = layoutData.charts.map(c => ({
+                                    ...c,
+                                    interval: c.interval || '15'
+                                }));
+                                setCharts(loadedCharts);
+                            }
                         }
                     }
                 } catch (err) {
@@ -828,9 +833,9 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                             )}
                                         </div>
                                     </div>
-                                    <TradingViewWidget 
-                                        symbol={chart.symbol.replace('/', '')} 
-                                        theme="dark" 
+                                    <TradingViewWidget
+                                        symbol={chart.symbol.replace('/', '')}
+                                        theme="dark"
                                         interval={chart.interval || '15'}
                                     />
                                 </div>
