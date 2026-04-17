@@ -108,8 +108,8 @@ const VIPChatContent = ({ styles, userBalances }) => {
         <div className="w-20 h-20 bg-[#fcd535]/10 rounded-full flex items-center justify-center text-[#fcd535] mb-6 border border-[#fcd535]/20 animate-pulse">
           <FaGem size={40} />
         </div>
-        <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-4">Acceso Reservado Elite</h2>
-        <p className="max-w-md text-slate-500 font-bold uppercase tracking-widest text-sm leading-relaxed">
+        <h2 className="text-3xl font-black text-main uppercase italic tracking-tighter mb-4">Acceso Reservado Elite</h2>
+        <p className="max-w-md text-soft font-bold uppercase tracking-widest text-sm leading-relaxed">
           Esta frecuencia de comunicación está cifrada y reservada para miembros VIP. Adquiere un cupo mensul para desbloquear señales y soporte directo.
         </p>
         <button onClick={() => window.location.hash = '/user/plan-trading'} className="mt-8 px-10 py-4 bg-[#fcd535] text-black rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all text-xs shadow-2xl shadow-[#fcd535]/10">Adquirir VIP</button>
@@ -121,12 +121,12 @@ const VIPChatContent = ({ styles, userBalances }) => {
     <div className="flex flex-col h-[calc(100vh-140px)] bg-[var(--bg-card)] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
       <div className="p-6 border-b border-white/5 bg-white/[0.01] flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">COMUNIDAD ELITE VIP</h2>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Canal Directo con Traders Expertos</p>
+          <h2 className="text-xl font-black text-main uppercase italic tracking-tighter">COMUNIDAD ELITE VIP</h2>
+          <p className="text-[10px] text-soft font-black uppercase tracking-[0.2em]">Canal Directo con Traders Expertos</p>
         </div>
         <div className="flex bg-[var(--bg-main)] p-1 rounded-xl border border-white/5">
-          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-slate-500'}`}>General</button>
-          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-slate-500'}`}>Soporte Directo</button>
+          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-soft'}`}>General</button>
+          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-soft'}`}>Soporte Directo</button>
         </div>
       </div>
 
@@ -140,8 +140,8 @@ const VIPChatContent = ({ styles, userBalances }) => {
                   {msg.profilePhotoUrl ? <img src={msg.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle className="text-slate-600 text-2xl" />}
                 </div>
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{msg.displayName || msg.username}</span>
-                  <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[var(--accent)] text-black rounded-tr-none' : 'bg-[var(--bg-sidebar)] text-white border border-white/5 rounded-tl-none'}`}>
+                  <span className="text-[9px] font-black text-soft uppercase tracking-widest mb-1">{msg.displayName || msg.username}</span>
+                  <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[var(--accent)] text-black rounded-tr-none' : 'bg-[var(--bg-sidebar)] text-main border border-white/5 rounded-tl-none'}`}>
                     {msg.text}
                   </div>
                   <span className="text-[8px] text-slate-600 font-black mt-1 uppercase tracking-tighter">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -160,7 +160,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               placeholder="Escribe un mensaje en el hub VIP..."
-              className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-8 py-5 text-white text-sm font-bold outline-none focus:border-[var(--accent)]/30 transition-all resize-none min-h-[60px]"
+              className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-8 py-5 text-main text-sm font-bold outline-none focus:border-[var(--accent)]/30 transition-all resize-none min-h-[60px]"
               rows="1"
             />
           </div>
@@ -371,7 +371,7 @@ const PlanTradingContent = ({ styles }) => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Señales en Tiempo Real</p>
+              <p className="font-bold text-main text-sm">Señales en Tiempo Real</p>
               <p className="text-xs text-slate-400">Entradas y salidas de mercado enviadas directamente a tu panel.</p>
             </div>
           </div>
@@ -380,7 +380,7 @@ const PlanTradingContent = ({ styles }) => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Análisis Técnico</p>
+              <p className="font-bold text-main text-sm">Análisis Técnico</p>
               <p className="text-xs text-slate-400">Gráficos y explicaciones detalladas de cada operación sugerida.</p>
             </div>
           </div>
@@ -389,7 +389,7 @@ const PlanTradingContent = ({ styles }) => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Soporte Prioritario</p>
+              <p className="font-bold text-main text-sm">Soporte Prioritario</p>
               <p className="text-xs text-slate-400">Atención personalizada para resolver dudas sobre tus operaciones.</p>
             </div>
           </div>
@@ -398,7 +398,7 @@ const PlanTradingContent = ({ styles }) => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Gestión de Riesgo</p>
+              <p className="font-bold text-main text-sm">Gestión de Riesgo</p>
               <p className="text-xs text-slate-400">Recomendaciones de inversión máxima y stop loss para proteger tu capital.</p>
             </div>
           </div>
@@ -462,7 +462,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
           <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
           Update
         </Link>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-main)] border border-white/5 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-main)] border border-white/5 rounded-lg text-[9px] font-black text-soft uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           Sistema v1.03 Beta
         </div>
@@ -482,10 +482,10 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
 
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-1">
-                <h1 className="text-xl font-black text-white uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
+                <h1 className="text-xl font-black text-main uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
                 <span className="px-3 py-1 bg-[#fcd535] text-black text-[8px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
               </div>
-              <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mb-4 flex items-center justify-center md:justify-start gap-2">
+              <p className="text-[9px] text-soft font-black uppercase tracking-[0.2em] mb-4 flex items-center justify-center md:justify-start gap-2">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                 Identidad Verificada • ID: {currentUser?.uid?.substring(0, 12).toUpperCase()}
               </p>
@@ -493,7 +493,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
               <div className="flex flex-wrap justify-center md:justify-start gap-8">
                 <div>
                   <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-0.5">Rango Global</p>
-                  <p className="text-sm font-black text-white italic tracking-tighter">ELITE VIP</p>
+                  <p className="text-sm font-black text-main italic tracking-tighter">ELITE VIP</p>
                 </div>
                 <div>
                   <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-0.5">Activos Seguidores</p>
@@ -508,23 +508,23 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
           <div className="w-full h-full bg-[var(--bg-card)] rounded-[30px] p-8 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Balance Estimado</span>
+                <span className="text-[9px] font-black text-soft uppercase tracking-widest">Balance Estimado</span>
                 <button onClick={() => setShowBalance(!showBalance)} className="text-[#fcd535]">
                   {showBalance ? <FaRegEye size={16} /> : <FaRegEyeSlash size={16} />}
                 </button>
               </div>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-black text-white italic tracking-tighter">
+                <p className="text-3xl font-black text-main italic tracking-tighter">
                   {showBalance ? totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '********'}
                 </p>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">USDT</span>
+                <span className="text-[10px] font-black text-soft uppercase tracking-widest">USDT</span>
               </div>
               <p className="text-[10px] text-slate-600 font-bold mt-1">≈ {showBalance ? totalEquity.toFixed(2) : '********'} USD</p>
             </div>
 
             <div className="mt-6 pt-4 border-t border-white/5 flex gap-3">
               <button onClick={() => navigate('/user/deposits')} className="flex-1 py-2.5 bg-[#fcd535] text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
-              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-2.5 bg-[var(--bg-main)] text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
+              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-2.5 bg-[var(--bg-main)] text-main text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
             </div>
           </div>
         </div>
@@ -615,12 +615,12 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
       <div className="w-full lg:w-[400px] bg-[var(--bg-card)] rounded-[40px] border border-white/5 flex flex-col overflow-hidden shadow-2xl relative">
         <div className="p-8 border-b border-white/5 bg-white/[0.01]">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Mis Solicitudes</h2>
+            <h2 className="text-xl font-black text-main italic uppercase tracking-tighter">Mis Solicitudes</h2>
             <button onClick={() => setSelectedTicket(null)} className="p-2 bg-[#fcd535]/10 text-[#fcd535] rounded-xl hover:bg-[#fcd535]/20 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
           </div>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Soporte Técnico Especializado</p>
+          <p className="text-[10px] text-soft font-black uppercase tracking-[0.2em]">Soporte Técnico Especializado</p>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
           {tickets.length === 0 ? (
@@ -629,10 +629,10 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             tickets.map(t => (
               <div key={t.id} onClick={() => handleSelectTicket(t)} className={`p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${selectedTicket?.id === t.id ? 'bg-[var(--bg-sidebar)] border-[var(--accent)]/30' : 'bg-[var(--bg-main)] border-white/5 hover:border-white/10'}`}>
                 <div className="flex justify-between items-start mb-3">
-                  <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[#fcd535]' : 'text-white'}`}>{t.subject}</p>
+                  <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[#fcd535]' : 'text-main'}`}>{t.subject}</p>
                   <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${t.status === 'Respondido' ? 'bg-[var(--green-check)] text-black' : 'bg-slate-800 text-slate-400'}`}>{t.status}</span>
                 </div>
-                <p className="text-[10px] text-slate-500 line-clamp-1 font-bold lowercase mb-3">{t.conversation[t.conversation.length - 1].text}</p>
+                <p className="text-[10px] text-soft line-clamp-1 font-bold lowercase mb-3">{t.conversation[t.conversation.length - 1].text}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-[8px] text-slate-700 font-black uppercase">{t.updatedAt.toLocaleDateString()}</span>
                   {t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser) && (<div className="w-2 h-2 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent)] animate-pulse"></div>)}
@@ -646,7 +646,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
         {selectedTicket ? (
           <>
             <div className="p-8 border-b border-white/5 bg-white/[0.01]">
-              <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">{selectedTicket.subject}</h2>
+              <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter mb-2">{selectedTicket.subject}</h2>
               <div className="flex items-center gap-4">
                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">ID: {selectedTicket.id.substring(0, 8)}</span>
                 <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
@@ -658,9 +658,9 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                 const isAdmin = msg.sender === 'admin';
                 return (
                   <div key={idx} className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`max-w-[75%] p-6 rounded-[2rem] text-sm font-bold shadow-xl ${isAdmin ? 'bg-slate-800 text-white rounded-tl-none border border-white/5' : 'bg-[var(--accent)] text-black rounded-tr-none'}`}>
+                    <div className={`max-w-[75%] p-6 rounded-[2rem] text-sm font-bold shadow-xl ${isAdmin ? 'bg-slate-800 text-main rounded-tl-none border border-white/5' : 'bg-[var(--accent)] text-black rounded-tr-none'}`}>
                       <p className="leading-relaxed">{msg.text}</p>
-                      <p className={`text-[8px] mt-4 font-black uppercase tracking-tighter ${isAdmin ? 'text-slate-500' : 'text-black/50'}`}> {isAdmin ? '🛡️ Agente de Soporte' : 'Tu consulta'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </p>
+                      <p className={`text-[8px] mt-4 font-black uppercase tracking-tighter ${isAdmin ? 'text-soft' : 'text-black/50'}`}> {isAdmin ? '🛡️ Agente de Soporte' : 'Tu consulta'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} </p>
                     </div>
                   </div>
                 )
@@ -668,7 +668,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             </div>
             <div className="p-8 border-t border-white/5 bg-white/[0.02]">
               <form onSubmit={handleSendMessage} className="flex gap-4">
-                <input type="text" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Enviar respuesta al nodo de soporte..." className="flex-1 bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-4 text-white text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all" />
+                <input type="text" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Enviar respuesta al nodo de soporte..." className="flex-1 bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-4 text-main text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all" />
                 <button type="submit" disabled={!messageContent.trim() || isLoading} className="px-8 py-4 bg-[var(--accent)] text-black rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-lg active:scale-95 disabled:opacity-50">Enviar</button>
               </form>
             </div>
@@ -676,16 +676,16 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-12">
             <div className="w-full max-w-lg">
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-2">Nueva Consulta</h2>
-              <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] mb-12">Nuestro equipo técnico responderá en menos de 24 horas</p>
+              <h2 className="text-3xl font-black text-main italic uppercase tracking-tighter mb-2">Nueva Consulta</h2>
+              <p className="text-[10px] text-soft font-black uppercase tracking-[0.2em] mb-12">Nuestro equipo técnico responderá en menos de 24 horas</p>
               <form onSubmit={handleSendMessage} className="space-y-8">
                 <div>
                   <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Asunto Global</label>
-                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Problemas con el retiro API" className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white text-xs font-black outline-none focus:border-[var(--accent)]/30 transition-all shadow-inner" />
+                  <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Ej: Problemas con el retiro API" className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main text-xs font-black outline-none focus:border-[var(--accent)]/30 transition-all shadow-inner" />
                 </div>
                 <div>
                   <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Descripción Detallada</label>
-                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[2rem] px-6 py-5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
+                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[2rem] px-6 py-5 text-main text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
                 </div>
                 <button type="submit" className="w-full py-5 bg-[#fcd535] text-black rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl active:scale-95">Iniciar Solicitud de Soporte</button>
               </form>
@@ -970,9 +970,9 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
           <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1V15a2 2 0 0 1-2-2 2 2 0 0 1 2-2v-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2v.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </div>
-          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Configuración del Nodo</h1>
+          <h1 className="text-4xl font-black text-main italic uppercase tracking-tighter">Configuración del Nodo</h1>
         </div>
-        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] ml-1">Gestión de identidad y protocolos de seguridad • Sincronizado</p>
+        <p className="text-[10px] text-soft font-black uppercase tracking-[0.3em] ml-1">Gestión de identidad y protocolos de seguridad • Sincronizado</p>
       </header>
 
       {isLoading && (
@@ -993,13 +993,13 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-4 px-6 py-5 rounded-[1.8rem] transition-all duration-500 whitespace-nowrap group relative overflow-hidden ${activeTab === tab.id
                 ? 'bg-[#fcd535] text-[#0b0e11] shadow-xl shadow-[#fcd535]/10 scale-[1.02]'
-                : 'text-slate-500 hover:text-white hover:bg-white/5'
+                : 'text-soft hover:text-main hover:bg-white/5'
                 }`}
             >
               <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[#fcd535]'}`}>
                 {tab.icon}
               </div>
-              <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0b0e11]' : 'text-slate-400 group-hover:text-white'}`}>{tab.label}</span>
+              <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0b0e11]' : 'text-slate-400 group-hover:text-main'}`}>{tab.label}</span>
               {activeTab === tab.id && (
                 <div className="absolute right-4 w-1.5 h-1.5 bg-[var(--bg-main)] rounded-full animate-pulse"></div>
               )}
@@ -1021,8 +1021,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Identidad Visual</h2>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Sincroniza tu presencia en el nodo global</p>
+                    <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Identidad Visual</h2>
+                    <p className="text-[10px] text-soft font-bold uppercase tracking-widest mt-1">Sincroniza tu presencia en el nodo global</p>
                   </div>
                 </div>
 
@@ -1042,7 +1042,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     </div>
                     <input type="file" id="profile-photo-input" hidden accept=".png,.gif,image/png,image/gif" onChange={(e) => setProfilePhotoFile(e.target.files[0])} />
                     <div className="mt-6 text-center">
-                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-1">Actualizar Bio-Fotografía</p>
+                      <p className="text-[10px] font-black text-main uppercase tracking-[0.2em] mb-1">Actualizar Bio-Fotografía</p>
                       <p className="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Formatos autorizados: PNG, GIF</p>
                     </div>
                   </div>
@@ -1052,7 +1052,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <div className="p-2.5 rounded-xl bg-[#fcd535]/10 border border-[#fcd535]/20">
                         <FaCrown size={20} className="text-[#fcd535]" />
                       </div>
-                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">Avatares Premium Sincronizados</h3>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-main">Avatares Premium Sincronizados</h3>
                     </div>
 
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
@@ -1074,12 +1074,12 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Usuario del Nodo (@)</label>
+                      <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Usuario del Nodo (@)</label>
                       <div className="relative group">
                         <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#fcd535] font-black text-lg">@</span>
                         <input
                           type="text"
-                          className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                          className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           placeholder="alias_elite"
@@ -1087,10 +1087,10 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Nombre de Visualización</label>
+                      <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Nombre de Visualización</label>
                       <input
                         type="text"
-                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] px-6 py-5 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] px-6 py-5 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Nombre Real o Pseudónimo"
@@ -1099,9 +1099,9 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-[0.15em]">Firma Biográfica</label>
+                    <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Firma Biográfica</label>
                     <textarea
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.8rem] px-8 py-6 text-white text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.8rem] px-8 py-6 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       placeholder="Describe tu trayectoria de inversión..."
@@ -1127,8 +1127,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Protocolos de Cuenta</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Gestión de credenciales y seguridad de acceso</p>
+                  <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Protocolos de Cuenta</h2>
+                  <p className="text-[10px] text-soft font-bold uppercase tracking-widest mt-1">Gestión de credenciales y seguridad de acceso</p>
                 </div>
               </div>
 
@@ -1136,10 +1136,10 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 <div className="space-y-6">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Enlace de Comunicación</h3>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Email de Acceso</label>
+                    <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-widest">Email de Acceso</label>
                     <input
                       type="email"
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       disabled={true}
@@ -1151,20 +1151,20 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Rotación de Cifrado (Contraseña)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Contraseña Actual</label>
+                      <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-widest">Contraseña Actual</label>
                       <input
                         type="password"
-                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-[#fcd535]/40 transition-all"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[#fcd535]/40 transition-all"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Confirmación Requerida"
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Nueva Contraseña</label>
+                      <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-widest">Nueva Contraseña</label>
                       <input
                         type="password"
-                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-white font-bold outline-none focus:border-emerald-500/40 transition-all"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-emerald-500/40 transition-all"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Nueva Master Key"
@@ -1179,12 +1179,12 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-widest">Autenticación Multifactor (2FA)</h4>
-                      <p className="text-[10px] text-slate-500 uppercase font-bold mt-1 tracking-tighter">Estado: Protocolo Pendiente de Integración</p>
+                      <h4 className="text-sm font-black text-main uppercase tracking-widest">Autenticación Multifactor (2FA)</h4>
+                      <p className="text-[10px] text-soft uppercase font-bold mt-1 tracking-tighter">Estado: Protocolo Pendiente de Integración</p>
                     </div>
                   </div>
                   <div className="px-6 py-2 bg-slate-800 rounded-full border border-white/5">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">En Mantenimiento</span>
+                    <span className="text-[9px] font-black text-soft uppercase tracking-widest">En Mantenimiento</span>
                   </div>
                 </div>
 
@@ -1205,8 +1205,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Terminales de Retiro</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Configuración del nodo de liquidez personal</p>
+                  <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Terminales de Retiro</h2>
+                  <p className="text-[10px] text-soft font-bold uppercase tracking-widest mt-1">Configuración del nodo de liquidez personal</p>
                 </div>
               </div>
 
@@ -1220,7 +1220,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 block ml-2">Dirección de Destino</label>
                     <input
                       type="text"
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-5 py-4 text-white text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-5 py-4 text-main text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
                       value={address}
                       onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
                       placeholder={`bc1.. / 0x.. / @uid`}
@@ -1233,7 +1233,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
                 </div>
-                <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-tighter italic">
+                <p className="text-[10px] text-soft font-bold leading-relaxed uppercase tracking-tighter italic">
                   Verifica la integridad de la dirección. El nodo global no procesa reversiones en redes descentralizadas.
                 </p>
               </div>
@@ -1254,15 +1254,15 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Estética del Nodo</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Calibración visual de la terminal de trading</p>
+                  <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Estética del Nodo</h2>
+                  <p className="text-[10px] text-soft font-bold uppercase tracking-widest mt-1">Calibración visual de la terminal de trading</p>
                 </div>
               </div>
 
               <div className="bg-[var(--bg-main)]/50 p-10 rounded-[2.5rem] border border-white/5">
                 <div className="flex items-center justify-between mb-10">
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Ampliación de Pantalla</h4>
+                    <h4 className="text-sm font-black text-main uppercase tracking-widest">Ampliación de Pantalla</h4>
                     <p className="text-[9px] text-slate-600 font-bold uppercase mt-1 tracking-widest">Dimensiones del layout central</p>
                   </div>
                   <div className="px-4 py-2 bg-indigo-600/10 border border-indigo-500/30 rounded-full">
@@ -1301,8 +1301,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Protocolos de Alerta</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Suscripción a telemetría del sistema</p>
+                  <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Protocolos de Alerta</h2>
+                  <p className="text-[10px] text-soft font-bold uppercase tracking-widest mt-1">Suscripción a telemetría del sistema</p>
                 </div>
               </div>
 
@@ -1315,10 +1315,10 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <div key={i} className="flex items-center justify-between p-8 bg-[var(--bg-main)]/50 rounded-[2.2rem] border border-white/5 group hover:border-[#fcd535]/20 transition-all">
                     <div className="flex-1 pr-10">
                       <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-xs font-black text-white uppercase tracking-[0.1em]">{item.label}</h4>
+                        <h4 className="text-xs font-black text-main uppercase tracking-[0.1em]">{item.label}</h4>
                         {item.locked && <span className="text-[8px] font-black text-black bg-[#fcd535] px-2 py-0.5 rounded-full uppercase italic">VIP Lock</span>}
                       </div>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter leading-relaxed">{item.desc}</p>
+                      <p className="text-[10px] text-soft font-bold uppercase tracking-tighter leading-relaxed">{item.desc}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={item.state} onChange={() => !item.locked && item.setter(!item.state)} disabled={item.locked} />

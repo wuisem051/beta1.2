@@ -44,6 +44,11 @@ export const ColorPaletteProvider = ({ children }) => {
         root.style.setProperty('--bg-main', palette.bgMain);
         root.style.setProperty('--bg-sidebar', palette.bgSidebar);
         root.style.setProperty('--bg-card', palette.bgCard || 'rgba(30, 41, 59, 0.7)');
+
+        // Textos y Bordes dinámicos (CRÍTICO para contraste)
+        root.style.setProperty('--text-main', palette.textMain || '#ffffff');
+        root.style.setProperty('--text-secondary', palette.textSecondary || '#94a3b8');
+        root.style.setProperty('--border-color', palette.border || 'rgba(255, 255, 255, 0.1)');
     };
 
     // Cargar paleta desde Firebase

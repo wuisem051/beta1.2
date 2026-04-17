@@ -10,12 +10,12 @@ export const ThemeProvider = ({ children }) => {
   }, [darkMode]);
 
   const theme = {
-    background: 'var(--bg-main)', // Usar variable de la paleta dinámica
-    backgroundAlt: 'var(--bg-sidebar)', // Usar variable para elementos secundarios o sidebar
-    text: darkMode ? 'text-white' : 'text-gray-900',
-    textSoft: darkMode ? 'text-gray-300' : 'text-gray-600',
+    background: 'var(--bg-main)',
+    backgroundAlt: 'var(--bg-sidebar)',
+    text: 'var(--text-main)',
+    textSoft: 'var(--text-secondary)',
     inputBackground: darkMode ? 'bg-gray-700' : 'bg-gray-50',
-    borderColor: darkMode ? 'border-gray-700' : 'border-gray-300',
+    borderColor: 'var(--border-color)',
     tableHeaderBackground: darkMode ? 'bg-gray-700' : 'bg-gray-200',
     // Añadir más estilos según sea necesario
   };

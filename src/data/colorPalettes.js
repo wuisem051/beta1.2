@@ -25,10 +25,13 @@ export const colorPalettes = {
         purple: '#8b5cf6',
         red: '#ef4444',
 
-        // Fondos
+        // Fondos y Textos
         bgMain: '#0b0e11',
         bgSidebar: '#0b0e11',
         bgCard: '#1e2329',
+        textMain: '#eaecef',
+        textSecondary: '#848e9c',
+        border: 'rgba(255, 255, 255, 0.05)',
     },
 
     ocean: {
@@ -57,6 +60,9 @@ export const colorPalettes = {
         bgMain: '#040d1a',
         bgSidebar: 'rgba(7, 20, 38, 0.95)',
         bgCard: 'rgba(15, 35, 60, 0.4)',
+        textMain: '#e0f2fe',
+        textSecondary: '#7dd3fc',
+        border: 'rgba(14, 165, 233, 0.1)',
     },
 
     forest: {
@@ -85,6 +91,9 @@ export const colorPalettes = {
         bgMain: '#02120b',
         bgSidebar: 'rgba(4, 25, 16, 0.95)',
         bgCard: 'rgba(10, 40, 25, 0.4)',
+        textMain: '#ecfdf5',
+        textSecondary: '#6ee7b7',
+        border: 'rgba(16, 185, 129, 0.1)',
     },
 
     purple: {
@@ -113,6 +122,9 @@ export const colorPalettes = {
         bgMain: '#0b0214',
         bgSidebar: 'rgba(20, 4, 38, 0.95)',
         bgCard: 'rgba(35, 15, 60, 0.4)',
+        textMain: '#faf5ff',
+        textSecondary: '#d8b4fe',
+        border: 'rgba(168, 85, 247, 0.1)',
     },
 
     gold: {
@@ -141,6 +153,9 @@ export const colorPalettes = {
         bgMain: '#09090b',
         bgSidebar: 'rgba(18, 18, 22, 0.95)',
         bgCard: 'rgba(35, 35, 40, 0.4)',
+        textMain: '#fefce8',
+        textSecondary: '#fde047',
+        border: 'rgba(234, 179, 8, 0.1)',
     },
 
     ruby: {
@@ -169,6 +184,9 @@ export const colorPalettes = {
         bgMain: '#0c0101',
         bgSidebar: 'rgba(25, 4, 4, 0.95)',
         bgCard: 'rgba(50, 10, 10, 0.4)',
+        textMain: '#fef2f2',
+        textSecondary: '#fca5a5',
+        border: 'rgba(239, 68, 68, 0.1)',
     },
 
     midnight: {
@@ -196,6 +214,9 @@ export const colorPalettes = {
         bgMain: '#0f0716',
         bgSidebar: 'rgba(24, 12, 35, 0.95)',
         bgCard: 'rgba(40, 20, 60, 0.4)',
+        textMain: '#fdf4ff',
+        textSecondary: '#f5d0fe',
+        border: 'rgba(217, 70, 239, 0.1)',
     },
 
     matrix: {
@@ -223,6 +244,9 @@ export const colorPalettes = {
         bgMain: '#000000',
         bgSidebar: 'rgba(0, 0, 0, 0.98)',
         bgCard: 'rgba(5, 40, 5, 0.6)',
+        textMain: '#4ade80',
+        textSecondary: '#16a34a',
+        border: 'rgba(34, 197, 94, 0.3)',
     },
 
     steel: {
@@ -249,34 +273,42 @@ export const colorPalettes = {
 
         bgMain: '#1e293b',
         bgSidebar: 'rgba(30, 41, 59, 0.98)',
-        bgCard: 'rgba(50, 70, 90, 0.4)',
+        bgCard: 'rgba(30, 41, 59, 0.7)',
+        textMain: '#f1f5f9',
+        textSecondary: '#94a3b8',
+        border: '#475569',
     },
 
     arctic: {
         id: 'arctic',
         name: 'Arctic Frost',
-        description: 'Limpio y claro - Modo claro de alto contraste',
+        description: 'Limpio y claro - Modo claro de alta fidelidad',
         emoji: '❄️',
 
-        accent: '#0284c7',
-        accentDark: '#0369a1',
-        accentLight: '#0ea5e9',
-        accentGlow: 'rgba(2, 132, 199, 0.1)',
+        // Color principal - Azul vibrante para modo claro
+        accent: '#3b82f6',
+        accentDark: '#2563eb',
+        accentLight: '#60a5fa',
+        accentGlow: 'rgba(59, 130, 246, 0.1)',
 
-        gradientAccent: 'linear-gradient(135deg, #0284c7, #0369a1)',
+        gradientAccent: 'linear-gradient(135deg, #3b82f6, #2563eb)',
         gradientBlue: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
         gradientGreen: 'linear-gradient(135deg, #10b981, #059669)',
-        gradientPurple: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+        gradientPurple: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
         gradientRed: 'linear-gradient(135deg, #ef4444, #dc2626)',
 
-        blue: '#0ea5e9',
+        blue: '#3b82f6',
         green: '#10b981',
-        purple: '#6366f1',
+        purple: '#8b5cf6',
         red: '#ef4444',
 
-        bgMain: '#f8fafc',
-        bgSidebar: 'rgba(255, 255, 255, 0.98)',
-        bgCard: 'rgba(255, 255, 255, 0.7)',
+        // Fondos Claros (Reestructurados)
+        bgMain: '#f1f5f9', // Slate 100
+        bgSidebar: '#ffffff', // Pure White
+        bgCard: '#ffffff', // Pure White
+        textMain: '#0f172a', // Slate 900
+        textSecondary: '#64748b', // Slate 500
+        border: '#e2e8f0', // Slate 200
     },
 
     emerald_night: {
@@ -304,6 +336,9 @@ export const colorPalettes = {
         bgMain: '#022c22',
         bgSidebar: 'rgba(6, 78, 59, 0.98)',
         bgCard: 'rgba(10, 80, 60, 0.4)',
+        textMain: '#ecfdf5',
+        textSecondary: '#6ee7b7',
+        border: 'rgba(16, 185, 129, 0.2)',
     },
 
     carbon: {
@@ -330,7 +365,10 @@ export const colorPalettes = {
 
         bgMain: '#0a0a0a',
         bgSidebar: 'rgba(18, 18, 18, 0.98)',
-        bgCard: 'rgba(40, 40, 40, 0.4)',
+        bgCard: 'rgba(30, 30, 30, 0.6)',
+        textMain: '#ffffff',
+        textSecondary: '#a3a3a3',
+        border: '#262626',
     },
 };
 

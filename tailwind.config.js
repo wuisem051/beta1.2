@@ -21,6 +21,14 @@ module.exports = {
         gray_text: '#6B7280', // Texto gris
         blue_link: '#3B82F6', // Azul para enlaces/botones
         red_error: '#EF4444', // Rojo para errores
+
+        // Sistema Dinámico de Paletas (NUEVO)
+        main: 'var(--text-main)',
+        soft: 'var(--text-secondary)',
+        'bg-dynamic': 'var(--bg-main)',
+        'sidebar-dynamic': 'var(--bg-sidebar)',
+        'card-dynamic': 'var(--bg-card)',
+        'border-dynamic': 'var(--border-color)',
       }
     },
   },

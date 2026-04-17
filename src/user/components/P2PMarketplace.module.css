@@ -9,8 +9,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .marketplaceHeader {
@@ -26,7 +33,7 @@
 .tabSwitcher {
     display: flex;
     gap: 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.5rem;
 }
 
@@ -41,7 +48,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-    color: #64748b;
+    color: var(--text-soft);
 }
 
 .tabButtonActiveBuy {
@@ -93,7 +100,7 @@
 .assetPill {
     padding: 0.6rem 1.25rem;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     border-radius: 1rem;
     color: #94a3b8;
     font-weight: 800;
@@ -123,10 +130,10 @@
     display: grid;
     grid-template-cols: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
-    background: #1e2329;
+    background: var(--bg-card);
     padding: 1.5rem 2rem;
     border-radius: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     margin-bottom: 2rem;
     align-items: center;
 }
@@ -145,8 +152,9 @@
     letter-spacing: 0.1em;
 }
 
-.filterInput, .filterSelect {
-    background: #0b0e11;
+.filterInput,
+.filterSelect {
+    background: var(--bg-main);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
     padding: 0.75rem 1rem;
@@ -163,9 +171,9 @@
 
 /* Offers Table Area */
 .offersSection {
-    background: #1e2329;
+    background: var(--bg-card);
     border-radius: 2.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
@@ -177,12 +185,12 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .tableRow {
     padding: 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     transition: background 0.2s;
 }
 
@@ -206,7 +214,7 @@
     align-items: center;
     justify-content: center;
     color: #475569;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .advertiserName {
@@ -220,7 +228,7 @@
 
 .trustMetrics {
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--text-soft);
     font-weight: 700;
     margin-top: 0.25rem;
 }
@@ -245,7 +253,7 @@
     gap: 0.5rem;
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-soft);
     font-weight: 700;
 }
 
@@ -273,9 +281,17 @@
     border-left: 3px solid transparent;
 }
 
-.paymentTag[data-method="Binance Pay"] { border-left-color: #fcd535; }
-.paymentTag[data-method="Pago Móvil"] { border-left-color: #ef4444; }
-.paymentTag[data-method="Zelle"] { border-left-color: #6d28d9; }
+.paymentTag[data-method="Binance Pay"] {
+    border-left-color: #fcd535;
+}
+
+.paymentTag[data-method="Pago Móvil"] {
+    border-left-color: #ef4444;
+}
+
+.paymentTag[data-method="Zelle"] {
+    border-left-color: #6d28d9;
+}
 
 /* Buttons */
 .buyButtonBinance {
@@ -352,10 +368,20 @@
 }
 
 @media (max-width: 1024px) {
-    .hideMobile { display: none; }
-    .tableRow { grid-template-columns: 1fr 1fr; gap: 1rem; display: grid; }
+    .hideMobile {
+        display: none;
+    }
+
+    .tableRow {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        display: grid;
+    }
 }
 
 @media (max-width: 640px) {
-    .marketplaceHeader { flex-direction: column; align-items: stretch; }
+    .marketplaceHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

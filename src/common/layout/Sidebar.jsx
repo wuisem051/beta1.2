@@ -47,7 +47,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
       onClick={onClick}
       className={`flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 group ${isActive
         ? 'text-[var(--accent)]'
-        : 'text-slate-400 hover:text-white'
+        : 'text-soft hover:text-main'
         }`}
       style={isActive ? { backgroundColor: 'var(--bg-card)' } : {}}
     >
@@ -62,16 +62,16 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
   const CollapsibleHeader = ({ icon, label, isOpen, onClick }) => (
     <button
       onClick={onClick}
-      className={`w-full flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white group`}
+      className={`w-full flex items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 text-soft hover:text-main group`}
       style={{ ':hover': { backgroundColor: 'var(--bg-card)' } }}
       onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-card)'}
       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
     >
-      <span className="mr-3 text-sm text-slate-500 group-hover:text-white">
+      <span className="mr-3 text-sm text-soft group-hover:text-main">
         {icon}
       </span>
       {label}
-      <span className="ml-auto text-[10px] text-slate-500">
+      <span className="ml-auto text-[10px] text-soft">
         {isOpen ? <FaChevronUp /> : <FaChevronDown />}
       </span>
     </button>
@@ -79,7 +79,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
 
   return (
     <aside
-      className={`shadow-xl border-r border-white border-opacity-5 flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
+      className={`shadow-xl border-r border-dynamic flex flex-col transition-all duration-300 ease-in-out ${isHidden ? 'w-0 p-0 border-r-0 opacity-0 -translate-x-full' : 'w-64 opacity-100 translate-x-0'}`}
       style={{
         background: 'var(--bg-sidebar)',
         position: 'fixed',
@@ -87,12 +87,11 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
         left: 0,
         bottom: 0,
         zIndex: 110,
-        overflow: 'hidden',
         padding: isHidden ? '0' : '1rem 0.75rem'
       }}
     >
       {/* Header Profile Section */}
-      <div className="flex items-center gap-3 px-3 pb-6 mb-4 border-b border-white border-opacity-5 mt-2">
+      <div className="flex items-center gap-3 px-3 pb-6 mb-4 border-b border-dynamic mt-2">
         <div className="w-10 h-10 rounded-full bg-[#fcd535] flex items-center justify-center overflow-hidden border-2 border-[#2b3139] relative shrink-0">
           {displayUser?.profilePhotoUrl ? (
             <img src={displayUser.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -101,7 +100,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
           )}
         </div>
         <div className="min-w-0">
-          <h2 className="text-xs font-black truncate text-white uppercase tracking-tighter">
+          <h2 className="text-xs font-black truncate text-main uppercase tracking-tighter">
             {displayUser?.displayName || displayUser?.username || 'Usuario'}
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -208,7 +207,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             />
           )}
 
-          <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">SISTEMA</div>
+          <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-soft">SISTEMA</div>
 
           {/* Soporte Section */}
           <div className="space-y-1">
@@ -246,15 +245,15 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
       </nav>
 
       {/* Footer ID Section */}
-      <div className="mt-4 pt-4 border-t border-white border-opacity-5">
-        <div className="bg-white bg-opacity-5 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/10 transition-all cursor-pointer">
+      <div className="mt-4 pt-4 border-t border-dynamic">
+        <div className="bg-dynamic bg-opacity-5 rounded-2xl p-4 flex items-center justify-between group hover:bg-main/5 transition-all cursor-pointer">
           <div>
-            <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Tu ID Único</p>
-            <p className="text-[10px] font-black text-white leading-none font-mono">
+            <p className="text-[9px] text-soft font-black uppercase tracking-widest leading-none mb-1">Tu ID Único</p>
+            <p className="text-[10px] font-black text-main leading-none font-mono">
               {displayUser?.uid?.substring(0, 10).toUpperCase()}
             </p>
           </div>
-          <FaShieldAlt className="text-slate-600 group-hover:text-[#fcd535] transition-colors" />
+          <FaShieldAlt className="text-soft group-hover:text-[#fcd535] transition-colors" />
         </div>
       </div>
     </aside>

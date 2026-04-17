@@ -48,20 +48,20 @@
   --gradient-red: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
-/* Estilos base para el cuerpo */
+/* Estilos base para el cuerpo - Usan las variables de la paleta dinámica */
 body {
   font-family: 'Inter', sans-serif;
-  /* Por defecto, usa el tema claro */
-  background-color: var(--light-bg);
-  color: var(--dark-text);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
   width: 100%;
 }
 
-/* Aplicar estilos del modo oscuro cuando la clase 'dark' está en el body */
+/* El modo oscuro ahora también respeta la paleta dinámica si está activa */
 body.dark {
-  background-color: var(--binance-bg);
-  color: var(--binance-text);
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
 /* Scrollbar Style Binance */
