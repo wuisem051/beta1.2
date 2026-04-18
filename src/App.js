@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react'; // Importar lazy y Suspense
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import Header from './common/layout/Header';
+import TopNav from './common/layout/TopNav';
 import Footer from './common/layout/Footer';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
@@ -78,8 +79,8 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header solo visible en páginas públicas; el UserPanel tiene su propio TopNav */}
-      {!isUserPanel && <Header />}
+      {/* TopNav es global ahora, pero el UserPanel maneja una versión más específica para el dashboard si se desea, aunque ahora usarán la misma */}
+      {!isUserPanel && <TopNav />}
       <main className="flex-grow">
         <ColorPaletteProvider>
           <Suspense fallback={<Loader text="Iniciando Plataforma..." />}>
