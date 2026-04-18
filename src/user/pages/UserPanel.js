@@ -16,7 +16,7 @@ import WalletHub from '../components/WalletHub'; // Importar WalletHub unificado
 import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
 import ExchangeContent from '../components/ExchangeContent'; // Importar ExchangeContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
-import Sidebar from '../../common/layout/Sidebar'; // Importar Sidebar
+import TopNav from '../../common/layout/TopNav'; // TopNav Bitunix-style
 import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
@@ -1710,46 +1710,18 @@ const UserPanel = () => {
 
   return (
     <div className={`${styles.userPanelContainer} w-full overflow-hidden`} style={{ backgroundColor: 'var(--bg-main)' }}>
-      {!isP2PPage && (
-        <Sidebar
-          unreadTicketsCount={unreadTicketsCount}
-          displayUser={displayUser}
-          isHidden={isSidebarHidden}
-          siteSettings={siteSettings}
-        />
-      )}
+      {/* Bitunix-style Top Navigation */}
+      <TopNav
+        displayUser={displayUser}
+        unreadTicketsCount={unreadTicketsCount}
+        siteSettings={siteSettings}
+      />
       <MainContent style={{
-        paddingLeft: actualSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
+        paddingTop: '60px',
+        paddingLeft: '0',
         width: '100%',
         boxSizing: 'border-box',
-        transition: 'padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
-        {/* Toggle Sidebar Button - Modern & Floating */}
-        {!isP2PPage && (
-          <button
-            onClick={() => setIsSidebarHidden(!isSidebarHidden)}
-            className={`fixed top-24 z-[100] p-2 bg-slate-800/80 backdrop-blur-xl border border-white/10 rounded-r-xl shadow-2xl transition-all duration-300 hover:bg-blue-600 group ${isSidebarHidden ? 'left-0' : 'left-64'}`}
-            title={isSidebarHidden ? 'Mostrar barra lateral' : 'Ocultar barra lateral'}
-            style={{
-              left: isSidebarHidden ? '0' : '16rem',
-              transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s'
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20" height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`transition-transform duration-500 ${isSidebarHidden ? '' : 'rotate-180'}`}
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        )}
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>

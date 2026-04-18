@@ -1,0 +1,524 @@
+/* ============================================================
+   TopNav.css — Bitunix-style Top Navigation Bar
+   ============================================================ */
+
+/* ---- Base nav bar ---- */
+.topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #0b0e11;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    height: 60px;
+}
+
+.topnav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 1.5rem;
+    max-width: 100%;
+}
+
+/* ---- Logo ---- */
+.topnav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+    letter-spacing: -0.03em;
+    transition: opacity 0.2s;
+}
+
+.topnav-logo:hover {
+    opacity: 0.85;
+}
+
+.topnav-logo-icon {
+    width: 24px;
+    height: 24px;
+    background-color: var(--accent, #f0b90b);
+    border-radius: 5px;
+    transform: rotate(45deg);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.topnav-logo-icon::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    background: #0b0e11;
+    border-radius: 2px;
+}
+
+/* ---- Left section ---- */
+.topnav-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.topnav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    overflow: hidden;
+}
+
+/* ---- Nav links ---- */
+.topnav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #848e9c;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: color 0.18s, background-color 0.18s;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.topnav-link:hover,
+.topnav-link-wrap:hover>.topnav-link {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.topnav-link.active {
+    color: var(--accent, #f0b90b);
+    background-color: rgba(240, 185, 11, 0.08);
+}
+
+.topnav-link-wrap {
+    position: relative;
+}
+
+.topnav-link-icon {
+    font-size: 0.78rem;
+    opacity: 0.7;
+}
+
+.topnav-fire {
+    color: #f6465d;
+    font-size: 0.72rem;
+    margin-left: 0.1rem;
+}
+
+.topnav-chevron {
+    font-size: 0.62rem;
+    margin-left: 0.15rem;
+    transition: transform 0.2s;
+    opacity: 0.6;
+}
+
+.topnav-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+/* ---- Dropdown ---- */
+.topnav-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 240px;
+    background: #1a1d23;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 0.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    animation: dropdownIn 0.15s ease;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.topnav-dropdown-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #c9d1d9;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background-color 0.15s, color 0.15s;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.topnav-dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.topnav-dropdown-icon {
+    font-size: 0.85rem;
+    color: var(--accent, #f0b90b);
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.topnav-dropdown-label {
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.2;
+}
+
+.topnav-dropdown-desc {
+    font-size: 0.7rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: 0.1rem;
+}
+
+.topnav-dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 0.4rem 0.9rem;
+}
+
+/* ---- Right section ---- */
+.topnav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+/* ---- Icon buttons ---- */
+.topnav-icon-btn {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: #848e9c;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.18s, background-color 0.18s;
+}
+
+.topnav-icon-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.topnav-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    background: #f6465d;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+}
+
+/* ---- Profile button ---- */
+.topnav-profile-wrap {
+    position: relative;
+}
+
+.topnav-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.65rem 0.35rem 0.35rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    cursor: pointer;
+    transition: background-color 0.18s;
+}
+
+.topnav-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.topnav-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--accent, #f0b90b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 1rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.topnav-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.topnav-profile-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.topnav-profile-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topnav-profile-level {
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: var(--accent, #f0b90b);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+}
+
+/* ---- Profile dropdown ---- */
+.topnav-profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 260px;
+    background: #1a1d23;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 0.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    animation: dropdownIn 0.15s ease;
+}
+
+.topnav-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+}
+
+.topnav-profile-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--accent, #f0b90b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    border: 2px solid rgba(240, 185, 11, 0.3);
+}
+
+.topnav-profile-header-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.topnav-profile-header-name {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.topnav-profile-header-id {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.1rem;
+    font-family: monospace;
+}
+
+.topnav-vip-badge {
+    margin-left: auto;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: rgba(255, 255, 255, 0.06);
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.topnav-vip-badge.vip {
+    background: rgba(240, 185, 11, 0.15);
+    color: var(--accent, #f0b90b);
+}
+
+/* ---- Logout button ---- */
+.topnav-logout {
+    color: #f6465d !important;
+}
+
+.topnav-logout:hover {
+    background-color: rgba(246, 70, 93, 0.08) !important;
+}
+
+/* ---- Hamburger (mobile only) ---- */
+.topnav-hamburger {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: #848e9c;
+    font-size: 1.1rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.18s;
+}
+
+.topnav-hamburger:hover {
+    color: #fff;
+}
+
+/* ---- Mobile Drawer ---- */
+.topnav-mobile-drawer {
+    display: flex;
+    flex-direction: column;
+    background: #0f1318;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.5rem 1rem 1rem;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    animation: drawerIn 0.2s ease;
+}
+
+@keyframes drawerIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.topnav-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.75rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #c9d1d9;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.topnav-mobile-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.topnav-mobile-sub {
+    padding-left: 2.5rem;
+    font-size: 0.78rem;
+    color: #6b7280;
+}
+
+.topnav-mobile-logout {
+    color: #f6465d;
+    margin-top: 0.5rem;
+}
+
+/* ---- Responsive breakpoints ---- */
+@media (max-width: 1100px) {
+    .topnav-links>*:not(:first-child):not(:nth-child(2)):not(:nth-child(3)) {
+        display: none;
+    }
+}
+
+@media (max-width: 860px) {
+    .topnav-links {
+        display: none;
+    }
+
+    .topnav-hamburger {
+        display: flex;
+    }
+
+    .topnav-icon-btn {
+        display: none;
+    }
+
+    .topnav-profile-name,
+    .topnav-profile-level,
+    .topnav-profile-info {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+    .topnav-inner {
+        padding: 0 1rem;
+    }
+}
