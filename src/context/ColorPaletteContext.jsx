@@ -59,13 +59,13 @@ export const ColorPaletteProvider = ({ children }) => {
             (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const paletteId = data.activePalette || 'sunset';
+                    const paletteId = data.activePalette || 'bitunix';
                     const palette = getPaletteById(paletteId);
                     setActivePalette(palette);
                     applyCSSVariables(palette);
                 } else {
                     // Si no existe, crear con paleta por defecto
-                    setDoc(settingsRef, { activePalette: 'sunset' }, { merge: true });
+                    setDoc(settingsRef, { activePalette: 'bitunix' }, { merge: true });
                     applyCSSVariables(defaultPalette);
                 }
                 setLoading(false);

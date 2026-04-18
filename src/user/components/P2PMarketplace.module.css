@@ -1,4 +1,4 @@
-/* P2P Marketplace Binance-Style Premium Styles */
+/* P2P Marketplace Bitunix-Style Premium Styles */
 
 .marketplaceContainer {
     padding: 2rem 1.5rem;
@@ -6,6 +6,7 @@
     margin: 0 auto;
     min-height: 100vh;
     animation: fadeIn 0.6s ease-out;
+    background-color: #000;
 }
 
 @keyframes fadeIn {
@@ -22,180 +23,213 @@
 
 .marketplaceHeader {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    flex-direction: column;
     margin-bottom: 2.5rem;
-    gap: 2rem;
-    flex-wrap: wrap;
+    gap: 1.5rem;
 }
 
-/* Buy/Sell Tab Switcher */
+/* Buy/Sell Tab Switcher - Bitunix Style */
 .tabSwitcher {
     display: flex;
-    gap: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
+    gap: 3rem;
+    margin-bottom: 1rem;
 }
 
 .tabButton {
     background: none;
     border: none;
-    padding: 1rem 0;
-    font-size: 1.25rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    padding: 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-    color: var(--text-soft);
+    color: #fff;
+    opacity: 0.4;
 }
 
-.tabButtonActiveBuy {
-    color: #10b981;
-}
-
-.tabButtonActiveBuy::after {
-    content: '';
-    position: absolute;
-    bottom: -0.5rem;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #10b981;
-    border-radius: 99px;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-}
-
+.tabButtonActiveBuy,
 .tabButtonActiveSell {
-    color: #f43f5e;
+    opacity: 1;
 }
 
+.tabButtonActiveBuy::after,
 .tabButtonActiveSell::after {
     content: '';
     position: absolute;
-    bottom: -0.5rem;
+    bottom: -0.2rem;
     left: 0;
-    right: 0;
-    height: 3px;
-    background: #f43f5e;
+    width: 60%;
+    height: 4px;
+    background: var(--accent);
     border-radius: 99px;
-    box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
 }
 
-/* Asset Pills */
+/* Asset List - Bitunix Style */
 .assetList {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
-}
-
-.assetList::-webkit-scrollbar {
-    display: none;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    align-items: center;
 }
 
 .assetPill {
-    padding: 0.6rem 1.25rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
-    border-radius: 1rem;
-    color: #94a3b8;
-    font-weight: 800;
-    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    background: #14151a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    color: #848e9c;
+    font-weight: 700;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    white-space: nowrap;
-}
-
-.assetPill:hover {
-    background: rgba(255, 255, 255, 0.07);
-    color: white;
 }
 
 .assetPillActive {
-    background: #fcd535 !important;
-    color: #000 !important;
-    border-color: #fcd535;
-    box-shadow: 0 4px 15px rgba(252, 213, 53, 0.2);
+    color: #fff;
+    border-color: var(--accent);
 }
 
-/* Filter Bar */
+/* Filter Bar - Bitunix Style */
 .filterBar {
-    display: grid;
-    grid-template-cols: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    background: var(--bg-card);
-    padding: 1.5rem 2rem;
-    border-radius: 2rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-    align-items: center;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
 }
 
 .filterGroup {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-}
-
-.filterLabel {
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
 }
 
 .filterInput,
 .filterSelect {
-    background: var(--bg-main);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 0.75rem 1rem;
+    background: #14151a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    padding: 0.8rem 1.2rem;
     color: white;
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.9rem;
+    font-weight: 600;
     outline: none;
-    transition: border-color 0.2s;
+    min-width: 150px;
 }
 
-.filterInput:focus {
-    border-color: #fcd535;
-}
-
-/* Offers Table Area */
+/* Offers Table - Bitunix Style */
 .offersSection {
-    background: var(--bg-card);
-    border-radius: 2.5rem;
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    width: 100%;
 }
 
 .tableHeader {
-    padding: 1.25rem 2rem;
-    color: #475569;
-    font-size: 0.7rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-bottom: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: 2.5fr 2fr 2fr 2fr 1.5fr;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #5e6673;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .tableRow {
-    padding: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s;
+    display: grid;
+    grid-template-columns: 2.5fr 2fr 2fr 2fr 1.5fr;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
 }
 
-.tableRow:hover {
-    background: rgba(255, 255, 255, 0.01);
+/* Tutorial Section: ¿Cómo utilizar el comercio P2P? */
+.howToSection {
+    margin-top: 6rem;
+    text-align: center;
+    padding-bottom: 6rem;
+}
+
+.howToTitle {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 3rem;
+}
+
+.howToTabs {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.howToTab {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    opacity: 0.4;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.howToTabActive {
+    opacity: 1;
+}
+
+.howToTabActive::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 99px;
+}
+
+.stepsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stepCard {
+    background: #14151a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.stepCard:hover {
+    border-color: var(--accent);
+}
+
+.stepIcon {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 2rem;
+}
+
+.stepTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.stepDescription {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #848e9c;
+    font-weight: 500;
 }
 
 /* Advertiser Info */
@@ -206,182 +240,430 @@
 }
 
 .avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: #2b3139;
+    width: 2.8rem;
+    height: 2.8rem;
+    background: #f0b90b;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #475569;
-    border: 1px solid var(--border-color);
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.2rem;
 }
 
 .advertiserName {
-    font-size: 1rem;
-    font-weight: 900;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    margin-bottom: 0.2rem;
 }
 
 .trustMetrics {
-    font-size: 0.7rem;
-    color: var(--text-soft);
-    font-weight: 700;
-    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #5e6673;
 }
 
-/* Price & Limits */
+/* Price */
 .priceText {
-    font-size: 1.5rem;
-    font-weight: 900;
+    font-size: 1.6rem;
+    font-weight: 700;
     color: white;
-    font-style: italic;
-    letter-spacing: -0.02em;
 }
 
 .fiatUnit {
-    font-size: 0.75rem;
-    color: #475569;
-    margin-left: 0.25rem;
+    font-size: 1rem;
+    margin-left: 0.3rem;
 }
 
+/* Limits */
 .limitRow {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--text-soft);
-    font-weight: 700;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.4rem;
 }
 
 .limitValue {
-    color: #94a3b8;
+    color: #5e6673;
+    font-size: 0.85rem;
+    display: block;
 }
 
 /* Payment Methods */
 .paymentList {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.8rem;
 }
 
 .paymentTag {
+    width: 1.8rem;
+    height: 1.8rem;
+    background: #1e2329;
+    border-radius: 0.4rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.75rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 0.5rem;
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: #94a3b8;
-    border-left: 3px solid transparent;
-}
-
-.paymentTag[data-method="Binance Pay"] {
-    border-left-color: #fcd535;
-}
-
-.paymentTag[data-method="Pago Móvil"] {
-    border-left-color: #ef4444;
-}
-
-.paymentTag[data-method="Zelle"] {
-    border-left-color: #6d28d9;
+    justify-content: center;
+    overflow: hidden;
 }
 
 /* Buttons */
 .buyButtonBinance {
-    padding: 0.75rem 2rem;
-    background: #10b981;
-    color: white;
+    padding: 0.8rem 2.2rem;
+    background: var(--accent);
+    color: #000;
     border: none;
-    border-radius: 1rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    font-size: 0.75rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.15);
 }
 
 .buyButtonBinance:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.25);
+    background: var(--accent-hover);
 }
 
 .sellButtonBinance {
-    padding: 0.75rem 2rem;
-    background: #f43f5e;
+    padding: 0.8rem 2.2rem;
+    background: #f6465d;
     color: white;
     border: none;
-    border-radius: 1rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    font-size: 0.75rem;
+    border-radius: 2rem;
+    font-weight: 700;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 10px 20px rgba(244, 63, 94, 0.15);
-}
-
-.sellButtonBinance:hover {
-    background: #e11d48;
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(244, 63, 94, 0.25);
 }
 
 .publishButton {
-    background: #2b3139;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 900;
-    text-transform: uppercase;
+    background: var(--accent);
+    color: #000;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    transition: all 0.2s;
+    gap: 1rem;
 }
 
-.publishButton:hover {
-    background: #3a414b;
-    border-color: #fcd535;
-}
-
-/* Modal Styling Overrides */
-.binanceModal {
-    background: #1e2329 !important;
-    border-radius: 2.5rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding: 0 !important;
-    overflow: hidden;
-}
-
-.modalInner {
-    padding: 2.5rem;
+.supportBubble {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    z-index: 1000;
 }
 
 @media (max-width: 1024px) {
-    .hideMobile {
+    .tableHeader {
         display: none;
     }
 
     .tableRow {
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 2rem 0;
     }
+
+    .paymentList {
+        justify-content: flex-start;
+    }
+
+    .stepsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+.faqSection {
+    max-width: 1200px;
+    margin: 4rem auto 8rem;
+    text-align: left;
+    padding: 0 1rem;
 }
 
-@media (max-width: 640px) {
-    .marketplaceHeader {
-        flex-direction: column;
-        align-items: stretch;
-    }
+.faqTitle {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4rem;
 }
+
+.faqItem {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2.5rem 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.faqItem:hover {
+    color: var(--accent);
+}
+
+.faqQuestion {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.faqItem:hover .faqQuestion {
+    color: var(--accent);
+}
+
+.faqIcon {
+    font-size: 1.5rem;
+    color: #fff;
+    opacity: 0.5;
+}
+
+
+/* Profile Section */
+.profileContainer {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.profileAvatar {
+    width: 5rem;
+    height: 5rem;
+    background: #2b3b24;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #3d5a2d;
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.profileEmail {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.userBadge {
+    background: var(--accent);
+    color: #000;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.uidText {
+    font-size: 0.9rem;
+    color: #848e9c;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.8;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.statCard {
+    background: #14151a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 2.5rem;
+}
+
+.statTitle {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 2rem;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.statLabelSub {
+    color: #848e9c;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statBar {
+    width: 3px;
+    height: 12px;
+    border-radius: 10px;
+}
+
+.barGreen { background: #2ebd85; }
+.barRed { background: #f6465d; }
+
+.statDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 1.5rem 0;
+}
+
+
+/* Orders Section */
+.ordersContainer {
+    display: flex;
+    gap: 2rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.ordersSidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebarOrderItem {
+    padding: 1rem 1.5rem;
+    border-radius: 0.8rem;
+    color: #848e9c;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sidebarOrderItem:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebarOrderActive {
+    background: #1e2026;
+    color: #fff;
+}
+
+.ordersMainContent {
+    flex: 1;
+}
+
+.ordersTabs {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+}
+
+.orderTab {
+    padding: 1rem 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #848e9c;
+    position: relative;
+    cursor: pointer;
+}
+
+.orderTabActive {
+    color: #fff;
+}
+
+.orderTabActive::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.ordersFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.filterBox {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filterLabel {
+    color: #848e9c;
+    font-size: 0.85rem;
+}
+
+.ordersTable {
+    width: 100%;
+}
+
+.ordersTableHeader {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1fr;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #848e9c;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.noOrders {
+    padding: 5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.4;
+    gap: 1.5rem;
+}
+
+.noOrdersText {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+

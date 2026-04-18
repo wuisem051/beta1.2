@@ -175,8 +175,8 @@ const CryptoMarketMonitor = () => {
     const getSortIcon = (key) => {
         if (sortConfig.key !== key) return <FaSort className="text-slate-600" />;
         return sortConfig.direction === 'asc'
-            ? <FaSortUp className="text-[#fcd535]" />
-            : <FaSortDown className="text-[#fcd535]" />;
+            ? <FaSortUp className="text-[var(--accent)]" />
+            : <FaSortDown className="text-[var(--accent)]" />;
     };
 
     // Filtrado y ordenamiento
@@ -237,7 +237,7 @@ const CryptoMarketMonitor = () => {
                     </p>
                 </div>
                 <div className="px-10 py-16 text-center">
-                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#fcd535] border-t-transparent mb-4"></div>
+                    <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[var(--accent)] border-t-transparent mb-4"></div>
                     <p className="text-slate-500 font-black uppercase text-[9px] tracking-widest animate-pulse">
                         Sincronizando datos del mercado...
                     </p>
@@ -256,7 +256,7 @@ const CryptoMarketMonitor = () => {
                     <p className="text-rose-500 font-bold mb-4">Error: {error}</p>
                     <button
                         onClick={fetchCryptoData}
-                        className="px-6 py-3 bg-[#fcd535] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all"
+                        className="px-6 py-3 bg-[var(--accent)] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all"
                     >
                         Reintentar
                     </button>
@@ -287,7 +287,7 @@ const CryptoMarketMonitor = () => {
                                     placeholder="Buscar criptomoneda..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl pl-12 pr-4 py-2.5 text-white text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all"
+                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl pl-12 pr-4 py-2.5 text-white text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all"
                                 />
                                 {searchTerm && (
                                     <button
@@ -304,14 +304,14 @@ const CryptoMarketMonitor = () => {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`p-2.5 rounded-xl transition-all ${showFilters ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-2.5 rounded-xl transition-all ${showFilters ? 'bg-[var(--accent)] text-black' : 'bg-[var(--bg-main)] text-[var(--accent)] hover:bg-[var(--accent)]/10'}`}
                                 title="Filtros"
                             >
                                 <FaFilter size={14} />
                             </button>
                             <button
                                 onClick={() => setCompareMode(!compareMode)}
-                                className={`p-2.5 rounded-xl transition-all ${compareMode ? 'bg-[#fcd535] text-black' : 'bg-[var(--bg-main)] text-[#fcd535] hover:bg-[#fcd535]/10'}`}
+                                className={`p-2.5 rounded-xl transition-all ${compareMode ? 'bg-[var(--accent)] text-black' : 'bg-[var(--bg-main)] text-[var(--accent)] hover:bg-[var(--accent)]/10'}`}
                                 title="Modo Comparación"
                             >
                                 <FaExchangeAlt size={14} />
@@ -319,7 +319,7 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={fetchCryptoData}
                                 disabled={loading}
-                                className="p-2.5 bg-[var(--bg-main)] text-[#fcd535] rounded-xl hover:bg-[#fcd535]/10 transition-all disabled:opacity-50"
+                                className="p-2.5 bg-[var(--bg-main)] text-[var(--accent)] rounded-xl hover:bg-[var(--accent)]/10 transition-all disabled:opacity-50"
                                 title="Actualizar datos"
                             >
                                 <FaSync size={14} className={loading ? 'animate-spin' : ''} />
@@ -333,7 +333,7 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('all')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'all'
-                                    ? 'bg-[#fcd535] text-black'
+                                    ? 'bg-[var(--accent)] text-black'
                                     : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
@@ -342,7 +342,7 @@ const CryptoMarketMonitor = () => {
                             <button
                                 onClick={() => setFilter('favorites')}
                                 className={`px-5 py-2 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${filter === 'favorites'
-                                    ? 'bg-[#fcd535] text-black'
+                                    ? 'bg-[var(--accent)] text-black'
                                     : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
@@ -384,11 +384,11 @@ const CryptoMarketMonitor = () => {
 
                 {/* Comparison Mode Banner */}
                 {compareMode && (
-                    <div className="px-10 py-4 bg-[#fcd535]/10 border-b border-[#fcd535]/20">
+                    <div className="px-10 py-4 bg-[var(--accent)]/10 border-b border-[var(--accent)]/20">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <FaExchangeAlt className="text-[#fcd535]" />
-                                <p className="text-xs font-bold text-[#fcd535]">
+                                <FaExchangeAlt className="text-[var(--accent)]" />
+                                <p className="text-xs font-bold text-[var(--accent)]">
                                     Modo Comparación Activo - Selecciona hasta 3 criptomonedas ({compareList.length}/3)
                                 </p>
                             </div>
@@ -426,42 +426,42 @@ const CryptoMarketMonitor = () => {
                         <thead className="bg-[var(--bg-main)]">
                             <tr className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
                                 <th className="px-4 py-3 text-center w-12">★</th>
-                                <th className="px-2 py-3 text-center w-14 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap_rank')}>
+                                <th className="px-2 py-3 text-center w-14 cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('market_cap_rank')}>
                                     <div className="flex items-center justify-center gap-2">
                                         # {getSortIcon('market_cap_rank')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('name')}>
+                                <th className="px-4 py-3 cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('name')}>
                                     <div className="flex items-center gap-2">
                                         Activo {getSortIcon('name')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('current_price')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('current_price')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Precio (USD) {getSortIcon('current_price')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_1h_in_currency')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('price_change_percentage_1h_in_currency')}>
                                     <div className="flex items-center justify-end gap-2">
                                         1h % {getSortIcon('price_change_percentage_1h_in_currency')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_24h')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('price_change_percentage_24h')}>
                                     <div className="flex items-center justify-end gap-2">
                                         24h % {getSortIcon('price_change_percentage_24h')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('price_change_percentage_7d_in_currency')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('price_change_percentage_7d_in_currency')}>
                                     <div className="flex items-center justify-end gap-2">
                                         7d % {getSortIcon('price_change_percentage_7d_in_currency')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('market_cap')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('market_cap')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Cap. Mercado {getSortIcon('market_cap')}
                                     </div>
                                 </th>
-                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[#fcd535] transition-colors" onClick={() => handleSort('total_volume')}>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:text-[var(--accent)] transition-colors" onClick={() => handleSort('total_volume')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Volumen 24h {getSortIcon('total_volume')}
                                     </div>
@@ -489,15 +489,15 @@ const CryptoMarketMonitor = () => {
                                     return (
                                         <tr
                                             key={crypto.id}
-                                            className={`hover:bg-white/[0.02] transition-all cursor-pointer group ${isComparing ? 'bg-[#fcd535]/5' : ''}`}
+                                            className={`hover:bg-white/[0.02] transition-all cursor-pointer group ${isComparing ? 'bg-[var(--accent)]/5' : ''}`}
                                         >
                                             <td className="px-4 py-3 text-center">
                                                 <button
                                                     onClick={() => toggleFavorite(crypto.id)}
-                                                    className="text-slate-600 hover:text-[#fcd535] transition-colors"
+                                                    className="text-slate-600 hover:text-[var(--accent)] transition-colors"
                                                 >
                                                     {favorites.includes(crypto.id) ? (
-                                                        <FaStar className="text-[#fcd535]" size={14} />
+                                                        <FaStar className="text-[var(--accent)]" size={14} />
                                                     ) : (
                                                         <FaRegStar size={14} />
                                                     )}
@@ -582,7 +582,7 @@ const CryptoMarketMonitor = () => {
                                                             onClick={() => toggleCompare(crypto)}
                                                             disabled={!isComparing && compareList.length >= 3}
                                                             className={`p-1.5 rounded-lg transition-all ${isComparing
-                                                                ? 'bg-[#fcd535] text-black'
+                                                                ? 'bg-[var(--accent)] text-black'
                                                                 : 'bg-[var(--bg-main)] text-slate-400 hover:text-white disabled:opacity-30'
                                                                 }`}
                                                             title={isComparing ? 'Quitar de comparación' : 'Agregar a comparación'}
@@ -760,14 +760,14 @@ const CryptoMarketMonitor = () => {
                                     value={alertPrice}
                                     onChange={(e) => setAlertPrice(e.target.value)}
                                     placeholder="Ej: 50000.00"
-                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-[#fcd535]/30 transition-all"
+                                    className="w-full bg-[var(--bg-main)] border border-white/5 rounded-xl px-4 py-3 text-white text-sm font-bold outline-none focus:border-[var(--accent)]/30 transition-all"
                                 />
                             </div>
 
                             <button
                                 onClick={addPriceAlert}
                                 disabled={!alertPrice}
-                                className="w-full py-4 bg-[#fcd535] text-black rounded-xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                                className="w-full py-4 bg-[var(--accent)] text-black rounded-xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
                             >
                                 Crear Alerta
                             </button>
@@ -817,7 +817,7 @@ const CryptoMarketMonitor = () => {
                                         <span className="text-slate-500 text-sm not-italic">({chartCrypto.symbol.toUpperCase()}/USDT)</span>
                                     </h3>
                                     <div className="flex items-center gap-4 mt-1">
-                                        <p className="text-lg font-black text-[#fcd535]">{formatPrice(chartCrypto.current_price)}</p>
+                                        <p className="text-lg font-black text-[var(--accent)]">{formatPrice(chartCrypto.current_price)}</p>
                                         <span className={`text-xs font-black ${getChangeColor(chartCrypto.price_change_percentage_24h)}`}>
                                             {chartCrypto.price_change_percentage_24h > 0 ? '+' : ''}{chartCrypto.price_change_percentage_24h.toFixed(2)}% (24h)
                                         </span>

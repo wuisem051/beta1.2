@@ -26,9 +26,9 @@ export const colorPalettes = {
         red: '#ef4444',
 
         // Fondos y Textos
-        bgMain: '#0b0e11',
-        bgSidebar: '#0b0e11',
-        bgCard: '#1e2329',
+        bgMain: 'var(--bg-main)',
+        bgSidebar: 'var(--bg-main)',
+        bgCard: 'var(--bg-card)',
         textMain: '#eaecef',
         textSecondary: '#848e9c',
         border: 'rgba(255, 255, 255, 0.05)',
@@ -370,11 +370,40 @@ export const colorPalettes = {
         textSecondary: '#a3a3a3',
         border: '#262626',
     },
+    bitunix: {
+        id: 'bitunix',
+        name: 'Bitunix Premium',
+        description: 'Diseño oficial de Bitunix - Oscuro con acentos lima vibrantes',
+        emoji: '🟢',
+
+        accent: '#c1ff2e',
+        accentDark: '#a3d927',
+        accentLight: '#d3ff6e',
+        accentGlow: 'rgba(193, 255, 46, 0.2)',
+
+        gradientAccent: 'linear-gradient(135deg, #c1ff2e, #a3d927)',
+        gradientBlue: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+        gradientGreen: 'linear-gradient(135deg, #c1ff2e, #10b981)',
+        gradientPurple: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+        gradientRed: 'linear-gradient(135deg, #ef4444, #dc2626)',
+
+        blue: '#3b82f6',
+        green: '#c1ff2e',
+        purple: '#8b5cf6',
+        red: '#ef4444',
+
+        bgMain: '#000000',
+        bgSidebar: '#000000',
+        bgCard: '#14151a',
+        textMain: '#ffffff',
+        textSecondary: '#848e9c',
+        border: 'rgba(255, 255, 255, 0.05)',
+    },
 };
 
 // Función helper para obtener una paleta por ID
 export const getPaletteById = (paletteId) => {
-    return colorPalettes[paletteId] || colorPalettes.sunset;
+    return colorPalettes[paletteId] || colorPalettes.bitunix;
 };
 
 // Función helper para obtener todas las paletas como array
@@ -383,4 +412,4 @@ export const getAllPalettes = () => {
 };
 
 // Paleta por defecto
-export const defaultPalette = colorPalettes.sunset;
+export const defaultPalette = colorPalettes.bitunix;

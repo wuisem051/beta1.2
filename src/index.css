@@ -4,30 +4,39 @@
 
 /* Definición de variables CSS para temas claro y oscuro */
 :root {
-  /* Binance Pro Theme Tokens */
-  --binance-bg: #0b0e11;
-  --binance-card: #1e2329;
-  --binance-card-hover: #2b3139;
-  --binance-yellow: #fcd535;
-  --binance-yellow-hover: #f0b90b;
+  /* Binance Pro Theme Tokens (Legacy/Alternative) */
+  --binance-bg: var(--bg-main);
+  --binance-card: var(--bg-card);
+  --binance-yellow: var(--accent);
   --binance-text: #eaecef;
-  --binance-text-gray: #848e9c;
-  --binance-gray: #474d57;
-  --binance-border: rgba(255, 255, 255, 0.05);
 
-  --bg-main: var(--binance-bg);
-  --card-bg: var(--binance-card);
-  --bg-card: var(--binance-card);
-  --bg-sidebar: var(--binance-bg);
-  --accent: var(--binance-yellow);
+  /* Bitunix Premium Tokens */
+  --bitunix-bg: #000000;
+  --bitunix-card: #14151a;
+  --bitunix-lime: #c1ff2e;
+  --bitunix-lime-hover: #d3ff6e;
+  --bitunix-text: #ffffff;
+  --bitunix-text-gray: #848e9c;
+  --bitunix-border: rgba(255, 255, 255, 0.05);
+
+  /* Global Theme Mapping - Defaulting to Bitunix Style */
+  --bg-main: var(--bitunix-bg);
+  --bg-sidebar: var(--bitunix-bg);
+  --bg-card: var(--bitunix-card);
+  --card-bg: var(--bitunix-card);
+  --accent: var(--bitunix-lime);
+  --accent-hover: var(--bitunix-lime-hover);
+  --text-main: var(--bitunix-text);
+  --text-secondary: var(--bitunix-text-gray);
+  --border-color: var(--bitunix-border);
 
   --light-bg: #f8fafc;
   --light-card: rgba(255, 255, 255, 0.9);
   --dark-text: #0f172a;
   --light-text: #f1f5f9;
-  --dark-bg: var(--binance-bg);
-  --dark-card: var(--binance-card);
-  --accent-glow: rgba(252, 213, 53, 0.2);
+  --dark-bg: var(--bitunix-bg);
+  --dark-card: var(--bitunix-card);
+  --accent-glow: rgba(193, 255, 46, 0.2);
   --green-check: #10b981;
   --gray-border: #e2e8f0;
   --dark-border: rgba(255, 255, 255, 0.1);
@@ -44,8 +53,27 @@
   --gradient-blue: linear-gradient(135deg, #3b82f6, #2563eb);
   --gradient-green: linear-gradient(135deg, #10b981, #059669);
   --gradient-purple: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  --gradient-accent: linear-gradient(135deg, #f59e0b, #d97706);
+  --gradient-accent: linear-gradient(135deg, #c1ff2e, #a3d927);
   --gradient-red: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Bitunix Design Overrides */
+.btn-primary {
+  @apply rounded-full font-bold transition-all duration-300;
+  background-color: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.card-bitunix {
+  @apply rounded-2xl p-6 transition-all duration-300;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
 }
 
 /* Estilos base para el cuerpo - Usan las variables de la paleta dinámica */

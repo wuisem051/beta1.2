@@ -502,7 +502,7 @@ const AirtmCashierContent = () => {
                             <span className="text-[8px] font-black uppercase tracking-widest mb-1">Extensión</span>
                             <span className="text-[9px] font-bold">{isExtensionLinked ? 'VINCULADA' : (apiKey ? 'MODO API' : 'OFFLINE')}</span>
                         </div>
-                        <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : (apiKey ? 'bg-[#fcd535]' : 'bg-slate-700')}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${isExtensionLinked ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]' : (apiKey ? 'bg-[var(--accent)]' : 'bg-slate-700')}`}></div>
                     </div>
 
                     <div className="h-10 w-px bg-white/10 mx-1 hidden sm:block"></div>
@@ -599,7 +599,7 @@ const AirtmCashierContent = () => {
                     <div className="bg-[var(--bg-card)] border border-white/5 rounded-[24px] p-6 shadow-xl space-y-5">
                         <div className="flex items-center justify-between">
                             <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                <FaBell className="text-[#fcd535]" /> Preferencias
+                                <FaBell className="text-[var(--accent)]" /> Preferencias
                             </h3>
                         </div>
 
@@ -687,7 +687,7 @@ const AirtmCashierContent = () => {
 
                                         if (isPaypal) methodIcon = <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">P</div>;
                                         if (isVez) methodIcon = <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Bandera_de_Venezuela.svg/200px-Bandera_de_Venezuela.svg.png" className="w-full h-full object-cover" alt="VES" />;
-                                        if (isBinance) methodIcon = <div className="w-full h-full bg-[#fcd535] flex items-center justify-center"><svg viewBox="0 0 32 32" className="w-6 h-6"><path fill="#1e2329" d="M16 0l6 6-6 6-6-6 6-6zm0 14l4 4-4 4-4-4 4-4zm0 24l-6-6 6-6 6 6-6 6zM5.333 10.667L8 13.333 5.333 16 2.667 13.333l2.666-2.666zm21.334 0L29.333 13.333 26.667 16 24 13.333l2.667-2.666z" /></svg></div>;
+                                        if (isBinance) methodIcon = <div className="w-full h-full bg-[var(--accent)] flex items-center justify-center"><svg viewBox="0 0 32 32" className="w-6 h-6"><path fill="var(--bg-card)" d="M16 0l6 6-6 6-6-6 6-6zm0 14l4 4-4 4-4-4 4-4zm0 24l-6-6 6-6 6 6-6 6zM5.333 10.667L8 13.333 5.333 16 2.667 13.333l2.666-2.666zm21.334 0L29.333 13.333 26.667 16 24 13.333l2.667-2.666z" /></svg></div>;
 
                                         // Formatter for Start Date
                                         const joinDate = op.userJoinDate ? op.userJoinDate : 'Jan, 2024';

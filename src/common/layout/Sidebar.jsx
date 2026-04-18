@@ -92,11 +92,11 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
     >
       {/* Header Profile Section */}
       <div className="flex items-center gap-3 px-3 pb-6 mb-4 border-b border-dynamic mt-2">
-        <div className="w-10 h-10 rounded-full bg-[#fcd535] flex items-center justify-center overflow-hidden border-2 border-[#2b3139] relative shrink-0">
+        <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center overflow-hidden border-2 border-[#2b3139] relative shrink-0">
           {displayUser?.profilePhotoUrl ? (
             <img src={displayUser.profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
-            <FaUserCircle className="text-[#1e2329] text-3xl" />
+            <FaUserCircle className="text-[var(--bg-card)] text-3xl" />
           )}
         </div>
         <div className="min-w-0">
@@ -104,7 +104,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             {displayUser?.displayName || displayUser?.username || 'Usuario'}
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-[#fcd535]">
+            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--accent)]">
               {isVIP ? 'VIP ELITE' : 'STANDARD'}
             </span>
           </div>
@@ -253,7 +253,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
               {displayUser?.uid?.substring(0, 10).toUpperCase()}
             </p>
           </div>
-          <FaShieldAlt className="text-soft group-hover:text-[#fcd535] transition-colors" />
+          <FaShieldAlt className="text-soft group-hover:text-[var(--accent)] transition-colors" />
         </div>
       </div>
     </aside>

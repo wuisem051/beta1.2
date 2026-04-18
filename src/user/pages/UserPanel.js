@@ -105,14 +105,14 @@ const VIPChatContent = ({ styles, userBalances }) => {
   if (!isVIP) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-10 bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl">
-        <div className="w-20 h-20 bg-[#fcd535]/10 rounded-full flex items-center justify-center text-[#fcd535] mb-6 border border-[#fcd535]/20 animate-pulse">
+        <div className="w-20 h-20 bg-[var(--accent)]/10 rounded-full flex items-center justify-center text-[var(--accent)] mb-6 border border-[var(--accent)]/20 animate-pulse">
           <FaGem size={40} />
         </div>
         <h2 className="text-3xl font-black text-main uppercase italic tracking-tighter mb-4">Acceso Reservado Elite</h2>
         <p className="max-w-md text-soft font-bold uppercase tracking-widest text-sm leading-relaxed">
           Esta frecuencia de comunicación está cifrada y reservada para miembros VIP. Adquiere un cupo mensul para desbloquear señales y soporte directo.
         </p>
-        <button onClick={() => window.location.hash = '/user/plan-trading'} className="mt-8 px-10 py-4 bg-[#fcd535] text-black rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all text-xs shadow-2xl shadow-[#fcd535]/10">Adquirir VIP</button>
+        <button onClick={() => window.location.hash = '/user/plan-trading'} className="mt-8 px-10 py-4 bg-[var(--accent)] text-black rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all text-xs shadow-2xl shadow-[var(--accent)]/10">Adquirir VIP</button>
       </div>
     );
   }
@@ -125,8 +125,8 @@ const VIPChatContent = ({ styles, userBalances }) => {
           <p className="text-[10px] text-soft font-black uppercase tracking-[0.2em]">Canal Directo con Traders Expertos</p>
         </div>
         <div className="flex bg-[var(--bg-main)] p-1 rounded-xl border border-white/5">
-          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-soft'}`}>General</button>
-          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[var(--bg-sidebar)] text-[#fcd535]' : 'text-soft'}`}>Soporte Directo</button>
+          <button onClick={() => setActiveTab('public')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'public' ? 'bg-[var(--bg-sidebar)] text-[var(--accent)]' : 'text-soft'}`}>General</button>
+          <button onClick={() => setActiveTab('private')} className={`px-6 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'private' ? 'bg-[var(--bg-sidebar)] text-[var(--accent)]' : 'text-soft'}`}>Soporte Directo</button>
         </div>
       </div>
 
@@ -164,7 +164,7 @@ const VIPChatContent = ({ styles, userBalances }) => {
               rows="1"
             />
           </div>
-          <button type="submit" disabled={!newMessage.trim()} className="w-14 h-14 bg-[#fcd535] rounded-2xl flex items-center justify-center text-black shadow-xl shadow-[#fcd535]/10 active:scale-95 disabled:opacity-50 transition-all">
+          <button type="submit" disabled={!newMessage.trim()} className="w-14 h-14 bg-[var(--accent)] rounded-2xl flex items-center justify-center text-black shadow-xl shadow-[var(--accent)]/10 active:scale-95 disabled:opacity-50 transition-all">
             <svg viewBox="0 0 24 24" className="w-6 h-6 rotate-45"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor" /></svg>
           </button>
         </form>
@@ -458,11 +458,11 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
   return (
     <div className="w-full min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-700 mx-auto px-1 md:px-4 py-6 relative" style={{ maxWidth: isSidebarHidden ? '100vw' : `${dashboardMaxWidth}px`, transition: 'max-width 0.3s ease' }}>
       <div className="absolute top-4 left-6 z-20 hidden md:flex flex-col gap-2">
-        <Link to="/user/updates" className="flex items-center gap-2 px-3 py-1.5 bg-[#fcd535]/10 border border-[#fcd535]/20 rounded-lg text-[9px] font-black text-[#fcd535] uppercase tracking-widest hover:bg-[#fcd535] hover:text-black transition-all group">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#fcd535] animate-pulse"></span>
+        <Link to="/user/updates" className="flex items-center gap-2 px-3 py-1.5 bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-lg text-[9px] font-black text-[var(--accent)] uppercase tracking-widest hover:bg-[var(--accent)] hover:text-black transition-all group">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse"></span>
           Update
         </Link>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-main)] border border-white/5 rounded-lg text-[9px] font-black text-soft uppercase tracking-widest hover:text-[#fcd535] transition-colors cursor-default">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-main)] border border-white/5 rounded-lg text-[9px] font-black text-soft uppercase tracking-widest hover:text-[var(--accent)] transition-colors cursor-default">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
           Sistema v1.03 Beta
         </div>
@@ -471,11 +471,11 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
       {/* Premium Profile Slot - Reduced padding for more professional look */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-6">
         <div className="lg:col-span-2 bg-[var(--bg-card)] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#fcd535]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
           <div className="relative flex flex-col md:flex-row items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-[#fcd535] p-1 shadow-2xl">
-              <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#1e2329] bg-[var(--bg-main)] flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-[var(--accent)] p-1 shadow-2xl">
+              <div className="w-full h-full rounded-full overflow-hidden border-4 border-[var(--bg-card)] bg-[var(--bg-main)] flex items-center justify-center">
                 {userBalances.profilePhotoUrl ? <img src={userBalances.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle size={40} className="text-slate-700" />}
               </div>
             </div>
@@ -483,7 +483,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-1">
                 <h1 className="text-xl font-black text-main uppercase italic tracking-tighter">{userBalances.displayName || userBalances.username || 'Inversor Global'}</h1>
-                <span className="px-3 py-1 bg-[#fcd535] text-black text-[8px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
+                <span className="px-3 py-1 bg-[var(--accent)] text-black text-[8px] font-black rounded-lg uppercase tracking-widest">{vipStatusLabel}</span>
               </div>
               <p className="text-[9px] text-soft font-black uppercase tracking-[0.2em] mb-4 flex items-center justify-center md:justify-start gap-2">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
@@ -497,19 +497,19 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
                 </div>
                 <div>
                   <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest mb-0.5">Activos Seguidores</p>
-                  <p className="text-sm font-black text-[#fcd535] italic tracking-tighter">3.2K+</p>
+                  <p className="text-sm font-black text-[var(--accent)] italic tracking-tighter">3.2K+</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#fcd535] p-[2px] rounded-[32px] shadow-2xl">
+        <div className="bg-[var(--accent)] p-[2px] rounded-[32px] shadow-2xl">
           <div className="w-full h-full bg-[var(--bg-card)] rounded-[30px] p-8 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
             <div>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[9px] font-black text-soft uppercase tracking-widest">Balance Estimado</span>
-                <button onClick={() => setShowBalance(!showBalance)} className="text-[#fcd535]">
+                <button onClick={() => setShowBalance(!showBalance)} className="text-[var(--accent)]">
                   {showBalance ? <FaRegEye size={16} /> : <FaRegEyeSlash size={16} />}
                 </button>
               </div>
@@ -523,7 +523,7 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
             </div>
 
             <div className="mt-6 pt-4 border-t border-white/5 flex gap-3">
-              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-2.5 bg-[#fcd535] text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
+              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-2.5 bg-[var(--accent)] text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
               <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-2.5 bg-[var(--bg-main)] text-main text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
             </div>
           </div>
@@ -616,7 +616,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
         <div className="p-8 border-b border-white/5 bg-white/[0.01]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-main italic uppercase tracking-tighter">Mis Solicitudes</h2>
-            <button onClick={() => setSelectedTicket(null)} className="p-2 bg-[#fcd535]/10 text-[#fcd535] rounded-xl hover:bg-[#fcd535]/20 transition-all">
+            <button onClick={() => setSelectedTicket(null)} className="p-2 bg-[var(--accent)]/10 text-[var(--accent)] rounded-xl hover:bg-[var(--accent)]/20 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
           </div>
@@ -629,7 +629,7 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
             tickets.map(t => (
               <div key={t.id} onClick={() => handleSelectTicket(t)} className={`p-6 rounded-[2rem] border transition-all cursor-pointer group relative overflow-hidden ${selectedTicket?.id === t.id ? 'bg-[var(--bg-sidebar)] border-[var(--accent)]/30' : 'bg-[var(--bg-main)] border-white/5 hover:border-white/10'}`}>
                 <div className="flex justify-between items-start mb-3">
-                  <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[#fcd535]' : 'text-main'}`}>{t.subject}</p>
+                  <p className={`text-xs font-black uppercase tracking-tight ${selectedTicket?.id === t.id ? 'text-[var(--accent)]' : 'text-main'}`}>{t.subject}</p>
                   <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${t.status === 'Respondido' ? 'bg-[var(--green-check)] text-black' : 'bg-slate-800 text-slate-400'}`}>{t.status}</span>
                 </div>
                 <p className="text-[10px] text-soft line-clamp-1 font-bold lowercase mb-3">{t.conversation[t.conversation.length - 1].text}</p>
@@ -685,9 +685,9 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
                 </div>
                 <div>
                   <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 ml-2">Descripción Detallada</label>
-                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[2rem] px-6 py-5 text-main text-xs font-bold outline-none focus:border-[#fcd535]/30 transition-all shadow-inner resize-none" />
+                  <textarea rows="6" value={messageContent} onChange={e => setMessageContent(e.target.value)} placeholder="Describe tu incidencia con precisión..." className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[2rem] px-6 py-5 text-main text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all shadow-inner resize-none" />
                 </div>
-                <button type="submit" className="w-full py-5 bg-[#fcd535] text-black rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl active:scale-95">Iniciar Solicitud de Soporte</button>
+                <button type="submit" className="w-full py-5 bg-[var(--accent)] text-black rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl active:scale-95">Iniciar Solicitud de Soporte</button>
               </form>
             </div>
           </div>
@@ -967,8 +967,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
     <div className="w-full mx-auto p-4 lg:p-10 bg-[var(--bg-main)] min-h-screen animate-in fade-in duration-700" style={{ maxWidth: `${dashboardMaxWidth}px` }}>
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1V15a2 2 0 0 1-2-2 2 2 0 0 1 2-2v-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2v.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+          <div className="p-3 bg-[var(--accent)]/10 rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1V15a2 2 0 0 1-2-2 2 2 0 0 1 2-2v-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2v.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </div>
           <h1 className="text-4xl font-black text-main italic uppercase tracking-tighter">Configuración del Nodo</h1>
         </div>
@@ -978,8 +978,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
       {isLoading && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-[#fcd535]/10 border-t-[#fcd535] rounded-full animate-spin"></div>
-            <p className="text-[10px] font-black text-[#fcd535] uppercase tracking-widest animate-pulse">Procesando Cambio...</p>
+            <div className="w-12 h-12 border-4 border-[var(--accent)]/10 border-t-[var(--accent)] rounded-full animate-spin"></div>
+            <p className="text-[10px] font-black text-[var(--accent)] uppercase tracking-widest animate-pulse">Procesando Cambio...</p>
           </div>
         </div>
       )}
@@ -992,14 +992,14 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-4 px-6 py-5 rounded-[1.8rem] transition-all duration-500 whitespace-nowrap group relative overflow-hidden ${activeTab === tab.id
-                ? 'bg-[#fcd535] text-[#0b0e11] shadow-xl shadow-[#fcd535]/10 scale-[1.02]'
+                ? 'bg-[var(--accent)] text-[var(--bg-main)] shadow-xl shadow-[var(--accent)]/10 scale-[1.02]'
                 : 'text-soft hover:text-main hover:bg-white/5'
                 }`}
             >
-              <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[#fcd535]'}`}>
+              <div className={`transition-transform duration-500 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[var(--accent)]'}`}>
                 {tab.icon}
               </div>
-              <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[#0b0e11]' : 'text-slate-400 group-hover:text-main'}`}>{tab.label}</span>
+              <span className={`text-[11px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'text-[var(--bg-main)]' : 'text-slate-400 group-hover:text-main'}`}>{tab.label}</span>
               {activeTab === tab.id && (
                 <div className="absolute right-4 w-1.5 h-1.5 bg-[var(--bg-main)] rounded-full animate-pulse"></div>
               )}
@@ -1017,8 +1017,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
               <div className="relative z-10">
                 <div className="flex items-center gap-6 mb-12">
-                  <div className="p-4 bg-[#fcd535]/10 rounded-2xl border border-[#fcd535]/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fcd535" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                  <div className="p-4 bg-[var(--accent)]/10 rounded-2xl border border-[var(--accent)]/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-main italic uppercase tracking-tighter">Identidad Visual</h2>
@@ -1029,14 +1029,14 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 <form onSubmit={handleUpdateProfile} className="space-y-10">
                   <div className="flex flex-col items-center p-12 bg-[var(--bg-main)]/50 rounded-[3rem] border border-white/5 shadow-inner">
                     <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-photo-input').click()}>
-                      <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-[#1e2329] bg-[var(--bg-card)] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all group-hover:scale-105 group-hover:border-[#fcd535]/30">
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-[6px] border-[var(--bg-card)] bg-[var(--bg-card)] flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all group-hover:scale-105 group-hover:border-[var(--accent)]/30">
                         {profilePhotoUrl ? (
                           <img src={profilePhotoUrl} alt="Perfil" className="w-full h-full object-cover" />
                         ) : (
                           <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2b3139" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         )}
                       </div>
-                      <div className="absolute inset-0 bg-[#fcd535]/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
+                      <div className="absolute inset-0 bg-[var(--accent)]/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                       </div>
                     </div>
@@ -1049,8 +1049,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
                   <div className="bg-[var(--bg-main)]/30 p-8 lg:p-10 rounded-[2.5rem] border border-white/5">
                     <div className="flex items-center gap-3 mb-8">
-                      <div className="p-2.5 rounded-xl bg-[#fcd535]/10 border border-[#fcd535]/20">
-                        <FaCrown size={20} className="text-[#fcd535]" />
+                      <div className="p-2.5 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20">
+                        <FaCrown size={20} className="text-[var(--accent)]" />
                       </div>
                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-main">Avatares Premium Sincronizados</h3>
                     </div>
@@ -1062,8 +1062,8 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                           type="button"
                           onClick={() => handleSelectAvatar(avatar.url)}
                           className={`group relative aspect-square rounded-[1.5rem] overflow-hidden border-4 transition-all duration-500 ${profilePhotoUrl === avatar.url
-                            ? 'border-[#fcd535] shadow-xl shadow-[#fcd535]/10 scale-110 z-10'
-                            : 'border-white/5 hover:border-[#fcd535]/30 hover:scale-105'
+                            ? 'border-[var(--accent)] shadow-xl shadow-[var(--accent)]/10 scale-110 z-10'
+                            : 'border-white/5 hover:border-[var(--accent)]/30 hover:scale-105'
                             }`}
                         >
                           <img src={avatar.url} alt={avatar.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:rotate-3 group-hover:scale-110" />
@@ -1076,10 +1076,10 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Usuario del Nodo (@)</label>
                       <div className="relative group">
-                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#fcd535] font-black text-lg">@</span>
+                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--accent)] font-black text-lg">@</span>
                         <input
                           type="text"
-                          className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                          className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] pl-12 pr-6 py-5 text-main text-sm font-bold outline-none focus:border-[var(--accent)]/40 transition-all shadow-inner"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           placeholder="alias_elite"
@@ -1090,7 +1090,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                       <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Nombre de Visualización</label>
                       <input
                         type="text"
-                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] px-6 py-5 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.5rem] px-6 py-5 text-main text-sm font-bold outline-none focus:border-[var(--accent)]/40 transition-all shadow-inner"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Nombre Real o Pseudónimo"
@@ -1101,7 +1101,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-[0.15em]">Firma Biográfica</label>
                     <textarea
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.8rem] px-8 py-6 text-main text-sm font-bold outline-none focus:border-[#fcd535]/40 transition-all shadow-inner min-h-[150px] resize-none"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-[1.8rem] px-8 py-6 text-main text-sm font-bold outline-none focus:border-[var(--accent)]/40 transition-all shadow-inner min-h-[150px] resize-none"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       placeholder="Describe tu trayectoria de inversión..."
@@ -1110,7 +1110,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
                   <button
                     type="submit"
-                    className="w-full py-6 bg-[#fcd535] text-[#0b0e11] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-[#fcd535]/10 hover:scale-[1.01] active:scale-[0.98] transition-all"
+                    className="w-full py-6 bg-[var(--accent)] text-[var(--bg-main)] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-[var(--accent)]/10 hover:scale-[1.01] active:scale-[0.98] transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? 'Actualizando Nodo...' : 'Guardar Perfil Maestro'}
@@ -1134,12 +1134,12 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
               <form onSubmit={handleUpdateAccount} className="space-y-12">
                 <div className="space-y-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Enlace de Comunicación</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent)]/60 border-l-4 border-[var(--accent)] pl-4">Enlace de Comunicación</h3>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-widest">Email de Acceso</label>
                     <input
                       type="email"
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[#fcd535]/40 transition-all opacity-70"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[var(--accent)]/40 transition-all opacity-70"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       disabled={true}
@@ -1148,13 +1148,13 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                 </div>
 
                 <div className="space-y-8">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#fcd535]/60 border-l-4 border-[#fcd535] pl-4">Rotación de Cifrado (Contraseña)</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent)]/60 border-l-4 border-[var(--accent)] pl-4">Rotación de Cifrado (Contraseña)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-soft uppercase ml-4 tracking-widest">Contraseña Actual</label>
                       <input
                         type="password"
-                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[#fcd535]/40 transition-all"
+                        className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-6 py-5 text-main font-bold outline-none focus:border-[var(--accent)]/40 transition-all"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Confirmación Requerida"
@@ -1190,7 +1190,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
                 <button
                   type="submit"
-                  className="w-full py-6 bg-white text-[#0b0e11] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-white/5 hover:bg-slate-100 transition-all active:scale-[0.98]"
+                  className="w-full py-6 bg-white text-[var(--bg-main)] rounded-[1.8rem] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl shadow-white/5 hover:bg-slate-100 transition-all active:scale-[0.98]"
                 >
                   Actualizar Protocolos de Acceso
                 </button>
@@ -1212,15 +1212,15 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {Object.entries(paymentAddresses).map(([currency, address]) => (
-                  <div key={currency} className="bg-[var(--bg-main)]/50 p-8 rounded-[2rem] border border-white/5 group hover:border-[#fcd535]/30 transition-all">
+                  <div key={currency} className="bg-[var(--bg-main)]/50 p-8 rounded-[2rem] border border-white/5 group hover:border-[var(--accent)]/30 transition-all">
                     <div className="flex justify-between items-center mb-6">
-                      <span className="px-3 py-1 bg-[var(--bg-card)] text-[#fcd535] rounded-lg text-[10px] font-black border border-white/5">{currency} Network</span>
+                      <span className="px-3 py-1 bg-[var(--bg-card)] text-[var(--accent)] rounded-lg text-[10px] font-black border border-white/5">{currency} Network</span>
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                     </div>
                     <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 block ml-2">Dirección de Destino</label>
                     <input
                       type="text"
-                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-5 py-4 text-main text-xs font-mono outline-none focus:border-[#fcd535]/40 transition-all font-bold"
+                      className="w-full bg-[var(--bg-main)] border border-white/5 rounded-2xl px-5 py-4 text-main text-xs font-mono outline-none focus:border-[var(--accent)]/40 transition-all font-bold"
                       value={address}
                       onChange={(e) => handlePaymentAddressChange(currency, e.target.value)}
                       placeholder={`bc1.. / 0x.. / @uid`}
@@ -1277,7 +1277,7 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   step="20"
                   value={localDashboardWidth}
                   onChange={(e) => setLocalDashboardWidth(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[#fcd535] mb-6"
+                  className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-[var(--accent)] mb-6"
                 />
                 <div className="flex justify-between">
                   <span className="text-[9px] font-black text-slate-700 uppercase">Standard (800)</span>
@@ -1312,17 +1312,17 @@ const SettingsContent = ({ styles, dashboardMaxWidth, onDashboardWidthChange, us
                   { label: 'Integridad del Nodo', desc: 'Alertas críticas de inicio de sesión y acceso.', state: receiveLoginAlerts, setter: setReceiveLoginAlerts },
                   { label: 'Señales de Alta Frecuencia', desc: 'Oportunidades de entrada al nodo de trading.', state: receiveSignalsNotifications, setter: setReceiveSignalsNotifications, locked: !isVIP },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-8 bg-[var(--bg-main)]/50 rounded-[2.2rem] border border-white/5 group hover:border-[#fcd535]/20 transition-all">
+                  <div key={i} className="flex items-center justify-between p-8 bg-[var(--bg-main)]/50 rounded-[2.2rem] border border-white/5 group hover:border-[var(--accent)]/20 transition-all">
                     <div className="flex-1 pr-10">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="text-xs font-black text-main uppercase tracking-[0.1em]">{item.label}</h4>
-                        {item.locked && <span className="text-[8px] font-black text-black bg-[#fcd535] px-2 py-0.5 rounded-full uppercase italic">VIP Lock</span>}
+                        {item.locked && <span className="text-[8px] font-black text-black bg-[var(--accent)] px-2 py-0.5 rounded-full uppercase italic">VIP Lock</span>}
                       </div>
                       <p className="text-[10px] text-soft font-bold uppercase tracking-tighter leading-relaxed">{item.desc}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={item.state} onChange={() => !item.locked && item.setter(!item.state)} disabled={item.locked} />
-                      <div className="w-14 h-7 bg-slate-800 rounded-full peer peer-checked:bg-[#fcd535] transition-all after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 peer-checked:after:bg-[var(--bg-main)] shadow-inner"></div>
+                      <div className="w-14 h-7 bg-slate-800 rounded-full peer peer-checked:bg-[var(--accent)] transition-all after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-500 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 peer-checked:after:bg-[var(--bg-main)] shadow-inner"></div>
                     </label>
                   </div>
                 ))}
@@ -1379,6 +1379,8 @@ const UserPanel = () => {
     vipExpiry: null,
   });
   const [isSidebarHidden, setIsSidebarHidden] = useState(false);
+  const isP2PPage = location.pathname.includes('/user/p2p-marketplace');
+  const actualSidebarHidden = isSidebarHidden || isP2PPage;
   const [dashboardMaxWidth, setDashboardMaxWidth] = useState(1600); // Default 1600px for wider charts
   const [paymentRate, setPaymentRate] = useState(0.00); // Nuevo estado para la tasa de pago
   const [btcToUsdRate, setBtcToUsdRate] = useState(20000); // Nuevo estado para la tasa de BTC a USD, valor por defecto
@@ -1708,42 +1710,46 @@ const UserPanel = () => {
 
   return (
     <div className={`${styles.userPanelContainer} w-full overflow-hidden`} style={{ backgroundColor: 'var(--bg-main)' }}>
-      <Sidebar
-        unreadTicketsCount={unreadTicketsCount}
-        displayUser={displayUser}
-        isHidden={isSidebarHidden}
-        siteSettings={siteSettings}
-      />
+      {!isP2PPage && (
+        <Sidebar
+          unreadTicketsCount={unreadTicketsCount}
+          displayUser={displayUser}
+          isHidden={isSidebarHidden}
+          siteSettings={siteSettings}
+        />
+      )}
       <MainContent style={{
-        paddingLeft: isSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
+        paddingLeft: actualSidebarHidden ? '0' : 'var(--sidebar-width, 16rem)',
         width: '100%',
         boxSizing: 'border-box',
         transition: 'padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
         {/* Toggle Sidebar Button - Modern & Floating */}
-        <button
-          onClick={() => setIsSidebarHidden(!isSidebarHidden)}
-          className={`fixed top-24 z-[100] p-2 bg-slate-800/80 backdrop-blur-xl border border-white/10 rounded-r-xl shadow-2xl transition-all duration-300 hover:bg-blue-600 group ${isSidebarHidden ? 'left-0' : 'left-64'}`}
-          title={isSidebarHidden ? 'Mostrar barra lateral' : 'Ocultar barra lateral'}
-          style={{
-            left: isSidebarHidden ? '0' : '16rem',
-            transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s'
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20" height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`transition-transform duration-500 ${isSidebarHidden ? '' : 'rotate-180'}`}
+        {!isP2PPage && (
+          <button
+            onClick={() => setIsSidebarHidden(!isSidebarHidden)}
+            className={`fixed top-24 z-[100] p-2 bg-slate-800/80 backdrop-blur-xl border border-white/10 rounded-r-xl shadow-2xl transition-all duration-300 hover:bg-blue-600 group ${isSidebarHidden ? 'left-0' : 'left-64'}`}
+            title={isSidebarHidden ? 'Mostrar barra lateral' : 'Ocultar barra lateral'}
+            style={{
+              left: isSidebarHidden ? '0' : '16rem',
+              transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s'
+            }}
           >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20" height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform duration-500 ${isSidebarHidden ? '' : 'rotate-180'}`}
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
         {showNavbar && <Navbar />} {/* Renderizar el Navbar condicionalmente */}
 
         <Routes>

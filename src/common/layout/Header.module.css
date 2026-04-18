@@ -1,0 +1,179 @@
+.header {
+    background-color: #000;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    font-family: inherit;
+}
+
+.headerContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.leftNav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin-right: 1.5rem;
+}
+
+.logoIcon {
+    width: 28px;
+    height: 28px;
+    background-color: var(--accent);
+    border-radius: 6px;
+    transform: rotate(45deg);
+    position: relative;
+}
+
+.logoIcon::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    background: #000;
+    border-radius: 2px;
+}
+
+.navLink {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.navLink:hover {
+    color: var(--accent);
+}
+
+.fireIcon {
+    color: #f6465d;
+    font-size: 0.8rem;
+}
+
+.rightNav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.addFundsBtn {
+    background-color: var(--accent);
+    color: #000;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.addFundsBtn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.searchBar {
+    background-color: #1e2026;
+    border-radius: 2rem;
+    padding: 0.4rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 200px;
+}
+
+.searchIcon {
+    color: #848e9c;
+    font-size: 0.9rem;
+}
+
+.searchText {
+    color: #848e9c;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.trendingToken {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+}
+
+.fireToken {
+    color: #f0b90b;
+}
+
+.iconGroup {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.iconItem {
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.iconItem:hover {
+    color: var(--accent);
+}
+
+.userProfile {
+    width: 28px;
+    height: 28px;
+    background-color: #2b3b24;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #3d5a2d;
+    cursor: pointer;
+}
+
+.userIcon {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .leftNav>*:not(.logo) {
+        display: none;
+    }
+
+    .searchBar {
+        display: none;
+    }
+}

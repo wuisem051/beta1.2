@@ -211,7 +211,7 @@ const WhaleMonitor = () => {
                         <div className="space-y-4">
                             {breakoutLog.map(log => (
                                 <div key={log.id} className="relative pl-6 border-l-2 border-white/5 pb-4 last:pb-0">
-                                    <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-[#1e2329] ${log.type === 'EXPLOSIVE' ? 'bg-orange-600 animate-pulse' : 'bg-blue-500'}`}></div>
+                                    <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-[var(--bg-card)] ${log.type === 'EXPLOSIVE' ? 'bg-orange-600 animate-pulse' : 'bg-blue-500'}`}></div>
                                     <div className="bg-black/20 p-4 rounded-2xl border border-white/5 group hover:border-orange-500/20 transition-all cursor-crosshair">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-[10px] font-black text-white">{log.time}</span>
@@ -280,7 +280,7 @@ const WhaleMonitor = () => {
                                         </linearGradient>
                                     </defs>
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e2329', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '10px', fontWeight: 'bold' }}
+                                        contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '10px', fontWeight: 'bold' }}
                                         itemStyle={{ color: '#ea580c' }}
                                     />
                                     <Area type="monotone" dataKey="vol" stroke="#ea580c" strokeWidth={3} fillOpacity={1} fill="url(#colorVol)" animationDuration={500} />
@@ -491,7 +491,7 @@ const WhaleMonitor = () => {
                     </div>
                     <div className="flex bg-[var(--bg-card)] p-3 rounded-[3rem] border border-white/5 shadow-2xl">
                         <button onClick={() => setActiveTab('arpa_pro')} className={`px-12 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'arpa_pro' ? 'bg-orange-600 text-white shadow-2xl shadow-orange-600/40' : 'text-slate-500 hover:text-white'}`}>Tactical Radar</button>
-                        <button onClick={() => setActiveTab('liquidations')} className={`px-12 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'liquidations' ? 'bg-[#fcd535] text-black shadow-2xl shadow-yellow-500/40' : 'text-slate-500 hover:text-white'}`}>Liquidity Maps</button>
+                        <button onClick={() => setActiveTab('liquidations')} className={`px-12 py-4 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === 'liquidations' ? 'bg-[var(--accent)] text-black shadow-2xl shadow-yellow-500/40' : 'text-slate-500 hover:text-white'}`}>Liquidity Maps</button>
                     </div>
                 </div>
             </header>

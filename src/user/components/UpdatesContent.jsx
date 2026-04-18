@@ -138,7 +138,7 @@ const UpdatesContent = ({ styles }) => {
 
     const getIcon = (type) => {
         switch (type) {
-            case 'feature': return <FaRocket className="text-[#fcd535]" />;
+            case 'feature': return <FaRocket className="text-[var(--accent)]" />;
             case 'fix': return <FaBug className="text-rose-500" />;
             case 'improvement': return <FaMagic className="text-amber-400" />;
             default: return <FaHistory className="text-slate-400" />;
@@ -150,8 +150,8 @@ const UpdatesContent = ({ styles }) => {
             <div className="max-w-5xl mx-auto">
                 <div className="mb-16">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
-                            <FaRegNewspaper className="text-[#fcd535]" size={24} />
+                        <div className="p-3 bg-[var(--accent)]/10 rounded-2xl">
+                            <FaRegNewspaper className="text-[var(--accent)]" size={24} />
                         </div>
                         <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Bitácora de Desarrollo</h1>
                     </div>
@@ -161,7 +161,7 @@ const UpdatesContent = ({ styles }) => {
                 <div className="space-y-12 relative border-l border-white/5 pl-8 ml-4">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                            <div className="w-12 h-12 border-4 border-[#fcd535]/10 border-t-[#fcd535] rounded-full animate-spin"></div>
+                            <div className="w-12 h-12 border-4 border-[var(--accent)]/10 border-t-[var(--accent)] rounded-full animate-spin"></div>
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Sincronizando Nodos...</p>
                         </div>
                     ) : updates.length === 0 ? (
@@ -171,8 +171,8 @@ const UpdatesContent = ({ styles }) => {
                     ) : (
                         updates.map((update, index) => (
                             <div key={update.id} className="relative group animate-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
-                                <div className="absolute -left-[45px] top-0 w-8 h-8 bg-[var(--bg-card)] border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:border-[#fcd535]/50 transition-all z-10">
-                                    <div className="w-2 h-2 bg-[#fcd535] rounded-full animate-pulse"></div>
+                                <div className="absolute -left-[45px] top-0 w-8 h-8 bg-[var(--bg-card)] border border-white/10 rounded-full flex items-center justify-center shadow-2xl group-hover:border-[var(--accent)]/50 transition-all z-10">
+                                    <div className="w-2 h-2 bg-[var(--accent)] rounded-full animate-pulse"></div>
                                 </div>
 
                                 <div className="bg-[var(--bg-card)] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl group-hover:bg-[var(--bg-sidebar)] transition-all duration-500 relative overflow-hidden backdrop-blur-sm">
@@ -183,7 +183,7 @@ const UpdatesContent = ({ styles }) => {
                                     <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
                                         <div>
                                             <div className="flex items-center gap-3 mb-2">
-                                                <span className="text-[9px] font-black text-[#fcd535] bg-[#fcd535]/10 px-3 py-1 rounded-full uppercase tracking-widest">{update.tag || 'SYSTEM'}</span>
+                                                <span className="text-[9px] font-black text-[var(--accent)] bg-[var(--accent)]/10 px-3 py-1 rounded-full uppercase tracking-widest">{update.tag || 'SYSTEM'}</span>
                                                 <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">{update.version || 'v2.0'}</span>
                                             </div>
                                             <h3 className="text-2xl font-black text-white italic uppercase tracking-tight">{update.title}</h3>
@@ -201,7 +201,7 @@ const UpdatesContent = ({ styles }) => {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-white/5">
                                             {update.changes.map((change, i) => (
                                                 <div key={i} className="flex items-start gap-3">
-                                                    <div className="mt-1.5 w-1.5 h-1.5 bg-[#fcd535] rounded-full shadow-[0_0_8px_#fcd535]"></div>
+                                                    <div className="mt-1.5 w-1.5 h-1.5 bg-[var(--accent)] rounded-full shadow-[0_0_8px_var(--accent)]"></div>
                                                     <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wide">{change}</p>
                                                 </div>
                                             ))}

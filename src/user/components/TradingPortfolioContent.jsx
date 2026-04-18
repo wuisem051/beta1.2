@@ -112,7 +112,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[500px] animate-pulse">
-                <div className="w-16 h-16 border-4 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mb-6"></div>
+                <div className="w-16 h-16 border-4 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin mb-6"></div>
                 <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Sincronizando Portafolio...</p>
             </div>
         );
@@ -123,8 +123,8 @@ const TradingPortfolioContent = ({ userBalances }) => {
             <div className="max-w-7xl mx-auto">
                 <header className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-[#fcd535]/10 rounded-2xl">
-                            <FaChartLine className="text-[#fcd535]" size={24} />
+                        <div className="p-3 bg-[var(--accent)]/10 rounded-2xl">
+                            <FaChartLine className="text-[var(--accent)]" size={24} />
                         </div>
                         <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">Portafolio de Trading</h1>
                     </div>
@@ -165,15 +165,15 @@ const TradingPortfolioContent = ({ userBalances }) => {
 
                     {!isVIP ? (
                         <div className="p-20 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0b0e11]/50 pointer-events-none"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--bg-main)]/50 pointer-events-none"></div>
                             <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center text-rose-500 mb-8 border border-rose-500/20 shadow-2xl animate-pulse">
                                 <FaLock size={32} />
                             </div>
                             <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">Módulo de Historial Bloqueado</h3>
                             <p className="text-xs text-slate-500 font-bold max-w-sm uppercase tracking-wide leading-relaxed mb-10">
-                                Se requiere el protocolo de seguridad <span className="text-[#fcd535]">VIP NODE</span> para desencriptar el historial detallado de operaciones y P/L.
+                                Se requiere el protocolo de seguridad <span className="text-[var(--accent)]">VIP NODE</span> para desencriptar el historial detallado de operaciones y P/L.
                             </p>
-                            <button className="px-10 py-4 bg-[#fcd535] text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl shadow-[#fcd535]/10">Adquirir Plan VIP</button>
+                            <button className="px-10 py-4 bg-[var(--accent)] text-black rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all shadow-xl shadow-[var(--accent)]/10">Adquirir Plan VIP</button>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -198,7 +198,7 @@ const TradingPortfolioContent = ({ userBalances }) => {
                                             </td>
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-black/20 p-2 border border-white/5 flex items-center justify-center group-hover:border-[#fcd535]/30 transition-all">
+                                                    <div className="w-10 h-10 rounded-full bg-black/20 p-2 border border-white/5 flex items-center justify-center group-hover:border-[var(--accent)]/30 transition-all">
                                                         <img
                                                             src={getCryptoIcon(op.pair)}
                                                             alt={op.pair}

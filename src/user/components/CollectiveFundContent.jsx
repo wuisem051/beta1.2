@@ -210,7 +210,7 @@ const CollectiveFundContent = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-10 py-5 bg-[#fcd535] hover:bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[#fcd535]/10 active:scale-95 text-xs"
+          className="px-10 py-5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--bg-main)] rounded-2xl font-black uppercase tracking-[0.2em] transition-all shadow-2xl shadow-[var(--accent)]/10 active:scale-95 text-xs"
         >
           Participar ahora
         </button>

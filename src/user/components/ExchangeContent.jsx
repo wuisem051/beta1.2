@@ -1081,7 +1081,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                         </div>
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Modo</span>
-                                            <span className="text-xs font-black text-[#fcd535] italic tracking-tighter">SPOT TERMINAL</span>
+                                            <span className="text-xs font-black text-[var(--accent)] italic tracking-tighter">SPOT TERMINAL</span>
                                         </div>
                                     </div>
                                     <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
