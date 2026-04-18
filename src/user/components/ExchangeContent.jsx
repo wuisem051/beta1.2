@@ -103,6 +103,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
 
     const tabs = [
         { id: 'trading', label: 'Terminal', icon: <FaBolt /> },
+        { id: 'spot', label: 'Spot', icon: <FaExchangeAlt /> },
         { id: 'scalper', label: 'Escalonado', icon: <FaLayerGroup /> },
         { id: 'orders', label: 'Órdenes', icon: <FaListUl /> },
         { id: 'history', label: 'Historial', icon: <FaHistory /> },
@@ -588,18 +589,18 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                     </div>
                 </div>
 
-                {/* Modern Navigation Tabs */}
-                <div className="flex bg-slate-900/40 backdrop-blur-xl p-1 rounded-xl border border-white/5 overflow-x-auto max-w-full">
+                {/* Modern Navigation Tabs (Bitunix Style) */}
+                <div className="flex bg-[#161a1f]/80 backdrop-blur-xl p-[3px] rounded-xl border border-white/5 overflow-x-auto max-w-full">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-300 transform active:scale-95 whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 border border-white/10'
-                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                            className={`flex items-center gap-2 px-5 py-2 rounded-[9px] text-[11px] font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 shadow-lg shadow-[#f0b90b]/5'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                                 }`}
                         >
-                            <span className={activeTab === tab.id ? 'scale-105 duration-500' : 'opacity-60'}>
+                            <span className={activeTab === tab.id ? 'opacity-100' : 'opacity-60'}>
                                 {tab.icon}
                             </span>
                             {tab.label}
@@ -715,31 +716,31 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 <FaChartLine className="text-blue-500" />
                                 ANÁLISIS DE MERCADO
                             </h2>
-                            <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5">
+                            <div className="flex bg-[#161a1f]/80 p-[3px] rounded-xl border border-white/5">
                                 <button
                                     onClick={() => setLayout('1')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '1' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '1' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Vista Simple"
                                 >
                                     <FaSquare />
                                 </button>
                                 <button
                                     onClick={() => setLayout('2v')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '2v' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '2v' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Vista Dividida"
                                 >
                                     <FaColumns />
                                 </button>
                                 <button
                                     onClick={() => setLayout('4')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '4' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '4' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Grid 4"
                                 >
                                     <FaThLarge />
                                 </button>
                                 <button
                                     onClick={() => setLayout('6')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '6' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '6' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Grid 6"
                                 >
                                     <FaTh />
@@ -747,11 +748,11 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 <button
                                     onClick={saveExchangeLayout}
                                     disabled={isSavingLayout}
-                                    className="ml-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                    className="ml-2 px-3 py-1.5 bg-[#f0b90b] hover:bg-[#d8a60a] text-black font-bold rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
                                     title="Guardar Configuración"
                                 >
                                     {isSavingLayout ? <FaSync className="animate-spin text-xs" /> : <FaSave className="text-xs" />}
-                                    <span className="text-[9px] font-black uppercase tracking-tighter hidden sm:inline">Guardar Config</span>
+                                    <span className="text-[10px] uppercase tracking-tighter hidden sm:inline">Guardar Config</span>
                                 </button>
                             </div>
                         </div>
@@ -765,8 +766,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 <div
                                     key={chart.id}
                                     onClick={() => setActiveChartId(chart.id)}
-                                    className={`bg-slate-900/40 rounded-3xl border overflow-hidden shadow-2xl relative group transition-all duration-300 ${activeChartId === chart.id
-                                        ? 'border-blue-500 ring-1 ring-blue-500/50 shadow-blue-500/20'
+                                    className={`bg-slate-900/50 rounded-2xl border overflow-hidden shadow-2xl relative group transition-all duration-300 ${activeChartId === chart.id
+                                        ? 'border-[#f0b90b] ring-1 ring-[#f0b90b]/30 shadow-[#f0b90b]/10'
                                         : 'border-white/5 hover:border-white/10'
                                         }`}
                                     style={{ height: layout === '1' ? '450px' : '350px' }}
@@ -842,22 +843,24 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                             ))}
                         </div>
                     </div>
+                </div>
+            )}
 
+            {activeTab === 'spot' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {/* Balance Section - 4 Columns */}
                     <div className="lg:col-span-4 space-y-4">
-                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-5 h-full relative overflow-hidden group`}>
-                            <div className="absolute top-0 right-0 p-32 bg-blue-600/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-600/10 transition-colors duration-700"></div>
-
+                        <div className={`${styles.sectionCard} !bg-[#161a1f]/80 backdrop-blur-xl !border-white/5 !p-5 h-full relative overflow-hidden group`}>
                             <div className="flex justify-between items-center mb-6 relative z-10">
                                 <div>
                                     <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Portfolio Balance</h2>
                                     <p className="text-base font-black text-white flex items-center gap-2 italic">
-                                        <FaBitcoin className="text-yellow-500" /> RESUMEN
+                                        <FaBitcoin className="text-[#f0b90b]" /> RESUMEN
                                     </p>
                                 </div>
                                 <button
                                     onClick={fetchBalance}
-                                    className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-blue-600/20 rounded-lg text-slate-400 hover:text-blue-400 transition-all border border-white/5 active:rotate-180 duration-500"
+                                    className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-[#f0b90b]/20 rounded-lg text-slate-400 hover:text-[#f0b90b] transition-all border border-white/5 active:rotate-180 duration-500"
                                 >
                                     <FaSync className={isLoadingBalance ? 'animate-spin' : ''} />
                                 </button>
@@ -886,7 +889,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className={`w-2 h-2 rounded-full ${isUSDT ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-blue-500'}`}></div>
+                                                        <div className={`w-2 h-2 rounded-full ${isUSDT ? 'bg-[#0ecb81] shadow-[0_0_8px_rgba(14,203,129,0.5)]' : 'bg-[#f0b90b]'}`}></div>
                                                     </div>
                                                 </div>
                                             );
@@ -911,24 +914,23 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
 
                     {/* Trade Form - 8 Columns */}
                     <div className="lg:col-span-8 flex flex-col">
-                        <div className={`${styles.sectionCard} !bg-slate-900/40 backdrop-blur-xl !border-white/5 !p-0 overflow-hidden flex-1 flex flex-col`}>
+                        <div className={`${styles.sectionCard} !bg-[#161a1f]/80 backdrop-blur-xl !border-white/5 !p-0 overflow-hidden flex-1 flex flex-col`}>
                             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/20">
-                                        <FaBolt className="text-white text-xl" />
+                                    <div className="w-12 h-12 bg-gradient-to-br from-[#f0b90b] to-[#b38805] rounded-2xl flex items-center justify-center shadow-xl shadow-[#f0b90b]/10">
+                                        <FaBolt className="text-black text-xl" />
                                     </div>
                                     <div>
                                         <h2 className="text-lg font-black text-white leading-none mb-1.5 flex items-center gap-2 tracking-tight">
-                                            Operación Rápida
-                                            <span className="px-2 py-0.5 bg-blue-600/20 text-blue-400 text-[9px] rounded-lg border border-blue-500/30 font-black">PRO</span>
+                                            Spot Market
                                         </h2>
                                         <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[#0ecb81] animate-pulse"></div>
                                             <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Ejecución en Tiempo Real</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex bg-slate-950/60 p-1.5 rounded-xl border border-white/5 shadow-inner">
+                                <div className="flex bg-[#161a1f] p-1.5 rounded-xl border border-white/5 shadow-inner">
                                     {[
                                         { id: 'market', label: 'Market' },
                                         { id: 'limit', label: 'Limit' }
@@ -938,8 +940,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                             type="button"
                                             onClick={() => setTradeType(type.id)}
                                             className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] transition-all duration-300 ${tradeType === type.id
-                                                ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 border border-white/10'
-                                                : 'text-slate-500 hover:text-slate-300'
+                                                ? 'bg-white/10 text-white shadow-xl border border-white/10'
+                                                : 'text-slate-500 hover:text-white'
                                                 }`}
                                         >
                                             {type.label}
@@ -955,32 +957,32 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                         type="button"
                                         onClick={() => setTradeSide('buy')}
                                         className={`group relative flex flex-col items-center justify-center py-6 rounded-3xl transition-all duration-500 border-2 overflow-hidden ${tradeSide === 'buy'
-                                            ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10 scale-105 z-10'
+                                            ? 'border-[#0ecb81] bg-[#0ecb81]/5 shadow-2xl shadow-[#0ecb81]/10 scale-105 z-10'
                                             : 'border-white/5 bg-slate-950/20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaArrowUp className={`${tradeSide === 'buy' ? 'text-emerald-500' : 'text-slate-600'} transition-all group-hover:-translate-y-1`} />
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'buy' ? 'text-emerald-500' : 'text-slate-600'}`}>Posición Larga</span>
+                                            <FaArrowUp className={`${tradeSide === 'buy' ? 'text-[#0ecb81]' : 'text-slate-600'} transition-all group-hover:-translate-y-1`} />
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'buy' ? 'text-[#0ecb81]' : 'text-slate-600'}`}>Posición Larga</span>
                                         </div>
                                         <span className={`text-2xl font-black italic tracking-tighter ${tradeSide === 'buy' ? 'text-white' : 'text-slate-500'}`}>COMPRAR</span>
-                                        {tradeSide === 'buy' && <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-500 shadow-[0_-4px_12px_rgba(16,185,129,0.5)]"></div>}
+                                        {tradeSide === 'buy' && <div className="absolute inset-x-0 bottom-0 h-1 bg-[#0ecb81] shadow-[0_-4px_12px_rgba(14,203,129,0.5)]"></div>}
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={() => setTradeSide('sell')}
                                         className={`group relative flex flex-col items-center justify-center py-6 rounded-3xl transition-all duration-500 border-2 overflow-hidden ${tradeSide === 'sell'
-                                            ? 'border-rose-500 bg-rose-500/5 shadow-2xl shadow-rose-500/10 scale-105 z-10'
+                                            ? 'border-[#f6465d] bg-[#f6465d]/5 shadow-2xl shadow-[#f6465d]/10 scale-105 z-10'
                                             : 'border-white/5 bg-slate-950/20 grayscale opacity-40 hover:grayscale-0 hover:opacity-100'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaArrowDown className={`${tradeSide === 'sell' ? 'text-rose-500' : 'text-slate-600'} transition-all group-hover:translate-y-1`} />
-                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'sell' ? 'text-rose-500' : 'text-slate-600'}`}>Posición Corta</span>
+                                            <FaArrowDown className={`${tradeSide === 'sell' ? 'text-[#f6465d]' : 'text-slate-600'} transition-all group-hover:translate-y-1`} />
+                                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${tradeSide === 'sell' ? 'text-[#f6465d]' : 'text-slate-600'}`}>Posición Corta</span>
                                         </div>
                                         <span className={`text-2xl font-black italic tracking-tighter ${tradeSide === 'sell' ? 'text-white' : 'text-slate-500'}`}>VENDER</span>
-                                        {tradeSide === 'sell' && <div className="absolute inset-x-0 bottom-0 h-1 bg-rose-500 shadow-[0_-4px_12px_rgba(244,63,94,0.5)]"></div>}
+                                        {tradeSide === 'sell' && <div className="absolute inset-x-0 bottom-0 h-1 bg-[#f6465d] shadow-[0_-4px_12px_rgba(246,70,93,0.5)]"></div>}
                                     </button>
                                 </div>
 
@@ -996,8 +998,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     type="button"
                                                     onClick={() => updateChartSymbol(activeChartId, pair)}
                                                     className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 ${tradeSymbol === pair
-                                                        ? 'bg-blue-600/10 border-blue-500 text-white shadow-xl shadow-blue-600/10'
-                                                        : 'bg-slate-950/40 border-white/5 text-slate-600 hover:border-white/10 hover:bg-slate-900/40 hover:text-slate-300'
+                                                        ? 'bg-[#f0b90b]/10 border-[#f0b90b] text-white shadow-xl'
+                                                        : 'bg-[#161a1f] border-white/5 text-slate-600 hover:border-white/10 hover:bg-white/5 hover:text-slate-300'
                                                         }`}
                                                 >
                                                     <img
@@ -1010,7 +1012,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                         }}
                                                     />
                                                     {pair.replace('/USDT', '')}
-                                                    {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-blue-500 rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-white" /></div>}
+                                                    {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-[#f0b90b] rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-black" /></div>}
                                                 </button>
                                             ))}
                                         </div>
@@ -1028,10 +1030,10 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     step="0.00000001"
                                                     value={tradePrice}
                                                     onChange={e => setTradePrice(e.target.value)}
-                                                    className="w-full bg-slate-950/60 border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
+                                                    className="w-full bg-[#161a1f] border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-[#f0b90b] transition-all outline-none text-right hover:border-white/10"
                                                     placeholder="0.0000"
                                                 />
-                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">PRICE</div>
+                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[#f0b90b]">PRICE</div>
                                             </div>
                                         </div>
                                     )}
@@ -1040,7 +1042,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                         <div className="flex justify-between items-end mb-4 px-1">
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block">Cantidad a Operar</label>
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                                                Disp: <span className="text-blue-500">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span>
+                                                Disp: <span className="text-white">{balance?.total ? (parseFloat(balance.total[tradeSide === 'buy' ? 'USDT' : tradeSymbol.split('/')[0]]) || 0).toFixed(4) : '0.0000'}</span>
                                             </span>
                                         </div>
                                         <div className="relative group mb-4">
@@ -1049,12 +1051,12 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                 step="0.00000001"
                                                 value={tradeAmount}
                                                 onChange={e => setTradeAmount(e.target.value)}
-                                                className="w-full bg-[var(--bg-main)] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-blue-500 transition-all outline-none text-right hover:border-white/10"
+                                                className="w-full bg-[#161a1f] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-[#f0b90b] transition-all outline-none text-right hover:border-white/10"
                                                 placeholder="0.0000"
                                                 required
                                             />
-                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-blue-500">AMOUNT</div>
-                                            <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[var(--bg-card)] border border-white/10 rounded-lg text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-xl group-focus-within:text-blue-400 group-focus-within:border-blue-500/30 transition-all">{tradeSymbol.split('/')[0]}</div>
+                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[#f0b90b]">AMOUNT</div>
+                                            <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[#232832] border border-white/10 rounded-lg text-[9px] font-black text-white py-1 uppercase tracking-widest shadow-xl">{tradeSymbol.split('/')[0]}</div>
                                         </div>
 
                                         <div className="grid grid-cols-4 gap-2">
@@ -1063,7 +1065,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     key={p}
                                                     type="button"
                                                     onClick={() => handlePercentageClick(p)}
-                                                    className="py-2.5 bg-black/20 hover:bg-white/5 rounded-xl text-[10px] font-black text-slate-600 hover:text-blue-400 transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
+                                                    className="py-2.5 bg-black/20 hover:bg-[#f0b90b]/10 rounded-xl text-[10px] font-black text-slate-500 hover:text-[#f0b90b] transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
                                                 >
                                                     {p}%
                                                 </button>
@@ -1077,11 +1079,11 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                     <div className="flex-1 space-y-4">
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Tipo de Orden</span>
-                                            <span className="text-xs font-black text-white px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
+                                            <span className="text-xs font-black text-white px-3 py-1 bg-white/10 border border-white/20 rounded-lg uppercase tracking-widest">{tradeType}</span>
                                         </div>
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Modo</span>
-                                            <span className="text-xs font-black text-[var(--accent)] italic tracking-tighter">SPOT TERMINAL</span>
+                                            <span className="text-xs font-black text-[#f0b90b] italic tracking-tighter">SPOT MARKET</span>
                                         </div>
                                     </div>
                                     <div className="flex-1 flex flex-col items-center justify-center md:pl-6">
@@ -1097,8 +1099,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                     type="submit"
                                     disabled={isTrading}
                                     className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all duration-500 shadow-2xl active:scale-[0.98] ${tradeSide === 'buy'
-                                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20'
-                                        : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20'
+                                        ? 'bg-[#0ecb81] hover:bg-[#0b9c61] text-white shadow-[#0ecb81]/20'
+                                        : 'bg-[#f6465d] hover:bg-[#c93245] text-white shadow-[#f6465d]/20'
                                         }`}
                                 >
                                     {isTrading ? 'Procesando Operación...' : `${tradeSide === 'buy' ? 'Comprar' : 'Vender'} ${tradeSymbol.split('/')[0]}`}
@@ -1107,104 +1109,111 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Scalper Trading Tool Tab */}
-            {activeTab === 'scalper' && (
-                <ScalperTradingTool
-                    exchange={activeTradingExchange}
-                    balance={balance}
-                    onRefresh={fetchBalance}
-                />
-            )}
+            {
+                activeTab === 'scalper' && (
+                    <ScalperTradingTool
+                        exchange={activeTradingExchange}
+                        balance={balance}
+                        onRefresh={fetchBalance}
+                    />
+                )
+            }
 
             {/* Orders & History Viewers (Modern Lists) */}
-            {(activeTab === 'orders' || activeTab === 'history') && (
-                <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="p-10 border-b border-white/5 bg-white/[0.01]">
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                            {activeTab === 'orders' ? 'Órdenes Abiertas' : 'Historial de Trading'}
-                        </h3>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
-                            {activeTab === 'orders' ? 'Gestiona tus posiciones activas en el exchange' : 'Registro de operaciones cerradas y liquidadas'}
-                        </p>
-                    </div>
+            {
+                (activeTab === 'orders' || activeTab === 'history') && (
+                    <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="p-10 border-b border-white/5 bg-white/[0.01]">
+                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                                {activeTab === 'orders' ? 'Órdenes Abiertas' : 'Historial de Trading'}
+                            </h3>
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
+                                {activeTab === 'orders' ? 'Gestiona tus posiciones activas en el exchange' : 'Registro de operaciones cerradas y liquidadas'}
+                            </p>
+                        </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-[var(--bg-main)]">
-                                <tr>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Símbolo</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo/Lado</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Monto</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Precio</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Tiempo</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {(activeTab === 'orders' ? recentOrders : orderHistory).map(order => (
-                                    <tr key={order.id || order.info?.orderId} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-blue-500 border border-white/5 uppercase">
-                                                    {(order.symbol || tradeSymbol).split('/')[0][0]}
-                                                </div>
-                                                <span className="text-xs font-black text-white">{order.symbol || tradeSymbol}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex flex-col">
-                                                <span className={`text-[9px] font-black uppercase ${order.side?.toLowerCase() === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                    {order.side === 'buy' ? 'Compra' : 'Venta'}
-                                                </span>
-                                                <span className="text-[8px] text-slate-600 font-bold uppercase">{order.type || 'LIMIT'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.amount}</td>
-                                        <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.price || order.average || 'Market'}</td>
-                                        <td className="px-8 py-6">
-                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${(order.status === 'open' || order.status === 'NEW') ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-                                                order.status === 'closed' || order.status === 'FILLED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                                    'bg-slate-500/10 text-slate-500 border border-white/5'
-                                                }`}>
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-600 font-bold">
-                                            {order.timestamp ? new Date(order.timestamp).toLocaleString() : order.datetime || '---'}
-                                        </td>
-                                    </tr>
-                                ))}
-                                {(activeTab === 'orders' ? recentOrders : orderHistory).length === 0 && (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-[var(--bg-main)]">
                                     <tr>
-                                        <td colSpan="6" className="px-8 py-32 text-center text-slate-600 italic">
-                                            <div className="opacity-20 flex flex-col items-center">
-                                                <FaRegClock size={48} className="mb-4" />
-                                                <p className="text-[10px] font-black uppercase tracking-[0.4em]">No hay órdenes registradas</p>
-                                            </div>
-                                        </td>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Símbolo</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo/Lado</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Monto</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Precio</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</th>
+                                        <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Tiempo</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {(activeTab === 'orders' ? recentOrders : orderHistory).map(order => (
+                                        <tr key={order.id || order.info?.orderId} className="hover:bg-white/[0.02] transition-colors group">
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-black text-blue-500 border border-white/5 uppercase">
+                                                        {(order.symbol || tradeSymbol).split('/')[0][0]}
+                                                    </div>
+                                                    <span className="text-xs font-black text-white">{order.symbol || tradeSymbol}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex flex-col">
+                                                    <span className={`text-[9px] font-black uppercase ${order.side?.toLowerCase() === 'buy' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                        {order.side === 'buy' ? 'Compra' : 'Venta'}
+                                                    </span>
+                                                    <span className="text-[8px] text-slate-600 font-bold uppercase">{order.type || 'LIMIT'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.amount}</td>
+                                            <td className="px-8 py-6 font-mono text-[11px] text-white font-bold">{order.price || order.average || 'Market'}</td>
+                                            <td className="px-8 py-6">
+                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase ${(order.status === 'open' || order.status === 'NEW') ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                                    order.status === 'closed' || order.status === 'FILLED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                                        'bg-slate-500/10 text-slate-500 border border-white/5'
+                                                    }`}>
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-600 font-bold">
+                                                {order.timestamp ? new Date(order.timestamp).toLocaleString() : order.datetime || '---'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {(activeTab === 'orders' ? recentOrders : orderHistory).length === 0 && (
+                                        <tr>
+                                            <td colSpan="6" className="px-8 py-32 text-center text-slate-600 italic">
+                                                <div className="opacity-20 flex flex-col items-center">
+                                                    <FaRegClock size={48} className="mb-4" />
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.4em]">No hay órdenes registradas</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {errorMsg && (
-                <div className="fixed bottom-10 right-10 bg-[var(--bg-card)] text-white px-8 py-4 rounded-3xl shadow-2xl border border-rose-500/20 flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 z-50">
-                    <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500">
-                        <FaExclamationTriangle className="text-xl" />
+            {
+                errorMsg && (
+                    <div className="fixed bottom-10 right-10 bg-[var(--bg-card)] text-white px-8 py-4 rounded-3xl shadow-2xl border border-rose-500/20 flex items-center gap-4 animate-in slide-in-from-right-10 duration-500 z-50">
+                        <div className="w-10 h-10 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500">
+                            <FaExclamationTriangle className="text-xl" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 text-slate-500">Alerta del Sistema</p>
+                            <p className="text-xs font-bold leading-none">{errorMsg}</p>
+                        </div>
+                        <button onClick={() => setErrorMsg('')} className="ml-4 text-white/20 hover:text-white">✕</button>
                     </div>
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest leading-none mb-1 text-slate-500">Alerta del Sistema</p>
-                        <p className="text-xs font-bold leading-none">{errorMsg}</p>
-                    </div>
-                    <button onClick={() => setErrorMsg('')} className="ml-4 text-white/20 hover:text-white">✕</button>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

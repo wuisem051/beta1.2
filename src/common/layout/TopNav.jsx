@@ -1,80 +1,77 @@
-import React, { useContext, useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import './TopNav.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import {
     FaWallet, FaChartLine, FaUserCircle, FaHeadset,
     FaCog, FaGem, FaThLarge, FaHistory, FaExchangeAlt,
-    FaUsers, FaShieldAlt, FaFire, FaSearch, FaBell,
-    FaChevronDown, FaSignOutAlt, FaArrowDown, FaArrowUp,
-    FaNetworkWired, FaBars, FaTimes
+    FaUsers, FaFire, FaBell, FaChevronDown, FaSignOutAlt,
+    FaArrowDown, FaArrowUp, FaNetworkWired, FaBars, FaTimes,
+    FaShieldAlt, FaTachometerAlt, FaCoins, FaChartBar
 } from 'react-icons/fa';
 
-const DropdownMenu = ({ items, isOpen }) => {
+/* ── Dropdown con hover ──────────────────────────────────────── */
+const Dropdown = ({ items, isOpen, onClose }) => {
     if (!isOpen) return null;
     return (
-        <div className="topnav-dropdown">
+        <div className="tn-dropdown">
             {items.map((item, i) => (
-                <Link key={i} to={item.path} className="topnav-dropdown-item">
-                    {item.icon && <span className="topnav-dropdown-icon">{item.icon}</span>}
-                    <div>
-                        <div className="topnav-dropdown-label">{item.label}</div>
-                        {item.desc && <div className="topnav-dropdown-desc">{item.desc}</div>}
-                    </div>
-                </Link>
+                item.divider
+                    ? <div key={i} className="tn-dd-divider" />
+                    : <Link
+                        key={i}
+                        to={item.path}
+                        className="tn-dd-item"
+                        onClick={onClose}
+                    >
+                        {item.icon && (
+                            <span className="tn-dd-icon-wrap">
+                                {item.icon}
+                            </span>
+                        )}
+                        <div className="tn-dd-text">
+                            <span className="tn-dd-label">{item.label}</span>
+                            {item.desc && <span className="tn-dd-desc">{item.desc}</span>}
+                        </div>
+                        {item.tag && <span className={`tn-dd-tag ${item.tag.cls}`}>{item.tag.text}</span>}
+                    </Link>
             ))}
         </div>
     );
 };
 
-const NavItem = ({ label, path, icon, children, isHot, siteSettings, settingKey }) => {
+/* ── NavItem con dropdown en hover ───────────────────────────── */
+const NavItem = ({ label, icon, children, path, isHot, active }) => {
     const [open, setOpen] = useState(false);
-    const { pathname } = useLocation();
-    const ref = useRef(null);
-    const timeoutRef = useRef(null);
+    const timer = useRef(null);
 
-    const isActive = path ? pathname.includes(path) : children?.some(c => pathname.includes(c.path));
-
-    if (settingKey && siteSettings && siteSettings[settingKey] === false) return null;
-
-    const handleMouseEnter = () => {
-        clearTimeout(timeoutRef.current);
-        if (children) setOpen(true);
-    };
-    const handleMouseLeave = () => {
-        timeoutRef.current = setTimeout(() => setOpen(false), 150);
-    };
-
-    useEffect(() => () => clearTimeout(timeoutRef.current), []);
+    const enter = () => { clearTimeout(timer.current); if (children) setOpen(true); };
+    const leave = () => { timer.current = setTimeout(() => setOpen(false), 180); };
+    useEffect(() => () => clearTimeout(timer.current), []);
 
     if (!children) {
         return (
-            <Link to={path} className={`topnav-link ${isActive ? 'active' : ''}`}>
-                {icon && <span className="topnav-link-icon">{icon}</span>}
-                {label}
-                {isHot && <FaFire className="topnav-fire" />}
+            <Link to={path} className={`tn-link ${active ? 'tn-active' : ''}`}>
+                {icon && <span className="tn-link-icon">{icon}</span>}
+                <span>{label}</span>
+                {isHot && <FaFire className="tn-fire" />}
             </Link>
         );
     }
 
     return (
-        <div
-            ref={ref}
-            className={`topnav-link-wrap ${isActive ? 'active' : ''}`}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            <div className={`topnav-link ${isActive ? 'active' : ''}`}>
-                {icon && <span className="topnav-link-icon">{icon}</span>}
-                {label}
-                <FaChevronDown className={`topnav-chevron ${open ? 'rotated' : ''}`} />
+        <div className={`tn-item ${active ? 'tn-active' : ''}`} onMouseEnter={enter} onMouseLeave={leave}>
+            <div className={`tn-link ${active ? 'tn-active' : ''}`}>
+                {icon && <span className="tn-link-icon">{icon}</span>}
+                <span>{label}</span>
+                <FaChevronDown className={`tn-chevron ${open ? 'open' : ''}`} />
             </div>
-            <DropdownMenu items={children} isOpen={open} />
+            <Dropdown items={children} isOpen={open} onClose={() => setOpen(false)} />
         </div>
     );
 };
 
+/* ── TopNav principal ────────────────────────────────────────── */
 const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     const { pathname } = useLocation();
     const navigate = useNavigate();
@@ -86,35 +83,50 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     const isVIP = useMemo(() => {
         if (!displayUser?.vipStatus || displayUser.vipStatus === 'none') return false;
         const now = new Date();
-        const expiry = displayUser?.vipExpiry?.toDate ? displayUser.vipExpiry.toDate() : new Date(displayUser?.vipExpiry);
-        return expiry > now;
+        const exp = displayUser?.vipExpiry?.toDate
+            ? displayUser.vipExpiry.toDate()
+            : new Date(displayUser?.vipExpiry);
+        return exp > now;
     }, [displayUser?.vipStatus, displayUser?.vipExpiry]);
 
+    // Cerrar profile dropdown al click fuera
     useEffect(() => {
-        const handler = (e) => {
-            if (profileRef.current && !profileRef.current.contains(e.target)) {
+        const h = (e) => {
+            if (profileRef.current && !profileRef.current.contains(e.target))
                 setProfileOpen(false);
-            }
         };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
     }, []);
 
-    // Build wallet sub-items dynamically based on siteSettings
+    const is = (seg) => pathname.includes(seg);
+
+    /* ── Sub-menús ──────────────────────────────────────────── */
     const walletItems = [
-        { path: '/user/my-wallet', label: 'Resumen', icon: <FaWallet />, desc: 'Vista general de activos' },
-        ...(!siteSettings || siteSettings.showDeposits !== false ? [{ path: '/user/deposits', label: 'Depósito', icon: <FaArrowDown />, desc: 'Añadir fondos a tu cuenta' }] : []),
-        ...(!siteSettings || siteSettings.showWithdrawals !== false ? [{ path: '/user/withdrawals', label: 'Retiro', icon: <FaArrowUp />, desc: 'Retirar fondos' }] : []),
-        ...(!siteSettings || siteSettings.showP2PMarketplace !== false ? [{ path: '/user/p2p-marketplace', label: 'P2P Marketplace', icon: <FaExchangeAlt />, desc: 'Compra y vende entre usuarios' }] : []),
-        ...(!siteSettings || siteSettings.showCajeroAirtm !== false ? [{ path: '/user/cajero', label: 'Cajero Airtm', icon: <FaExchangeAlt />, desc: 'Canjear con Airtm' }] : []),
+        { path: '/user/my-wallet', label: 'Resumen de Activos', icon: <FaCoins />, desc: 'Vista completa de tu portafolio' },
+        ...(!siteSettings || siteSettings.showDeposits !== false
+            ? [{ path: '/user/deposits', label: 'Depósito', icon: <FaArrowDown />, desc: 'Añadir fondos a tu cuenta', tag: { text: 'Rápido', cls: 'green' } }] : []),
+        ...(!siteSettings || siteSettings.showWithdrawals !== false
+            ? [{ path: '/user/withdrawals', label: 'Retiro', icon: <FaArrowUp />, desc: 'Retirar fondos' }] : []),
+        { divider: true },
+        ...(!siteSettings || siteSettings.showP2PMarketplace !== false
+            ? [{ path: '/user/p2p-marketplace', label: 'P2P Marketplace', icon: <FaExchangeAlt />, desc: 'Compra y vende entre usuarios' }] : []),
+        ...(!siteSettings || siteSettings.showCajeroAirtm !== false
+            ? [{ path: '/user/cajero', label: 'Cajero Airtm', icon: <FaWallet />, desc: 'Canjear saldo con Airtm' }] : []),
     ];
 
     const tradingItems = [
-        ...(!siteSettings || siteSettings.showExchangeSection !== false ? [{ path: '/user/exchange', label: 'Terminal Spot', icon: <FaChartLine />, desc: 'Trading en tiempo real' }] : []),
-        ...(!siteSettings || siteSettings.showWhaleMonitor !== false ? [{ path: '/user/whale-monitor', label: 'Monitor Ballenas', icon: <FaNetworkWired />, desc: 'Actividad de grandes wallets' }] : []),
-        ...(!siteSettings || siteSettings.showCopyTrading !== false ? [{ path: '/user/miners', label: 'Señales VIP', icon: <FaGem />, desc: 'Señales exclusivas de trading' }] : []),
-        ...(!siteSettings || siteSettings.showTradingPortfolio !== false ? [{ path: '/user/mining-portfolio', label: 'Mi Portafolio', icon: <FaChartLine />, desc: 'Historial de operaciones' }] : []),
-        ...(!siteSettings || siteSettings.showPlanTrading !== false ? [{ path: '/user/plan-trading', label: 'Plan de Trading', icon: <FaGem />, desc: 'Actualiza tu cuenta VIP' }] : []),
+        ...(!siteSettings || siteSettings.showExchangeSection !== false
+            ? [{ path: '/user/exchange', label: 'Terminal Spot', icon: <FaChartBar />, desc: 'Gráficos en tiempo real', tag: { text: '🔥 HOT', cls: 'orange' } }] : []),
+        ...(!siteSettings || siteSettings.showWhaleMonitor !== false
+            ? [{ path: '/user/whale-monitor', label: 'Monitor Ballenas', icon: <FaNetworkWired />, desc: 'Actividad de grandes wallets' }] : []),
+        { divider: true },
+        ...(!siteSettings || siteSettings.showCopyTrading !== false
+            ? [{ path: '/user/miners', label: 'Señales VIP', icon: <FaGem />, desc: 'Señales exclusivas de expertos', tag: { text: 'VIP', cls: 'gold' } }] : []),
+        ...(!siteSettings || siteSettings.showTradingPortfolio !== false
+            ? [{ path: '/user/mining-portfolio', label: 'Mi Portafolio', icon: <FaChartLine />, desc: 'Historial de operaciones' }] : []),
+        ...(!siteSettings || siteSettings.showPlanTrading !== false
+            ? [{ path: '/user/plan-trading', label: 'Plan de Trading', icon: <FaShieldAlt />, desc: 'Actualiza tu cuenta VIP' }] : []),
     ];
 
     const supportItems = [
@@ -122,184 +134,233 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
         { path: '/user/updates', label: 'Actualizaciones', icon: <FaHistory />, desc: 'Novedades de la plataforma' },
     ];
 
-    const accountItems = [
+    const cuentaItems = [
         { path: '/user/settings', label: 'Ajustes de Cuenta', icon: <FaCog />, desc: 'Seguridad y preferencias' },
-        ...(!siteSettings || siteSettings.showReferrals !== false ? [{ path: '/user/referrals', label: 'Referidos', icon: <FaUsers />, desc: 'Invita y gana comisiones' }] : []),
-        ...(!siteSettings || siteSettings.showVipChat !== false ? [{ path: isVIP ? '/user/vip-chat' : '#', label: 'Chat VIP', icon: <FaGem />, desc: 'Canal exclusivo elite' }] : []),
+        ...(!siteSettings || siteSettings.showReferrals !== false
+            ? [{ path: '/user/referrals', label: 'Referidos', icon: <FaUsers />, desc: 'Invita y gana comisiones' }] : []),
+        ...(!siteSettings || siteSettings.showVipChat !== false
+            ? [{ path: isVIP ? '/user/vip-chat' : '#', label: 'Chat VIP', icon: <FaGem />, desc: 'Canal exclusivo elite', tag: isVIP ? { text: 'ELITE', cls: 'gold' } : { text: 'BLOQ', cls: 'gray' } }] : []),
     ];
 
     return (
         <>
-            <nav className="topnav">
-                <div className="topnav-inner">
-                    {/* LEFT: Logo + Links */}
-                    <div className="topnav-left">
-                        <Link to="/user/dashboard" className="topnav-logo">
-                            <div className="topnav-logo-icon" />
-                            Bitunix
-                        </Link>
+            <nav className="tn-nav">
+                <div className="tn-inner">
 
-                        <div className="topnav-links">
-                            <Link to="/user/dashboard" className={`topnav-link ${pathname.includes('/dashboard') ? 'active' : ''}`}>
-                                <FaThLarge className="topnav-link-icon" /> Dashboard
-                            </Link>
+                    {/* ── LOGO ───────────────────────────────── */}
+                    <Link to="/user/dashboard" className="tn-logo">
+                        <span className="tn-logo-diamond" />
+                        <span className="tn-logo-text">Bitunix</span>
+                    </Link>
 
-                            <NavItem label="Billetera" icon={<FaWallet />} siteSettings={siteSettings} children={walletItems} />
-                            <NavItem label="Trading" icon={<FaChartLine />} isHot siteSettings={siteSettings} children={tradingItems} />
+                    {/* ── SEPARADOR VERTICAL ─────────────────── */}
+                    <div className="tn-sep" />
 
-                            {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
-                                <Link to="/user/collective-fund" className={`topnav-link ${pathname.includes('/collective-fund') ? 'active' : ''}`}>
-                                    <FaUsers className="topnav-link-icon" /> Fondo Colectivo
-                                </Link>
-                            )}
-
-                            <Link to="/user/bonus" className={`topnav-link ${pathname.includes('/bonus') ? 'active' : ''}`}>
-                                Campañas
-                            </Link>
-
-                            <NavItem label="Soporte" icon={<FaHeadset />} siteSettings={siteSettings} children={supportItems} />
-                            <NavItem label="Cuenta" icon={<FaCog />} siteSettings={siteSettings} children={accountItems} />
-                        </div>
+                    {/* ── LINKS DE NAVEGACIÓN ─────────────────── */}
+                    <div className="tn-links">
+                        <NavItem
+                            path="/user/dashboard"
+                            label="Dashboard"
+                            icon={<FaTachometerAlt />}
+                            active={is('/dashboard')}
+                        />
+                        <NavItem
+                            label="Billetera"
+                            icon={<FaWallet />}
+                            active={is('/my-wallet') || is('/deposits') || is('/withdrawals') || is('/p2p') || is('/cajero')}
+                            children={walletItems}
+                        />
+                        <NavItem
+                            label="Trading"
+                            icon={<FaChartLine />}
+                            isHot
+                            active={is('/exchange') || is('/whale') || is('/miners') || is('/mining-portfolio') || is('/plan-trading')}
+                            children={tradingItems}
+                        />
+                        {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
+                            <NavItem
+                                path="/user/collective-fund"
+                                label="Fondo Colectivo"
+                                icon={<FaUsers />}
+                                active={is('/collective-fund')}
+                            />
+                        )}
+                        <NavItem
+                            path="/user/bonus"
+                            label="Campañas"
+                            active={is('/bonus')}
+                        />
+                        <NavItem
+                            label="Soporte"
+                            icon={<FaHeadset />}
+                            active={is('/contact-support') || is('/updates')}
+                            children={supportItems}
+                        />
+                        <NavItem
+                            label="Cuenta"
+                            icon={<FaCog />}
+                            active={is('/settings') || is('/referrals') || is('/vip-chat')}
+                            children={cuentaItems}
+                        />
                     </div>
 
-                    {/* RIGHT: Actions */}
-                    <div className="topnav-right">
-                        {/* Notifications */}
+                    {/* ── RIGHT SIDE ───────────────────────────── */}
+                    <div className="tn-right">
+                        {/* Depositar – botón acción */}
                         <button
-                            className="topnav-icon-btn"
+                            className="tn-deposit-btn"
+                            onClick={() => navigate('/user/deposits')}
+                        >
+                            Depositar
+                        </button>
+
+                        {/* Notificaciones */}
+                        <button
+                            className="tn-icon-btn"
                             onClick={() => navigate('/user/contact-support')}
-                            title="Notificaciones"
+                            title="Soporte / Tickets"
                         >
                             <FaBell />
                             {unreadTicketsCount > 0 && (
-                                <span className="topnav-badge">{unreadTicketsCount}</span>
+                                <span className="tn-badge">{unreadTicketsCount}</span>
                             )}
                         </button>
 
-                        {/* Wallet shortcut */}
-                        <button className="topnav-icon-btn" onClick={() => navigate('/user/my-wallet')} title="Billetera">
+                        {/* Wallet rápido */}
+                        <button
+                            className="tn-icon-btn"
+                            onClick={() => navigate('/user/my-wallet')}
+                            title="Mi Billetera"
+                        >
                             <FaWallet />
                         </button>
 
-                        {/* Profile dropdown */}
-                        <div ref={profileRef} className="topnav-profile-wrap">
+                        {/* ── PERFIL ───────────────────────────── */}
+                        <div ref={profileRef} className="tn-profile-wrap">
                             <button
-                                className="topnav-profile-btn"
+                                className="tn-profile-btn"
                                 onClick={() => setProfileOpen(!profileOpen)}
                             >
-                                <div className="topnav-avatar">
+                                <div className="tn-avatar">
                                     {displayUser?.profilePhotoUrl
-                                        ? <img src={displayUser.profilePhotoUrl} alt="Avatar" />
+                                        ? <img src={displayUser.profilePhotoUrl} alt="avatar" />
                                         : <FaUserCircle />
                                     }
                                 </div>
-                                <div className="topnav-profile-info">
-                                    <span className="topnav-profile-name">
-                                        {displayUser?.displayName || displayUser?.username || 'Usuario'}
+                                <div className="tn-profile-text">
+                                    <span className="tn-profile-name">
+                                        {(displayUser?.displayName || displayUser?.username || 'Usuario').substring(0, 14)}
                                     </span>
-                                    <span className="topnav-profile-level">
-                                        {isVIP ? 'VIP ELITE' : 'STANDARD'}
+                                    <span className={`tn-profile-level ${isVIP ? 'vip' : ''}`}>
+                                        {isVIP ? '⭐ VIP ELITE' : 'STANDARD'}
                                     </span>
                                 </div>
-                                <FaChevronDown className={`topnav-chevron ${profileOpen ? 'rotated' : ''}`} />
+                                <FaChevronDown className={`tn-chevron ${profileOpen ? 'open' : ''}`} />
                             </button>
 
+                            {/* Perfil dropdown */}
                             {profileOpen && (
-                                <div className="topnav-profile-dropdown">
-                                    <div className="topnav-profile-header">
-                                        <div className="topnav-profile-header-avatar">
+                                <div className="tn-profile-dd">
+                                    {/* Header del dropdown */}
+                                    <div className="tn-profile-dd-head">
+                                        <div className="tn-profile-dd-avatar">
                                             {displayUser?.profilePhotoUrl
-                                                ? <img src={displayUser.profilePhotoUrl} alt="Avatar" />
+                                                ? <img src={displayUser.profilePhotoUrl} alt="avatar" />
                                                 : <FaUserCircle />
                                             }
                                         </div>
-                                        <div>
-                                            <p className="topnav-profile-header-name">
+                                        <div className="tn-profile-dd-info">
+                                            <p className="tn-profile-dd-name">
                                                 {displayUser?.displayName || displayUser?.username || 'Usuario'}
                                             </p>
-                                            <p className="topnav-profile-header-id">
-                                                ID: {displayUser?.uid?.substring(0, 10).toUpperCase()}
+                                            <p className="tn-profile-dd-id">
+                                                UID: {displayUser?.uid?.substring(0, 12).toUpperCase()}
                                             </p>
                                         </div>
-                                        <span className={`topnav-vip-badge ${isVIP ? 'vip' : ''}`}>
+                                        <span className={`tn-vip-pill ${isVIP ? 'vip' : ''}`}>
                                             {isVIP ? 'VIP' : 'FREE'}
                                         </span>
                                     </div>
-                                    <div className="topnav-dropdown-divider" />
-                                    <Link to="/user/settings" className="topnav-dropdown-item" onClick={() => setProfileOpen(false)}>
-                                        <FaCog className="topnav-dropdown-icon" /> Ajustes de Cuenta
+
+                                    <div className="tn-dd-divider" />
+
+                                    <Link to="/user/settings" className="tn-dd-item" onClick={() => setProfileOpen(false)}>
+                                        <span className="tn-dd-icon-wrap"><FaCog /></span>
+                                        <div className="tn-dd-text">
+                                            <span className="tn-dd-label">Ajustes de Cuenta</span>
+                                            <span className="tn-dd-desc">Seguridad y preferencias</span>
+                                        </div>
                                     </Link>
-                                    <Link to="/user/my-wallet" className="topnav-dropdown-item" onClick={() => setProfileOpen(false)}>
-                                        <FaWallet className="topnav-dropdown-icon" /> Mi Billetera
+                                    <Link to="/user/my-wallet" className="tn-dd-item" onClick={() => setProfileOpen(false)}>
+                                        <span className="tn-dd-icon-wrap"><FaWallet /></span>
+                                        <div className="tn-dd-text">
+                                            <span className="tn-dd-label">Mi Billetera</span>
+                                            <span className="tn-dd-desc">Activos y movimientos</span>
+                                        </div>
                                     </Link>
                                     {(!siteSettings || siteSettings.showReferrals !== false) && (
-                                        <Link to="/user/referrals" className="topnav-dropdown-item" onClick={() => setProfileOpen(false)}>
-                                            <FaUsers className="topnav-dropdown-icon" /> Referidos
+                                        <Link to="/user/referrals" className="tn-dd-item" onClick={() => setProfileOpen(false)}>
+                                            <span className="tn-dd-icon-wrap"><FaUsers /></span>
+                                            <div className="tn-dd-text">
+                                                <span className="tn-dd-label">Referidos</span>
+                                                <span className="tn-dd-desc">Invita y gana comisiones</span>
+                                            </div>
                                         </Link>
                                     )}
-                                    <div className="topnav-dropdown-divider" />
+
+                                    <div className="tn-dd-divider" />
+
                                     <button
-                                        className="topnav-dropdown-item topnav-logout"
+                                        className="tn-dd-item tn-dd-logout"
                                         onClick={() => { setProfileOpen(false); logout(); }}
                                     >
-                                        <FaSignOutAlt className="topnav-dropdown-icon" /> Cerrar Sesión
+                                        <span className="tn-dd-icon-wrap red"><FaSignOutAlt /></span>
+                                        <div className="tn-dd-text">
+                                            <span className="tn-dd-label">Cerrar Sesión</span>
+                                        </div>
                                     </button>
                                 </div>
                             )}
                         </div>
 
-                        {/* Mobile hamburger */}
-                        <button className="topnav-hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
+                        {/* Hamburger mobile */}
+                        <button className="tn-hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
                             {mobileOpen ? <FaTimes /> : <FaBars />}
                         </button>
                     </div>
                 </div>
 
-                {/* Mobile drawer */}
+                {/* ── MOBILE DRAWER ─────────────────────────── */}
                 {mobileOpen && (
-                    <div className="topnav-mobile-drawer">
-                        <Link to="/user/dashboard" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                            <FaThLarge /> Dashboard
-                        </Link>
-                        <Link to="/user/my-wallet" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                            <FaWallet /> Billetera
-                        </Link>
-                        {(!siteSettings || siteSettings.showDeposits !== false) && (
-                            <Link to="/user/deposits" className="topnav-mobile-link topnav-mobile-sub" onClick={() => setMobileOpen(false)}>
-                                Depósito
+                    <div className="tn-mobile-drawer">
+                        {[
+                            { to: '/user/dashboard', icon: <FaTachometerAlt />, label: 'Dashboard' },
+                            { to: '/user/my-wallet', icon: <FaWallet />, label: 'Billetera' },
+                            ...(!siteSettings || siteSettings.showDeposits !== false ? [{ to: '/user/deposits', label: '↓ Depósito', sub: true }] : []),
+                            ...(!siteSettings || siteSettings.showWithdrawals !== false ? [{ to: '/user/withdrawals', label: '↑ Retiro', sub: true }] : []),
+                            ...(!siteSettings || siteSettings.showExchangeSection !== false ? [{ to: '/user/exchange', icon: <FaChartLine />, label: 'Terminal Spot' }] : []),
+                            ...(!siteSettings || siteSettings.showCopyTrading !== false ? [{ to: '/user/miners', icon: <FaGem />, label: 'Señales VIP' }] : []),
+                            ...(!siteSettings || siteSettings.showWhaleMonitor !== false ? [{ to: '/user/whale-monitor', icon: <FaNetworkWired />, label: 'Monitor Ballenas' }] : []),
+                            ...(!siteSettings || siteSettings.showTradingPortfolio !== false ? [{ to: '/user/mining-portfolio', icon: <FaChartLine />, label: 'Mi Portafolio' }] : []),
+                            ...(!siteSettings || siteSettings.showCollectiveFund !== false ? [{ to: '/user/collective-fund', icon: <FaUsers />, label: 'Fondo Colectivo' }] : []),
+                            { to: '/user/bonus', label: 'Campañas' },
+                            { to: '/user/contact-support', icon: <FaHeadset />, label: 'Soporte' },
+                            { to: '/user/updates', icon: <FaHistory />, label: 'Actualizaciones' },
+                            { to: '/user/settings', icon: <FaCog />, label: 'Ajustes' },
+                            ...(!siteSettings || siteSettings.showReferrals !== false ? [{ to: '/user/referrals', icon: <FaUsers />, label: 'Referidos' }] : []),
+                        ].map((item, i) =>
+                            <Link
+                                key={i}
+                                to={item.to}
+                                className={`tn-mob-link ${item.sub ? 'sub' : ''}`}
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                {item.icon && <span>{item.icon}</span>}
+                                {item.label}
                             </Link>
                         )}
-                        {(!siteSettings || siteSettings.showWithdrawals !== false) && (
-                            <Link to="/user/withdrawals" className="topnav-mobile-link topnav-mobile-sub" onClick={() => setMobileOpen(false)}>
-                                Retiro
-                            </Link>
-                        )}
-                        {(!siteSettings || siteSettings.showExchangeSection !== false) && (
-                            <Link to="/user/exchange" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                                <FaChartLine /> Trading Spot
-                            </Link>
-                        )}
-                        {(!siteSettings || siteSettings.showCopyTrading !== false) && (
-                            <Link to="/user/miners" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                                <FaGem /> Señales VIP
-                            </Link>
-                        )}
-                        {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
-                            <Link to="/user/collective-fund" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                                <FaUsers /> Fondo Colectivo
-                            </Link>
-                        )}
-                        <Link to="/user/bonus" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                            Campañas
-                        </Link>
-                        <Link to="/user/contact-support" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                            <FaHeadset /> Soporte
-                        </Link>
-                        <Link to="/user/settings" className="topnav-mobile-link" onClick={() => setMobileOpen(false)}>
-                            <FaCog /> Ajustes
-                        </Link>
                         <button
-                            className="topnav-mobile-link topnav-mobile-logout"
+                            className="tn-mob-link tn-mob-logout"
                             onClick={() => { setMobileOpen(false); logout(); }}
                         >
                             <FaSignOutAlt /> Cerrar Sesión

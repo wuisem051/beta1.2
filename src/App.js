@@ -74,10 +74,12 @@ function App() {
 function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isUserPanel = location.pathname.startsWith('/user') || location.pathname.startsWith('/test-user-settings');
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      {/* Header solo visible en páginas públicas; el UserPanel tiene su propio TopNav */}
+      {!isUserPanel && <Header />}
       <main className="flex-grow">
         <ColorPaletteProvider>
           <Suspense fallback={<Loader text="Iniciando Plataforma..." />}>
