@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useContext } from 'react';
 import './TopNav.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { ThemeContext } from '../../context/ThemeContext';
 import {
     FaWallet, FaChartLine, FaUserCircle, FaHeadset,
     FaCog, FaGem, FaThLarge, FaHistory, FaExchangeAlt,
     FaUsers, FaFire, FaBell, FaChevronDown, FaSignOutAlt,
     FaArrowDown, FaArrowUp, FaNetworkWired, FaBars, FaTimes,
-    FaShieldAlt, FaTachometerAlt, FaCoins, FaChartBar
+    FaShieldAlt, FaTachometerAlt, FaCoins, FaChartBar,
+    FaSun, FaMoon
 } from 'react-icons/fa';
 
 /* ── Dropdown con hover ──────────────────────────────────────── */
@@ -79,6 +81,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef(null);
+    const { darkMode, setDarkMode } = useContext(ThemeContext);
 
     const isVIP = useMemo(() => {
         if (!displayUser?.vipStatus || displayUser.vipStatus === 'none') return false;
@@ -331,6 +334,16 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                                 <Link to="/signup" className="bg-[#f0b90b] text-black px-5 py-2 rounded-lg text-xs font-black transition-all hover:bg-[#ffe358] hover:shadow-[0_0_15px_rgba(240,185,11,0.4)] uppercase tracking-tight">Registrarse</Link>
                             </div>
                         )}
+
+                        {/* Cambio de Tema - Disponible para todos */}
+                        <button
+                            className="tn-icon-btn theme-toggle"
+                            onClick={() => setDarkMode(!darkMode)}
+                            title={darkMode ? "Activar Modo Claro" : "Activar Modo Oscuro"}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-blue-400" />}
+                        </button>
 
                         {/* Hamburger mobile */}
                         <button className="tn-hamburger" onClick={() => setMobileOpen(!mobileOpen)}>

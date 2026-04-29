@@ -57,6 +57,25 @@
   --gradient-red: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
+/* Modo Claro Overrides */
+body.light-mode {
+  --bitunix-bg: #f5f5f5;
+  --bitunix-card: #ffffff;
+  --bitunix-text: #1e2329;
+  --bitunix-text-gray: #474d57;
+  --bitunix-border: rgba(0, 0, 0, 0.08);
+  
+  --bg-main: var(--bitunix-bg);
+  --bg-card: var(--bitunix-card);
+  --text-main: var(--bitunix-text);
+  --text-secondary: var(--bitunix-text-gray);
+  --border-color: var(--bitunix-border);
+  
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --dark-border: rgba(0, 0, 0, 0.08);
+}
+
 /* Bitunix Design Overrides */
 .btn-primary {
   @apply rounded-full font-bold transition-all duration-300;

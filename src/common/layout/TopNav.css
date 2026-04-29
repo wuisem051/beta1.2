@@ -16,6 +16,18 @@
     --tn-height: 60px;
 }
 
+/* Modo Claro TopNav */
+body.light-mode {
+    --tn-bg: #ffffff;
+    --tn-border: rgba(0, 0, 0, 0.06);
+    --tn-text-soft: #474d57;
+    --tn-text-main: #1e2329;
+    --tn-hover-bg: rgba(0, 0, 0, 0.05);
+    --tn-active-bg: rgba(240, 185, 11, 0.1);
+    --tn-dd-bg: #ffffff;
+    --tn-dd-border: rgba(0, 0, 0, 0.08);
+}
+
 /* ── Nav base ──────────────────────────────────────────────────── */
 .tn-nav {
     position: fixed;
@@ -71,7 +83,7 @@
 .tn-logo-text {
     font-size: 1.2rem;
     font-weight: 900;
-    color: #fff;
+    color: var(--tn-text-main);
     letter-spacing: -0.04em;
 }
 
@@ -433,7 +445,7 @@
 .tn-profile-name {
     font-size: 0.74rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--tn-text-main);
     line-height: 1.2;
 }
 
@@ -501,7 +513,7 @@
 .tn-profile-dd-name {
     font-size: 0.85rem;
     font-weight: 800;
-    color: #fff;
+    color: var(--tn-text-main);
     margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;

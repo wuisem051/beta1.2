@@ -11,9 +11,12 @@ import {
 } from 'react-icons/fa';
 import TradingViewWidget from './TradingViewWidget';
 import ScalperTradingTool from './ScalperTradingTool';
+import { useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
 
 const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) => {
     const { currentUser } = useAuth();
+    const { darkMode } = useContext(ThemeContext);
     const [activeTab, setActiveTab] = useState('trading');
     const [configs, setConfigs] = useState({
         binance: { apiKey: '', secret: '', connected: false },
@@ -836,7 +839,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                     </div>
                                     <TradingViewWidget
                                         symbol={chart.symbol.replace('/', '')}
-                                        theme="dark"
+                                        theme={darkMode ? "dark" : "light"}
                                         interval={chart.interval || '15'}
                                     />
                                 </div>

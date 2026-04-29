@@ -1709,7 +1709,7 @@ const UserPanel = () => {
   };
 
   return (
-    <div className={`${styles.userPanelContainer} w-full overflow-hidden`} style={{ backgroundColor: 'var(--bg-main)' }}>
+    <div className={`${styles.userPanelContainer} ${!darkMode ? 'light-mode' : ''} w-full overflow-hidden`} style={{ backgroundColor: 'var(--bg-main)' }}>
       {/* Bitunix-style Top Navigation */}
       <TopNav
         displayUser={displayUser}
