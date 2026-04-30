@@ -8,22 +8,22 @@
   transition: background-color 0.5s ease;
 }
 
-/* Glassmorphism Binance Style */
+/* Glassmorphism MaxiOS Style */
 .glassBase {
   background: var(--bg-card);
   border: 1px solid var(--glass-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Binance Specific Utilities */
-.binanceCard {
+/* MaxiOS Specific Utilities */
+.maxiosCard {
   background-color: var(--bg-card);
   border-radius: 1rem;
   border: 1px solid var(--glass-border);
   padding: 1.5rem;
 }
 
-.binanceItem {
+.maxiosItem {
   background-color: var(--bg-sidebar);
   border-radius: 0.75rem;
   padding: 1rem;
@@ -34,19 +34,19 @@
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.textBinanceYellow {
+.textMaxiosYellow {
   color: var(--accent);
 }
 
-.bgBinanceYellow {
+.bgMaxiosYellow {
   background-color: var(--accent);
 }
 
-.textBinanceGreen {
+.textMaxiosGreen {
   color: var(--green-check);
 }
 
-.textBinanceRed {
+.textMaxiosRed {
   color: var(--red-error);
 }
 

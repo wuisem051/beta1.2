@@ -11,7 +11,7 @@ import {
 import styles from './Footer.module.css';
 
 const Footer = () => {
-  const [footerText, setFooterText] = useState(`© 2022 - ${new Date().getFullYear()} Bitunix.com. All rights reserved`);
+  const [footerText, setFooterText] = useState(`© 2022 - ${new Date().getFullYear()} MaxiOS. All rights reserved`);
 
   useEffect(() => {
     const fetchFooterText = async () => {
@@ -34,7 +34,7 @@ const Footer = () => {
     {
       title: 'Empresa',
       links: [
-        'Acerca de Bitunix', 'Anuncios', 'Blog', 'Preuve de Réserves',
+        'Acerca de MaxiOS', 'Anuncios', 'Blog', 'Preuve de Réserves',
         'Acuerdo de Usuario', 'Política de Privacidad', 'Aviso legal',
         'Mejora Regulatoria y Legal', 'Advertencia de Riesgo', 'Políticas AML'
       ]
@@ -51,7 +51,7 @@ const Footer = () => {
       title: 'Trading',
       extras: [
         { title: 'Trading', links: ['Spot', 'Futuros', 'Ganancias Fáciles', 'Comisiones'] },
-        { title: 'Soporte', links: ['Centro de Ayuda', 'Informe Fiscal', 'Verificación Oficial', 'Comentarios y Sugerencias', 'Registro de cambios del producto', 'Contactar a Bitunix', 'Enviar Solicitud'] }
+        { title: 'Soporte', links: ['Centro de Ayuda', 'Informe Fiscal', 'Verificación Oficial', 'Comentarios y Sugerencias', 'Registro de cambios del producto', 'Contactar a MaxiOS', 'Enviar Solicitud'] }
       ]
     },
     {
@@ -71,8 +71,16 @@ const Footer = () => {
           {/* Brand & Social Column */}
           <div className={styles.brandSection}>
             <div className={styles.logo}>
-              <div className={styles.logoIcon}></div>
-              Bitunix
+              <img
+                src="/logo.png"
+                alt="MaxiOS"
+                style={{
+                  height: '35px',
+                  width: 'auto',
+                  mixBlendMode: 'lighten',
+                  filter: 'brightness(1.1)'
+                }}
+              />
             </div>
             <div className={styles.socialIcons}>
               <a href="#" className={styles.socialLink}><FaTwitter /></a>

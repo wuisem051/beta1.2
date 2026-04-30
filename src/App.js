@@ -110,7 +110,7 @@ function AppContent() {
           </Suspense>
         </ColorPaletteProvider>
       </main>
-      {!isHomePage && <Footer />}
+      {!isHomePage && !isUserPanel && <Footer />}
     </div>
   );
 }

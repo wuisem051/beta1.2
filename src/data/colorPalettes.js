@@ -370,10 +370,10 @@ export const colorPalettes = {
         textSecondary: '#a3a3a3',
         border: '#262626',
     },
-    bitunix: {
-        id: 'bitunix',
-        name: 'Bitunix Premium',
-        description: 'Diseño oficial de Bitunix - Oscuro con acentos lima vibrantes',
+    maxios: {
+        id: 'maxios',
+        name: 'MaxiOS Premium',
+        description: 'Diseño oficial de MaxiOS - Oscuro con acentos lima vibrantes',
         emoji: '🟢',
 
         accent: '#c1ff2e',
@@ -403,7 +403,7 @@ export const colorPalettes = {
 
 // Función helper para obtener una paleta por ID
 export const getPaletteById = (paletteId) => {
-    return colorPalettes[paletteId] || colorPalettes.bitunix;
+    return colorPalettes[paletteId] || colorPalettes.maxios;
 };
 
 // Función helper para obtener todas las paletas como array
@@ -412,4 +412,4 @@ export const getAllPalettes = () => {
 };
 
 // Paleta por defecto
-export const defaultPalette = colorPalettes.bitunix;
+export const defaultPalette = colorPalettes.maxios;

@@ -16,7 +16,7 @@ import WalletHub from '../components/WalletHub'; // Importar WalletHub unificado
 import TradingPortfolioContent from '../components/TradingPortfolioContent'; // Importar TradingPortfolioContent
 import ExchangeContent from '../components/ExchangeContent'; // Importar ExchangeContent
 import P2P_MarketplacePage from '../pages/P2P_MarketplacePage'; // Importar P2P_MarketplacePage
-import TopNav from '../../common/layout/TopNav'; // TopNav Bitunix-style
+import TopNav from '../../common/layout/TopNav'; // TopNav MaxiOS-style
 import Navbar from '../components/Navbar'; // Importar Navbar
 import MainContent from '../components/MainContent'; // Importar MainContent
 import ErrorMessage from '../components/ErrorMessage'; // Importar ErrorMessage
@@ -469,8 +469,8 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
       </div>
 
       {/* Premium Profile Slot - Reduced padding for more professional look */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-6">
-        <div className="lg:col-span-2 bg-[var(--bg-card)] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8 mt-6">
+        <div className="bg-[var(--bg-card)] p-8 rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
           <div className="relative flex flex-col md:flex-row items-center gap-6">
@@ -500,31 +500,6 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
                   <p className="text-sm font-black text-[var(--accent)] italic tracking-tighter">3.2K+</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[var(--accent)] p-[2px] rounded-[32px] shadow-2xl">
-          <div className="w-full h-full bg-[var(--bg-card)] rounded-[30px] p-8 flex flex-col justify-between border border-white/5 hover:bg-[var(--bg-sidebar)] transition-all cursor-pointer group">
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-[9px] font-black text-soft uppercase tracking-widest">Balance Estimado</span>
-                <button onClick={() => setShowBalance(!showBalance)} className="text-[var(--accent)]">
-                  {showBalance ? <FaRegEye size={16} /> : <FaRegEyeSlash size={16} />}
-                </button>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-black text-main italic tracking-tighter">
-                  {showBalance ? totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '********'}
-                </p>
-                <span className="text-[10px] font-black text-soft uppercase tracking-widest">USDT</span>
-              </div>
-              <p className="text-[10px] text-slate-600 font-bold mt-1">≈ {showBalance ? totalEquity.toFixed(2) : '********'} USD</p>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-white/5 flex gap-3">
-              <button onClick={() => navigate('/user/deposits')} className="flex-1 py-2.5 bg-[var(--accent)] text-black text-[9px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all">Depositar</button>
-              <button onClick={() => navigate('/user/withdrawals')} className="flex-1 py-2.5 bg-[var(--bg-main)] text-main text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all border border-white/5">Retirar</button>
             </div>
           </div>
         </div>

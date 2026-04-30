@@ -14,7 +14,7 @@ const Header = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [siteName, setSiteName] = useState('Bitunix');
+  const [siteName, setSiteName] = useState('MaxiOS');
 
   useEffect(() => {
     const fetchSiteConfig = async () => {

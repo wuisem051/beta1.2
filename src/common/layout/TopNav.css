@@ -8,9 +8,9 @@
     --tn-border: rgba(255, 255, 255, 0.06);
     --tn-text-soft: #848e9c;
     --tn-text-main: #eaecef;
-    --tn-accent: var(--accent, #f0b90b);
+    --tn-accent: var(--accent);
     --tn-hover-bg: rgba(255, 255, 255, 0.05);
-    --tn-active-bg: rgba(240, 185, 11, 0.08);
+    --tn-active-bg: rgba(193, 255, 46, 0.08);
     --tn-dd-bg: #161a1f;
     --tn-dd-border: rgba(255, 255, 255, 0.07);
     --tn-height: 60px;
@@ -60,13 +60,13 @@ body.light-mode {
 }
 
 .tn-logo-diamond {
-    width: 22px;
-    height: 22px;
-    background: var(--tn-accent);
-    border-radius: 4px;
-    transform: rotate(45deg);
-    position: relative;
-    flex-shrink: 0;
+    display: none;
+}
+
+.tn-logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
 }
 
 .tn-logo-diamond::after {
@@ -240,7 +240,7 @@ body.light-mode {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: rgba(240, 185, 11, 0.1);
+    background: rgba(193, 255, 46, 0.1);
     color: var(--tn-accent);
     display: flex;
     align-items: center;
@@ -256,7 +256,7 @@ body.light-mode {
 }
 
 .tn-dd-item:hover .tn-dd-icon-wrap {
-    background: rgba(240, 185, 11, 0.18);
+    background: rgba(193, 255, 46, 0.18);
 }
 
 .tn-dd-item:hover .tn-dd-icon-wrap.red {
@@ -307,7 +307,7 @@ body.light-mode {
 }
 
 .tn-dd-tag.gold {
-    background: rgba(240, 185, 11, 0.15);
+    background: rgba(193, 255, 46, 0.15);
     color: var(--tn-accent);
 }
 
@@ -543,7 +543,7 @@ body.light-mode {
 }
 
 .tn-vip-pill.vip {
-    background: rgba(240, 185, 11, 0.15);
+    background: rgba(193, 255, 46, 0.15);
     color: var(--tn-accent);
 }
 

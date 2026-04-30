@@ -10,32 +10,32 @@
   --binance-yellow: var(--accent);
   --binance-text: #eaecef;
 
-  /* Bitunix Premium Tokens */
-  --bitunix-bg: #000000;
-  --bitunix-card: #14151a;
-  --bitunix-lime: #c1ff2e;
-  --bitunix-lime-hover: #d3ff6e;
-  --bitunix-text: #ffffff;
-  --bitunix-text-gray: #848e9c;
-  --bitunix-border: rgba(255, 255, 255, 0.05);
+  /* MaxiOS Premium Tokens */
+  --maxios-bg: #000000;
+  --maxios-card: #14151a;
+  --maxios-lime: #c1ff2e;
+  --maxios-lime-hover: #d3ff6e;
+  --maxios-text: #ffffff;
+  --maxios-text-gray: #848e9c;
+  --maxios-border: rgba(255, 255, 255, 0.05);
 
-  /* Global Theme Mapping - Defaulting to Bitunix Style */
-  --bg-main: var(--bitunix-bg);
-  --bg-sidebar: var(--bitunix-bg);
-  --bg-card: var(--bitunix-card);
-  --card-bg: var(--bitunix-card);
-  --accent: var(--bitunix-lime);
-  --accent-hover: var(--bitunix-lime-hover);
-  --text-main: var(--bitunix-text);
-  --text-secondary: var(--bitunix-text-gray);
-  --border-color: var(--bitunix-border);
+  /* Global Theme Mapping - Defaulting to MaxiOS Style */
+  --bg-main: var(--maxios-bg);
+  --bg-sidebar: var(--maxios-bg);
+  --bg-card: var(--maxios-card);
+  --card-bg: var(--maxios-card);
+  --accent: var(--maxios-lime);
+  --accent-hover: var(--maxios-lime-hover);
+  --text-main: var(--maxios-text);
+  --text-secondary: var(--maxios-text-gray);
+  --border-color: var(--maxios-border);
 
   --light-bg: #f8fafc;
   --light-card: rgba(255, 255, 255, 0.9);
   --dark-text: #0f172a;
   --light-text: #f1f5f9;
-  --dark-bg: var(--bitunix-bg);
-  --dark-card: var(--bitunix-card);
+  --dark-bg: var(--maxios-bg);
+  --dark-card: var(--maxios-card);
   --accent-glow: rgba(193, 255, 46, 0.2);
   --green-check: #10b981;
   --gray-border: #e2e8f0;
@@ -59,24 +59,24 @@
 
 /* Modo Claro Overrides */
 body.light-mode {
-  --bitunix-bg: #f5f5f5;
-  --bitunix-card: #ffffff;
-  --bitunix-text: #1e2329;
-  --bitunix-text-gray: #474d57;
-  --bitunix-border: rgba(0, 0, 0, 0.08);
-  
-  --bg-main: var(--bitunix-bg);
-  --bg-card: var(--bitunix-card);
-  --text-main: var(--bitunix-text);
-  --text-secondary: var(--bitunix-text-gray);
-  --border-color: var(--bitunix-border);
-  
+  --maxios-bg: #f5f5f5;
+  --maxios-card: #ffffff;
+  --maxios-text: #1e2329;
+  --maxios-text-gray: #474d57;
+  --maxios-border: rgba(0, 0, 0, 0.08);
+
+  --bg-main: var(--maxios-bg);
+  --bg-card: var(--maxios-card);
+  --text-main: var(--maxios-text);
+  --text-secondary: var(--maxios-text-gray);
+  --border-color: var(--maxios-border);
+
   --glass-bg: rgba(0, 0, 0, 0.03);
   --glass-border: rgba(0, 0, 0, 0.08);
   --dark-border: rgba(0, 0, 0, 0.08);
 }
 
-/* Bitunix Design Overrides */
+/* MaxiOS Design Overrides */
 .btn-primary {
   @apply rounded-full font-bold transition-all duration-300;
   background-color: var(--accent);
@@ -89,7 +89,7 @@ body.light-mode {
   box-shadow: 0 4px 12px var(--accent-glow);
 }
 
-.card-bitunix {
+.card-maxios {
   @apply rounded-2xl p-6 transition-all duration-300;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);

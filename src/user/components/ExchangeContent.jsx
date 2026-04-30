@@ -592,14 +592,14 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                     </div>
                 </div>
 
-                {/* Modern Navigation Tabs (Bitunix Style) */}
+                {/* Modern Navigation Tabs (MaxiOS Style) */}
                 <div className="flex bg-[#161a1f]/80 backdrop-blur-xl p-[3px] rounded-xl border border-white/5 overflow-x-auto max-w-full">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-5 py-2 rounded-[9px] text-[11px] font-bold uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 shadow-lg shadow-[#f0b90b]/5'
+                                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30 shadow-lg shadow-[var(--accent)]/5'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                                 }`}
                         >
@@ -722,28 +722,28 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                             <div className="flex bg-[#161a1f]/80 p-[3px] rounded-xl border border-white/5">
                                 <button
                                     onClick={() => setLayout('1')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '1' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '1' ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Vista Simple"
                                 >
                                     <FaSquare />
                                 </button>
                                 <button
                                     onClick={() => setLayout('2v')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '2v' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '2v' ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Vista Dividida"
                                 >
                                     <FaColumns />
                                 </button>
                                 <button
                                     onClick={() => setLayout('4')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '4' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '4' ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Grid 4"
                                 >
                                     <FaThLarge />
                                 </button>
                                 <button
                                     onClick={() => setLayout('6')}
-                                    className={`p-2 rounded-lg transition-all ${layout === '6' ? 'bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
+                                    className={`p-2 rounded-lg transition-all ${layout === '6' ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30' : 'text-slate-500 hover:text-white border border-transparent'}`}
                                     title="Grid 6"
                                 >
                                     <FaTh />
@@ -751,7 +751,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 <button
                                     onClick={saveExchangeLayout}
                                     disabled={isSavingLayout}
-                                    className="ml-2 px-3 py-1.5 bg-[#f0b90b] hover:bg-[#d8a60a] text-black font-bold rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                    className="ml-2 px-3 py-1.5 bg-[var(--accent)] hover:bg-[#d8a60a] text-black font-bold rounded-lg transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
                                     title="Guardar Configuración"
                                 >
                                     {isSavingLayout ? <FaSync className="animate-spin text-xs" /> : <FaSave className="text-xs" />}
@@ -770,7 +770,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                     key={chart.id}
                                     onClick={() => setActiveChartId(chart.id)}
                                     className={`bg-slate-900/50 rounded-2xl border overflow-hidden shadow-2xl relative group transition-all duration-300 ${activeChartId === chart.id
-                                        ? 'border-[#f0b90b] ring-1 ring-[#f0b90b]/30 shadow-[#f0b90b]/10'
+                                        ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]/30 shadow-[var(--accent)]/10'
                                         : 'border-white/5 hover:border-white/10'
                                         }`}
                                     style={{ height: layout === '1' ? '450px' : '350px' }}
@@ -858,12 +858,12 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                 <div>
                                     <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Portfolio Balance</h2>
                                     <p className="text-base font-black text-white flex items-center gap-2 italic">
-                                        <FaBitcoin className="text-[#f0b90b]" /> RESUMEN
+                                        <FaBitcoin className="text-[var(--accent)]" /> RESUMEN
                                     </p>
                                 </div>
                                 <button
                                     onClick={fetchBalance}
-                                    className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-[#f0b90b]/20 rounded-lg text-slate-400 hover:text-[#f0b90b] transition-all border border-white/5 active:rotate-180 duration-500"
+                                    className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-[var(--accent)]/20 rounded-lg text-slate-400 hover:text-[var(--accent)] transition-all border border-white/5 active:rotate-180 duration-500"
                                 >
                                     <FaSync className={isLoadingBalance ? 'animate-spin' : ''} />
                                 </button>
@@ -892,7 +892,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className={`w-2 h-2 rounded-full ${isUSDT ? 'bg-[#0ecb81] shadow-[0_0_8px_rgba(14,203,129,0.5)]' : 'bg-[#f0b90b]'}`}></div>
+                                                        <div className={`w-2 h-2 rounded-full ${isUSDT ? 'bg-[#0ecb81] shadow-[0_0_8px_rgba(14,203,129,0.5)]' : 'bg-[var(--accent)]'}`}></div>
                                                     </div>
                                                 </div>
                                             );
@@ -920,7 +920,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                         <div className={`${styles.sectionCard} !bg-[#161a1f]/80 backdrop-blur-xl !border-white/5 !p-0 overflow-hidden flex-1 flex flex-col`}>
                             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-[#f0b90b] to-[#b38805] rounded-2xl flex items-center justify-center shadow-xl shadow-[#f0b90b]/10">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-[var(--accent)] to-[#b38805] rounded-2xl flex items-center justify-center shadow-xl shadow-[var(--accent)]/10">
                                         <FaBolt className="text-black text-xl" />
                                     </div>
                                     <div>
@@ -1001,7 +1001,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     type="button"
                                                     onClick={() => updateChartSymbol(activeChartId, pair)}
                                                     className={`py-3.5 rounded-2xl border-2 font-black text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 ${tradeSymbol === pair
-                                                        ? 'bg-[#f0b90b]/10 border-[#f0b90b] text-white shadow-xl'
+                                                        ? 'bg-[var(--accent)]/10 border-[var(--accent)] text-white shadow-xl'
                                                         : 'bg-[#161a1f] border-white/5 text-slate-600 hover:border-white/10 hover:bg-white/5 hover:text-slate-300'
                                                         }`}
                                                 >
@@ -1015,7 +1015,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                         }}
                                                     />
                                                     {pair.replace('/USDT', '')}
-                                                    {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-[#f0b90b] rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-black" /></div>}
+                                                    {tradeSymbol === pair && <div className="absolute top-0 right-0 p-1 bg-[var(--accent)] rounded-bl-lg animate-in zoom-in-0"><FaCheckCircle className="text-[8px] text-black" /></div>}
                                                 </button>
                                             ))}
                                         </div>
@@ -1033,10 +1033,10 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     step="0.00000001"
                                                     value={tradePrice}
                                                     onChange={e => setTradePrice(e.target.value)}
-                                                    className="w-full bg-[#161a1f] border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-[#f0b90b] transition-all outline-none text-right hover:border-white/10"
+                                                    className="w-full bg-[#161a1f] border-2 border-white/5 rounded-3xl px-6 py-5 text-white font-mono text-2xl focus:border-[var(--accent)] transition-all outline-none text-right hover:border-white/10"
                                                     placeholder="0.0000"
                                                 />
-                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[#f0b90b]">PRICE</div>
+                                                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[var(--accent)]">PRICE</div>
                                             </div>
                                         </div>
                                     )}
@@ -1054,11 +1054,11 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                 step="0.00000001"
                                                 value={tradeAmount}
                                                 onChange={e => setTradeAmount(e.target.value)}
-                                                className="w-full bg-[#161a1f] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-[#f0b90b] transition-all outline-none text-right hover:border-white/10"
+                                                className="w-full bg-[#161a1f] border border-white/5 rounded-3xl px-6 py-6 text-white font-mono text-3xl focus:border-[var(--accent)] transition-all outline-none text-right hover:border-white/10"
                                                 placeholder="0.0000"
                                                 required
                                             />
-                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[#f0b90b]">AMOUNT</div>
+                                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 font-black italic text-xs tracking-widest border-r border-white/5 pr-4 group-focus-within:text-[var(--accent)]">AMOUNT</div>
                                             <div className="absolute right-6 -bottom-2 px-3 py-1 bg-[#232832] border border-white/10 rounded-lg text-[9px] font-black text-white py-1 uppercase tracking-widest shadow-xl">{tradeSymbol.split('/')[0]}</div>
                                         </div>
 
@@ -1068,7 +1068,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                                     key={p}
                                                     type="button"
                                                     onClick={() => handlePercentageClick(p)}
-                                                    className="py-2.5 bg-black/20 hover:bg-[#f0b90b]/10 rounded-xl text-[10px] font-black text-slate-500 hover:text-[#f0b90b] transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
+                                                    className="py-2.5 bg-black/20 hover:bg-[var(--accent)]/10 rounded-xl text-[10px] font-black text-slate-500 hover:text-[var(--accent)] transition-all border border-white/5 active:scale-95 uppercase tracking-tighter"
                                                 >
                                                     {p}%
                                                 </button>
@@ -1086,7 +1086,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                         </div>
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Modo</span>
-                                            <span className="text-xs font-black text-[#f0b90b] italic tracking-tighter">SPOT MARKET</span>
+                                            <span className="text-xs font-black text-[var(--accent)] italic tracking-tighter">SPOT MARKET</span>
                                         </div>
                                     </div>
                                     <div className="flex-1 flex flex-col items-center justify-center md:pl-6">

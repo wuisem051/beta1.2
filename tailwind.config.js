@@ -14,7 +14,7 @@ module.exports = {
         light_text: '#F9FAFB', // Texto claro para modo oscuro
         dark_bg: '#121212', // Fondo oscuro
         dark_card: '#1F2937', // Fondo de tarjeta oscuro
-        accent: '#F59E0B',    // Un color de acento, como amarillo/naranja
+        accent: 'var(--accent)',    // Color de acento dinámico (MaxiOS Lime)
         green_check: '#10B981', // Un verde para elementos de éxito
         gray_border: '#E5E7EB', // Borde gris claro
         dark_border: '#374151', // Borde oscuro

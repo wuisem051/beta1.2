@@ -243,7 +243,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                             <div className={styles.historyGrid}>
                                 <div className={styles.supportCard}>
                                     <div className={styles.cardNumber}>1</div>
-                                    <h3 className={styles.supportTitle}>¿Cómo depositar en Bitunix?</h3>
+                                    <h3 className={styles.supportTitle}>¿Cómo depositar en MaxiOS?</h3>
                                     <span className={styles.supportLink}>Más información</span>
                                 </div>
                                 <div className={styles.supportCard}>

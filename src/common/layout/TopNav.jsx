@@ -151,9 +151,12 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                 <div className="tn-inner">
 
                     {/* ── LOGO ───────────────────────────────── */}
-                    <Link to="/user/dashboard" className="tn-logo">
-                        <span className="tn-logo-diamond" />
-                        <span className="tn-logo-text">Bitunix</span>
+                    <Link to="/" className="tn-logo">
+                        <svg viewBox="0 0 100 100" className="w-8 h-8 filter drop-shadow(0 0 8px var(--accent))">
+                            <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="none" stroke="var(--accent)" strokeWidth="6" />
+                            <path d="M50 30 L70 50 L50 70 L30 50 Z" fill="var(--accent)" />
+                        </svg>
+                        <span className="tn-logo-text" style={{ background: 'linear-gradient(90deg, var(--accent), #fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '1.5rem' }}>MaxiOS</span>
                     </Link>
 
                     {/* ── SEPARADOR VERTICAL ─────────────────── */}
@@ -331,7 +334,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                         ) : (
                             <div className="flex items-center gap-4 ml-4">
                                 <Link to="/login" className="text-slate-300 hover:text-white text-xs font-bold transition-colors">Iniciar Sesión</Link>
-                                <Link to="/signup" className="bg-[#f0b90b] text-black px-5 py-2 rounded-lg text-xs font-black transition-all hover:bg-[#ffe358] hover:shadow-[0_0_15px_rgba(240,185,11,0.4)] uppercase tracking-tight">Registrarse</Link>
+                                <Link to="/signup" className="bg-accent text-black px-5 py-2 rounded-lg text-xs font-black transition-all hover:opacity-90 hover:shadow-[0_0_15px_rgba(193,255,46,0.4)] uppercase tracking-tight">Registrarse</Link>
                             </div>
                         )}
 

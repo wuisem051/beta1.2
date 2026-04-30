@@ -129,7 +129,7 @@
 }
 
 .fireToken {
-    color: #f0b90b;
+    color: var(--accent);
 }
 
 .iconGroup {

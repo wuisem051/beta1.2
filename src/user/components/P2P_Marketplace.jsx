@@ -149,7 +149,7 @@ const P2P_Marketplace = ({ userBalances, isSidebarHidden = false, dashboardMaxWi
   return (
     <div className={styles.marketplaceContainer} style={{ maxWidth: isSidebarHidden ? '100%' : `${dashboardMaxWidth}px`, margin: isSidebarHidden ? '0' : '0 auto', transition: 'all 0.3s ease' }}>
 
-      {/* Bitunix P2P Submenu */}
+      {/* MaxiOS P2P Submenu */}
       <div className="flex gap-8 mb-10 border-b border-white/5 pb-1 overflow-x-auto no-scrollbar">
         {['Compra con un clic', 'Depósito Fiat', 'Tarjeta de crédito/débito', 'Comercio P2P', 'Express'].map((item) => (
           <button
@@ -530,7 +530,7 @@ const P2P_Marketplace = ({ userBalances, isSidebarHidden = false, dashboardMaxWi
             <FaHeadset />
           </div>
 
-          {/* Modal Bitunix Style */}
+          {/* Modal MaxiOS Style */}
           <Modal
             show={showCreateOfferModal}
             onClose={() => setShowCreateOfferModal(false)}
