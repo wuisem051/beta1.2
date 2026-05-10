@@ -73,37 +73,52 @@ const BotZoneContent = () => {
 
     // Live Trading Engine: Accurately mimics grid execution without wild UI jitter
     useEffect(() => {
+        if (!instances.length) return; // Wait for instances
+
         const interval = setInterval(() => {
             setLiveStats(prev => {
                 const next = { ...prev };
                 Object.keys(next).forEach(id => {
-                    // Grid bots only hit periodically, and the grid PnL should accumulate stably
-                    // Simulate 10% chance of a grid match every 3 seconds to generate realistic activity
+                    const bot = instances.find(b => b.id === id);
+                    if (!bot) return;
+
+                    // Simulate 10% chance of a grid match
                     if (Math.random() > 0.9) {
-                        const profit = parseFloat((Math.random() * 0.05 + 0.01).toFixed(6));
-                        const buyPrice = 80000 - Math.random() * 500;
-                        const sellPrice = buyPrice + (profit / 0.00009); // basic math to make limits realistic
+                        const rMin = parseFloat(bot.config.range_min || 70000);
+                        const rMax = parseFloat(bot.config.range_max || 83000);
+                        const grids = parseInt(bot.config.grids || 10, 10);
+                        const step = (rMax - rMin) / grids;
+
+                        // Generate a valid grid tier (1 to grids-1 to ensure inside range)
+                        const matchTier = Math.floor(Math.random() * (grids - 2)) + 1;
+                        const buyPrice = rMin + ((matchTier - 1) * step);
+                        const sellPrice = rMin + (matchTier * step);
+
+                        const cap = parseFloat(bot.config.capital);
+                        const amt = (cap * 0.0001).toFixed(5);
+                        const profit = (sellPrice - buyPrice) * parseFloat(amt);
+
                         const timestamp = new Date();
 
                         const newMatch = {
                             id: Math.random().toString(36).substring(7),
                             time: timestamp.toLocaleString(),
-                            profit: profit.toFixed(8) + ' USDT',
+                            profit: profit.toFixed(4) + ' USDT',
                             sell: {
                                 time: timestamp.toLocaleString(),
                                 type: 'Venta',
                                 price: sellPrice.toFixed(2),
-                                amount: '0.00009',
-                                total: (0.00009 * sellPrice).toFixed(6) + ' USDT',
-                                fee: (0.00009 * sellPrice * 0.001).toFixed(8) + ' USDT'
+                                amount: amt,
+                                total: (parseFloat(amt) * sellPrice).toFixed(4) + ' USDT',
+                                fee: (parseFloat(amt) * sellPrice * 0.001).toFixed(6) + ' USDT'
                             },
                             buy: {
                                 time: new Date(timestamp.getTime() - 4500000).toLocaleString(), // 75 mins prior
                                 type: 'Compra',
                                 price: buyPrice.toFixed(2),
-                                amount: '0.00009',
-                                total: (0.00009 * buyPrice).toFixed(6) + ' USDT',
-                                fee: '0.00000009 BTC' // Standard BNB/Crypto fee representation
+                                amount: amt,
+                                total: (parseFloat(amt) * buyPrice).toFixed(4) + ' USDT',
+                                fee: '0.00000009 BNB'
                             }
                         };
 
@@ -116,7 +131,7 @@ const BotZoneContent = () => {
             });
         }, 3000);
         return () => clearInterval(interval);
-    }, []);
+    }, [instances]);
 
     const handleCreateBot = async (e) => {
         e.preventDefault();
@@ -433,23 +448,21 @@ const BotZoneContent = () => {
                                                 {/* Table Body */}
                                                 <div className="font-mono text-[10px]">
                                                     {Array.from({ length: maxRows }).map((_, i) => {
-                                                        const buyPrice = rangeMax - ((i + 1) * step);
-                                                        const sellPrice = rangeMax + ((i + 1) * step);
-                                                        const hasBuy = i < buyCount;
-                                                        const hasSell = i < sellCount;
+                                                        const buyPrice = i < buyCount ? (rangeMin + ((buyCount - 1 - i) * step)) : null;
+                                                        const sellPrice = i < sellCount ? (rangeMin + ((buyCount + 1 + i) * step)) : null;
 
                                                         return (
                                                             <div key={i} className="flex w-full items-center py-2 hover:bg-white/5 border-b border-white/5 border-dashed">
                                                                 <div className="flex-1 text-white opacity-80">
-                                                                    {hasBuy ? `-${(i * 0.5 + 0.42).toFixed(2)}%` : ''}
+                                                                    {buyPrice !== null ? `-${(i * 0.5 + 0.42).toFixed(2)}%` : ''}
                                                                 </div>
                                                                 <div className="w-fit flex items-center justify-center gap-2">
-                                                                    <span className="text-[#00C087] w-14 text-right pr-2">{hasBuy ? buyPrice.toFixed(2) : '--'}</span>
+                                                                    <span className="text-[#00C087] w-14 text-right pr-2">{buyPrice !== null ? buyPrice.toFixed(2) : '--'}</span>
                                                                     <span className="text-[#848e9c] font-black text-[9px]">{i + 1}</span>
-                                                                    <span className="text-red-500 w-14 text-left pl-2">{hasSell ? sellPrice.toFixed(2) : '--'}</span>
+                                                                    <span className="text-red-500 w-14 text-left pl-2">{sellPrice !== null ? sellPrice.toFixed(2) : '--'}</span>
                                                                 </div>
                                                                 <div className="flex-1 text-right text-white opacity-80">
-                                                                    {hasSell ? `${(i * 0.5 + 0.64).toFixed(2)}%` : ''}
+                                                                    {sellPrice !== null ? `${(i * 0.5 + 0.64).toFixed(2)}%` : ''}
                                                                 </div>
                                                             </div>
                                                         );
