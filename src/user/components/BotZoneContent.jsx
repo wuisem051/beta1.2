@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../services/firebase';
 import {
@@ -7,64 +7,30 @@ import {
 } from 'firebase/firestore';
 
 // ─── Iconos ──────────────────────────────────────────────────────
-const IconStats = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M12 20V10M18 20V4M6 20v-4" /></svg>;
 const IconBot = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><rect x="3" y="11" width="18" height="10" rx="2" /><circle cx="12" cy="5" r="2" /><path d="M12 7v4" /></svg>;
-const IconChevron = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="m9 18 6-6-6-6" /></svg>;
+const IconPower = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" /></svg>;
+const IconSettings = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>;
 
 const BOT_CATALOG = [
     {
         id: 'grid', name: 'Cuadrícula de spot', color: '#F3BA2F',
-        desc: 'Compra bajo y vende alto en rangos definidos.',
-        stats: { risk: 'Bajo', pairs: 'Todos' },
         params: [
-            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'SOL/USDT'] },
-            { key: 'range_min', label: 'Precio Inferior', type: 'number', placeholder: 'Ej: 60000' },
-            { key: 'range_max', label: 'Precio Superior', type: 'number', placeholder: 'Ej: 75000' },
-            { key: 'grids', label: 'Número de Grillas', type: 'number', placeholder: '2-170' },
+            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'DOT/USDT'] },
+            { key: 'range_min', label: 'Precio Inferior', type: 'number', placeholder: '70000' },
+            { key: 'range_max', label: 'Precio Superior', type: 'number', placeholder: '83000' },
+            { key: 'grids', label: 'Número de Grillas', type: 'number', placeholder: '10' },
             { key: 'capital', label: 'Inversión (USDT)', type: 'capital-slider' }
-        ]
-    },
-    {
-        id: 'dca', name: 'DCA de spot', color: '#00C087',
-        desc: 'Inversión recurrente para promediar coste de entrada.',
-        stats: { risk: 'Muy Bajo', pairs: 'Principales' },
-        params: [
-            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT'] },
-            { key: 'interval', label: 'Intervalo', type: 'select', options: ['Diario', 'Semanal', 'Cada 4h'] },
-            { key: 'amount', label: 'Monto por orden', type: 'number' },
-            { key: 'capital', label: 'Inversión total', type: 'capital-slider' }
-        ]
-    },
-    {
-        id: 'rebalance', name: 'Bot de Reequilibrio', color: '#60a5fa',
-        desc: 'Mantiene las proporciones de tu portafolio automáticamente.',
-        stats: { risk: 'Bajo', pairs: 'Portfolio' },
-        params: [
-            { key: 'assets', label: 'Monedas (BTC/ETH/USDT)', type: 'text', placeholder: 'Ej: BTC 50%, ETH 50%' },
-            { key: 'capital', label: 'Inversión total', type: 'capital-slider' }
         ]
     }
 ];
 
-// ─── Componentes Pequeños ────────────────────────────────────────
-const StatBox = ({ label, value, sub, color = 'white' }) => (
-    <div className="flex flex-col gap-1 border-r border-white/5 pr-10 last:border-0">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#848e9c]">{label}</span>
-        <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black tracking-tighter" style={{ color }}>{value}</span>
-            {sub && <span className="text-[10px] font-bold text-[#00C087]">{sub}</span>}
-        </div>
-    </div>
-);
-
-// ─── Main Component ──────────────────────────────────────────────
 const BotZoneContent = () => {
     const { currentUser } = useAuth();
     const [tab, setTab] = useState('catalog');
+    const [mode, setMode] = useState('real'); // 'real' | 'demo'
     const [selectedBot, setSelectedBot] = useState(null);
     const [instances, setInstances] = useState([]);
     const [balance, setBalance] = useState(0);
-    const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
 
     const notify = useCallback((msg, type = 'success') => {
@@ -81,22 +47,21 @@ const BotZoneContent = () => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (!currentUser?.uid) { setLoading(false); return; }
+        if (!currentUser?.uid) return;
         const q = query(collection(db, 'userBots'), where('userId', '==', currentUser.uid));
         const unsub = onSnapshot(q, snap => {
             setInstances(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-            setLoading(false);
-        }, () => setLoading(false));
+        });
         return () => unsub();
     }, [currentUser]);
 
-    const handleSaveBot = async (e) => {
+    const handleCreateBot = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const config = Object.fromEntries(formData);
-        const capital = parseFloat(config.capital || config.amount || 0);
+        const capital = parseFloat(config.capital || 0);
 
-        if (capital > balance) return notify("Saldo insuficiente", "error");
+        if (mode === 'real' && capital > balance) return notify("Saldo insuficiente en billetera", "error");
 
         try {
             await addDoc(collection(db, 'userBots'), {
@@ -104,196 +69,154 @@ const BotZoneContent = () => {
                 botId: selectedBot.id,
                 botName: selectedBot.name,
                 config,
+                mode,
                 status: 'running',
                 createdAt: serverTimestamp()
             });
 
-            if (capital > 0) {
+            if (mode === 'real' && capital > 0) {
                 await updateDoc(doc(db, 'users', currentUser.uid), { balanceUSD: balance - capital });
             }
 
-            setTab('active');
-            setSelectedBot(null);
-            notify("🚀 Bot activado con éxito");
+            notify(`🚀 Bot ${mode === 'demo' ? '(DEMO)' : ''} activado con éxito`);
         } catch (err) { notify(err.message, "error"); }
     };
 
-    const handleDelete = async (id, capital = 0) => {
+    const handleDelete = async (id, capital = 0, botMode = 'real') => {
         await deleteDoc(doc(db, 'userBots', id));
-        if (capital > 0) {
+        if (botMode === 'real' && capital > 0) {
             await updateDoc(doc(db, 'users', currentUser.uid), { balanceUSD: balance + parseFloat(capital) });
         }
-        notify("🗑 Bot eliminado y capital devuelto");
+        notify("Detenido: Capital liberado");
     };
 
-    if (!currentUser) return <div className="p-20 text-center text-white">Inicia sesión para continuar.</div>;
+    if (!currentUser) return <div className="p-20 text-center text-white">Inicia sesión.</div>;
 
     return (
-        <div className="w-full min-h-screen bg-[#0b0e11] text-[#eaecef] p-4 md:p-8 font-sans">
-            {/* Header / Stats */}
-            {tab !== 'config' && (
-                <div className="max-w-7xl mx-auto mb-10 animate-in fade-in duration-500">
-                    <h1 className="text-3xl font-black mb-8 text-white tracking-tight italic">BOTS DE TRADING SPOT</h1>
+        <div className="w-full min-h-screen bg-[#0b0e11] text-[#eaecef] p-2 md:p-4 font-sans">
 
-                    <div className="flex flex-col lg:flex-row justify-between gap-6">
-                        <div className="flex flex-wrap gap-2 items-center bg-[#1e2329] p-8 rounded-3xl border border-white/5 flex-1">
-                            <StatBox label="Saldo Estimado" value={`$${Number(balance).toLocaleString()}`} />
-                            <StatBox label="PnL 24h" value="+$0.00" sub="(+0.00%)" color="#00C087" />
-                            <StatBox label="Bots Operando" value={instances.length} />
-                        </div>
-
-                        {/* Promo Card */}
-                        <div className="bg-[#F3BA2F] text-black p-6 rounded-3xl w-full lg:w-96 flex justify-between items-center relative overflow-hidden group cursor-pointer">
-                            <div className="relative z-10">
-                                <h3 className="text-lg font-black leading-tight mb-2">MAXI AI TRADING</h3>
-                                <p className="text-[10px] font-bold opacity-70 mb-4">Gana mientras duermes con algoritmos VIP.</p>
-                                <span className="text-[10px] font-black uppercase flex items-center gap-2">Explorar más <IconChevron /></span>
-                            </div>
-                            <div className="opacity-20 absolute -right-4 -bottom-4 group-hover:scale-110 transition-all">
-                                <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Config View (Split View) */}
-            {tab === 'config' && selectedBot && (
-                <div className="max-w-7xl mx-auto h-[750px] flex gap-4 animate-in fade-in slide-in-from-right-4 duration-500">
-                    {/* Left: Secure Chart Iframe */}
-                    <div className="flex-1 bg-[#1e2329] rounded-3xl overflow-hidden border border-white/5">
-                        <iframe
-                            src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_762ae&symbol=BINANCE:BTCUSDT&interval=15&hidesidetoolbar=1&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=es&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3ABTCUSDT`}
-                            style={{ width: '100%', height: '100%', border: 'none' }}
-                        />
-                    </div>
-
-                    {/* Right: Config Panel */}
-                    <div className="w-[400px] bg-[#1e2329] rounded-3xl border border-white/5 p-8 overflow-y-auto">
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center gap-3">
-                                <div style={{ color: selectedBot.color }}><IconBot /></div>
-                                <h2 className="font-black uppercase tracking-tighter">{selectedBot.name}</h2>
-                            </div>
-                            <button onClick={() => { setTab('catalog'); setSelectedBot(null); }} className="text-[#848e9c] hover:text-white transition-colors">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6 6 18M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleSaveBot} className="space-y-6">
-                            {selectedBot.params.map(p => (
-                                <div key={p.key} className="space-y-2">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-[#848e9c] block">{p.label}</label>
-                                    {p.type === 'select' ? (
-                                        <select name={p.key} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#F3BA2F]/50">
-                                            {p.options.map(o => <option key={o} value={o}>{o}</option>)}
-                                        </select>
-                                    ) : p.type === 'capital-slider' ? (
-                                        <div className="space-y-3">
-                                            <input type="number" name="capital" required placeholder="0.00 USDT" className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#F3BA2F]/50" />
-                                            <div className="flex justify-between gap-1">
-                                                {[25, 50, 75, 100].map(pct => (
-                                                    <button type="button" key={pct} className="flex-1 py-2 rounded-lg bg-white/5 text-[9px] font-bold hover:bg-[#F3BA2F]/20 hover:text-[#F3BA2F] transition-all">{pct}%</button>
-                                                ))}
-                                            </div>
-                                            <p className="text-[9px] font-bold text-[#848e9c] flex justify-between"><span>Disponible:</span> <span className="text-[#00C087]">${balance.toFixed(2)} USDT</span></p>
-                                        </div>
-                                    ) : (
-                                        <input type={p.type} name={p.key} required placeholder={p.placeholder} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-[#F3BA2F]/50" />
-                                    )}
-                                </div>
-                            ))}
-                            <button type="submit" className="w-full py-4 bg-[#F3BA2F] text-black font-black uppercase italic tracking-widest rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#F3BA2F]/10">
-                                Activar Bot
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Catalog Grid */}
-            {tab === 'catalog' && (
-                <div className="max-w-7xl mx-auto space-y-6">
-                    <div className="flex gap-4 border-b border-white/5 pb-4">
-                        <button onClick={() => setTab('catalog')} className={`text-xs font-black uppercase tracking-widest ${tab === 'catalog' ? 'text-[#F3BA2F]' : 'text-[#848e9c]'}`}>Marketplace</button>
-                        <button onClick={() => setTab('active')} className={`text-xs font-black uppercase tracking-widest ${tab === 'active' ? 'text-[#F3BA2F]' : 'text-[#848e9c]'}`}>Historial ({instances.length})</button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tab === 'catalog' ? (
+                <div className="max-w-7xl mx-auto py-10">
+                    <h1 className="text-3xl font-black mb-10 text-white italic">ZONA DE BOTS</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {BOT_CATALOG.map(bot => (
-                            <div key={bot.id} onClick={() => { setSelectedBot(bot); setTab('config'); }} className="bg-[#1e2329] p-8 rounded-3xl border border-white/5 hover:border-white/20 transition-all group cursor-pointer">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="p-4 bg-white/5 text-white/50 group-hover:bg-[#F3BA2F]/10 group-hover:text-[#F3BA2F] rounded-2xl transition-all">
-                                        <IconBot />
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-[10px] font-bold text-[#848e9c] uppercase block">Riesgo</span>
-                                        <span className="text-xs font-bold" style={{ color: bot.color }}>{bot.stats.risk}</span>
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-bold mb-3 text-white">{bot.name}</h3>
-                                <p className="text-xs text-[#848e9c] leading-relaxed mb-8">{bot.desc}</p>
-                                <div className="flex justify-between items-center pt-6 border-t border-white/5">
-                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Trading Spot</span>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#F3BA2F]">Configurar →</span>
-                                </div>
+                            <div key={bot.id} onClick={() => { setSelectedBot(bot); setTab('config'); }} className="bg-[#1e2329] p-8 rounded-3xl border border-white/5 hover:border-[#F3BA2F]/30 transition-all cursor-pointer group">
+                                <div className="p-4 bg-white/5 text-[#F3BA2F] rounded-2xl w-fit mb-6 group-hover:scale-110 transition-transform"><IconBot /></div>
+                                <h3 className="text-xl font-bold mb-2">{bot.name}</h3>
+                                <p className="text-xs text-[#848e9c] mb-6">Automatiza tus ganancias en el mercado spot.</p>
+                                <span className="text-[10px] font-black text-[#F3BA2F] uppercase">Configurar →</span>
                             </div>
                         ))}
                     </div>
                 </div>
-            )}
+            ) : (
+                <div className="flex h-[calc(100vh-40px)] gap-2">
+                    {/* LEFT: Chart + Table */}
+                    <div className="flex-1 flex flex-col gap-2">
+                        {/* Chart */}
+                        <div className="flex-[2] bg-[#1e2329] rounded-xl overflow-hidden border border-white/5 relative">
+                            <div className="absolute top-4 left-4 z-10 flex gap-2">
+                                <button onClick={() => setTab('catalog')} className="px-3 py-1 bg-black/40 hover:bg-black/60 rounded text-[10px] font-bold border border-white/10 uppercase">← Volver</button>
+                            </div>
+                            <iframe
+                                src={`https://s.tradingview.com/widgetembed/?symbol=BINANCE:${(selectedBot?.params?.find(p => p.key === 'pair')?.options[0] || 'BTC/USDT').replace('/', '')}&interval=15&theme=dark&style=1&locale=es`}
+                                style={{ width: '100%', height: '100%', border: 'none' }}
+                            />
+                        </div>
 
-            {/* Active Bots List */}
-            {tab === 'active' && (
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex gap-4 border-b border-white/5 pb-4 mb-8">
-                        <button onClick={() => setTab('catalog')} className="text-xs font-black uppercase tracking-widest text-[#848e9c]">Marketplace</button>
-                        <button onClick={() => setTab('active')} className="text-xs font-black uppercase tracking-widest text-[#F3BA2F]">Historial ({instances.length})</button>
+                        {/* Instances Table (Below Chart) */}
+                        <div className="flex-1 bg-[#1e2329] rounded-xl border border-white/5 overflow-hidden flex flex-col">
+                            <div className="flex gap-6 px-6 border-b border-white/5">
+                                <button className="py-3 text-[10px] font-black uppercase text-[#F3BA2F] border-b-2 border-[#F3BA2F]">Ejecutando ({instances.length})</button>
+                                <button className="py-3 text-[10px] font-black uppercase text-[#848e9c]">Historial</button>
+                                <button className="py-3 text-[10px] font-black uppercase text-[#848e9c]">Análisis de PnL</button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                <table className="w-full text-left text-[10px] border-collapse">
+                                    <thead className="sticky top-0 bg-[#1e2329] text-[#848e9c] border-b border-white/5">
+                                        <tr>
+                                            <th className="p-4 font-bold uppercase">Par</th>
+                                            <th className="p-4 font-bold uppercase">Fecha de creación</th>
+                                            <th className="p-4 font-bold uppercase">Inversión total</th>
+                                            <th className="p-4 font-bold uppercase">Ganancias totales</th>
+                                            <th className="p-4 font-bold uppercase text-right">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {instances.map(inst => (
+                                            <tr key={inst.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                                                <td className="p-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-white">{inst.config?.pair || 'BTC/USDT'}</span>
+                                                        <span className={`text-[8px] uppercase font-black ${inst.mode === 'demo' ? 'text-sky-400' : 'text-orange-400'}`}>{inst.mode} mode</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 opacity-50">{inst.createdAt?.toDate().toLocaleString() || 'Reciente...'}</td>
+                                                <td className="p-4 font-bold">{inst.config?.capital} USDT</td>
+                                                <td className="p-4 text-[#00C087] font-bold">+0.701 USDT (+0.70%)</td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex justify-end gap-3">
+                                                        <button onClick={() => handleDelete(inst.id, inst.config?.capital, inst.mode)} className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded transition-all"><IconPower /></button>
+                                                        <button className="p-2 hover:bg-white/5 text-white/20 hover:text-white rounded transition-all"><IconSettings /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {instances.length === 0 && (
+                                            <tr><td colSpan="5" className="p-20 text-center opacity-30 italic">No hay bots activos en este momento.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
-                    {instances.length === 0 ? (
-                        <div className="text-center py-32 bg-[#1e2329] rounded-[3rem] border border-white/5">
-                            <h2 className="text-2xl font-bold mb-2">No hay bots activos</h2>
-                            <p className="text-sm opacity-40 mb-8">Selecciona una estrategia en el Marketplace para comenzar.</p>
-                            <button onClick={() => setTab('catalog')} className="px-8 py-3 bg-[#F3BA2F] text-black font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Ir al catálogo</button>
+                    {/* RIGHT: Config Panel */}
+                    <div className="w-[360px] bg-[#1e2329] rounded-xl border border-white/5 p-6 flex flex-col overflow-y-auto">
+                        <div className="mb-6">
+                            <h2 className="text-sm font-black uppercase text-[#F3BA2F] mb-4">Configurar Bot</h2>
+
+                            {/* Mode Toggle Demo / Real */}
+                            <div className="flex bg-black/40 rounded-lg p-1 mb-8">
+                                <button onClick={() => setMode('demo')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded ${mode === 'demo' ? 'bg-[#2b3139] text-sky-400 border border-sky-400/20' : 'text-[#848e9c]'}`}>DEMO</button>
+                                <button onClick={() => setMode('real')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded ${mode === 'real' ? 'bg-[#2b3139] text-[#F3BA2F] border border-[#F3BA2F]/20' : 'text-[#848e9c]'}`}>REAL</button>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {instances.map(inst => (
-                                <div key={inst.id} className="bg-[#1e2329] p-8 rounded-[2.5rem] border border-white/5 flex flex-col gap-6">
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-[#F3BA2F]/10 text-[#F3BA2F] rounded-2xl"><IconBot /></div>
-                                            <div>
-                                                <h3 className="font-bold text-lg">{inst.botName}</h3>
-                                                <span className="text-[9px] font-black text-[#00C087] uppercase tracking-widest">En ejecución</span>
+
+                        <form onSubmit={handleCreateBot} className="space-y-6 flex-1">
+                            {selectedBot?.params.map(p => (
+                                <div key={p.key} className="space-y-2">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-[#848e9c]">{p.label}</label>
+                                    {p.type === 'select' ? (
+                                        <select name={p.key} className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40">
+                                            {p.options.map(o => <option key={o} value={o}>{o}</option>)}
+                                        </select>
+                                    ) : p.type === 'capital-slider' ? (
+                                        <div className="space-y-3">
+                                            <input type="number" name="capital" required placeholder="0" className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
+                                            <div className="flex gap-1">
+                                                {[25, 50, 75, 100].map(per => <button type="button" key={per} className="flex-1 py-2 rounded bg-white/5 text-[9px] font-bold hover:bg-white/10">{per}%</button>)}
+                                            </div>
+                                            <div className="flex justify-between text-[9px] font-bold">
+                                                <span className="text-[#848e9c]">Disponible:</span>
+                                                <span className={mode === 'real' ? 'text-[#00C087]' : 'text-sky-400'}>
+                                                    {mode === 'real' ? `$${balance.toFixed(2)} USDT` : '$10,000 (DEMO)'}
+                                                </span>
                                             </div>
                                         </div>
-                                        <button onClick={() => handleDelete(inst.id, inst.config?.capital)} className="p-3 text-white/10 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                                        </button>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="bg-black/20 p-4 rounded-3xl">
-                                            <p className="text-[8px] font-bold text-[#848e9c] uppercase mb-1">Capital</p>
-                                            <p className="font-black text-xs text-white">${inst.config?.capital || '0.00'}</p>
-                                        </div>
-                                        <div className="bg-black/20 p-4 rounded-3xl">
-                                            <p className="text-[8px] font-bold text-[#848e9c] uppercase mb-1">PnL</p>
-                                            <p className="font-black text-xs text-[#00C087]">+2.15%</p>
-                                        </div>
-                                        <div className="bg-black/20 p-4 rounded-3xl">
-                                            <p className="text-[8px] font-bold text-[#848e9c] uppercase mb-1">Par</p>
-                                            <p className="font-black text-xs text-white">{inst.config?.pair || 'BTC/USDT'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="bg-[#F3BA2F]/10 h-1 rounded-full overflow-hidden">
-                                        <div className="h-full bg-[#F3BA2F] w-2/3 animate-pulse" />
-                                    </div>
+                                    ) : (
+                                        <input type={p.type} name={p.key} required placeholder={p.placeholder} className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
+                                    )}
                                 </div>
                             ))}
-                        </div>
-                    )}
+
+                            <div className="pt-8">
+                                <button type="submit" className={`w-full py-4 rounded-xl font-black uppercase italic tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl ${mode === 'real' ? 'bg-[#F3BA2F] text-black shadow-[#F3BA2F]/10' : 'bg-sky-500 text-white shadow-sky-500/10'}`}>
+                                    Activar Bot {mode.toUpperCase()}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 
