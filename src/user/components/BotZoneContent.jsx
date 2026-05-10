@@ -369,35 +369,64 @@ const BotZoneContent = () => {
                                     <span>Cant. por orden <strong className="text-white">{(parseFloat(detailedBot.config.capital) * 0.0001).toFixed(5)} {detailedBot.config.pair?.split('/')[0]}</strong></span>
                                 </div>
 
-                                <div className="flex w-full mb-2 relative h-1 bg-[#2b3139] rounded overflow-hidden">
-                                    <div className="bg-[#00C087] h-full" style={{ width: '66%' }}></div>
-                                    <div className="bg-red-500 h-full" style={{ width: '34%' }}></div>
-                                </div>
-                                <div className="flex justify-between text-[10px] font-bold mb-6">
-                                    <span className="text-[#00C087]">Compra(10)</span>
-                                    <span className="text-red-500">Venta(5)</span>
-                                </div>
+                                {(() => {
+                                    const rangeMin = parseFloat(detailedBot.config.range_min || 70000);
+                                    const rangeMax = parseFloat(detailedBot.config.range_max || 83000);
+                                    const totalGrids = parseInt(detailedBot.config.grids || 10, 10);
+                                    const step = (rangeMax - rangeMin) / totalGrids;
+                                    const amountPerGrid = (parseFloat(detailedBot.config.capital) * 0.0001).toFixed(5);
+                                    const buyCount = Math.floor(totalGrids * 0.66);
+                                    const sellCount = totalGrids - buyCount;
+                                    const maxRows = Math.max(buyCount, sellCount);
 
-                                <table className="w-full text-left text-[11px]">
-                                    <thead className="text-[#848e9c] border-b border-white/5 border-dashed">
-                                        <tr>
-                                            <th className="pb-2 font-normal">Porcentaje de cumplimiento</th>
-                                            <th className="pb-2 font-normal text-center">Precio(USDT)</th>
-                                            <th className="pb-2 font-normal text-right">Monto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="font-mono">
-                                        {Array.from({ length: 8 }).map((_, i) => (
-                                            <tr key={i} className="hover:bg-white/5">
-                                                <td className="py-2 text-white">-{(i * 0.5 + 0.43).toFixed(2)}%</td>
-                                                <td className="py-2 text-center font-bold text-[#00C087]">
-                                                    {(parseFloat(detailedBot.config.range_max || 80000) - (i * 500)).toFixed(2)}
-                                                </td>
-                                                <td className="py-2 text-right text-white">0.00009</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                    return (
+                                        <div className="w-full">
+                                            <div className="flex w-full mb-6 gap-1 h-1">
+                                                <div className="bg-[#00C087] h-full rounded" style={{ width: `${(buyCount / totalGrids) * 100}%` }}></div>
+                                                <div className="bg-red-500 h-full rounded" style={{ width: `${(sellCount / totalGrids) * 100}%` }}></div>
+                                            </div>
+                                            <div className="flex justify-between text-[10px] font-bold mb-4">
+                                                <span className="text-[#00C087]">Compra({buyCount})</span>
+                                                <span className="text-red-500">Venta({sellCount})</span>
+                                            </div>
+
+                                            <div className="w-full text-[11px]">
+                                                {/* Table Header */}
+                                                <div className="flex w-full text-[#848e9c] border-b border-white/5 border-dashed pb-2 mb-2 font-normal">
+                                                    <div className="flex-1 w-fit pb-1">Porcentaje de cumplimiento...</div>
+                                                    <div className="w-24 text-center">Precio(USDT)</div>
+                                                    <div className="flex-1 text-right w-fit pb-1">Porcentaje de cumplimiento...</div>
+                                                </div>
+
+                                                {/* Table Body */}
+                                                <div className="font-mono text-[10px]">
+                                                    {Array.from({ length: maxRows }).map((_, i) => {
+                                                        const buyPrice = rangeMax - ((i + 1) * step);
+                                                        const sellPrice = rangeMax + ((i + 1) * step);
+                                                        const hasBuy = i < buyCount;
+                                                        const hasSell = i < sellCount;
+
+                                                        return (
+                                                            <div key={i} className="flex w-full items-center py-2 hover:bg-white/5 border-b border-white/5 border-dashed">
+                                                                <div className="flex-1 text-white opacity-80">
+                                                                    {hasBuy ? `-${(i * 0.5 + 0.42).toFixed(2)}%` : ''}
+                                                                </div>
+                                                                <div className="w-fit flex items-center justify-center gap-2">
+                                                                    <span className="text-[#00C087] w-14 text-right pr-2">{hasBuy ? buyPrice.toFixed(2) : '--'}</span>
+                                                                    <span className="text-[#848e9c] font-black text-[9px]">{i + 1}</span>
+                                                                    <span className="text-red-500 w-14 text-left pl-2">{hasSell ? sellPrice.toFixed(2) : '--'}</span>
+                                                                </div>
+                                                                <div className="flex-1 text-right text-white opacity-80">
+                                                                    {hasSell ? `${(i * 0.5 + 0.64).toFixed(2)}%` : ''}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         )}
 
