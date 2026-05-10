@@ -447,20 +447,35 @@ const BotZoneContent = () => {
 
     // Load user balance
     useEffect(() => {
-        if (!currentUser?.uid) return;
-        getDoc(doc(db, 'users', currentUser.uid)).then(snap => {
-            if (snap.exists()) setUserBalanceUSD(parseFloat(snap.data().balanceUSD || 0));
-        });
+        if (!currentUser?.uid) {
+            setUserBalanceUSD(0);
+            return;
+        }
+        const userRef = doc(db, 'users', currentUser.uid);
+        const unsub = onSnapshot(userRef, snap => {
+            if (snap.exists()) {
+                setUserBalanceUSD(parseFloat(snap.data().balanceUSD || 0));
+            }
+        }, (err) => console.error("Balance listen error:", err));
+        return () => unsub();
     }, [currentUser]);
 
     // Load bot instances
     useEffect(() => {
-        if (!currentUser?.uid) { setLoading(false); return; }
+        if (!currentUser?.uid) {
+            setInstances([]);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
         const q = query(collection(db, 'userBots'), where('userId', '==', currentUser.uid));
         const unsub = onSnapshot(q, snap => {
             setInstances(snap.docs.map(d => ({ id: d.id, ...d.data() })));
             setLoading(false);
-        }, () => setLoading(false));
+        }, (err) => {
+            console.error("Bots listen error:", err);
+            setLoading(false);
+        });
         return () => unsub();
     }, [currentUser]);
 
@@ -470,6 +485,10 @@ const BotZoneContent = () => {
     };
 
     const handleSaveBot = async ({ botId, botName, config, mode }) => {
+        if (!currentUser?.uid) {
+            notify("Inicia sesión para crear bots", "error");
+            return;
+        }
         try {
             const capital = parseFloat(config.capital || config.totalCapital || config.amountPerOrder || 0);
             if (mode === 'real' && capital > userBalanceUSD) throw new Error('Fondos insuficientes');
