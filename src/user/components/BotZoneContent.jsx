@@ -131,12 +131,17 @@ const BotZoneContent = () => {
 
                 const stats = next[id];
 
-                // Initialize tracking
+                // Prevent micro-flutter executions (grid bounce debounce)
+                const now = Date.now();
+                if (stats.lastTradeTime && (now - stats.lastTradeTime) < 10000) return;
+
+                // Initialize tracking safely respecting bounds
                 if (stats.currentTier == null) {
                     stats.currentTier = tier;
                     hasUpdate = true;
                 } else if (stats.currentTier !== tier) {
                     // Price has physically crossed a grid threshold!
+                    stats.lastTradeTime = now;
 
                     if (tier >= 0 && tier < grids) {
                         // If it moves UP a tier, it fills a resting Sell order (Profit realization!)
@@ -145,8 +150,9 @@ const BotZoneContent = () => {
                             const sellPrice = rMin + (crossedTier * step);
                             const buyPrice = sellPrice - step; // the floor from where it bought
 
-                            const cap = parseFloat(bot.config.capital);
-                            const amt = (cap * 0.0001).toFixed(5);
+                            const cap = parseFloat(bot.config.capital) || 0;
+                            const perGrid = grids > 0 ? (cap / grids) : 0;
+                            const amt = (perGrid / buyPrice).toFixed(5);
                             const profit = (sellPrice - buyPrice) * parseFloat(amt);
 
                             const timestamp = new Date();
