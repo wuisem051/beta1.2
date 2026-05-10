@@ -204,8 +204,16 @@ service cloud.firestore {
 
     // Reglas para el Sistema de Bots dinámicos
     match /userBots/{botId} {
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Permitir leer si el usuario es el dueño (ayuda con queries y get)
+      allow read: if request.auth != null && (
+        resource == null || resource.data.userId == request.auth.uid
+      );
+      
+      // Permitir crear si el userId enviado es el del usuario logueado
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // Permitir modificar o borrar si es el dueño
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       
       // Los administradores tienen acceso completo
       allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
