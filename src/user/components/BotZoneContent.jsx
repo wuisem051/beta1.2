@@ -36,6 +36,7 @@ const BotZoneContent = () => {
     const [modalTab, setModalTab] = useState('PnL'); // Tab for detailed modal
     const [balance, setBalance] = useState(0);
     const [notification, setNotification] = useState(null);
+    const [activeConfigPair, setActiveConfigPair] = useState('BTC/USDT');
 
     const notify = useCallback((msg, type = 'success') => {
         setNotification({ msg, type });
@@ -253,7 +254,8 @@ const BotZoneContent = () => {
                                 <button onClick={() => setTab('catalog')} className="px-3 py-1 bg-black/40 hover:bg-black/60 rounded text-[10px] font-bold border border-white/10 uppercase">← Volver</button>
                             </div>
                             <iframe
-                                src={`https://s.tradingview.com/widgetembed/?symbol=BINANCE:${(selectedBot?.params?.find(p => p.key === 'pair')?.options[0] || 'BTC/USDT').replace('/', '')}&interval=15&theme=dark&style=1&locale=es`}
+                                key={activeConfigPair}
+                                src={`https://s.tradingview.com/widgetembed/?symbol=BINANCE:${activeConfigPair.replace('/', '')}&interval=15&theme=dark&style=1&locale=es`}
                                 style={{ width: '100%', height: '100%', border: 'none' }}
                             />
                         </div>
@@ -331,7 +333,12 @@ const BotZoneContent = () => {
                                 <div key={p.key} className="space-y-2">
                                     <label className="text-[9px] font-black uppercase tracking-widest text-[#848e9c]">{p.label}</label>
                                     {p.type === 'select' ? (
-                                        <select name={p.key} className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40">
+                                        <select
+                                            name={p.key}
+                                            value={p.key === 'pair' ? activeConfigPair : undefined}
+                                            onChange={(e) => { if (p.key === 'pair') setActiveConfigPair(e.target.value); }}
+                                            className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40"
+                                        >
                                             {p.options.map(o => <option key={o} value={o}>{o}</option>)}
                                         </select>
                                     ) : p.type === 'capital-slider' ? (
