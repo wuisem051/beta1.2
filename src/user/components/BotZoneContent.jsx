@@ -16,7 +16,7 @@ const BOT_CATALOG = [
     {
         id: 'grid', name: 'Cuadrícula de spot', color: '#F3BA2F',
         params: [
-            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'DOT/USDT'] },
+            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'DOT/USDT', 'SOL/USDT', 'AAVE/USDT', 'ARPA/USDT', 'HBAR/USDT', 'LINK/USDT', 'LTC/USDT', 'DOGE/USDT', 'ALGO/USDT', 'TAO/USDT', 'ARK/USDT', 'TRB/USDT', 'AR/USDT'] },
             { key: 'range_min', label: 'Precio Inferior', type: 'number', placeholder: '70000' },
             { key: 'range_max', label: 'Precio Superior', type: 'number', placeholder: '83000' },
             { key: 'grids', label: 'Número de Grillas', type: 'number', placeholder: '10' },
@@ -37,6 +37,7 @@ const BotZoneContent = () => {
     const [balance, setBalance] = useState(0);
     const [notification, setNotification] = useState(null);
     const [activeConfigPair, setActiveConfigPair] = useState('BTC/USDT');
+    const [mainTab, setMainTab] = useState('ejecutando');
 
     const notify = useCallback((msg, type = 'success') => {
         setNotification({ msg, type });
@@ -263,55 +264,99 @@ const BotZoneContent = () => {
                         {/* Instances Table (Below Chart) */}
                         <div className="flex-1 bg-[#1e2329] rounded-xl border border-white/5 overflow-hidden flex flex-col">
                             <div className="flex gap-6 px-6 border-b border-white/5">
-                                <button className="py-3 text-[10px] font-black uppercase text-[#F3BA2F] border-b-2 border-[#F3BA2F]">Ejecutando ({instances.length})</button>
-                                <button className="py-3 text-[10px] font-black uppercase text-[#848e9c]">Historial</button>
-                                <button className="py-3 text-[10px] font-black uppercase text-[#848e9c]">Análisis de PnL</button>
+                                <button onClick={() => setMainTab('ejecutando')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'ejecutando' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Ejecutando ({instances.length})</button>
+                                <button onClick={() => setMainTab('historial')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'historial' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Historial</button>
+                                <button onClick={() => setMainTab('pnl')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'pnl' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Análisis de PnL</button>
                             </div>
                             <div className="flex-1 overflow-y-auto">
-                                <table className="w-full text-left text-[10px] border-collapse">
-                                    <thead className="sticky top-0 bg-[#1e2329] text-[#848e9c] border-b border-white/5">
-                                        <tr>
-                                            <th className="p-4 font-bold uppercase">Par</th>
-                                            <th className="p-4 font-bold uppercase">Fecha de creación</th>
-                                            <th className="p-4 font-bold uppercase">Inversión total</th>
-                                            <th className="p-4 font-bold uppercase">Ganancias totales</th>
-                                            <th className="p-4 font-bold uppercase text-right">Acción</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {instances.map(inst => {
-                                            const stat = liveStats[inst.id] || { pnl: 0, gridHits: 0 };
-                                            const capital = parseFloat(inst.config?.capital || 0);
-                                            const pnlPct = capital > 0 ? (stat.pnl / capital) * 100 : 0;
-                                            const isProfit = stat.pnl >= 0;
+                                {mainTab === 'ejecutando' && (
+                                    <table className="w-full text-left text-[10px] border-collapse">
+                                        <thead className="sticky top-0 bg-[#1e2329] text-[#848e9c] border-b border-white/5">
+                                            <tr>
+                                                <th className="p-4 font-bold uppercase">Par</th>
+                                                <th className="p-4 font-bold uppercase">Fecha de creación</th>
+                                                <th className="p-4 font-bold uppercase">Inversión total</th>
+                                                <th className="p-4 font-bold uppercase">Ganancias totales</th>
+                                                <th className="p-4 font-bold uppercase text-right">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {instances.map(inst => {
+                                                const stat = liveStats[inst.id] || { pnl: 0, gridHits: 0 };
+                                                const capital = parseFloat(inst.config?.capital || 0);
+                                                const pnlPct = capital > 0 ? (stat.pnl / capital) * 100 : 0;
+                                                const isProfit = stat.pnl >= 0;
 
-                                            return (
-                                                <tr key={inst.id} className="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer" onClick={() => setDetailedBot({ ...inst, stat })}>
-                                                    <td className="p-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-bold text-white">{inst.config?.pair || 'BTC/USDT'}</span>
-                                                            <span className={`text-[8px] uppercase font-black ${inst.mode === 'demo' ? 'text-sky-400' : 'text-[#F3BA2F]'}`}>{inst.mode} mode</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-4 opacity-50">{inst.createdAt?.toDate().toLocaleString() || 'Reciente...'}</td>
-                                                    <td className="p-4 font-bold">{capital.toFixed(2)} USDT</td>
-                                                    <td className={`p-4 font-bold ${isProfit ? 'text-[#00C087]' : 'text-red-500'}`}>
-                                                        {isProfit ? '+' : ''}{stat.pnl.toFixed(4)} USDT ({isProfit ? '+' : ''}{pnlPct.toFixed(2)}%)
-                                                    </td>
-                                                    <td className="p-4 text-right" onClick={e => e.stopPropagation()}>
-                                                        <div className="flex justify-end gap-3">
-                                                            <button onClick={() => handleDelete(inst.id, inst.config?.capital, inst.mode)} className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded transition-all"><IconPower /></button>
-                                                            <button onClick={() => setDetailedBot({ ...inst, stat })} className="p-2 hover:bg-white/5 text-white/20 hover:text-white rounded transition-all"><IconSettings /></button>
-                                                        </div>
+                                                return (
+                                                    <tr key={inst.id} className="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer" onClick={() => setDetailedBot({ ...inst, stat })}>
+                                                        <td className="p-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-white">{inst.config?.pair || 'BTC/USDT'}</span>
+                                                                <span className={`text-[8px] uppercase font-black ${inst.mode === 'demo' ? 'text-sky-400' : 'text-[#F3BA2F]'}`}>{inst.mode} mode</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4 opacity-50">{inst.createdAt?.toDate().toLocaleString() || 'Reciente...'}</td>
+                                                        <td className="p-4 font-bold">{capital.toFixed(2)} USDT</td>
+                                                        <td className={`p-4 font-bold ${isProfit ? 'text-[#00C087]' : 'text-red-500'}`}>
+                                                            {isProfit ? '+' : ''}{stat.pnl.toFixed(4)} USDT ({isProfit ? '+' : ''}{pnlPct.toFixed(2)}%)
+                                                        </td>
+                                                        <td className="p-4 text-right" onClick={e => e.stopPropagation()}>
+                                                            <div className="flex justify-end gap-3">
+                                                                <button onClick={() => handleDelete(inst.id, capital, inst.mode)} className="text-[#848e9c] hover:text-red-500 border border-white/10 hover:border-red-500/50 p-2 rounded bg-white/5 transition-colors" title="Detener Bot">
+                                                                    <IconPower />
+                                                                </button>
+                                                                <button className="text-[#848e9c] hover:text-white border border-white/10 hover:border-white/30 p-2 rounded bg-white/5 transition-colors" title="Ajustes">
+                                                                    <IconSettings />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {instances.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="5" className="p-10 text-center text-[#848e9c] text-xs italic">
+                                                        No tienes bots en ejecución. Configura uno a la derecha.
                                                     </td>
                                                 </tr>
-                                            );
-                                        })}
-                                        {instances.length === 0 && (
-                                            <tr><td colSpan="5" className="p-20 text-center opacity-30 italic">No hay bots activos en este momento.</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
+
+                                {mainTab === 'historial' && (
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-[#848e9c]">
+                                        <IconBot />
+                                        <p className="mt-4 text-[11px] italic">No hay bots finalizados en el historial.</p>
+                                    </div>
+                                )}
+
+                                {mainTab === 'pnl' && (() => {
+                                    const totalCapital = instances.reduce((acc, b) => acc + parseFloat(b.config?.capital || 0), 0);
+                                    const totalPnl = instances.reduce((acc, b) => acc + (liveStats[b.id]?.pnl || 0), 0);
+
+                                    return (
+                                        <div className="p-6">
+                                            <h3 className="text-white text-sm font-bold mb-6">Resumen Global (Activos)</h3>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div className="bg-[#2b3139]/40 p-4 rounded-xl border border-white/5">
+                                                    <p className="text-[10px] text-[#848e9c] font-bold mb-1 uppercase">Capital Invertido</p>
+                                                    <p className="text-lg font-black text-white">{totalCapital.toFixed(2)} USDT</p>
+                                                </div>
+                                                <div className="bg-[#2b3139]/40 p-4 rounded-xl border border-white/5">
+                                                    <p className="text-[10px] text-[#848e9c] font-bold mb-1 uppercase">Ganancia PnL Total</p>
+                                                    <p className={`text-lg font-black ${totalPnl >= 0 ? 'text-[#00C087]' : 'text-red-500'}`}>
+                                                        {totalPnl >= 0 ? '+' : ''}{totalPnl.toFixed(4)} USDT
+                                                    </p>
+                                                </div>
+                                                <div className="bg-[#2b3139]/40 p-4 rounded-xl border border-white/5">
+                                                    <p className="text-[10px] text-[#848e9c] font-bold mb-1 uppercase">Bots Activos</p>
+                                                    <p className="text-lg font-black text-white">{instances.length}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>
@@ -343,7 +388,7 @@ const BotZoneContent = () => {
                                         </select>
                                     ) : p.type === 'capital-slider' ? (
                                         <div className="space-y-3">
-                                            <input type="number" name="capital" required placeholder="0" className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
+                                            <input type="number" step="any" name="capital" required placeholder="0" className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
                                             <div className="flex gap-1">
                                                 {[25, 50, 75, 100].map(per => <button type="button" key={per} className="flex-1 py-2 rounded bg-white/5 text-[9px] font-bold hover:bg-white/10">{per}%</button>)}
                                             </div>
@@ -355,7 +400,7 @@ const BotZoneContent = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <input type={p.type} name={p.key} required placeholder={p.placeholder} className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
+                                        <input type={p.type} step={p.type === 'number' ? 'any' : undefined} name={p.key} required placeholder={p.placeholder} className="w-full bg-[#2b3139] border border-white/5 rounded-lg px-4 py-3 text-xs font-bold outline-none focus:border-[#F3BA2F]/40" />
                                     )}
                                 </div>
                             ))}
