@@ -52,6 +52,8 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
     const [isCollectiveModalOpen, setIsCollectiveModalOpen] = useState(false);
     const [collectiveAmount, setCollectiveAmount] = useState('');
     const [isProcessingCollective, setIsProcessingCollective] = useState(false);
+    const [userBots, setUserBots] = useState([]);
+    const [botSubTab, setBotSubTab] = useState('en_ejecucion');
 
     // Crypto prices
     const { price: btcPrice } = useCryptoPrice('bitcoin');
@@ -123,6 +125,11 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
         const depositsQ = query(collection(db, 'deposits'), where('userId', '==', currentUser.uid));
         const withdrawalsQ = query(collection(db, 'withdrawals'), where('userId', '==', currentUser.uid));
 
+        const botsQ = query(collection(db, 'userBots'), where('userId', '==', currentUser.uid));
+        const unsubBots = onSnapshot(botsQ, snap => {
+            setUserBots(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+
         const updateHistory = () => {
             // Placeholder for real logic (similar to previous WalletHub)
         };
@@ -130,6 +137,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
         return () => {
             unsubUser();
             unsubAddr();
+            unsubBots();
         };
     }, [currentUser]);
 
@@ -317,6 +325,69 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                                 <FaHistory size={40} className="mx-auto mb-4 opacity-20" />
                                 <p className="text-xs uppercase font-black tracking-widest">No hay transacciones recientes para mostrar</p>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'bot' && (
+                        <div className="bg-[#1e2329] rounded-xl border border-white/5 p-8 animate-in fade-in duration-300">
+                            <div className="flex gap-6 mb-8 text-[11px] font-black uppercase text-[#848e9c] border-b border-white/5 pb-4">
+                                <span className="text-[#F3BA2F] border-b-2 border-[#F3BA2F] pb-4 -mb-[17px]">Bots de spot</span>
+                                <span className="hover:text-white cursor-pointer">UM Grid</span>
+                                <span className="hover:text-white cursor-pointer">CM Grid</span>
+                                <span className="hover:text-white cursor-pointer">Position Snowball</span>
+                                <span className="hover:text-white cursor-pointer">Futures DCA</span>
+                            </div>
+
+                            <div className="flex justify-between items-start mb-10">
+                                <div>
+                                    <p className="text-[#848e9c] text-xs font-bold mb-2">Saldo (USDT)</p>
+                                    <p className="text-2xl font-black text-white">
+                                        {userBots.reduce((acc, b) => acc + parseFloat(b.config?.capital || 0), 0).toFixed(8)}
+                                    </p>
+                                    <p className="text-[#848e9c] text-xs mt-1">
+                                        ≈ ${userBots.reduce((acc, b) => acc + parseFloat(b.config?.capital || 0), 0).toFixed(2)}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[#848e9c] text-xs font-bold mb-2">Ganancias totales (USDT)</p>
+                                    <p className="text-2xl font-black text-[#00C087]">
+                                        {/* Ideally syncs with live stats, here we'll mock a small dynamic PnL or 0 for now as WalletHub doesn't store BotZone's live simulator */}
+                                        +0.00000000
+                                    </p>
+                                    <p className="text-[#00C087] text-xs mt-1">≈ $0.00</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 mb-6">
+                                <button onClick={() => setBotSubTab('en_ejecucion')} className={`px-4 py-2 text-xs font-bold rounded-lg ${botSubTab === 'en_ejecucion' ? 'bg-[#2b3139] text-white' : 'text-[#848e9c] hover:text-white'}`}>En ejecución</button>
+                                <button onClick={() => setBotSubTab('activos')} className={`px-4 py-2 text-xs font-bold rounded-lg ${botSubTab === 'activos' ? 'bg-[#2b3139] text-white' : 'text-[#848e9c] hover:text-white'}`}>Activos</button>
+                            </div>
+
+                            <table className="w-full text-left text-xs text-[#848e9c] border-collapse">
+                                <thead>
+                                    <tr className="border-b border-white/5">
+                                        <th className="py-4 font-normal">Estrategia</th>
+                                        <th className="py-4 font-normal">Inversión inicial</th>
+                                        <th className="py-4 font-normal">Saldo actual</th>
+                                        <th className="py-4 font-normal text-right">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {userBots.map(bot => (
+                                        <tr key={bot.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                                            <td className="py-4 text-white font-bold">{bot.config?.pair || 'BOT'} <span className="text-[9px] text-[#F3BA2F] ml-2 border border-[#F3BA2F]/30 px-1 rounded">{bot.botName || 'Grid'}</span></td>
+                                            <td className="py-4 text-white">{parseFloat(bot.config?.capital || 0).toFixed(4)} USDT</td>
+                                            <td className="py-4 text-white">{parseFloat(bot.config?.capital || 0).toFixed(4)} USDT</td>
+                                            <td className="py-4 text-right"><span className="text-[#F3BA2F] cursor-pointer text-[10px] font-black uppercase">Ver Dts.</span></td>
+                                        </tr>
+                                    ))}
+                                    {userBots.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" className="py-10 text-center opacity-50">No hay información de los datos.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>
