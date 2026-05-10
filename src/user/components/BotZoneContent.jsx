@@ -62,7 +62,7 @@ const BotZoneContent = () => {
                 const next = { ...prev };
                 data.forEach(b => {
                     if (!next[b.id]) {
-                        next[b.id] = { pnl: (Math.random() * 0.1 - 0.02), gridHits: 0 }; // Start slightly around 0
+                        next[b.id] = { pnl: 0, gridHits: 0, history: [] }; // No random negative starts
                     }
                 });
                 return next;
@@ -71,22 +71,50 @@ const BotZoneContent = () => {
         return () => unsub();
     }, [currentUser]);
 
-    // Live Trading Simulation Engine: Updates PnL continuously to mimic real market movements
+    // Live Trading Engine: Accurately mimics grid execution without wild UI jitter
     useEffect(() => {
         const interval = setInterval(() => {
             setLiveStats(prev => {
                 const next = { ...prev };
                 Object.keys(next).forEach(id => {
-                    // Random walk algorithm (drift + volatility)
-                    const volatility = 0.5; // USDT swing per tick
-                    const drift = 0.05; // Slight upward bias
-                    const change = (Math.random() * volatility * 2 - volatility) + drift;
-                    next[id].pnl += change;
-                    if (Math.random() > 0.8) next[id].gridHits += 1;
+                    // Grid bots only hit periodically, and the grid PnL should accumulate stably
+                    // Simulate 10% chance of a grid match every 3 seconds to generate realistic activity
+                    if (Math.random() > 0.9) {
+                        const profit = parseFloat((Math.random() * 0.05 + 0.01).toFixed(6));
+                        const buyPrice = 80000 - Math.random() * 500;
+                        const sellPrice = buyPrice + (profit / 0.00009); // basic math to make limits realistic
+                        const timestamp = new Date();
+
+                        const newMatch = {
+                            id: Math.random().toString(36).substring(7),
+                            time: timestamp.toLocaleString(),
+                            profit: profit.toFixed(8) + ' USDT',
+                            sell: {
+                                time: timestamp.toLocaleString(),
+                                type: 'Venta',
+                                price: sellPrice.toFixed(2),
+                                amount: '0.00009',
+                                total: (0.00009 * sellPrice).toFixed(6) + ' USDT',
+                                fee: (0.00009 * sellPrice * 0.001).toFixed(8) + ' USDT'
+                            },
+                            buy: {
+                                time: new Date(timestamp.getTime() - 4500000).toLocaleString(), // 75 mins prior
+                                type: 'Compra',
+                                price: buyPrice.toFixed(2),
+                                amount: '0.00009',
+                                total: (0.00009 * buyPrice).toFixed(6) + ' USDT',
+                                fee: '0.00000009 BTC' // Standard BNB/Crypto fee representation
+                            }
+                        };
+
+                        next[id].pnl += profit;
+                        next[id].gridHits += 1;
+                        next[id].history = [newMatch, ...(next[id].history || [])].slice(0, 50); // keep last 50
+                    }
                 });
                 return next;
             });
-        }, 3000); // Update every 3 seconds
+        }, 3000);
         return () => clearInterval(interval);
     }, []);
 
@@ -303,63 +331,67 @@ const BotZoneContent = () => {
                         </div>
 
                         {/* Modal Body: PnL Tab */}
-                        {modalTab === 'PnL' && (
-                            <div className="flex-1 p-6 overflow-y-auto flex gap-8">
-                                <div className="flex-1 space-y-8">
-                                    <h3 className="text-sm font-bold text-white mb-4">PnL</h3>
-                                    <div className="grid grid-cols-2 gap-y-6">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias totales</p>
-                                            <p className={`text-lg font-black ${detailedBot.stat.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'}`}>
-                                                {detailedBot.stat.pnl >= 0 ? '+' : ''}{detailedBot.stat.pnl.toFixed(4)} USDT
-                                            </p>
-                                            <p className={`text-[10px] font-bold ${detailedBot.stat.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'} opacity-80`}>
-                                                ({detailedBot.stat.pnl >= 0 ? '+' : ''}{((detailedBot.stat.pnl / parseFloat(detailedBot.config.capital)) * 100).toFixed(2)}%)
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Inversión total</p>
-                                            <p className="text-lg font-black text-white">{parseFloat(detailedBot.config.capital).toFixed(2)} USDT</p>
-                                        </div>
-                                    </div>
+                        {modalTab === 'PnL' && (() => {
+                            const botStats = liveStats[detailedBot.id] || { pnl: 0, gridHits: 0 };
 
-                                    <div className="grid grid-cols-2 gap-y-6 pt-4 border-t border-white/5">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias de la cuadrícula</p>
-                                            <p className="font-bold text-[#00C087]">+{(Math.abs(detailedBot.stat.pnl) * 0.6).toFixed(4)} USDT</p>
+                            return (
+                                <div className="flex-1 p-6 overflow-y-auto flex gap-8">
+                                    <div className="flex-1 space-y-8">
+                                        <h3 className="text-sm font-bold text-white mb-4">PnL</h3>
+                                        <div className="grid grid-cols-2 gap-y-6">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias totales</p>
+                                                <p className={`text-lg font-black ${botStats.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'}`}>
+                                                    {botStats.pnl >= 0 ? '+' : ''}{botStats.pnl.toFixed(4)} USDT
+                                                </p>
+                                                <p className={`text-[10px] font-bold ${botStats.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'} opacity-80`}>
+                                                    ({botStats.pnl >= 0 ? '+' : ''}{((botStats.pnl / parseFloat(detailedBot.config.capital)) * 100).toFixed(2)}%)
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[#848e9c] mb-1">Inversión total</p>
+                                                <p className="text-lg font-black text-white">{parseFloat(detailedBot.config.capital).toFixed(2)} USDT</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias variables</p>
-                                            <p className="font-bold text-[#00C087]">+{(Math.abs(detailedBot.stat.pnl) * 0.4).toFixed(4)} USDT</p>
+
+                                        <div className="grid grid-cols-2 gap-y-6 pt-4 border-t border-white/5">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias de la cuadrícula</p>
+                                                <p className="font-bold text-[#00C087]">+{(botStats.pnl).toFixed(4)} USDT</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias variables</p>
+                                                <p className="font-bold text-white">+0.0000 USDT</p>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="pt-4 border-t border-white/5">
-                                        <p className="text-[10px] font-bold text-[#848e9c] mb-1">Rendimiento anualizado (APR)</p>
-                                        <p className="text-xl font-black text-[#00C087]">+{(Math.random() * 50 + 20).toFixed(2)}%</p>
-                                    </div>
+                                        <div className="pt-4 border-t border-white/5">
+                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Rendimiento anualizado (APR)</p>
+                                            <p className="text-xl font-black text-[#00C087]">+20.45%</p>
+                                        </div>
 
-                                    <button className="w-full py-4 mt-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all uppercase tracking-widest text-xs border border-white/10">
-                                        Retirar ganancias
-                                    </button>
+                                        <button className="w-full py-4 mt-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all uppercase tracking-widest text-xs border border-white/10">
+                                            Retirar ganancias
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 bg-[#0b0e11] rounded-xl border border-white/5 p-6 flex flex-col relative overflow-hidden">
+                                        <h3 className="text-sm font-bold text-white mb-2">Curva de PnL</h3>
+                                        <div className="flex-1 w-full flex items-end">
+                                            {Array.from({ length: 40 }).map((_, i) => {
+                                                const h = Math.random() * 100;
+                                                const isGreen = Math.random() > 0.4;
+                                                return (
+                                                    <div key={i} className="flex-1 border-b border-dashed border-white/10 flex flex-col justify-end" style={{ height: '100%' }}>
+                                                        <div style={{ height: `${h}%` }} className={`w-full rounded-t-sm opacity-60 ${isGreen ? 'bg-[#00C087]' : 'bg-red-500'}`} />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0b0e11] to-transparent pointer-events-none" />
+                                    </div>
                                 </div>
-                                <div className="flex-1 bg-[#0b0e11] rounded-xl border border-white/5 p-6 flex flex-col relative overflow-hidden">
-                                    <h3 className="text-sm font-bold text-white mb-2">Curva de PnL</h3>
-                                    <div className="flex-1 w-full flex items-end">
-                                        {Array.from({ length: 40 }).map((_, i) => {
-                                            const h = Math.random() * 100;
-                                            const isGreen = Math.random() > 0.4;
-                                            return (
-                                                <div key={i} className="flex-1 border-b border-dashed border-white/10 flex flex-col justify-end" style={{ height: '100%' }}>
-                                                    <div style={{ height: `${h}%` }} className={`w-full rounded-t-sm opacity-60 ${isGreen ? 'bg-[#00C087]' : 'bg-red-500'}`} />
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0b0e11] to-transparent pointer-events-none" />
-                                </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* Modal Body: Orden pendiente Tab */}
                         {modalTab === 'Orden pendiente' && (
@@ -456,35 +488,73 @@ const BotZoneContent = () => {
                         )}
 
                         {/* Modal Body: Historial de órdenes Tab */}
-                        {modalTab === 'Historial de órdenes' && (
-                            <div className="flex-1 p-6 overflow-y-auto">
-                                <h3 className="text-sm font-bold text-white mb-6">Historial</h3>
-                                <div className="text-[11px] flex gap-8 mb-8">
-                                    <span className="text-[#848e9c]">Ganancias de la cuadrícula <strong className="text-[#00C087]">{(Math.abs(detailedBot.stat.pnl) * 0.6).toFixed(4)} USDT</strong></span>
-                                    <span className="text-[#848e9c]">Operaciones emparejadas totales <strong className="text-white">{detailedBot.stat.gridHits}</strong></span>
-                                </div>
+                        {modalTab === 'Historial de órdenes' && (() => {
+                            const botStats = liveStats[detailedBot.id] || { pnl: 0, gridHits: 0, history: [] };
 
-                                <table className="w-full text-left text-[11px]">
-                                    <thead className="text-[#848e9c] border-b border-white/5 border-dashed">
-                                        <tr>
-                                            <th className="pb-2 font-normal">Hora</th>
-                                            <th className="pb-2 font-normal text-right">Ganancias</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="font-mono">
-                                        {Array.from({ length: detailedBot.stat.gridHits > 0 ? Math.min(detailedBot.stat.gridHits, 5) : 1 }).map((_, i) => (
-                                            <tr key={i} className="hover:bg-white/5 border-b border-white/5">
-                                                <td className="py-4 text-white">{new Date(Date.now() - i * 3600000).toLocaleString()}</td>
-                                                <td className="py-4 text-right font-bold text-[#00C087]">+{(Math.random() * 0.05).toFixed(6)} USDT</td>
-                                            </tr>
-                                        ))}
-                                        {detailedBot.stat.gridHits === 0 && (
-                                            <tr><td colSpan="2" className="py-10 text-center text-[#848e9c] italic">Esperando que el precio cruce una grilla...</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                            return (
+                                <div className="flex-1 p-6 overflow-y-auto">
+                                    <h3 className="text-sm font-bold text-white mb-6">Historial</h3>
+                                    <div className="text-[11px] flex gap-8 mb-8">
+                                        <span className="text-[#848e9c]">Ganancias de la cuadrícula <strong className="text-[#00C087]">{botStats.pnl.toFixed(4)} USDT</strong></span>
+                                        <span className="text-[#848e9c]">Operaciones emparejadas totales <strong className="text-white">{botStats.gridHits}</strong></span>
+                                    </div>
+
+                                    <div className="w-full text-left text-[11px]">
+                                        {/* Binance style expanded rows */}
+                                        <div className="space-y-4">
+                                            {botStats.history && botStats.history.length > 0 ? botStats.history.map((match) => (
+                                                <div key={match.id} className="border border-white/5 rounded-lg bg-[#2b3139]/40 overflow-hidden text-[#848e9c]">
+                                                    {/* Header of the matched trade */}
+                                                    <div className="flex justify-between items-center px-4 py-3 bg-[#1e2329] border-b border-white/5">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="cursor-pointer text-white hover:text-[#F3BA2F]">˅</span>
+                                                            <span className="font-mono text-white">{match.time}</span>
+                                                        </div>
+                                                        <span className="font-bold text-[#00C087]">{match.profit}</span>
+                                                    </div>
+
+                                                    {/* Internal Buys & Sells Table */}
+                                                    <div className="px-4 py-2">
+                                                        <div className="grid grid-cols-7 gap-4 mb-2 pb-2 border-b border-white/5 font-normal">
+                                                            <span className="col-span-2">Hora</span>
+                                                            <span>Lado</span>
+                                                            <span>Tipo de orden</span>
+                                                            <span className="text-right">Avg. Price</span>
+                                                            <span className="text-right">Total</span>
+                                                            <span className="text-right">Comisiones</span>
+                                                        </div>
+                                                        <div className="space-y-3 font-mono text-[10px]">
+                                                            {/* Sell Line */}
+                                                            <div className="grid grid-cols-7 gap-4 text-white">
+                                                                <span className="col-span-2">{match.sell.time}</span>
+                                                                <span className="text-red-500 font-bold">{match.sell.type}</span>
+                                                                <span>Límite</span>
+                                                                <span className="text-right">{match.sell.price}</span>
+                                                                <span className="text-right">{match.sell.total}</span>
+                                                                <span className="text-right">{match.sell.fee}</span>
+                                                            </div>
+                                                            {/* Buy Line */}
+                                                            <div className="grid grid-cols-7 gap-4 text-white">
+                                                                <span className="col-span-2">{match.buy.time}</span>
+                                                                <span className="text-[#00C087] font-bold">{match.buy.type}</span>
+                                                                <span>Límite</span>
+                                                                <span className="text-right">{match.buy.price}</span>
+                                                                <span className="text-right">{match.buy.total}</span>
+                                                                <span className="text-right">{match.buy.fee}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )) : (
+                                                <div className="py-10 text-center text-[#848e9c] italic border border-white/5 border-dashed rounded-xl">
+                                                    Esperando la primera operación emparejada...
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}
