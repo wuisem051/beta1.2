@@ -33,6 +33,7 @@ import UpdatesContent from '../components/UpdatesContent';
 import CryptoMarketMonitor from '../components/CryptoMarketMonitor';
 import WhaleMonitor from '../components/WhaleMonitor';
 import AirtmCashierContent from '../components/AirtmCashierContent';
+import BotZoneContent from '../components/BotZoneContent';
 
 // Componentes de las sub-secciones
 
@@ -1745,6 +1746,7 @@ const UserPanel = () => {
           {(!siteSettings || siteSettings.showWhaleMonitor !== false) && (
             <Route path="whale-monitor/*" element={<WhaleMonitor />} />
           )}
+          <Route path="bot-zone/*" element={<BotZoneContent />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />
