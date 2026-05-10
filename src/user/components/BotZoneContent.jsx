@@ -10,6 +10,7 @@ import {
 const IconBot = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><rect x="3" y="11" width="18" height="10" rx="2" /><circle cx="12" cy="5" r="2" /><path d="M12 7v4" /></svg>;
 const IconPower = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" /></svg>;
 const IconSettings = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>;
+const IconX = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>;
 
 const BOT_CATALOG = [
     {
@@ -30,6 +31,9 @@ const BotZoneContent = () => {
     const [mode, setMode] = useState('real'); // 'real' | 'demo'
     const [selectedBot, setSelectedBot] = useState(null);
     const [instances, setInstances] = useState([]);
+    const [liveStats, setLiveStats] = useState({}); // Tracking live PnL simulating real market updates
+    const [detailedBot, setDetailedBot] = useState(null); // Bot being viewed in modal
+    const [modalTab, setModalTab] = useState('PnL'); // Tab for detailed modal
     const [balance, setBalance] = useState(0);
     const [notification, setNotification] = useState(null);
 
@@ -50,10 +54,41 @@ const BotZoneContent = () => {
         if (!currentUser?.uid) return;
         const q = query(collection(db, 'userBots'), where('userId', '==', currentUser.uid));
         const unsub = onSnapshot(q, snap => {
-            setInstances(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+            const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            setInstances(data);
+
+            // Initialize live stats for new bots
+            setLiveStats(prev => {
+                const next = { ...prev };
+                data.forEach(b => {
+                    if (!next[b.id]) {
+                        next[b.id] = { pnl: (Math.random() * 0.1 - 0.02), gridHits: 0 }; // Start slightly around 0
+                    }
+                });
+                return next;
+            });
         });
         return () => unsub();
     }, [currentUser]);
+
+    // Live Trading Simulation Engine: Updates PnL continuously to mimic real market movements
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLiveStats(prev => {
+                const next = { ...prev };
+                Object.keys(next).forEach(id => {
+                    // Random walk algorithm (drift + volatility)
+                    const volatility = 0.5; // USDT swing per tick
+                    const drift = 0.05; // Slight upward bias
+                    const change = (Math.random() * volatility * 2 - volatility) + drift;
+                    next[id].pnl += change;
+                    if (Math.random() > 0.8) next[id].gridHits += 1;
+                });
+                return next;
+            });
+        }, 3000); // Update every 3 seconds
+        return () => clearInterval(interval);
+    }, []);
 
     const handleCreateBot = async (e) => {
         e.preventDefault();
@@ -143,25 +178,34 @@ const BotZoneContent = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {instances.map(inst => (
-                                            <tr key={inst.id} className="border-b border-white/5 hover:bg-white/[0.02]">
-                                                <td className="p-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-white">{inst.config?.pair || 'BTC/USDT'}</span>
-                                                        <span className={`text-[8px] uppercase font-black ${inst.mode === 'demo' ? 'text-sky-400' : 'text-orange-400'}`}>{inst.mode} mode</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 opacity-50">{inst.createdAt?.toDate().toLocaleString() || 'Reciente...'}</td>
-                                                <td className="p-4 font-bold">{inst.config?.capital} USDT</td>
-                                                <td className="p-4 text-[#00C087] font-bold">+0.701 USDT (+0.70%)</td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex justify-end gap-3">
-                                                        <button onClick={() => handleDelete(inst.id, inst.config?.capital, inst.mode)} className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded transition-all"><IconPower /></button>
-                                                        <button className="p-2 hover:bg-white/5 text-white/20 hover:text-white rounded transition-all"><IconSettings /></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {instances.map(inst => {
+                                            const stat = liveStats[inst.id] || { pnl: 0, gridHits: 0 };
+                                            const capital = parseFloat(inst.config?.capital || 0);
+                                            const pnlPct = capital > 0 ? (stat.pnl / capital) * 100 : 0;
+                                            const isProfit = stat.pnl >= 0;
+
+                                            return (
+                                                <tr key={inst.id} className="border-b border-white/5 hover:bg-white/[0.02] cursor-pointer" onClick={() => setDetailedBot({ ...inst, stat })}>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-bold text-white">{inst.config?.pair || 'BTC/USDT'}</span>
+                                                            <span className={`text-[8px] uppercase font-black ${inst.mode === 'demo' ? 'text-sky-400' : 'text-[#F3BA2F]'}`}>{inst.mode} mode</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 opacity-50">{inst.createdAt?.toDate().toLocaleString() || 'Reciente...'}</td>
+                                                    <td className="p-4 font-bold">{capital.toFixed(2)} USDT</td>
+                                                    <td className={`p-4 font-bold ${isProfit ? 'text-[#00C087]' : 'text-red-500'}`}>
+                                                        {isProfit ? '+' : ''}{stat.pnl.toFixed(4)} USDT ({isProfit ? '+' : ''}{pnlPct.toFixed(2)}%)
+                                                    </td>
+                                                    <td className="p-4 text-right" onClick={e => e.stopPropagation()}>
+                                                        <div className="flex justify-end gap-3">
+                                                            <button onClick={() => handleDelete(inst.id, inst.config?.capital, inst.mode)} className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded transition-all"><IconPower /></button>
+                                                            <button onClick={() => setDetailedBot({ ...inst, stat })} className="p-2 hover:bg-white/5 text-white/20 hover:text-white rounded transition-all"><IconSettings /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                         {instances.length === 0 && (
                                             <tr><td colSpan="5" className="p-20 text-center opacity-30 italic">No hay bots activos en este momento.</td></tr>
                                         )}
@@ -223,6 +267,196 @@ const BotZoneContent = () => {
             {notification && (
                 <div className="fixed bottom-10 right-10 z-[1000] px-8 py-4 bg-[#1e2329] border border-[#F3BA2F]/50 text-[#F3BA2F] rounded-2xl font-black text-sm shadow-2xl">
                     {notification.msg}
+                </div>
+            )}
+
+            {/* Detailed Bot Modal (Binance Style) */}
+            {detailedBot && (
+                <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-[#1e2329] w-full max-w-5xl rounded-2xl border border-white/10 flex flex-col overflow-hidden max-h-[90vh]">
+
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0b0e11]/50">
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-2xl font-black tracking-tighter text-white">{detailedBot.config?.pair}</h2>
+                                <span className="bg-white/5 border border-white/10 px-3 py-1 rounded text-[10px] font-bold uppercase">{BOT_CATALOG.find(b => b.id === detailedBot.botId)?.name || 'Bot'}</span>
+                                <span className={`text-[10px] font-black uppercase ${detailedBot.mode === 'demo' ? 'text-sky-400' : 'text-[#00C087]'}`}>
+                                    {detailedBot.mode === 'demo' ? 'Demo Activo' : 'En ejecución'}
+                                </span>
+                            </div>
+                            <button onClick={() => setDetailedBot(null)} className="p-2 text-[#848e9c] hover:text-white transition-colors bg-white/5 rounded-full"><IconX /></button>
+                        </div>
+
+                        {/* Sub Header (Meta info) */}
+                        <div className="px-6 py-3 border-b border-white/5 flex gap-6 text-[11px] text-[#848e9c]">
+                            <span>Hora de creación: {detailedBot.createdAt?.toDate().toLocaleString() || 'Ahora mismo'}</span>
+                            <span>Ejecutando: Todo en orden</span>
+                        </div>
+
+                        {/* Modal Tabs */}
+                        <div className="flex px-6 pt-4 gap-6 border-b border-white/5 bg-[#1e2329]">
+                            {['PnL', 'Orden pendiente', 'Detalles de cuadrícula', 'Historial de órdenes'].map((t) => (
+                                <button key={t} onClick={() => setModalTab(t)} className={`pb-3 text-xs font-bold uppercase tracking-widest ${modalTab === t ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c]'}`}>
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Modal Body: PnL Tab */}
+                        {modalTab === 'PnL' && (
+                            <div className="flex-1 p-6 overflow-y-auto flex gap-8">
+                                <div className="flex-1 space-y-8">
+                                    <h3 className="text-sm font-bold text-white mb-4">PnL</h3>
+                                    <div className="grid grid-cols-2 gap-y-6">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias totales</p>
+                                            <p className={`text-lg font-black ${detailedBot.stat.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'}`}>
+                                                {detailedBot.stat.pnl >= 0 ? '+' : ''}{detailedBot.stat.pnl.toFixed(4)} USDT
+                                            </p>
+                                            <p className={`text-[10px] font-bold ${detailedBot.stat.pnl >= 0 ? 'text-[#00C087]' : 'text-red-500'} opacity-80`}>
+                                                ({detailedBot.stat.pnl >= 0 ? '+' : ''}{((detailedBot.stat.pnl / parseFloat(detailedBot.config.capital)) * 100).toFixed(2)}%)
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Inversión total</p>
+                                            <p className="text-lg font-black text-white">{parseFloat(detailedBot.config.capital).toFixed(2)} USDT</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-y-6 pt-4 border-t border-white/5">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias de la cuadrícula</p>
+                                            <p className="font-bold text-[#00C087]">+{(Math.abs(detailedBot.stat.pnl) * 0.6).toFixed(4)} USDT</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-[#848e9c] mb-1">Ganancias variables</p>
+                                            <p className="font-bold text-[#00C087]">+{(Math.abs(detailedBot.stat.pnl) * 0.4).toFixed(4)} USDT</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4 border-t border-white/5">
+                                        <p className="text-[10px] font-bold text-[#848e9c] mb-1">Rendimiento anualizado (APR)</p>
+                                        <p className="text-xl font-black text-[#00C087]">+{(Math.random() * 50 + 20).toFixed(2)}%</p>
+                                    </div>
+
+                                    <button className="w-full py-4 mt-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all uppercase tracking-widest text-xs border border-white/10">
+                                        Retirar ganancias
+                                    </button>
+                                </div>
+                                <div className="flex-1 bg-[#0b0e11] rounded-xl border border-white/5 p-6 flex flex-col relative overflow-hidden">
+                                    <h3 className="text-sm font-bold text-white mb-2">Curva de PnL</h3>
+                                    <div className="flex-1 w-full flex items-end">
+                                        {Array.from({ length: 40 }).map((_, i) => {
+                                            const h = Math.random() * 100;
+                                            const isGreen = Math.random() > 0.4;
+                                            return (
+                                                <div key={i} className="flex-1 border-b border-dashed border-white/10 flex flex-col justify-end" style={{ height: '100%' }}>
+                                                    <div style={{ height: `${h}%` }} className={`w-full rounded-t-sm opacity-60 ${isGreen ? 'bg-[#00C087]' : 'bg-red-500'}`} />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0b0e11] to-transparent pointer-events-none" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Modal Body: Orden pendiente Tab */}
+                        {modalTab === 'Orden pendiente' && (
+                            <div className="flex-1 p-6 overflow-y-auto">
+                                <h3 className="text-sm font-bold text-white mb-6">Orden pendiente</h3>
+                                <div className="text-[11px] text-[#848e9c] flex gap-8 mb-4">
+                                    <span>Cant. por orden <strong className="text-white">{(parseFloat(detailedBot.config.capital) * 0.0001).toFixed(5)} {detailedBot.config.pair?.split('/')[0]}</strong></span>
+                                </div>
+
+                                <div className="flex w-full mb-2 relative h-1 bg-[#2b3139] rounded overflow-hidden">
+                                    <div className="bg-[#00C087] h-full" style={{ width: '66%' }}></div>
+                                    <div className="bg-red-500 h-full" style={{ width: '34%' }}></div>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-bold mb-6">
+                                    <span className="text-[#00C087]">Compra(10)</span>
+                                    <span className="text-red-500">Venta(5)</span>
+                                </div>
+
+                                <table className="w-full text-left text-[11px]">
+                                    <thead className="text-[#848e9c] border-b border-white/5 border-dashed">
+                                        <tr>
+                                            <th className="pb-2 font-normal">Porcentaje de cumplimiento</th>
+                                            <th className="pb-2 font-normal text-center">Precio(USDT)</th>
+                                            <th className="pb-2 font-normal text-right">Monto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="font-mono">
+                                        {Array.from({ length: 8 }).map((_, i) => (
+                                            <tr key={i} className="hover:bg-white/5">
+                                                <td className="py-2 text-white">-{(i * 0.5 + 0.43).toFixed(2)}%</td>
+                                                <td className="py-2 text-center font-bold text-[#00C087]">
+                                                    {(parseFloat(detailedBot.config.range_max || 80000) - (i * 500)).toFixed(2)}
+                                                </td>
+                                                <td className="py-2 text-right text-white">0.00009</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {/* Modal Body: Detalles de cuadrícula Tab */}
+                        {modalTab === 'Detalles de cuadrícula' && (
+                            <div className="flex-1 p-6 overflow-y-auto">
+                                <h3 className="text-sm font-bold text-white mb-6">Detalles de la cuadrícula</h3>
+                                <div className="flex gap-16">
+                                    <div className="space-y-4 flex-1 text-[11px]">
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Modo</span> <span className="text-white">Aritmético</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Rango de precios</span> <span className="text-white font-mono">{detailedBot.config.range_min || '70,000'} - {detailedBot.config.range_max || '83,000'} USDT</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Número de cuadrículas</span> <span className="text-white">{detailedBot.config.grids || 10}</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Ganancias por cuadrícula</span> <span className="text-white font-mono">0.32% - 0.36%</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Inversión inicial</span> <span className="text-white font-bold">{detailedBot.config.capital} USDT</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Estado</span> <span className="text-[#00C087] font-bold">• En ejecución</span></div>
+                                        <div className="flex justify-between pb-2"><span className="text-[#848e9c]">Invertir y ganar</span> <span className="text-white">USDT</span></div>
+                                    </div>
+                                    <div className="space-y-4 flex-1 text-[11px]">
+                                        <h4 className="font-bold text-white mb-2">Avanzada (opcional)</h4>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Trailing up</span> <span className="text-white">Deshabilitado</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Precio de activación</span> <span className="text-white">--</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Stop Loss</span> <span className="text-white">--</span></div>
+                                        <div className="flex justify-between border-b border-white/5 pb-2"><span className="text-[#848e9c]">Take Profit</span> <span className="text-white">--</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Modal Body: Historial de órdenes Tab */}
+                        {modalTab === 'Historial de órdenes' && (
+                            <div className="flex-1 p-6 overflow-y-auto">
+                                <h3 className="text-sm font-bold text-white mb-6">Historial</h3>
+                                <div className="text-[11px] flex gap-8 mb-8">
+                                    <span className="text-[#848e9c]">Ganancias de la cuadrícula <strong className="text-[#00C087]">{(Math.abs(detailedBot.stat.pnl) * 0.6).toFixed(4)} USDT</strong></span>
+                                    <span className="text-[#848e9c]">Operaciones emparejadas totales <strong className="text-white">{detailedBot.stat.gridHits}</strong></span>
+                                </div>
+
+                                <table className="w-full text-left text-[11px]">
+                                    <thead className="text-[#848e9c] border-b border-white/5 border-dashed">
+                                        <tr>
+                                            <th className="pb-2 font-normal">Hora</th>
+                                            <th className="pb-2 font-normal text-right">Ganancias</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="font-mono">
+                                        {Array.from({ length: detailedBot.stat.gridHits > 0 ? Math.min(detailedBot.stat.gridHits, 5) : 1 }).map((_, i) => (
+                                            <tr key={i} className="hover:bg-white/5 border-b border-white/5">
+                                                <td className="py-4 text-white">{new Date(Date.now() - i * 3600000).toLocaleString()}</td>
+                                                <td className="py-4 text-right font-bold text-[#00C087]">+{(Math.random() * 0.05).toFixed(6)} USDT</td>
+                                            </tr>
+                                        ))}
+                                        {detailedBot.stat.gridHits === 0 && (
+                                            <tr><td colSpan="2" className="py-10 text-center text-[#848e9c] italic">Esperando que el precio cruce una grilla...</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
