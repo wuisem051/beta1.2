@@ -200,6 +200,8 @@ const BotZoneContent = () => {
         notify('🗑 Bot detenido y capital liberado');
     };
 
+    console.log("BotZoneContent Render:", { currentUser: !!currentUser, loading, tab, instancesLength: instances.length });
+
     if (loading && !instances.length && currentUser) {
         return (
             <div className="w-full h-screen flex items-center justify-center bg-[#0b0e11]">
@@ -207,6 +209,18 @@ const BotZoneContent = () => {
                     <div className="w-12 h-12 border-4 border-[#F3BA2F]/20 border-t-[#F3BA2F] rounded-full animate-spin" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-[#848e9c]">Sincronizando con la red...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (!currentUser) {
+        return (
+            <div className="w-full h-screen flex flex-col items-center justify-center bg-[#0b0e11] text-[#eaecef] p-8 text-center">
+                <div className="w-20 h-20 bg-[#F3BA2F]/10 text-[#F3BA2F] rounded-full flex items-center justify-center mb-6">
+                    <IconInf />
+                </div>
+                <h1 className="text-2xl font-black mb-4 uppercase">Sesión requerida</h1>
+                <p className="text-[#848e9c] max-w-xs mb-8">Por favor, inicia sesión para acceder a la zona de bots de trading automatizados.</p>
             </div>
         );
     }
@@ -220,9 +234,9 @@ const BotZoneContent = () => {
 
                     <div className="flex flex-col lg:flex-row justify-between gap-8">
                         <div className="flex flex-wrap gap-12 items-start">
-                            <StatItem label="Saldo total" value={`$${userBalanceUSD.toLocaleString()}`} />
+                            <StatItem label="Saldo total" value={`$${(userBalanceUSD || 0).toLocaleString()}`} />
                             <StatItem label="PnL de hoy" value="+$0.51" sub="(+0.22%)" color="#00C087" />
-                            <StatItem label="Mis bots" value={instances.length} sub={<span onClick={() => setTab('active')} className="cursor-pointer hover:text-white underline">Ver todos</span>} />
+                            <StatItem label="Mis bots" value={instances?.length || 0} sub={<span onClick={() => setTab('active')} className="cursor-pointer hover:text-white underline">Ver todos</span>} />
                         </div>
 
                         {/* Banner Card */}
@@ -359,7 +373,7 @@ const BotZoneContent = () => {
 
             {/* Content: Configuration View (Inspired by Binance Full Trading Page) */}
             {tab === 'config' && selectedBot && (
-                <div className="h-[calc(100vh-60px)] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="h-[calc(100vh-60px)] flex flex-col">
                     {/* Config Navbar */}
                     <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
                         <div className="flex items-center gap-4">
@@ -450,7 +464,7 @@ const BotZoneContent = () => {
             )}
 
             {notification && (
-                <div className="fixed bottom-10 right-10 z-[1000] px-8 py-4 bg-[#1e2329] border border-[#F3BA2F]/50 text-[#F3BA2F] rounded-2xl font-black text-sm shadow-2xl animate-in slide-in-from-right-4 duration-300">
+                <div className="fixed bottom-10 right-10 z-[1000] px-8 py-4 bg-[#1e2329] border border-[#F3BA2F]/50 text-[#F3BA2F] rounded-2xl font-black text-sm shadow-2xl">
                     {notification.msg}
                 </div>
             )}
