@@ -200,11 +200,22 @@ const BotZoneContent = () => {
         notify('🗑 Bot detenido y capital liberado');
     };
 
+    if (loading && !instances.length && currentUser) {
+        return (
+            <div className="w-full h-screen flex items-center justify-center bg-[#0b0e11]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-[#F3BA2F]/20 border-t-[#F3BA2F] rounded-full animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-[#848e9c]">Sincronizando con la red...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full min-h-screen bg-[#0b0e11] text-[#eaecef] p-4 md:p-8 font-sans">
             {/* Header / Stats */}
             {tab !== 'config' && (
-                <div className="max-w-[1280px] mx-auto mb-12 animate-in fade-in duration-700">
+                <div className="max-w-[1280px] mx-auto mb-12">
                     <h1 className="text-4xl font-black mb-10 tracking-tight text-white">Bots de trading</h1>
 
                     <div className="flex flex-col lg:flex-row justify-between gap-8">
@@ -262,7 +273,7 @@ const BotZoneContent = () => {
 
             {/* Content: Catalog */}
             {tab === 'catalog' && (
-                <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {BOT_CATALOG.filter(b => catFilter === 'todo' || b.category === catFilter).map(bot => (
                         <div key={bot.id} className="bg-[#1e2329] border border-white/5 hover:border-white/20 transition-all rounded-2xl p-6 group cursor-pointer"
                             onClick={() => handleOpenConfig(bot)}>
@@ -285,7 +296,7 @@ const BotZoneContent = () => {
 
             {/* Content: Active Bots */}
             {tab === 'active' && (
-                <div className="max-w-[1280px] mx-auto animate-in fade-in duration-500">
+                <div className="max-w-[1280px] mx-auto">
                     {instances.length === 0 ? (
                         <div className="text-center py-32 bg-[#1e2329] rounded-3xl border border-white/5">
                             <h2 className="text-xl font-bold mb-2">No tienes bots activos</h2>
