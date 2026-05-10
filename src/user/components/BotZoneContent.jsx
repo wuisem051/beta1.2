@@ -71,67 +71,123 @@ const BotZoneContent = () => {
         return () => unsub();
     }, [currentUser]);
 
-    // Live Trading Engine: Accurately mimics grid execution without wild UI jitter
+    const [livePrices, setLivePrices] = useState({});
+
+    // Live Market WebSocket Connection (Binance)
     useEffect(() => {
-        if (!instances.length) return; // Wait for instances
+        const uniquePairs = [...new Set(instances.map(b => b.config.pair).filter(Boolean))];
+        if (!uniquePairs.length) return;
 
-        const interval = setInterval(() => {
-            setLiveStats(prev => {
-                const next = { ...prev };
-                Object.keys(next).forEach(id => {
-                    const bot = instances.find(b => b.id === id);
-                    if (!bot) return;
+        const symbolHash = {};
+        const streams = uniquePairs.map(p => {
+            const sym = p.replace('/', '').toLowerCase();
+            symbolHash[sym.toUpperCase()] = p; // store back mapper 
+            return `${sym}@trade`;
+        });
 
-                    // Simulate 10% chance of a grid match
-                    if (Math.random() > 0.9) {
-                        const rMin = parseFloat(bot.config.range_min || 70000);
-                        const rMax = parseFloat(bot.config.range_max || 83000);
-                        const grids = parseInt(bot.config.grids || 10, 10);
-                        const step = (rMax - rMin) / grids;
+        const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams.join('/')}`);
 
-                        // Generate a valid grid tier (1 to grids-1 to ensure inside range)
-                        const matchTier = Math.floor(Math.random() * (grids - 2)) + 1;
-                        const buyPrice = rMin + ((matchTier - 1) * step);
-                        const sellPrice = rMin + (matchTier * step);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.e === 'trade' && data.s && data.p) {
+                const pairStr = symbolHash[data.s];
+                if (pairStr) {
+                    setLivePrices(prev => ({ ...prev, [pairStr]: parseFloat(data.p) }));
+                }
+            }
+        };
 
-                        const cap = parseFloat(bot.config.capital);
-                        const amt = (cap * 0.0001).toFixed(5);
-                        const profit = (sellPrice - buyPrice) * parseFloat(amt);
-
-                        const timestamp = new Date();
-
-                        const newMatch = {
-                            id: Math.random().toString(36).substring(7),
-                            time: timestamp.toLocaleString(),
-                            profit: profit.toFixed(4) + ' USDT',
-                            sell: {
-                                time: timestamp.toLocaleString(),
-                                type: 'Venta',
-                                price: sellPrice.toFixed(2),
-                                amount: amt,
-                                total: (parseFloat(amt) * sellPrice).toFixed(4) + ' USDT',
-                                fee: (parseFloat(amt) * sellPrice * 0.001).toFixed(6) + ' USDT'
-                            },
-                            buy: {
-                                time: new Date(timestamp.getTime() - 4500000).toLocaleString(), // 75 mins prior
-                                type: 'Compra',
-                                price: buyPrice.toFixed(2),
-                                amount: amt,
-                                total: (parseFloat(amt) * buyPrice).toFixed(4) + ' USDT',
-                                fee: '0.00000009 BNB'
-                            }
-                        };
-
-                        next[id].pnl += profit;
-                        next[id].gridHits += 1;
-                        next[id].history = [newMatch, ...(next[id].history || [])].slice(0, 50); // keep last 50
-                    }
-                });
-                return next;
-            });
-        }, 3000);
-        return () => clearInterval(interval);
+        return () => ws.close();
     }, [instances]);
+
+    // True Live Market Execution Engine
+    useEffect(() => {
+        if (!instances.length || Object.keys(livePrices).length === 0) return;
+
+        setLiveStats(prev => {
+            let hasUpdate = false;
+            const next = { ...prev };
+
+            Object.keys(next).forEach(id => {
+                const bot = instances.find(b => b.id === id);
+                if (!bot) return;
+
+                const pair = bot.config.pair;
+                const currentPrice = livePrices[pair];
+                if (!currentPrice) return;
+
+                const rMin = parseFloat(bot.config.range_min || 70000);
+                const rMax = parseFloat(bot.config.range_max || 83000);
+                const grids = parseInt(bot.config.grids || 10, 10);
+                const step = (rMax - rMin) / grids;
+
+                // Determine mathematical grid tier (0 to grids-1)
+                let tier = Math.floor((currentPrice - rMin) / step);
+                if (tier < 0) tier = -1; // Below zone
+                if (tier >= grids) tier = grids; // Above zone
+
+                const stats = next[id];
+
+                // Initialize tracking
+                if (stats.currentTier == null) {
+                    stats.currentTier = tier;
+                    hasUpdate = true;
+                } else if (stats.currentTier !== tier) {
+                    // Price has physically crossed a grid threshold!
+
+                    if (tier >= 0 && tier < grids) {
+                        // If it moves UP a tier, it fills a resting Sell order (Profit realization!)
+                        if (tier > stats.currentTier) {
+                            const crossedTier = tier;
+                            const sellPrice = rMin + (crossedTier * step);
+                            const buyPrice = sellPrice - step; // the floor from where it bought
+
+                            const cap = parseFloat(bot.config.capital);
+                            const amt = (cap * 0.0001).toFixed(5);
+                            const profit = (sellPrice - buyPrice) * parseFloat(amt);
+
+                            const timestamp = new Date();
+
+                            const newMatch = {
+                                id: Math.random().toString(36).substring(7),
+                                time: timestamp.toLocaleString(),
+                                profit: profit.toFixed(4) + ' USDT',
+                                sell: {
+                                    time: timestamp.toLocaleString(),
+                                    type: 'Venta',
+                                    price: sellPrice.toFixed(2),
+                                    amount: amt,
+                                    total: (parseFloat(amt) * sellPrice).toFixed(4) + ' USDT',
+                                    fee: (parseFloat(amt) * sellPrice * 0.001).toFixed(6) + ' USDT'
+                                },
+                                buy: {
+                                    time: new Date(timestamp.getTime() - 3600000).toLocaleString(), // Approximation of buy time
+                                    type: 'Compra',
+                                    price: buyPrice.toFixed(2),
+                                    amount: amt,
+                                    total: (parseFloat(amt) * buyPrice).toFixed(4) + ' USDT',
+                                    fee: '0.00000009 BNB'
+                                }
+                            };
+
+                            stats.pnl += profit;
+                            stats.gridHits += 1;
+                            stats.history = [newMatch, ...(stats.history || [])].slice(0, 50);
+                            hasUpdate = true;
+                        }
+                        // Moving DOWN implies it filled a Buy order (unrealized loss), no paired history logged yet for classic view.
+                        // It will generate profit when it bounces back UP.
+                    }
+
+                    // Always lock the new tier
+                    stats.currentTier = tier;
+                    hasUpdate = true;
+                }
+            });
+
+            return hasUpdate ? next : prev;
+        });
+    }, [livePrices, instances]);
 
     const handleCreateBot = async (e) => {
         e.preventDefault();
