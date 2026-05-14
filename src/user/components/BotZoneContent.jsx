@@ -61,12 +61,17 @@ const BotZoneContent = () => {
             const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             setInstances(data);
 
-            // Initialize live stats for new bots
+            // ✅ FIX 3: Cargar PnL persistido desde Firebase al inicializar
             setLiveStats(prev => {
                 const next = { ...prev };
                 data.forEach(b => {
                     if (!next[b.id]) {
-                        next[b.id] = { pnl: 0, gridHits: 0, history: [] }; // No random negative starts
+                        // Recuperar PnL guardado en el documento del bot
+                        next[b.id] = {
+                            pnl: parseFloat(b.savedPnl || 0),
+                            gridHits: parseInt(b.savedGridHits || 0),
+                            history: b.savedHistory || []
+                        };
                     }
                 });
                 return next;
@@ -184,6 +189,14 @@ const BotZoneContent = () => {
                             stats.gridHits += 1;
                             stats.history = [newMatch, ...(stats.history || [])].slice(0, 50);
                             hasUpdate = true;
+
+                            // ✅ FIX 3: Persistir PnL en Firebase para no perder datos al recargar
+                            const botRef = doc(db, 'userBots', id);
+                            updateDoc(botRef, {
+                                savedPnl: stats.pnl,
+                                savedGridHits: stats.gridHits,
+                                savedHistory: stats.history.slice(0, 20) // Limitar para no exceder límites de Firestore
+                            }).catch(err => console.error('Error saving bot PnL:', err));
                         }
                         // Moving DOWN implies it filled a Buy order (unrealized loss), no paired history logged yet for classic view.
                         // It will generate profit when it bounces back UP.
@@ -251,6 +264,18 @@ const BotZoneContent = () => {
                                 <span className="text-[10px] font-black text-[#F3BA2F] uppercase">Configurar →</span>
                             </div>
                         ))}
+
+                        {/* Trading Quirúrgico — Acceso directo desde catálogo */}
+                        <div
+                            onClick={() => { setSelectedBot(BOT_CATALOG[0]); setTab('config'); setMainTab('quirurgico'); }}
+                            className="bg-[#1e2329] p-8 rounded-3xl border border-white/5 hover:border-[#00C087]/40 transition-all cursor-pointer group relative overflow-hidden"
+                        >
+                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#00C087]/5 rounded-full blur-2xl group-hover:bg-[#00C087]/10 transition-all" />
+                            <div className="p-4 bg-[#00C087]/10 text-[#00C087] rounded-2xl w-fit mb-6 group-hover:scale-110 transition-transform text-xl font-black">⚡</div>
+                            <h3 className="text-xl font-bold mb-2">Trading Quirúrgico</h3>
+                            <p className="text-xs text-[#848e9c] mb-6">Control total sobre lotes y ejecución escalonada.</p>
+                            <span className="text-[10px] font-black text-[#00C087] uppercase">Abrir herramienta →</span>
+                        </div>
                     </div>
                 </div>
             ) : (

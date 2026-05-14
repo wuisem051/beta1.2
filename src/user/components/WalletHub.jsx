@@ -106,14 +106,9 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
                 });
             }
             setLoading(false);
-        }, (err) => {
-            console.error("error fetching user balance:", err);
-            setLoading(false); // Safety fallback
-        });
+        }, (err) => { console.error(err); setLoading(false); });
 
-        const safetyTimeout = setTimeout(() => {
-            setLoading(false);
-        }, 3000);
+        setTimeout(() => setLoading(false), 3000);
 
         const qAddr = query(collection(db, 'depositAddresses'), where('isActive', '==', true));
         const unsubAddr = onSnapshot(qAddr, (snapshot) => {
@@ -122,21 +117,51 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
             setDepositAddresses(addresses);
         }, (err) => console.error(err));
 
-        const depositsQ = query(collection(db, 'deposits'), where('userId', '==', currentUser.uid));
-        const withdrawalsQ = query(collection(db, 'withdrawals'), where('userId', '==', currentUser.uid));
+        // ✅ FIX 1: Suscripción REAL a depósitos y retiros
+        const depositsQ = query(
+            collection(db, 'deposits'),
+            where('userId', '==', currentUser.uid)
+        );
+        const withdrawalsQ = query(
+            collection(db, 'withdrawals'),
+            where('userId', '==', currentUser.uid)
+        );
+
+        let deposits = [];
+        let withdrawals = [];
+
+        const mergeAndSort = () => {
+            const all = [
+                ...deposits.map(d => ({ ...d, _type: 'deposit' })),
+                ...withdrawals.map(w => ({ ...w, _type: 'withdrawal' }))
+            ].sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                return dateB - dateA;
+            });
+            setFinancialHistory(all);
+        };
+
+        const unsubDeposits = onSnapshot(depositsQ, snap => {
+            deposits = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            mergeAndSort();
+        }, err => console.error(err));
+
+        const unsubWithdrawals = onSnapshot(withdrawalsQ, snap => {
+            withdrawals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            mergeAndSort();
+        }, err => console.error(err));
 
         const botsQ = query(collection(db, 'userBots'), where('userId', '==', currentUser.uid));
         const unsubBots = onSnapshot(botsQ, snap => {
             setUserBots(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         });
 
-        const updateHistory = () => {
-            // Placeholder for real logic (similar to previous WalletHub)
-        };
-
         return () => {
             unsubUser();
             unsubAddr();
+            unsubDeposits();
+            unsubWithdrawals();
             unsubBots();
         };
     }, [currentUser]);
@@ -151,8 +176,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
     const sidebarItems = [
         { id: 'overview', label: 'Activos', icon: FaWallet },
-        { id: 'spot', label: 'Cuenta Spot', icon: FaChartLine },
-        { id: 'finances', label: 'Cuenta financiera', icon: FaExchangeAlt },
+        // ✅ FIX 2: Tabs vacías reasignadas a secciones funcionales
         { id: 'bot', label: 'Cuenta Bot', icon: FaRobot },
         { id: 'deposit', label: 'Depositar', icon: FaArrowDown },
         { id: 'withdraw', label: 'Retirar', icon: FaArrowUp },
@@ -315,16 +339,71 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
 
                     {activeTab === 'history' && (
                         <div className="bg-[#1e2026] rounded-3xl border border-white/5 overflow-hidden animate-in fade-in duration-300">
-                            <div className="p-8 border-b border-white/5 bg-white/[0.01]">
-                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">Historial Transaccional</h3>
-                                <p className="text-slate-500 text-[10px] font-black uppercase mt-1">Registros de tus movimientos recientes</p>
+                            <div className="p-8 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">Historial Transaccional</h3>
+                                    <p className="text-slate-500 text-[10px] font-black uppercase mt-1">Registros de tus movimientos en tiempo real</p>
+                                </div>
+                                <span className="text-[10px] font-black text-slate-600 uppercase">{financialHistory.length} registros</span>
                             </div>
-                            <div className="p-10 text-center text-slate-500">
-                                <FaHistory size={40} className="mx-auto mb-4 opacity-20" />
-                                <p className="text-xs uppercase font-black tracking-widest">No hay transacciones recientes para mostrar</p>
-                            </div>
+
+                            {financialHistory.length === 0 ? (
+                                <div className="p-16 text-center text-slate-500">
+                                    <FaHistory size={40} className="mx-auto mb-4 opacity-20" />
+                                    <p className="text-xs uppercase font-black tracking-widest">No hay transacciones registradas</p>
+                                    <p className="text-[10px] text-slate-700 mt-2">Tus depósitos y retiros aparecerán aquí</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-white/5">
+                                    {financialHistory.map(tx => {
+                                        const isDeposit = tx._type === 'deposit';
+                                        const date = tx.createdAt?.toDate ? tx.createdAt.toDate() : new Date(tx.createdAt || Date.now());
+                                        const statusColor = {
+                                            'Aprobado': 'text-[#00C087] bg-[#00C087]/10 border-[#00C087]/20',
+                                            'Completado': 'text-[#00C087] bg-[#00C087]/10 border-[#00C087]/20',
+                                            'Pendiente': 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+                                            'Rechazado': 'text-red-400 bg-red-400/10 border-red-400/20',
+                                        }[tx.status] || 'text-slate-400 bg-white/5 border-white/10';
+
+                                        return (
+                                            <div key={tx.id} className="flex items-center gap-5 px-8 py-5 hover:bg-white/[0.02] transition-colors">
+                                                {/* Icon */}
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDeposit ? 'bg-[#00C087]/10 text-[#00C087]' : 'bg-red-500/10 text-red-400'}`}>
+                                                    {isDeposit ? <FaArrowDown size={14} /> : <FaArrowUp size={14} />}
+                                                </div>
+
+                                                {/* Type + Currency */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-black text-white uppercase tracking-tight">
+                                                        {isDeposit ? 'Depósito' : 'Retiro'} · {tx.currency}
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-600 font-mono mt-0.5 truncate">
+                                                        {tx.txHash || tx.addressOrId || '—'}
+                                                    </p>
+                                                </div>
+
+                                                {/* Amount */}
+                                                <div className="text-right">
+                                                    <p className={`text-sm font-black ${isDeposit ? 'text-[#00C087]' : 'text-red-400'}`}>
+                                                        {isDeposit ? '+' : '-'}{parseFloat(tx.amount || 0).toFixed(4)}
+                                                    </p>
+                                                    <p className="text-[9px] text-slate-600 font-bold mt-0.5">
+                                                        {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
+
+                                                {/* Status badge */}
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border flex-shrink-0 ${statusColor}`}>
+                                                    {tx.status || 'Pendiente'}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     )}
+
 
                     {activeTab === 'bot' && (
                         <div className="bg-[#1e2329] rounded-xl border border-white/5 p-8 animate-in fade-in duration-300">
