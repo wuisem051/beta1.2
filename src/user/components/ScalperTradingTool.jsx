@@ -518,25 +518,28 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600/10 to-blue-600/10 rounded-3xl p-8 border border-purple-500/20">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl">
-                            <FaLayerGroup className="text-white text-2xl" />
+            <div className="bg-[#1e2329] rounded-[2rem] p-8 border border-white/5 relative overflow-hidden group">
+                {/* Decorative background glow */}
+                <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#F3BA2F]/10 blur-[100px] pointer-events-none group-hover:bg-[#F3BA2F]/20 transition-all duration-1000"></div>
+
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 bg-[#F3BA2F]/10 rounded-2xl flex items-center justify-center shadow-2xl border border-[#F3BA2F]/20">
+                            <FaLayerGroup className="text-[#F3BA2F] text-2xl" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Trading Quirúrgico</h2>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Control Total sobre Lotes y Ejecución</p>
+                            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">Trading Quirúrgico</h2>
+                            <p className="text-[10px] text-[#848e9c] font-black uppercase tracking-[0.2em] mt-2 opacity-70">Arquitectura de Alta Precisión & Ejecución Flash</p>
                         </div>
                     </div>
 
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSaving
-                        ? 'border-blue-500/30 bg-blue-500/10 text-blue-400'
-                        : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${isSaving
+                        ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
+                        : 'border-[#F3BA2F]/30 bg-[#F3BA2F]/10 text-[#F3BA2F]'
                         }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-sky-400 animate-pulse' : 'bg-[#F3BA2F]'}`} />
                         <span className="text-[10px] font-black uppercase tracking-widest">
-                            {isSaving ? 'Guardando en DB...' : 'Sincronizado con la Nube'}
+                            {isSaving ? 'Cloud Core Saving...' : 'Terminal Sincronizada'}
                         </span>
                     </div>
                 </div>
@@ -559,48 +562,51 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
             {/* Configuración */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Panel de Configuración */}
-                <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5 space-y-6">
-                    <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
-                        <FaCalculator className="text-blue-500" />
-                        Configuración Base
+                <div className="bg-[#1e2329] rounded-[2rem] p-8 border border-white/5 space-y-8">
+                    <h3 className="text-xs font-black text-[#848e9c] uppercase tracking-[0.2em] flex items-center gap-2">
+                        <FaCalculator className="text-[#F3BA2F]" />
+                        Parámetros de Inyección
                     </h3>
 
                     {/* Estrategia */}
                     <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Estrategia</label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <label className="block text-[10px] font-black text-[#848e9c] uppercase tracking-widest mb-4">Mecánica de Ejecución</label>
+                        <div className="grid grid-cols-2 gap-4">
                             <button
                                 type="button"
                                 onClick={() => setStrategy('buy')}
-                                className={`py-4 rounded-xl font-black uppercase text-xs transition-all ${strategy === 'buy'
-                                    ? 'bg-emerald-500 text-black shadow-xl shadow-emerald-500/20'
-                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                className={`py-5 rounded-2xl font-black uppercase text-[11px] transition-all italic tracking-widest ${strategy === 'buy'
+                                    ? 'bg-[#00C087] text-black shadow-xl shadow-[#00C087]/20 scale-105'
+                                    : 'bg-black/30 text-[#848e9c] border border-white/5 opacity-50 hover:opacity-100'
                                     }`}
                             >
                                 <FaArrowDown className="inline mr-2" />
-                                Compras
+                                Comprar Lotes
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setStrategy('sell')}
-                                className={`py-4 rounded-xl font-black uppercase text-xs transition-all ${strategy === 'sell'
-                                    ? 'bg-rose-500 text-black shadow-xl shadow-rose-500/20'
-                                    : 'bg-slate-950/60 text-slate-500 border border-white/5'
+                                className={`py-5 rounded-2xl font-black uppercase text-[11px] transition-all italic tracking-widest ${strategy === 'sell'
+                                    ? 'bg-red-500 text-black shadow-xl shadow-red-500/20 scale-105'
+                                    : 'bg-black/30 text-[#848e9c] border border-white/5 opacity-50 hover:opacity-100'
                                     }`}
                             >
                                 <FaArrowUp className="inline mr-2" />
-                                Ventas
+                                Vender Lotes
                             </button>
                         </div>
                     </div>
 
                     {/* Par de Trading */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Par de Trading</label>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <label className="block text-[10px] font-black text-[#848e9c] uppercase tracking-widest">Activo de Mercado</label>
+                            <span className="text-[10px] font-black text-[#F3BA2F] italic">Live Core Data</span>
+                        </div>
                         <select
                             value={symbol}
                             onChange={(e) => setSymbol(e.target.value)}
-                            className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
+                            className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-4 text-white font-black text-sm outline-none focus:border-[#F3BA2F]/40 transition-all appearance-none"
                         >
                             {availablePairs.map(pair => (
                                 <option key={pair} value={pair}>{pair}</option>
@@ -634,32 +640,29 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     </div>
 
                     {/* Capital Total */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            {strategy === 'buy' ? 'Capital a Distribuir (USDT)' : 'Capital a Distribuir (USDT o Asset)'}
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black text-[#848e9c] uppercase tracking-widest">
+                            Distribución de Masa (Inyección)
                         </label>
                         <div className="relative">
                             <input
                                 type="number"
-                                step="0.00000001"
+                                step="any"
                                 value={totalCapital}
                                 onChange={(e) => setTotalCapital(e.target.value)}
-                                className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
-                                placeholder={strategy === 'buy' ? "100.00" : "Cant. Asset u 80.00 USD"}
+                                className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-black outline-none focus:border-[#F3BA2F]/40 transition-all text-lg pr-20"
+                                placeholder="0.00"
                             />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                                <span className="text-[10px] text-slate-600 font-black uppercase">{strategy === 'buy' ? 'USDT' : symbol.split('/')[0]}</span>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                <span className="text-[12px] text-[#F3BA2F] font-black uppercase italic">{strategy === 'buy' ? 'USDT' : symbol.split('/')[0]}</span>
                             </div>
                         </div>
-                        {strategy === 'sell' && (
-                            <p className="mt-2 text-[9px] text-slate-600 font-bold uppercase tracking-widest">Tip: Si indicas un valor menor a 1000, el sistema asumirá que es USD si el balance lo permite.</p>
-                        )}
                     </div>
 
                     {/* Número de Niveles */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            Lotes Sugeridos: {numLevels}
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black text-[#848e9c] uppercase tracking-widest">
+                            Lotes de Fragmentación: <span className="text-white ml-2">{numLevels}</span>
                         </label>
                         <input
                             type="range"
@@ -667,14 +670,14 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                             max="10"
                             value={numLevels}
                             onChange={(e) => setNumLevels(parseInt(e.target.value))}
-                            className="w-full h-2 bg-slate-950/60 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            className="w-full h-1.5 bg-[#0b0e11] rounded-lg appearance-none cursor-pointer accent-[#F3BA2F]"
                         />
                     </div>
 
                     {/* Paso de Precio / Objetivo Ganancia */}
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
-                            {strategy === 'buy' ? 'Separación Base (%)' : 'Objetivo de Ganancia (%)'}
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-black text-[#848e9c] uppercase tracking-widest">
+                            {strategy === 'buy' ? 'Delta de Separación (%)' : 'Umbral de Salida Real (%)'}
                         </label>
                         <div className="relative">
                             <input
@@ -682,10 +685,10 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                                 step="0.1"
                                 value={strategy === 'buy' ? priceStep : sellProfit}
                                 onChange={(e) => strategy === 'buy' ? setPriceStep(e.target.value) : setSellProfit(e.target.value)}
-                                className="w-full bg-slate-950/60 border border-white/5 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-blue-500"
-                                placeholder="1.0"
+                                className="w-full bg-[#0b0e11] border border-white/5 rounded-2xl px-6 py-5 text-white font-black outline-none focus:border-[#F3BA2F]/40 transition-all text-lg"
+                                placeholder="1.5"
                             />
-                            <FaPercentage className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                            <FaPercentage className="absolute right-6 top-1/2 -translate-y-1/2 text-[#F3BA2F] opacity-50" />
                         </div>
                     </div>
 
@@ -737,56 +740,61 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
                     <button
                         onClick={strategy === 'buy' ? calculateBuyLevels : calculateSellLevels}
                         disabled={isCalculating}
-                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all shadow-xl shadow-blue-600/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                        className="w-full bg-[#F3BA2F] hover:scale-[1.02] active:scale-95 text-black font-black py-5 rounded-2xl transition-all shadow-2xl shadow-[#F3BA2F]/10 uppercase tracking-[0.2em] italic text-xs flex items-center justify-center gap-3"
                     >
-                        <FaCalculator />
-                        Calcular Sugerencia
+                        {isCalculating ? <FaSync className="animate-spin" /> : <FaCalculator />}
+                        Generar Matriz de Lotes
                     </button>
-                    <p className="text-[9px] text-slate-500 text-center font-bold uppercase tracking-widest">Luego podrás editar cada nivel manualmente</p>
+                    <p className="text-[10px] text-[#848e9c] text-center font-black uppercase tracking-[0.2em] italic opacity-50">Sugerencia algorítmica personalizable</p>
                 </div>
 
                 {/* Panel de Vista Previa */}
-                <div className="bg-slate-900/40 rounded-3xl p-8 border border-white/5 flex flex-col">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
-                            <FaChartLine className="text-purple-500" />
-                            Distribución Visual
+                <div className="bg-[#1e2329] rounded-[2rem] p-8 border border-white/5 flex flex-col relative overflow-hidden">
+                    <div className="flex items-center justify-between mb-8 relative z-10">
+                        <h3 className="text-xs font-black text-[#848e9c] uppercase tracking-[0.2em] flex items-center gap-2">
+                            Visualizador de Carga
                         </h3>
                         <button
                             onClick={fetchCurrentPrice}
-                            className="p-2 bg-slate-950/60 rounded-lg text-slate-400 hover:text-blue-400 transition-all"
+                            className="px-4 py-2 bg-black/40 rounded-xl text-[#F3BA2F] hover:bg-[#F3BA2F]/10 transition-all font-black text-[10px] uppercase border border-[#F3BA2F]/20"
                         >
-                            <FaSync className={`text-sm ${isCalculating ? 'animate-spin' : ''}`} />
+                            Sync Market
                         </button>
                     </div>
 
                     {/* Indicador Visual */}
-                    <div className="space-y-4 flex-1">
+                    <div className="space-y-4 flex-1 relative z-10 custom-scrollbar overflow-y-auto max-h-[500px] pr-2">
                         {(strategy === 'buy' ? levels : sellLevels).length > 0 ? (
                             (strategy === 'buy' ? levels : sellLevels).map((level, idx) => (
-                                <div key={idx} className="bg-slate-950/40 rounded-xl p-3 border border-white/5">
-                                    <div className="flex justify-between items-center mb-2 text-[8px] font-black uppercase tracking-widest">
-                                        <span className="text-slate-500">Lote {level.level}</span>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-slate-600">Vol: {parseFloat(level.quantity).toFixed(4)}</span>
-                                            <span className="text-white">{parseFloat(level.percentage).toFixed(2)}%</span>
+                                <div key={idx} className="bg-[#0b0e11] rounded-2xl p-5 border border-white/5 hover:border-[#F3BA2F]/20 transition-all group">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black text-[#848e9c] uppercase tracking-[0.2em]">Lote {level.level}</span>
+                                            <span className="text-[13px] font-black text-white italic mt-1">${parseFloat(level.price).toFixed(2)}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[10px] font-black text-[#F3BA2F] uppercase tracking-widest">{parseFloat(level.percentage).toFixed(0)}% Masa</span>
+                                            <p className="text-[11px] font-black text-[#848e9c] mt-1 italic">{parseFloat(level.quantity).toFixed(4)} Alt</p>
                                         </div>
                                     </div>
                                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full transition-all duration-700 shadow-lg ${strategy === 'buy' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : 'bg-gradient-to-r from-rose-600 to-rose-400'}`}
+                                            className={`h-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,0,0,0.5)] ${strategy === 'buy' ? 'bg-[#00C087]' : 'bg-red-500'}`}
                                             style={{ width: `${level.percentage}%` }}
                                         />
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="flex flex-col items-center justify-center p-12 text-center opacity-20 h-full border-2 border-dashed border-white/5 rounded-3xl">
-                                <FaCalculator className="text-4xl mb-4" />
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Sin datos calculados</p>
+                            <div className="flex flex-col items-center justify-center p-12 text-center h-full border-2 border-dashed border-white/5 rounded-3xl opacity-20">
+                                <FaChartLine className="text-4xl mb-6" />
+                                <p className="text-[11px] font-black uppercase tracking-[0.3em]">Esperando Datos Nucleares</p>
                             </div>
                         )}
                     </div>
+
+                    {/* Background decoration */}
+                    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#F3BA2F]/5 blur-[120px] pointer-events-none"></div>
                 </div>
             </div>
 
