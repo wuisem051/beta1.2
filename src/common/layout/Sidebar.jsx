@@ -170,9 +170,6 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showExchangeSection !== false) && (
                   <NavLink to="/user/exchange" label="Terminal Spot" isActive={pathname.includes('/exchange')} />
                 )}
-                {(!siteSettings || siteSettings.showWhaleMonitor !== false) && (
-                  <NavLink to="/user/whale-monitor" label="Monitor Ballenas" isActive={pathname.includes('/whale-monitor')} />
-                )}
                 {(!siteSettings || siteSettings.showCopyTrading !== false) && (
                   <NavLink to="/user/miners" label="Señales VIP" isActive={pathname.includes('/miners')} />
                 )}

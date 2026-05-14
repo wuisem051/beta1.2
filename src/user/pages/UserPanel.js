@@ -31,7 +31,6 @@ import { FaHistory, FaUserCircle, FaRegEye, FaRegEyeSlash, FaCrown, FaGem, FaReg
 
 import UpdatesContent from '../components/UpdatesContent';
 import CryptoMarketMonitor from '../components/CryptoMarketMonitor';
-import WhaleMonitor from '../components/WhaleMonitor';
 import AirtmCashierContent from '../components/AirtmCashierContent';
 import BotZoneContent from '../components/BotZoneContent';
 
@@ -1742,9 +1741,6 @@ const UserPanel = () => {
           )}
           {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
             <Route path="cajero/*" element={<AirtmCashierContent />} />
-          )}
-          {(!siteSettings || siteSettings.showWhaleMonitor !== false) && (
-            <Route path="whale-monitor/*" element={<WhaleMonitor />} />
           )}
           <Route path="bot-zone/*" element={<BotZoneContent />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />

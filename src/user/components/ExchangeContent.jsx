@@ -10,7 +10,6 @@ import {
     FaArrowUp, FaArrowDown, FaSync, FaColumns, FaSquare, FaThLarge, FaTh, FaLayerGroup, FaSave
 } from 'react-icons/fa';
 import TradingViewWidget from './TradingViewWidget';
-import ScalperTradingTool from './ScalperTradingTool';
 import { useContext } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 
@@ -107,7 +106,6 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const tabs = [
         { id: 'trading', label: 'Terminal', icon: <FaBolt /> },
         { id: 'spot', label: 'Spot', icon: <FaExchangeAlt /> },
-        { id: 'scalper', label: 'Escalonado', icon: <FaLayerGroup /> },
         { id: 'orders', label: 'Órdenes', icon: <FaListUl /> },
         { id: 'history', label: 'Historial', icon: <FaHistory /> },
         { id: 'config', label: 'Credenciales', icon: <FaKey /> }
@@ -1115,16 +1113,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
             )
             }
 
-            {/* Scalper Trading Tool Tab */}
-            {
-                activeTab === 'scalper' && (
-                    <ScalperTradingTool
-                        exchange={activeTradingExchange}
-                        balance={balance}
-                        onRefresh={fetchBalance}
-                    />
-                )
-            }
+
 
             {/* Orders & History Viewers (Modern Lists) */}
             {

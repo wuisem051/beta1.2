@@ -121,8 +121,6 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     const tradingItems = [
         ...(!siteSettings || siteSettings.showExchangeSection !== false
             ? [{ path: '/user/exchange', label: 'Terminal Spot', icon: <FaChartBar />, desc: 'Gráficos en tiempo real', tag: { text: '🔥 HOT', cls: 'orange' } }] : []),
-        ...(!siteSettings || siteSettings.showWhaleMonitor !== false
-            ? [{ path: '/user/whale-monitor', label: 'Monitor Ballenas', icon: <FaNetworkWired />, desc: 'Actividad de grandes wallets' }] : []),
         { divider: true },
         ...(!siteSettings || siteSettings.showCopyTrading !== false
             ? [{ path: '/user/miners', label: 'Señales VIP', icon: <FaGem />, desc: 'Señales exclusivas de expertos', tag: { text: 'VIP', cls: 'gold' } }] : []),
@@ -182,7 +180,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                             label="Trading"
                             icon={<FaChartLine />}
                             isHot
-                            active={is('/exchange') || is('/whale') || is('/miners') || is('/mining-portfolio') || is('/plan-trading') || is('/bot-zone')}
+                            active={is('/exchange') || is('/miners') || is('/mining-portfolio') || is('/plan-trading') || is('/bot-zone')}
                             children={tradingItems}
                         />
                         {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
@@ -367,7 +365,6 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                             ...(!siteSettings || siteSettings.showWithdrawals !== false ? [{ to: '/user/withdrawals', label: '↑ Retiro', sub: true }] : []),
                             ...(!siteSettings || siteSettings.showExchangeSection !== false ? [{ to: '/user/exchange', icon: <FaChartLine />, label: 'Terminal Spot' }] : []),
                             ...(!siteSettings || siteSettings.showCopyTrading !== false ? [{ to: '/user/miners', icon: <FaGem />, label: 'Señales VIP' }] : []),
-                            ...(!siteSettings || siteSettings.showWhaleMonitor !== false ? [{ to: '/user/whale-monitor', icon: <FaNetworkWired />, label: 'Monitor Ballenas' }] : []),
                             ...(!siteSettings || siteSettings.showTradingPortfolio !== false ? [{ to: '/user/mining-portfolio', icon: <FaChartLine />, label: 'Mi Portafolio' }] : []),
                             { to: '/user/bot-zone', icon: <FaRobot />, label: 'Zona de Bots' },
                             ...(!siteSettings || siteSettings.showCollectiveFund !== false ? [{ to: '/user/collective-fund', icon: <FaUsers />, label: 'Fondo Colectivo' }] : []),

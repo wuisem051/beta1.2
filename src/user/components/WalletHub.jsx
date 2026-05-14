@@ -152,9 +152,7 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
     const sidebarItems = [
         { id: 'overview', label: 'Activos', icon: FaWallet },
         { id: 'spot', label: 'Cuenta Spot', icon: FaChartLine },
-        { id: 'futures', label: 'Cuenta de futuros', icon: FaHistory },
         { id: 'finances', label: 'Cuenta financiera', icon: FaExchangeAlt },
-        { id: 'copy', label: 'Copiar cuenta', icon: FaUsers },
         { id: 'bot', label: 'Cuenta Bot', icon: FaRobot },
         { id: 'deposit', label: 'Depositar', icon: FaArrowDown },
         { id: 'withdraw', label: 'Retirar', icon: FaArrowUp },

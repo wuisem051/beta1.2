@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../services/firebase';
+import ScalperTradingTool from './ScalperTradingTool';
 import {
     collection, addDoc, query, where, onSnapshot,
     serverTimestamp, doc, updateDoc, deleteDoc
@@ -274,6 +275,7 @@ const BotZoneContent = () => {
                                 <button onClick={() => setMainTab('ejecutando')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'ejecutando' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Ejecutando ({instances.length})</button>
                                 <button onClick={() => setMainTab('historial')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'historial' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Historial</button>
                                 <button onClick={() => setMainTab('pnl')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'pnl' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>Análisis de PnL</button>
+                                <button onClick={() => setMainTab('quirurgico')} className={`py-3 text-[10px] font-black uppercase transition-all ${mainTab === 'quirurgico' ? 'text-[#F3BA2F] border-b-2 border-[#F3BA2F]' : 'text-[#848e9c] hover:text-white'}`}>⚡ Trading Quirúrgico</button>
                             </div>
                             <div className="flex-1 overflow-y-auto">
                                 {mainTab === 'ejecutando' && (
@@ -367,6 +369,16 @@ const BotZoneContent = () => {
                                         </div>
                                     );
                                 })()}
+
+                                {mainTab === 'quirurgico' && (
+                                    <div className="w-full">
+                                        <ScalperTradingTool
+                                            exchange="binance"
+                                            balance={null}
+                                            onRefresh={() => { }}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
