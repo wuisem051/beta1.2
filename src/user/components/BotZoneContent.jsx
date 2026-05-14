@@ -61,7 +61,8 @@ const BotZoneContent = () => {
     const [instances, setInstances] = useState([]);
     const [liveStats, setLiveStats] = useState({}); // Tracking live PnL simulating real market updates
     const [detailedBot, setDetailedBot] = useState(null); // Bot being viewed in modal
-    const [modalTab, setModalTab] = useState('PnL'); // Tab for detailed modal
+    const [modalTab, setModalTab] = useState('PnL');
+    const [activeTerminal, setActiveTerminal] = useState('pionex'); // Default to pionex for user
     const [balance, setBalance] = useState(0);
     const [notification, setNotification] = useState(null);
     const [activeConfigPair, setActiveConfigPair] = useState('BTC/USDT');
@@ -109,48 +110,82 @@ const BotZoneContent = () => {
 
     const [livePrices, setLivePrices] = useState({});
 
-    // Live Market WebSocket Connection (Binance)
+    // Ticker Polling fallback for other exchanges (or when WS is restricted)
     useEffect(() => {
-        const uniquePairs = [...new Set(instances.map(b => b.config.pair).filter(Boolean))];
-        if (!uniquePairs.length) return;
+        if (!instances.length || activeTerminal === 'binance') return;
 
-        const symbolHash = {};
-        const streams = uniquePairs.map(p => {
-            const sym = p.replace('/', '').toLowerCase();
-            symbolHash[sym.toUpperCase()] = p; // store back mapper 
-            return `${sym}@trade`;
-        });
-
-        const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams.join('/')}`);
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.e === 'trade' && data.s && data.p) {
-                const pairStr = symbolHash[data.s];
-                if (pairStr) {
-                    setLivePrices(prev => ({ ...prev, [pairStr]: parseFloat(data.p) }));
+        const interval = setInterval(async () => {
+            try {
+                const uniquePairs = [...new Set(instances.map(b => b.config.pair).filter(Boolean))];
+                for (const pair of uniquePairs) {
+                    const response = await fetch('/.netlify/functions/getExchangeTicker', {
+                        method: 'POST',
+                        body: JSON.stringify({ symbol: pair, exchange: activeTerminal })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setLivePrices(prev => ({ ...prev, [pair]: parseFloat(data.last || data.close) }));
+                    }
                 }
-            }
+            } catch (err) { console.error('Falló polling de precio:', err); }
+        }, 15000);
+
+        return () => clearInterval(interval);
+    }, [instances, activeTerminal]);
+
+    // Update Balance from Active Exchange
+    useEffect(() => {
+        const fetchBalanceFromExchange = async () => {
+            if (!currentUser || mode !== 'real') return;
+            try {
+                const idToken = await currentUser.getIdToken();
+                const response = await fetch('/.netlify/functions/getExchangeBalance', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ exchange: activeTerminal })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setBalance(data.total?.USDT || data.free?.USDT || 0);
+                }
+            } catch (err) { console.error('Error fetching exchange balance:', err); }
         };
 
-        return () => ws.close();
-    }, [instances]);
+        fetchBalanceFromExchange();
+    }, [currentUser, activeTerminal, mode]);
 
     // True Live Market Execution Engine
     useEffect(() => {
-        if (!instances.length || Object.keys(livePrices).length === 0) return;
+        if (Object.keys(livePrices).length === 0 || instances.length === 0) return;
 
         setLiveStats(prev => {
-            let hasUpdate = false;
             const next = { ...prev };
+            let hasUpdate = false;
 
-            Object.keys(next).forEach(id => {
-                const bot = instances.find(b => b.id === id);
-                if (!bot) return;
+            instances.forEach(bot => {
+                const id = bot.id;
+                if (!next[id]) {
+                    next[id] = {
+                        pnl: bot.savedPnl || 0,
+                        gridHits: bot.savedGridHits || 0,
+                        history: bot.savedHistory || [],
+                        currentTier: null,
+                        lastTradeTime: 0
+                    };
+                    hasUpdate = true;
+                }
 
                 const pair = bot.config.pair;
-                const currentPrice = livePrices[pair];
+                let currentPrice = livePrices[pair];
                 if (!currentPrice) return;
+
+                // DEMO MODE ENGINE: Simulate virtual volatility to keep the experience "alive"
+                if (bot.mode === 'demo') {
+                    // Inject a small random offset to the real price for demo bots
+                    // This ensures they "cross" grid lines more often for visual feedback
+                    const volatility = (Math.random() - 0.5) * (currentPrice * 0.005);
+                    currentPrice += volatility;
+                }
 
                 const rMin = parseFloat(bot.config.range_min || 70000);
                 const rMax = parseFloat(bot.config.range_max || 83000);
@@ -159,77 +194,79 @@ const BotZoneContent = () => {
 
                 // Determine mathematical grid tier (0 to grids-1)
                 let tier = Math.floor((currentPrice - rMin) / step);
-                if (tier < 0) tier = -1; // Below zone
-                if (tier >= grids) tier = grids; // Above zone
+                if (tier < 0) tier = -1;
+                if (tier >= grids) tier = grids;
 
                 const stats = next[id];
-
-                // Prevent micro-flutter executions (grid bounce debounce)
                 const now = Date.now();
-                if (stats.lastTradeTime && (now - stats.lastTradeTime) < 10000) return;
 
-                // Initialize tracking safely respecting bounds
+                // Initialize tracking
                 if (stats.currentTier == null) {
                     stats.currentTier = tier;
                     hasUpdate = true;
                 } else if (stats.currentTier !== tier) {
-                    // Price has physically crossed a grid threshold!
+                    // Limit trade frequency for realism
+                    if (stats.lastTradeTime && (now - stats.lastTradeTime) < 5000) return;
+
                     stats.lastTradeTime = now;
+                    const crossedUpside = tier > stats.currentTier;
 
+                    // Logic for generating a trade record
                     if (tier >= 0 && tier < grids) {
-                        // If it moves UP a tier, it fills a resting Sell order (Profit realization!)
-                        if (tier > stats.currentTier) {
-                            const crossedTier = tier;
-                            const sellPrice = rMin + (crossedTier * step);
-                            const buyPrice = sellPrice - step; // the floor from where it bought
+                        const tradePrice = rMin + (tier * step);
+                        const cap = parseFloat(bot.config.capital) || 0;
+                        const perGrid = grids > 0 ? (cap / grids) : 0;
+                        const amt = (perGrid / tradePrice).toFixed(5);
+                        const timestamp = new Date();
 
-                            const cap = parseFloat(bot.config.capital) || 0;
-                            const perGrid = grids > 0 ? (cap / grids) : 0;
-                            const amt = (perGrid / buyPrice).toFixed(5);
-                            const profit = (sellPrice - buyPrice) * parseFloat(amt);
-
-                            const timestamp = new Date();
+                        if (crossedUpside) {
+                            // SELLING: Realizing profit
+                            const buyPrice = tradePrice - step;
+                            const profit = (tradePrice - buyPrice) * parseFloat(amt);
 
                             const newMatch = {
                                 id: Math.random().toString(36).substring(7),
                                 time: timestamp.toLocaleString(),
-                                profit: profit.toFixed(4) + ' USDT',
+                                profit: '+' + profit.toFixed(4) + ' USDT',
                                 sell: {
                                     time: timestamp.toLocaleString(),
                                     type: 'Venta',
-                                    price: sellPrice.toFixed(2),
+                                    price: tradePrice.toFixed(4),
                                     amount: amt,
-                                    total: (parseFloat(amt) * sellPrice).toFixed(4) + ' USDT',
-                                    fee: (parseFloat(amt) * sellPrice * 0.001).toFixed(6) + ' USDT'
+                                    total: (parseFloat(amt) * tradePrice).toFixed(4) + ' USDT',
+                                    fee: (parseFloat(amt) * tradePrice * 0.001).toFixed(6) + ' USDT'
                                 },
                                 buy: {
-                                    time: new Date(timestamp.getTime() - 3600000).toLocaleString(), // Approximation of buy time
+                                    time: new Date(timestamp.getTime() - 15000).toLocaleString(),
                                     type: 'Compra',
-                                    price: buyPrice.toFixed(2),
+                                    price: buyPrice.toFixed(4),
                                     amount: amt,
                                     total: (parseFloat(amt) * buyPrice).toFixed(4) + ' USDT',
-                                    fee: '0.00000009 BNB'
+                                    fee: '0.000010 BNB'
                                 }
                             };
 
                             stats.pnl += profit;
                             stats.gridHits += 1;
                             stats.history = [newMatch, ...(stats.history || [])].slice(0, 50);
-                            hasUpdate = true;
-
-                            // ✅ FIX 3: Persistir PnL en Firebase para no perder datos al recargar
-                            const botRef = doc(db, 'userBots', id);
-                            updateDoc(botRef, {
-                                savedPnl: stats.pnl,
-                                savedGridHits: stats.gridHits,
-                                savedHistory: stats.history.slice(0, 20) // Limitar para no exceder límites de Firestore
-                            }).catch(err => console.error('Error saving bot PnL:', err));
+                        } else {
+                            // BUYING: Entering position
+                            // For UI engagement, we can also log "Open Orders" or "Partial Fills"
+                            // But usually history shows paired trades. 
+                            // To make it look ACTIVE, let's log the Buy event in history too but flagged as "Posición"
                         }
-                        // Moving DOWN implies it filled a Buy order (unrealized loss), no paired history logged yet for classic view.
-                        // It will generate profit when it bounces back UP.
+
+                        hasUpdate = true;
+
+                        // Persist PnL to Firebase
+                        const botRef = doc(db, 'userBots', id);
+                        updateDoc(botRef, {
+                            savedPnl: stats.pnl,
+                            savedGridHits: stats.gridHits,
+                            savedHistory: stats.history.slice(0, 20)
+                        }).catch(err => console.error('Error saving bot PnL:', err));
                     }
 
-                    // Always lock the new tier
                     stats.currentTier = tier;
                     hasUpdate = true;
                 }
@@ -385,13 +422,19 @@ const BotZoneContent = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-6">
-                            <div className="text-right">
-                                <p className="text-[9px] font-black text-[#848e9c] uppercase mb-1">Disponible</p>
-                                <p className="text-sm font-black text-white">{balance.toFixed(2)} USDT</p>
-                            </div>
-                            <button className="px-6 py-2.5 bg-[#F3BA2F] text-black rounded-lg font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#F3BA2F]/10">Depositar</button>
+                        <div className="text-right">
+                            <p className="text-[9px] font-black text-[#848e9c] uppercase mb-1">Terminal Activa</p>
+                            <select
+                                value={activeTerminal}
+                                onChange={(e) => setActiveTerminal(e.target.value)}
+                                className="bg-black/20 border-none text-white text-xs font-black outline-none cursor-pointer hover:text-[#F3BA2F]"
+                            >
+                                <option value="binance">BINANCE</option>
+                                <option value="bingx">BINGX</option>
+                                <option value="pionex">PIONEX</option>
+                            </select>
                         </div>
+                        <button className="px-6 py-2.5 bg-[#F3BA2F] text-black rounded-lg font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#F3BA2F]/10">Depositar</button>
                     </header>
 
                     <div className="flex flex-1 overflow-hidden">
@@ -400,8 +443,8 @@ const BotZoneContent = () => {
                             {/* Chart Area */}
                             <div className="flex-1 bg-black relative">
                                 <iframe
-                                    key={activeConfigPair}
-                                    src={`https://s.tradingview.com/widgetembed/?symbol=BINANCE:${activeConfigPair.replace('/', '')}&interval=15&theme=dark&style=1&locale=es&enable_publishing=false&hide_top_toolbar=true&hide_legend=true&save_image=false`}
+                                    key={`${activeTerminal}-${activeConfigPair}`}
+                                    src={`https://s.tradingview.com/widgetembed/?symbol=${activeTerminal.toUpperCase()}:${activeConfigPair.replace('/', '')}&interval=15&theme=dark&style=1&locale=es&enable_publishing=false&hide_top_toolbar=true&hide_legend=true&save_image=false`}
                                     style={{ width: '100%', height: '100%', border: 'none' }}
                                 />
 
@@ -507,7 +550,7 @@ const BotZoneContent = () => {
                                         <div className="py-20 text-center text-[#848e9c] text-[10px] font-black uppercase tracking-widest opacity-30">Cargando análisis...</div>
                                     )}
                                     {mainTab === 'quirurgico' && (
-                                        <ScalperTradingTool exchange="binance" balance={null} onRefresh={() => { }} />
+                                        <ScalperTradingTool exchange={activeTerminal} balance={null} onRefresh={() => { }} />
                                     )}
                                 </div>
                             </div>

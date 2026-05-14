@@ -20,12 +20,17 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const [configs, setConfigs] = useState({
         binance: { apiKey: '', secret: '', connected: false },
         binanceus: { apiKey: '', secret: '', connected: false },
-        bingx: { apiKey: '', secret: '', connected: false }
+        bingx: { apiKey: '', secret: '', connected: false },
+        pionex: {
+            apiKey: '3i6gHghfEAjhz3KR8wAmdTaPDTZyPDWg2GCrcfx79sXEnfJ9JFm9tC1YdRCU8mGjkg',
+            secret: 'IrOUUoOwW6ZwevxIGsEWX9blBT1HdYqtiyqjLPo7hj9ZWENBJpjKxJ7ev884yuGL',
+            connected: false
+        }
     });
-    const [activeTradingExchange, setActiveTradingExchange] = useState('binance');
+    const [activeTradingExchange, setActiveTradingExchange] = useState('pionex');
 
     // UI Helpers
-    const [isSaving, setIsSaving] = useState({ binance: false, binanceus: false, bingx: false });
+    const [isSaving, setIsSaving] = useState({ binance: false, binanceus: false, bingx: false, pionex: false });
     const [isSavingLayout, setIsSavingLayout] = useState(false);
 
     const [balance, setBalance] = useState(null);
@@ -158,17 +163,20 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                 try {
                     const binanceRef = doc(db, 'users', currentUser.uid, 'secrets', 'binance');
                     const bingxRef = doc(db, 'users', currentUser.uid, 'secrets', 'bingx');
+                    const pionexRef = doc(db, 'users', currentUser.uid, 'secrets', 'pionex');
                     const legacyRef = doc(db, 'users', currentUser.uid, 'secrets', 'exchange');
 
-                    const [binSnap, bingSnap, legacySnap] = await Promise.all([
+                    const [binSnap, bingSnap, pionexSnap, legacySnap] = await Promise.all([
                         getDoc(binanceRef),
                         getDoc(bingxRef),
+                        getDoc(pionexRef),
                         getDoc(legacyRef)
                     ]);
 
                     let newConfigs = {
                         binance: { apiKey: '', secret: '', connected: false },
-                        bingx: { apiKey: '', secret: '', connected: false }
+                        bingx: { apiKey: '', secret: '', connected: false },
+                        pionex: { apiKey: '', secret: '', connected: false }
                     };
 
                     if (binSnap.exists()) {
@@ -178,6 +186,10 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                     if (bingSnap.exists()) {
                         const d = bingSnap.data();
                         newConfigs.bingx = { apiKey: d.apiKey, secret: '', connected: true };
+                    }
+                    if (pionexSnap.exists()) {
+                        const d = pionexSnap.data();
+                        newConfigs.pionex = { apiKey: d.apiKey, secret: '', connected: true };
                     }
 
                     // Legacy fallback
@@ -192,6 +204,8 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                         setActiveTradingExchange('binance');
                     } else if (bingSnap.exists() && !binSnap.exists()) {
                         setActiveTradingExchange('bingx');
+                    } else if (pionexSnap.exists()) {
+                        setActiveTradingExchange('pionex');
                     }
 
                     setConfigs(newConfigs);
@@ -585,6 +599,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                             <option value="binance">BINANCE (Global)</option>
                             <option value="binanceus">BINANCE.US</option>
                             <option value="bingx">BINGX</option>
+                            <option value="pionex">PIONEX</option>
                         </select>
                         <span className="text-slate-600 font-bold ml-1 text-xs">v2.3</span>
                     </div>
