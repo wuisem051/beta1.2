@@ -34,7 +34,7 @@ exports.handler = async (event, context) => {
                 fiat: fiat.toUpperCase(),
                 tradeType: "BUY",
                 page: 1,
-                rows: 10,
+                rows: 20,
                 payTypes: [],
                 publisherType: null,
                 countries: [],
@@ -63,8 +63,7 @@ exports.handler = async (event, context) => {
                 if (response.data && response.data.data && response.data.data.length > 0) {
                     // Filtro de seguridad manual adicional
                     const validOffers = response.data.data.filter(offer =>
-                        offer.adv.takerAdditionalKycRequired !== 1 &&
-                        offer.advertiser.authStatus === 'SUCCESS'
+                        offer.adv.takerAdditionalKycRequired !== 1
                     );
 
                     if (validOffers.length > 0) {
