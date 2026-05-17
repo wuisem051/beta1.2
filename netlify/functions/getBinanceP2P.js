@@ -29,16 +29,15 @@ exports.handler = async (event, context) => {
             const payload = {
                 fiat: fiat.toUpperCase(),
                 page: 1,
-                rows: 10, // Buscamos más filas para asegurar encontrar una no restringida
+                rows: 20, // Aumentamos a 20 para tener más margen al filtrar restringidas
                 tradeType: 'BUY',
                 asset: asset.toUpperCase(),
                 countries: [],
                 proMerchantAds: false,
                 shieldMerchantAds: false,
-                publisherType: null,
+                publisherType: null, // Captar tanto verificados como no verificados
                 payTypes: [],
-                classifies: ['mass', 'profession'],
-                additionalKycVerifyFilter: 1 // FILTRO CLAVE: Omitir órdenes restringidas
+                additionalKycVerifyFilter: 1 // La API de Binance ya filtrará la mayoría de las restringidas
             };
 
             try {
