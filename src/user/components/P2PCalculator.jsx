@@ -99,7 +99,7 @@ const P2PCalculator = () => {
         };
 
         syncAll();
-        const interval = setInterval(syncAll, 30000);
+        const interval = setInterval(syncAll, 5000); // Frecuencia ultra-alta: 5 segundos
         return () => clearInterval(interval);
     }, []);
 
@@ -138,6 +138,7 @@ const P2PCalculator = () => {
                     <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
                         <h3 className="text-[10px] font-black text-[#848e9c] uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                             <TrendingUp className="w-3 h-3 text-[#f0b90b]" /> Órdenes Reales Binance P2P
+                            <span className="ml-auto text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20">SIN RESTRICCIONES</span>
                         </h3>
                         {tokens.map((token) => (
                             <div key={token.id} className="relative group/item">
@@ -234,7 +235,14 @@ const P2PCalculator = () => {
                                         </div>
                                         <div>
                                             <h3 className="text-2xl font-black italic uppercase tracking-tighter leading-none group-hover:text-[#f0b90b] transition-colors">{token.name}</h3>
-                                            <p className="text-[10px] font-bold text-[#848e9c] uppercase tracking-widest mt-1">Binance {token.symbol}</p>
+                                            <div className="flex flex-col gap-0.5 mt-1">
+                                                <p className="text-[10px] font-bold text-[#848e9c] uppercase tracking-widest leading-tight">Binance {token.symbol}</p>
+                                                {token.advertiser && (
+                                                    <p className="text-[9px] font-black text-[#f0b90b]/80 uppercase tracking-tighter flex items-center gap-1">
+                                                        <TrendingDown className="w-2 h-2" /> {token.advertiser}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="text-right">

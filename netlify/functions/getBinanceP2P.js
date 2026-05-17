@@ -24,33 +24,56 @@ exports.handler = async (event, context) => {
 
         const results = {};
 
-        // Fetch each asset P2P price
-        for (const asset of assets) {
+        // Fetch all assets P2P prices IN PARALLEL for high frequency
+        await Promise.all(assets.map(async (asset) => {
+            const payload = {
+                fiat: fiat.toUpperCase(),
+                page: 1,
+                rows: 10, // Buscamos más filas para asegurar encontrar una no restringida
+                tradeType: 'BUY',
+                asset: asset.toUpperCase(),
+                countries: [],
+                proMerchantAds: false,
+                shieldMerchantAds: false,
+                publisherType: null,
+                payTypes: [],
+                classifies: ['mass', 'profession'],
+                additionalKycVerifyFilter: 1 // FILTRO CLAVE: Omitir órdenes restringidas
+            };
+
             try {
-                const response = await axios.post('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
-                    asset: asset.toUpperCase(),
-                    fiat: fiat.toUpperCase(),
-                    tradeType: 'BUY',
-                    page: 1,
-                    rows: 1,
-                    payTypes: [],
-                    publisherType: null
+                const response = await axios.post('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', payload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    },
+                    timeout: 5000 // Timeout para evitar bloqueos
                 });
 
                 if (response.data && response.data.data && response.data.data.length > 0) {
-                    const bestOffer = response.data.data[0];
-                    results[asset] = {
-                        price: parseFloat(bestOffer.adv.price),
-                        advertiser: bestOffer.advertiser.nickName
-                    };
+                    // Filtro de seguridad manual adicional
+                    const validOffers = response.data.data.filter(offer =>
+                        offer.adv.takerAdditionalKycRequired !== 1 &&
+                        offer.advertiser.authStatus === 'SUCCESS'
+                    );
+
+                    if (validOffers.length > 0) {
+                        const bestOffer = validOffers[0];
+                        results[asset] = {
+                            price: parseFloat(bestOffer.adv.price),
+                            advertiser: bestOffer.advertiser.nickName
+                        };
+                    } else {
+                        results[asset] = null;
+                    }
                 } else {
                     results[asset] = null;
                 }
-            } catch (err) {
-                console.error(`Error fetching P2P for ${asset}:`, err.message);
+            } catch (error) {
+                console.error(`Error para ${asset}:`, error.message);
                 results[asset] = null;
             }
-        }
+        }));
 
         return {
             statusCode: 200,
