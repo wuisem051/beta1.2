@@ -20,6 +20,7 @@ const P2PCalculator = () => {
     const [lastUpdate, setLastUpdate] = useState(new Date());
     const [isLoading, setIsLoading] = useState(true);
     const [isSyncingP2P, setIsSyncingP2P] = useState(false);
+    const [syncError, setSyncError] = useState(false);
 
     // Estado inicial de los tokens
     const [tokens, setTokens] = useState([
@@ -62,6 +63,7 @@ const P2PCalculator = () => {
     const fetchP2PPrices = async () => {
         try {
             setIsSyncingP2P(true);
+            setSyncError(false);
             const assetsToFetch = ['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
             const response = await fetch('/.netlify/functions/getBinanceP2P?t=' + new Date().getTime(), {
                 method: 'POST',
@@ -91,6 +93,7 @@ const P2PCalculator = () => {
             }
         } catch (error) {
             console.error("Error al sincronizar con Binance P2P:", error);
+            setSyncError(true);
         } finally {
             setIsSyncingP2P(false);
         }
@@ -198,10 +201,10 @@ const P2PCalculator = () => {
                         {isSyncingP2P ? (
                             <RefreshCw className="w-3 h-3 text-[#00C087] animate-spin" />
                         ) : (
-                            <span className="w-1.5 h-1.5 bg-[#00C087] rounded-full shadow-[0_0_8px_#00C087]"></span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${syncError ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 'bg-[#00C087] shadow-[0_0_8px_#00C087]'}`}></span>
                         )}
-                        <span className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest">
-                            {isSyncingP2P ? 'Sincronizando' : 'Vivo'}
+                        <span className={`text-[9px] font-black uppercase tracking-widest ${syncError ? 'text-red-500' : 'text-[#848e9c]'}`}>
+                            {isSyncingP2P ? 'Sincronizando' : syncError ? 'Error de Conexión' : 'Vivo'}
                         </span>
                     </div>
                 </header>
