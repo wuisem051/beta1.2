@@ -99,7 +99,7 @@ function AppContent() {
               />
               <Route
                 path="/user/p2p-monitor/*"
-                element={<UserPanel />}
+                element={<P2PCalculator />}
               />
               <Route
                 path="/user/*"
