@@ -150,7 +150,9 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
                   <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
                 )}
-                <NavLink to="/user/p2p-monitor" label="P2P Monitor" isActive={pathname.includes('/p2p-monitor')} />
+                {(!siteSettings || siteSettings.showP2PMonitor !== false) && (
+                  <NavLink to="/user/p2p-monitor" label="P2P Monitor" isActive={pathname.includes('/p2p-monitor')} />
+                )}
                 {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
                   <NavLink to="/user/cajero" label="Cajero Airtm" isActive={pathname.includes('/cajero')} />
                 )}
@@ -191,6 +193,16 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
               icon={<FaUsers />}
               label="Fondo Colectivo"
               isActive={pathname.includes('/collective-fund')}
+            />
+          )}
+
+          {/* P2P Monitor */}
+          {(!siteSettings || siteSettings.showP2PMonitor !== false) && (
+            <NavLink
+              to="/user/p2p-monitor"
+              icon={<FaNetworkWired />}
+              label="P2P Monitor"
+              isActive={pathname.includes('/p2p-monitor')}
             />
           )}
 

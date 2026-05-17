@@ -1722,7 +1722,9 @@ const UserPanel = () => {
           {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
             <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} isSidebarHidden={isSidebarHidden} dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
-          <Route path="p2p-monitor/*" element={<P2PCalculator />} />
+          {(!siteSettings || siteSettings.showP2PMonitor !== false) && (
+            <Route path="p2p-monitor/*" element={<P2PCalculator />} />
+          )}
           {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
             <Route path="collective-fund/*" element={<CollectiveFundContent />} />
           )}
