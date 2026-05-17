@@ -19,6 +19,7 @@ import {
 const P2PCalculator = () => {
     const [lastUpdate, setLastUpdate] = useState(new Date());
     const [isLoading, setIsLoading] = useState(true);
+    const [isSyncingP2P, setIsSyncingP2P] = useState(false);
 
     // Estado inicial de los tokens
     const [tokens, setTokens] = useState([
@@ -60,8 +61,9 @@ const P2PCalculator = () => {
     // Sincronización con Binance P2P (Proxy)
     const fetchP2PPrices = async () => {
         try {
-            const assetsToFetch = ['USDT', 'BTC', 'ETH', 'SOL', 'XRP'];
-            const response = await fetch('/.netlify/functions/getBinanceP2P', {
+            setIsSyncingP2P(true);
+            const assetsToFetch = ['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
+            const response = await fetch('/.netlify/functions/getBinanceP2P?t=' + new Date().getTime(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assets: assetsToFetch, fiat: 'VES' })
@@ -80,7 +82,7 @@ const P2PCalculator = () => {
                     }
 
                     const usdtData = data.prices['USDT'];
-                    if (usdtData && !['USDT', 'BTC', 'ETH', 'SOL', 'XRP'].includes(symbolUpper)) {
+                    if (usdtData && !['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'].includes(symbolUpper)) {
                         return { ...token, p2pPrice: usdtData.price * token.spotPrice, advertiser: 'Estimado (via USDT)' };
                     }
 
@@ -89,6 +91,8 @@ const P2PCalculator = () => {
             }
         } catch (error) {
             console.error("Error al sincronizar con Binance P2P:", error);
+        } finally {
+            setIsSyncingP2P(false);
         }
     };
 
@@ -99,7 +103,7 @@ const P2PCalculator = () => {
         };
 
         syncAll();
-        const interval = setInterval(syncAll, 5000); // Frecuencia ultra-alta: 5 segundos
+        const interval = setInterval(syncAll, 2500); // 2.5 segundos (Casi tiempo real)
         return () => clearInterval(interval);
     }, []);
 
@@ -187,103 +191,66 @@ const P2PCalculator = () => {
             </div>
 
             {/* Panel Derecho: Ranking de Eficiencia */}
-            <div className="flex-1 flex flex-col gap-6">
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 bg-[#f0b90b] rounded-full animate-pulse shadow-[0_0_8px_#f0b90b]"></div>
-                            <span className="text-[10px] font-black text-[#f0b90b] uppercase tracking-[0.4em]">Algoritmo de Arbitraje</span>
-                        </div>
-                        <h1 className="text-4xl lg:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">Ranking de <span className="text-[#f0b90b]">Eficiencia</span></h1>
-                    </div>
-                    <div className="bg-[#1e2329] border border-[#2b3139] rounded-2xl px-6 py-4 flex flex-col items-end shadow-xl">
-                        <span className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest mb-1">Mejor Tasa Implícita</span>
-                        <span className="text-xl font-black text-[#f0b90b] italic">{bestOption?.implicitRate.toFixed(4)} <span className="text-[10px] not-italic text-[#848e9c]">VES/USD</span></span>
+            <div className="flex-1 flex flex-col gap-4 overflow-y-auto no-scrollbar">
+                <header className="flex items-center justify-between mb-2">
+                    <h2 className="text-sm font-black text-[#848e9c] uppercase tracking-[0.3em]">Ranking de Eficiencia</h2>
+                    <div className="flex items-center gap-2">
+                        {isSyncingP2P ? (
+                            <RefreshCw className="w-3 h-3 text-[#00C087] animate-spin" />
+                        ) : (
+                            <span className="w-1.5 h-1.5 bg-[#00C087] rounded-full shadow-[0_0_8px_#00C087]"></span>
+                        )}
+                        <span className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest">
+                            {isSyncingP2P ? 'Sincronizando' : 'Vivo'}
+                        </span>
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 pb-12">
+                <div className="space-y-1.5 pb-12">
                     {ranking.map((token, index) => {
-                        const isBest = token.id === bestOption.id;
+                        const isBest = index === 0;
+                        const variation = ((token.implicitRate / bestOption.implicitRate - 1) * 100).toFixed(2);
+
                         return (
                             <div
                                 key={token.id}
-                                className={`group relative overflow-hidden rounded-[2.5rem] p-8 border transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${isBest
-                                    ? 'bg-[#1e2329] border-[#f0b90b] shadow-[0_30px_60px_-15px_rgba(240,185,11,0.15)] ring-1 ring-[#f0b90b]/50'
-                                    : 'bg-[#1e2329] border-[#2b3139] hover:bg-[#2b3139]/50'
+                                className={`flex items-center justify-between p-4 px-6 rounded-2xl border transition-all duration-300 ${isBest
+                                    ? 'bg-[#1e2329] border-[#00C087]/30 shadow-[0_4px_20px_-5px_rgba(0,192,135,0.1)]'
+                                    : 'bg-[#111418] border-[#2b3139]'
                                     }`}
                             >
-                                {isBest && (
-                                    <div className="absolute top-0 right-0">
-                                        <div className="bg-[#f0b90b] text-[#0b0e11] px-6 py-2 rounded-bl-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-lg animate-fade-in flex items-center gap-2">
-                                            <Trophy size={14} strokeWidth={3} /> MEJOR OPCIÓN
-                                        </div>
-                                    </div>
-                                )}
+                                {/* Izquierda: Posición e Info Moneda */}
+                                <div className="flex items-center gap-6">
+                                    <span className={`text-xl font-black italic w-6 ${isBest ? 'text-[#00C087]' : 'text-[#474d57]'}`}>
+                                        #{index + 1}
+                                    </span>
 
-                                <div className="flex justify-between items-start mb-10">
-                                    <div className="flex items-center gap-5">
-                                        <div
-                                            className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-3xl shadow-2xl border transition-transform duration-700 group-hover:rotate-12"
-                                            style={{
-                                                backgroundColor: `${token.color}20`,
-                                                borderColor: isBest ? '#f0b90b' : `${token.color}40`,
-                                                color: token.color
-                                            }}
-                                        >
-                                            {React.cloneElement(token.icon, { size: 32, strokeWidth: 2.5 })}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-2xl font-black italic uppercase tracking-tighter leading-none group-hover:text-[#f0b90b] transition-colors">{token.name}</h3>
-                                            <div className="flex flex-col gap-0.5 mt-1">
-                                                <p className="text-[10px] font-bold text-[#848e9c] uppercase tracking-widest leading-tight">Binance {token.symbol}</p>
-                                                {token.advertiser && (
-                                                    <p className="text-[9px] font-black text-[#f0b90b]/80 uppercase tracking-tighter flex items-center gap-1">
-                                                        <TrendingDown className="w-2 h-2" /> {token.advertiser}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest mb-1 italic">Costo por 1$ USD</div>
-                                        <div className={`text-2xl font-black italic underline decoration-[#f0b90b]/20 underline-offset-8 ${isBest ? 'text-[#f0b90b]' : 'text-white'}`}>
-                                            {token.implicitRate.toFixed(4)}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="bg-[#0b0e11] rounded-3xl p-6 border border-[#2b3139] shadow-inner flex flex-col group-hover:bg-[#000000] transition-colors duration-500">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-[10px] font-black text-[#848e9c] uppercase tracking-widest flex items-center gap-2">
-                                                <ArrowRight className="w-3 h-3 text-[#f0b90b]" /> Precio de Referencia P2P
-                                            </span>
-                                        </div>
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-3xl font-black text-white italic tracking-tighter">
-                                                {token.p2pPrice.toLocaleString()}
-                                            </span>
-                                            <span className="text-sm font-black text-[#f0b90b] uppercase italic">BS / {token.name}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between pt-2">
+                                    <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${isBest ? 'bg-[#00C087] animate-ping' : 'bg-[#1e2329]'}`}></div>
-                                            <span className="text-[10px] font-bold text-[#848e9c] uppercase tracking-tighter">
-                                                {isBest ? 'Posición Dominante' : `Variación: +${((token.implicitRate / bestOption.implicitRate - 1) * 100).toFixed(2)}%`}
+                                            <span className="text-lg font-black text-white italic tracking-tight uppercase leading-none">
+                                                {token.name}
                                             </span>
+                                            {isBest && (
+                                                <span className="bg-[#00C087] text-[#0b0e11] text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                                    MEJOR PRECIO
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="text-4xl font-black text-white/5 italic">
-                                            #0{index + 1}
-                                        </div>
+                                        <p className="text-[10px] font-bold text-[#848e9c] uppercase tracking-widest leading-none mt-1.5">
+                                            P2P: Bs. {token.p2pPrice.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Decorative Background Icon */}
-                                <div className="absolute -bottom-6 -right-6 text-[#f0b90b]/5 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700 pointer-events-none">
-                                    {React.cloneElement(token.icon, { size: 120, strokeWidth: 1 })}
+                                {/* Derecha: Tasa Implícita y Variación */}
+                                <div className="text-right">
+                                    <p className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest leading-none mb-1">Tasa Implícita</p>
+                                    <div className={`text-xl font-black italic tracking-tight leading-none ${isBest ? 'text-[#00C087]' : 'text-white'}`}>
+                                        Bs. {token.implicitRate.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+                                    </div>
+                                    <p className={`text-[10px] font-black uppercase tracking-tighter mt-1 leading-none ${isBest ? 'text-[#00C087]' : 'text-[#f0b90b]'}`}>
+                                        {isBest ? 'Referencia' : `+${variation}% más caro`}
+                                    </p>
                                 </div>
                             </div>
                         );

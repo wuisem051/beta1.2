@@ -5,6 +5,9 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
     };
 
     if (event.httpMethod === 'OPTIONS') {
@@ -41,12 +44,17 @@ exports.handler = async (event, context) => {
             };
 
             try {
-                const response = await axios.post('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', payload, {
+                // Añadimos timestamp a la URL de Binance para evitar caché interna de sus servidores
+                const binanceUrl = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search?t=${new Date().getTime()}`;
+
+                const response = await axios.post(binanceUrl, payload, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     },
-                    timeout: 5000 // Timeout para evitar bloqueos
+                    timeout: 8000 // Aumentamos un poco el timeout para mayor fiabilidad
                 });
 
                 if (response.data && response.data.data && response.data.data.length > 0) {
