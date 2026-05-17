@@ -17,7 +17,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
 
   // States for collapsible menus
   const [openMenus, setOpenMenus] = useState({
-    wallet: pathname.includes('wallet') || pathname.includes('deposits') || pathname.includes('withdrawals'),
+    wallet: pathname.includes('wallet') || pathname.includes('deposits') || pathname.includes('withdrawals') || pathname.includes('p2p-monitor') || pathname.includes('p2p-marketplace'),
     trading: pathname.includes('miners') || pathname.includes('mining-portfolio') || pathname.includes('exchange') || pathname.includes('plan-trading'),
     support: pathname.includes('contact-support') || pathname.includes('updates'),
     account: pathname.includes('settings')
@@ -150,6 +150,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showP2PMarketplace !== false) && (
                   <NavLink to="/user/p2p-marketplace" label="P2P Marketplace" isActive={pathname.includes('/p2p-marketplace')} />
                 )}
+                <NavLink to="/user/p2p-monitor" label="P2P Monitor" isActive={pathname.includes('/p2p-monitor')} />
                 {(!siteSettings || siteSettings.showCajeroAirtm !== false) && (
                   <NavLink to="/user/cajero" label="Cajero Airtm" isActive={pathname.includes('/cajero')} />
                 )}
