@@ -32,29 +32,34 @@ exports.handler = async (event, context) => {
             const payload = {
                 fiat: fiat.toUpperCase(),
                 page: 1,
-                rows: 20, // Aumentamos a 20 para tener más margen al filtrar restringidas
+                rows: 10,
                 tradeType: 'BUY',
                 asset: asset.toUpperCase(),
                 countries: [],
                 proMerchantAds: false,
                 shieldMerchantAds: false,
-                publisherType: null, // Captar tanto verificados como no verificados
+                publisherType: null,
                 payTypes: [],
-                additionalKycVerifyFilter: 1 // La API de Binance ya filtrará la mayoría de las restringidas
+                additionalKycVerifyFilter: 1
             };
 
             try {
                 // Añadimos timestamp a la URL de Binance para evitar caché interna de sus servidores
-                const binanceUrl = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search?t=${new Date().getTime()}`;
+                const binanceUrl = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search?t=${new Date().getTime()}&v=${Math.random()}`;
 
                 const response = await axios.post(binanceUrl, payload, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': '*/*',
+                        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+                        'Lang': 'es',
+                        'Origin': 'https://p2p.binance.com',
+                        'Referer': 'https://p2p.binance.com/es/trade/all-payments/USDT?fiat=VES',
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache'
                     },
-                    timeout: 8000 // Aumentamos un poco el timeout para mayor fiabilidad
+                    timeout: 10000
                 });
 
                 if (response.data && response.data.data && response.data.data.length > 0) {

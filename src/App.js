@@ -97,6 +97,10 @@ function AppContent() {
                 }
               />
               <Route
+                path="/user/p2p-monitor/*"
+                element={<UserPanel />}
+              />
+              <Route
                 path="/user/*"
                 element={
                   <ProtectedRoute>
