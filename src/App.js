@@ -21,6 +21,7 @@ const Signup = lazy(() => import('./user/pages/Signup'));
 const UserPanel = lazy(() => import('./user/pages/UserPanel'));
 // Admin panel migrado a repositorio separado (panel-admin)
 const AllNewsPage = lazy(() => import('./user/pages/AllNewsPage')); // Nueva página para todas las noticias
+const P2PCalculator = lazy(() => import('./user/components/P2PCalculator'));
 
 function App() {
   const { darkMode, theme } = useContext(ThemeContext); // Usar ThemeContext
@@ -110,6 +111,7 @@ function AppContent() {
               />
               {/* Rutas admin eliminadas - migradas a repositorio panel-admin */}
               <Route path="/news" element={<AllNewsPage />} />
+              <Route path="/p2p-arbitrage" element={<P2PCalculator />} />
             </Routes>
           </Suspense>
         </ColorPaletteProvider>

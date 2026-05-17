@@ -30,16 +30,14 @@ exports.handler = async (event, context) => {
         // Fetch all assets P2P prices IN PARALLEL for high frequency
         await Promise.all(assets.map(async (asset) => {
             const payload = {
+                asset: asset.toUpperCase(),
                 fiat: fiat.toUpperCase(),
+                tradeType: "BUY",
                 page: 1,
                 rows: 10,
-                tradeType: 'BUY',
-                asset: asset.toUpperCase(),
-                countries: [],
-                proMerchantAds: false,
-                shieldMerchantAds: false,
-                publisherType: null,
                 payTypes: [],
+                publisherType: null,
+                countries: [],
                 additionalKycVerifyFilter: 1
             };
 
