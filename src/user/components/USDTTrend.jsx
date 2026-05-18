@@ -36,8 +36,6 @@ const USDTTrend = () => {
     useEffect(() => {
         setIsLoading(true);
         const historyRef = collection(db, 'p2p_price_trend');
-
-        // Query para los últimos 100 puntos de datos
         const q = query(historyRef, orderBy('timestamp', 'asc'), limit(150));
 
         const unsubscribe = onSnapshot(q,
@@ -57,7 +55,11 @@ const USDTTrend = () => {
                 });
 
                 setChartData(fetchedData);
-                if (fetchedData.length > 0) {
+
+                // Si la base está vacía, forzamos el primer registro
+                if (fetchedData.length === 0) {
+                    recordCurrentPrices();
+                } else {
                     const last = fetchedData[fetchedData.length - 1];
                     setCurrentPrices({
                         binance: last.binance,
@@ -73,10 +75,35 @@ const USDTTrend = () => {
             }
         );
 
-        return () => unsubscribe();
+        // Fetch de precios actuales inmediatos
+        fetchLivePrices();
+
+        // Intervalo de auto-grabado cada 5 minutos
+        const interval = setInterval(recordCurrentPrices, 5 * 60 * 1000);
+
+        return () => {
+            unsubscribe();
+            clearInterval(interval);
+        };
     }, []);
 
-    // Función para grabar un punto de datos (esto idealmente va en un cron, lo ponemos aqui como trigger manual/auto)
+    const fetchLivePrices = async () => {
+        try {
+            const resp = await Promise.all([
+                fetch('/.netlify/functions/getBinanceP2P', { method: 'POST', body: JSON.stringify({ assets: ['USDT'], fiat: 'VES' }) }),
+                fetch('/.netlify/functions/getBitunixP2P', { method: 'POST', body: JSON.stringify({ assets: ['USDT'], fiat: 'VES' }) }),
+                fetch('/.netlify/functions/getBingXP2P', { method: 'POST', body: JSON.stringify({ assets: ['USDT'], fiat: 'VES' }) })
+            ]);
+            const [b, u, x] = await Promise.all(resp.map(r => r.json()));
+            setCurrentPrices({
+                binance: b.prices?.USDT?.price || 0,
+                bitunix: u.prices?.USDT?.price || 0,
+                bingx: x.prices?.USDT?.price || 0
+            });
+        } catch (e) { }
+    };
+
+    // Función para grabar un punto de datos
     const recordCurrentPrices = async () => {
         try {
             const resp = await Promise.all([
@@ -87,15 +114,20 @@ const USDTTrend = () => {
 
             const [b, u, x] = await Promise.all(resp.map(r => r.json()));
 
-            const newPoint = {
-                timestamp: serverTimestamp(),
-                binance: b.prices?.USDT?.price || 0,
-                bitunix: u.prices?.USDT?.price || 0,
-                bingx: x.prices?.USDT?.price || 0
-            };
+            const bp = b.prices?.USDT?.price || 0;
+            const up = u.prices?.USDT?.price || 0;
+            const xp = x.prices?.USDT?.price || 0;
 
-            if (newPoint.binance > 0) {
-                await addDoc(collection(db, 'p2p_price_trend'), newPoint);
+            if (bp > 0) {
+                await addDoc(collection(db, 'p2p_price_trend'), {
+                    timestamp: serverTimestamp(),
+                    binance: bp,
+                    bitunix: up,
+                    bingx: xp
+                });
+
+                // Actualizar visualmente de inmediato
+                setCurrentPrices({ binance: bp, bitunix: up, bingx: xp });
             }
         } catch (err) {
             console.error("Error recording trend point:", err);
