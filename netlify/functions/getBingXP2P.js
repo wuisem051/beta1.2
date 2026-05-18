@@ -42,15 +42,26 @@ exports.handler = async (event, context) => {
                     timeout: 4000
                 });
 
-                if (response.data && response.data.data && response.data.data.items && response.data.data.items.length > 0) {
-                    const best = response.data.data.items[0];
-                    results[asset.toUpperCase()] = {
-                        price: parseFloat(best.price),
-                        advertiser: best.nickName,
-                        orderCount: best.orderCount,
-                        finishRate: (parseFloat(best.orderCompletionRate) * 100).toFixed(1),
-                        isMerchant: best.isMerchant === 1
-                    };
+                if (response.data?.data?.items?.length > 0) {
+                    const top3 = response.data.data.items
+                        .filter(item => item.orderCount >= 2) // Filtro mínimo de reputación
+                        .slice(0, 3)
+                        .map(item => ({
+                            price: parseFloat(item.price),
+                            advertiser: item.nickName,
+                            orderCount: item.orderCount,
+                            finishRate: (parseFloat(item.orderCompletionRate) * 100).toFixed(1),
+                            isMerchant: item.isMerchant === 1
+                        }));
+
+                    if (top3.length > 0) {
+                        results[asset.toUpperCase()] = {
+                            ...top3[0],
+                            offers: top3
+                        };
+                    } else {
+                        throw new Error("No valid items");
+                    }
                 } else {
                     throw new Error("No items");
                 }

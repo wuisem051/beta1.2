@@ -96,7 +96,8 @@ const P2PCalculator = () => {
                             advertiser: p2pData.advertiser,
                             orderCount: p2pData.orderCount,
                             finishRate: p2pData.finishRate,
-                            isMerchant: p2pData.isMerchant
+                            isMerchant: p2pData.isMerchant,
+                            offers: p2pData.offers
                         };
                     }
 
@@ -256,6 +257,25 @@ const P2PCalculator = () => {
                                                 {token.p2pPrice && token.spotPrice ? (token.p2pPrice / token.spotPrice).toFixed(2) : '0.00'} BS/$
                                             </span>
                                         </div>
+
+                                        {/* Otras ofertas */}
+                                        {token.offers && token.offers.length > 1 && (
+                                            <div className="mt-3 pt-3 border-t border-[#2b3139] space-y-2">
+                                                <p className="text-[7px] font-black text-[#848e9c] uppercase tracking-widest mb-1">Otras ofertas competitivas:</p>
+                                                {token.offers.slice(1, 3).map((offer, idx) => (
+                                                    <div key={idx} className="flex justify-between items-center bg-[#1e2329]/30 rounded-lg px-2 py-1.5 border border-transparent hover:border-[#2b3139] transition-all cursor-pointer" onClick={() => handleP2PChange(token.id, offer.price)}>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[9px] font-black text-white">{offer.price.toFixed(2)} BS</span>
+                                                            <span className="text-[7px] text-[#848e9c] truncate max-w-[80px]">{offer.advertiser}</span>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-[7px] font-bold text-[#848e9c] block">{offer.orderCount} ord.</span>
+                                                            <span className="text-[7px] font-bold text-[#848e9c] opacity-70">{offer.finishRate}%</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             );

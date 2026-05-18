@@ -39,8 +39,7 @@ exports.handler = async (event, context) => {
                 publisherType: null,
                 countries: [],
                 additionalKycVerifyFilter: 0, // 'Anuncios que no necesitan verificación' = ON
-                filterType: "trading",      // 'Solo anuncios para trading' = ON
-                classifies: ["mass", "profession"] // Excluir anuncios de baja categoría
+                filterType: "trading"      // 'Solo anuncios para trading' = ON
             };
 
             try {
@@ -78,9 +77,9 @@ exports.handler = async (event, context) => {
                         const dynamicMax = parseFloat(offer.adv.dynamicMaxSingleTransAmount) || 0;
                         const isSpam = (max - min) < 100 || (max / min < 1.05 && min < 20000); // Rango muy estrecho = Fake/Spam
 
-                        // Si no es Merchant, pedimos al menos 250 órdenes para garantizar que NO está restringido
-                        const minOrders = isMerchant ? 15 : 250;
-                        const hasReputation = orderCount >= minOrders && finishRate > 0.95;
+                        // Heurística de Reputación Ajustada: Permitir anunciantes con pocas operaciones (pueden tener mejores tasas)
+                        const minOrders = isMerchant ? 2 : 5;
+                        const hasReputation = orderCount >= minOrders && finishRate > 0.85;
                         const canOperate = dynamicMax >= min;
 
                         return isTradable &&
@@ -91,13 +90,17 @@ exports.handler = async (event, context) => {
                     });
 
                     if (validOffers.length > 0) {
-                        const bestOffer = validOffers[0];
+                        const top3 = validOffers.slice(0, 3).map(offer => ({
+                            price: parseFloat(offer.adv.price),
+                            advertiser: offer.advertiser.nickName,
+                            orderCount: offer.advertiser.monthOrderCount,
+                            finishRate: (offer.advertiser.monthFinishRate * 100).toFixed(1),
+                            isMerchant: offer.advertiser.userType === 'merchant' || offer.advertiser.userGrade > 2
+                        }));
+
                         results[asset] = {
-                            price: parseFloat(bestOffer.adv.price),
-                            advertiser: bestOffer.advertiser.nickName,
-                            orderCount: bestOffer.advertiser.monthOrderCount,
-                            finishRate: (bestOffer.advertiser.monthFinishRate * 100).toFixed(1),
-                            isMerchant: bestOffer.advertiser.userType === 'merchant' || bestOffer.advertiser.userGrade > 2
+                            ...top3[0],
+                            offers: top3
                         };
                     } else {
                         results[asset] = null;

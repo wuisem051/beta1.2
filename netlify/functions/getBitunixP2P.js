@@ -36,13 +36,17 @@ exports.handler = async (event, context) => {
                     const list = rawList.filter(item => item.onlineFlag === "online" || !item.onlineFlag);
 
                     if (list.length > 0) {
-                        const best = list[0];
+                        const top3 = list.slice(0, 3).map(item => ({
+                            price: parseFloat(item.price),
+                            advertiser: item.nickname || item.memberName || "Comerciante",
+                            orderCount: item.thirtyOrderQuantity || item.orderCount || 0,
+                            finishRate: (parseFloat(item.thirtyCompleteRate) || 100).toFixed(1),
+                            isMerchant: item.customizeState === 1 || item.isMerchant === 1
+                        }));
+
                         results[asset.toUpperCase()] = {
-                            price: parseFloat(best.price),
-                            advertiser: best.nickname || best.memberName || "Comerciante",
-                            orderCount: best.thirtyOrderQuantity || best.orderCount || 0,
-                            finishRate: (parseFloat(best.thirtyCompleteRate) || 100).toFixed(1),
-                            isMerchant: best.customizeState === 1 || best.isMerchant === 1
+                            ...top3[0],
+                            offers: top3
                         };
                     }
                 }
