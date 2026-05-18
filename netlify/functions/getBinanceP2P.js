@@ -34,11 +34,13 @@ exports.handler = async (event, context) => {
                 fiat: fiat.toUpperCase(),
                 tradeType: "BUY",
                 page: 1,
-                rows: 20,
+                rows: 15,
                 payTypes: [],
                 publisherType: null,
                 countries: [],
-                additionalKycVerifyFilter: 1
+                additionalKycVerifyFilter: 0, // 'Anuncios que no necesitan verificación' = ON
+                filterType: "trading",      // 'Solo anuncios para trading' = ON
+                classifies: ["mass", "profession"] // Excluir anuncios de baja categoría
             };
 
             try {
@@ -64,7 +66,7 @@ exports.handler = async (event, context) => {
                     // FILTROS PARA ELIMINAR ANUNCIOS RESTRINGIDOS Y SPAM:
                     // 1. Quitar los que piden KYC adicional explicito o no son tradeables.
                     // 2. Filtrar órdenes spam (ej: min 300, max 301).
-                    // 3. Heurística de Reputación: Omitir usuarios con < 200 órdenes mensuales (gran foco de restricción).
+                    // 3. Heurística de Reputación: Omitir usuarios con < 250 órdenes (suelen ser los restringidos)
                     const validOffers = response.data.data.filter(offer => {
                         const min = parseFloat(offer.adv.minSingleTransAmount);
                         const max = parseFloat(offer.adv.maxSingleTransAmount);
@@ -74,11 +76,11 @@ exports.handler = async (event, context) => {
 
                         const isTradable = offer.adv.isTradable !== false;
                         const dynamicMax = parseFloat(offer.adv.dynamicMaxSingleTransAmount) || 0;
-                        const isSpam = (max - min) < 100 || (max / min < 1.02 && min < 10000);
+                        const isSpam = (max - min) < 100 || (max / min < 1.05 && min < 20000); // Rango muy estrecho = Fake/Spam
 
-                        // Heurística fuerte: Los restringidos suelen ser cuentas de <200 órdenes
-                        const minOrders = isMerchant ? 15 : 200;
-                        const hasReputation = orderCount >= minOrders && finishRate > 0.90;
+                        // Si no es Merchant, pedimos al menos 250 órdenes para garantizar que NO está restringido
+                        const minOrders = isMerchant ? 15 : 250;
+                        const hasReputation = orderCount >= minOrders && finishRate > 0.95;
                         const canOperate = dynamicMax >= min;
 
                         return isTradable &&
