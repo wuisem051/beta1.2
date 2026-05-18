@@ -21,6 +21,7 @@ const P2PCalculator = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSyncingP2P, setIsSyncingP2P] = useState(false);
     const [syncError, setSyncError] = useState(false);
+    const [activeExchange, setActiveExchange] = useState('binance'); // binance, bingx, bitunix
 
     // Estado inicial de los tokens
     const [tokens, setTokens] = useState([
@@ -59,16 +60,25 @@ const P2PCalculator = () => {
         }
     };
 
-    // Sincronización con Binance P2P (Proxy)
+    // Sincronización P2P Multi-Exchange
     const fetchP2PPrices = async () => {
         try {
             setIsSyncingP2P(true);
             setSyncError(false);
+
+            let endpoint = '/.netlify/functions/getBinanceP2P';
+            if (activeExchange === 'bitunix') endpoint = '/.netlify/functions/getBitunixP2P';
+            if (activeExchange === 'bingx') endpoint = '/.netlify/functions/getBingXP2P';
+
             const assetsToFetch = ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
-            const response = await fetch('/.netlify/functions/getBinanceP2P?t=' + new Date().getTime(), {
+            const response = await fetch(endpoint + '?t=' + new Date().getTime(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ assets: assetsToFetch, fiat: 'VES' })
+                body: JSON.stringify({
+                    assets: assetsToFetch,
+                    fiat: 'VES',
+                    exchange: activeExchange
+                })
             });
 
             if (!response.ok) throw new Error('P2P Fetch failed');
@@ -92,14 +102,14 @@ const P2PCalculator = () => {
 
                     const usdtData = data.prices['USDT'];
                     if (usdtData && !['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'].includes(symbolUpper)) {
-                        return { ...token, p2pPrice: usdtData.price * token.spotPrice, advertiser: 'Estimado (via USDT)' };
+                        return { ...token, p2pPrice: usdtData.price * token.spotPrice, advertiser: `Estimado (${activeExchange})` };
                     }
 
                     return token;
                 }));
             }
         } catch (error) {
-            console.error("Error al sincronizar con Binance P2P:", error);
+            console.error(`Error al sincronizar con ${activeExchange}:`, error);
             setSyncError(true);
         } finally {
             setIsSyncingP2P(false);
@@ -113,9 +123,9 @@ const P2PCalculator = () => {
         };
 
         syncAll();
-        const interval = setInterval(syncAll, 2500); // 2.5 segundos (Casi tiempo real)
+        const interval = setInterval(syncAll, 4000); // 4 segundos para evitar rate limit multi-exchange
         return () => clearInterval(interval);
-    }, []);
+    }, [activeExchange]); // Re-sync when exchange changes
 
     // Manejo de cambio en precio P2P
     const handleP2PChange = (id, value) => {
@@ -147,12 +157,23 @@ const P2PCalculator = () => {
                         <h2 className="text-2xl font-black italic tracking-tighter uppercase">Parámetros</h2>
                     </div>
 
+                    <div className="flex bg-[#0b0e11] p-1 rounded-2xl mb-8 border border-white/5">
+                        {['binance', 'bingx', 'bitunix'].map(ex => (
+                            <button
+                                key={ex}
+                                onClick={() => setActiveExchange(ex)}
+                                className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activeExchange === ex ? 'bg-[#f0b90b] text-black shadow-lg shadow-[#f0b90b]/10' : 'text-slate-500 hover:text-[#eaecef]'}`}
+                            >
+                                {ex}
+                            </button>
+                        ))}
+                    </div>
 
                     {/* Inputs de Precios P2P */}
                     <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar no-scrollbar">
-                        <h3 className="text-[10px] font-black text-[#848e9c] uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                            <TrendingUp className="w-3 h-3 text-[#f0b90b]" /> Órdenes Reales Binance P2P
-                            <span className="ml-auto text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20">SIN RESTRICCIONES</span>
+                        <h3 className="text-[10px] font-black text-[#848e9c] uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-3 h-3 text-[#f0b90b]" /> P2P {activeExchange.toUpperCase()}
+                            <span className="ml-auto text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20 uppercase">SIN RESTRICCIONES</span>
                         </h3>
                         {tokens.map((token) => (
                             <div key={token.id} className="relative group/item">
