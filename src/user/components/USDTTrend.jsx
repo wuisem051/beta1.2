@@ -40,28 +40,38 @@ const USDTTrend = () => {
         // Query para los últimos 100 puntos de datos
         const q = query(historyRef, orderBy('timestamp', 'asc'), limit(150));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                time: new Date(doc.data().timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                date: new Date(doc.data().timestamp?.toDate()).toLocaleDateString(),
-                fullTimestamp: doc.data().timestamp?.toDate(),
-                binance: doc.data().binance,
-                bitunix: doc.data().bitunix,
-                bingx: doc.data().bingx
-            }));
-
-            if (data.length > 0) {
-                setChartData(data);
-                const last = data[data.length - 1];
-                setCurrentPrices({
-                    binance: last.binance,
-                    bitunix: last.bitunix,
-                    bingx: last.bingx
+        const unsubscribe = onSnapshot(q,
+            (snapshot) => {
+                const fetchedData = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    const ts = d.timestamp?.toDate() || new Date();
+                    return {
+                        id: doc.id,
+                        time: ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        date: ts.toLocaleDateString(),
+                        fullTimestamp: ts,
+                        binance: d.binance || 0,
+                        bitunix: d.bitunix || 0,
+                        bingx: d.bingx || 0
+                    };
                 });
+
+                setChartData(fetchedData);
+                if (fetchedData.length > 0) {
+                    const last = fetchedData[fetchedData.length - 1];
+                    setCurrentPrices({
+                        binance: last.binance,
+                        bitunix: last.bitunix,
+                        bingx: last.bingx
+                    });
+                }
+                setIsLoading(false);
+            },
+            (error) => {
+                console.error("Firestore Trend Error:", error);
+                setIsLoading(false);
             }
-            setIsLoading(false);
-        });
+        );
 
         return () => unsubscribe();
     }, []);
