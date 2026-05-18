@@ -36,7 +36,7 @@ exports.handler = async (event, context) => {
                 page: 1,
                 rows: 20,
                 payTypes: [],
-                publisherType: null,
+                publisherType: "merchant",
                 countries: [],
                 additionalKycVerifyFilter: 1
             };

@@ -64,7 +64,7 @@ const P2PCalculator = () => {
         try {
             setIsSyncingP2P(true);
             setSyncError(false);
-            const assetsToFetch = ['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
+            const assetsToFetch = ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
             const response = await fetch('/.netlify/functions/getBinanceP2P?t=' + new Date().getTime(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -84,7 +84,7 @@ const P2PCalculator = () => {
                     }
 
                     const usdtData = data.prices['USDT'];
-                    if (usdtData && !['USDT', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'].includes(symbolUpper)) {
+                    if (usdtData && !['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'].includes(symbolUpper)) {
                         return { ...token, p2pPrice: usdtData.price * token.spotPrice, advertiser: 'Estimado (via USDT)' };
                     }
 
