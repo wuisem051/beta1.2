@@ -153,9 +153,14 @@ const P2PCalculator = () => {
         return tokens
             .filter(t => t.p2pPrice !== null && t.p2pPrice > 0)
             .filter(t => {
-                // Excluir si es estimado en Bitunix/BingX (limpiar UI según pedido)
+                const symbolUpper = t.symbol.replace('USDT', '').toUpperCase() || 'USDT';
+                if (activeExchange === 'binance') return true;
+                if (symbolUpper === 'USDT') return true; // USDT siempre se queda
+
                 const isEstimated = t.advertiser?.includes('Estimado');
-                return activeExchange === 'binance' || !isEstimated;
+                if (activeExchange === 'bitunix') return false; // Bitunix solo tiene USDT
+                if (activeExchange === 'bingx') return !isEstimated; // BingX solo reales (excepto USDT)
+                return true;
             })
             .map(token => {
                 const implicitRate = token.p2pPrice / token.spotPrice;
@@ -200,9 +205,17 @@ const P2PCalculator = () => {
                             <span className="ml-auto text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20 uppercase">SIN RESTRICCIONES</span>
                         </h3>
                         {tokens.map((token) => {
-                            // Si el exchange no es BINANCE y no tenemos data real (es estimado), lo ocultamos según pedido del usuario
+                            const symbolUpper = token.symbol.replace('USDT', '').toUpperCase() || 'USDT';
+
+                            // Si estamos en Bitunix, solo mostramos USDT (el resto no existe en su P2P)
+                            if (activeExchange === 'bitunix' && symbolUpper !== 'USDT') return null;
+
+                            // Si estamos en BingX, mostramos USDT siempre, y el resto solo si hay data real
                             const isEstimated = token.advertiser?.includes('Estimado');
-                            if (activeExchange !== 'binance' && isEstimated) return null;
+                            if (activeExchange === 'bingx' && symbolUpper !== 'USDT' && isEstimated) return null;
+
+                            // Evitar mostrar tokens sin ningun dato todavia
+                            if (!token.p2pPrice && !token.advertiser) return null;
 
                             return (
                                 <div key={token.id} className="relative group/item">
