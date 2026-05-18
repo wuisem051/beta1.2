@@ -151,13 +151,18 @@ const P2PCalculator = () => {
 
     const ranking = useMemo(() => {
         return tokens
-            .filter(t => t.p2pPrice !== null && t.p2pPrice > 0) // Solo rankear lo que tiene precio
+            .filter(t => t.p2pPrice !== null && t.p2pPrice > 0)
+            .filter(t => {
+                // Excluir si es estimado en Bitunix/BingX (limpiar UI según pedido)
+                const isEstimated = t.advertiser?.includes('Estimado');
+                return activeExchange === 'binance' || !isEstimated;
+            })
             .map(token => {
                 const implicitRate = token.p2pPrice / token.spotPrice;
                 return { ...token, implicitRate };
             })
             .sort((a, b) => a.implicitRate - b.implicitRate);
-    }, [tokens]);
+    }, [tokens, activeExchange]);
 
     const bestOption = ranking[0];
 
@@ -194,48 +199,54 @@ const P2PCalculator = () => {
                             <TrendingUp className="w-3 h-3 text-[#f0b90b]" /> P2P {activeExchange.toUpperCase()}
                             <span className="ml-auto text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20 uppercase">SIN RESTRICCIONES</span>
                         </h3>
-                        {tokens.map((token) => (
-                            <div key={token.id} className="relative group/item">
-                                <div className="bg-[#0b0e11] border border-[#2b3139] hover:border-[#f0b90b]/30 rounded-2xl p-4 transition-all duration-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-[#1e2329] flex items-center justify-center border border-[#2b3139]" style={{ color: token.color }}>
-                                                {React.cloneElement(token.icon, { size: 14, strokeWidth: 3 })}
+                        {tokens.map((token) => {
+                            // Si el exchange no es BINANCE y no tenemos data real (es estimado), lo ocultamos según pedido del usuario
+                            const isEstimated = token.advertiser?.includes('Estimado');
+                            if (activeExchange !== 'binance' && isEstimated) return null;
+
+                            return (
+                                <div key={token.id} className="relative group/item">
+                                    <div className="bg-[#0b0e11] border border-[#2b3139] hover:border-[#f0b90b]/30 rounded-2xl p-4 transition-all duration-300">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-lg bg-[#1e2329] flex items-center justify-center border border-[#2b3139]" style={{ color: token.color }}>
+                                                    {React.cloneElement(token.icon, { size: 14, strokeWidth: 3 })}
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#848e9c]">{token.name}</span>
                                             </div>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#848e9c]">{token.name}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-0.5">
-                                            <span className={`text-[9px] font-bold ${token.isMerchant ? 'text-[#f0b90b] bg-[#f0b90b]/10' : 'text-[#848e9c] bg-[#848e9c]/10'} px-2 py-0.5 rounded border ${token.isMerchant ? 'border-[#f0b90b]/20' : 'border-[#848e9c]/20'} flex items-center gap-1`}>
-                                                {token.isMerchant ? <ShieldCheck className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-                                                {token.advertiser ? token.advertiser : 'CAPTANDO...'}
-                                            </span>
-                                            {token.orderCount && (
-                                                <span className="text-[7px] font-black text-[#848e9c]/70 uppercase tracking-tighter">
-                                                    {token.orderCount} ord. | {token.finishRate}%
+                                            <div className="flex flex-col items-end gap-0.5">
+                                                <span className={`text-[9px] font-bold ${token.isMerchant ? 'text-[#f0b90b] bg-[#f0b90b]/10' : 'text-[#848e9c] bg-[#848e9c]/10'} px-2 py-0.5 rounded border ${token.isMerchant ? 'border-[#f0b90b]/20' : 'border-[#848e9c]/20'} flex items-center gap-1`}>
+                                                    {token.isMerchant ? <ShieldCheck className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                                                    {token.advertiser ? token.advertiser : 'CAPTANDO...'}
                                                 </span>
-                                            )}
+                                                {token.orderCount && (
+                                                    <span className="text-[7px] font-black text-[#848e9c]/70 uppercase tracking-tighter">
+                                                        {token.orderCount} ord. | {token.finishRate}%
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="relative group/input">
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            value={token.p2pPrice || ''}
-                                            onChange={(e) => handleP2PChange(token.id, e.target.value)}
-                                            className="w-full bg-[#0b0e11] border border-[#2b3139] rounded-lg py-2 pl-4 pr-12 text-sm font-black text-[#f0b90b] outline-none focus:border-[#f0b90b] transition-all"
-                                            placeholder="0.00"
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#848e9c]">BS</span>
-                                    </div>
-                                    <div className="flex justify-between items-center mt-1.5 px-1 text-[10px]">
-                                        <span className="text-[#848e9c] font-medium">Tasa Implícita:</span>
-                                        <span className="text-[#f0b90b] font-black tracking-tighter">
-                                            {(token.p2pPrice / token.spotPrice).toFixed(2)} BS/$
-                                        </span>
+                                        <div className="relative group/input">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={token.p2pPrice || ''}
+                                                onChange={(e) => handleP2PChange(token.id, e.target.value)}
+                                                className="w-full bg-[#0b0e11] border border-[#2b3139] rounded-lg py-2 pl-4 pr-12 text-sm font-black text-[#f0b90b] outline-none focus:border-[#f0b90b] transition-all"
+                                                placeholder="0.00"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#848e9c]">BS</span>
+                                        </div>
+                                        <div className="flex justify-between items-center mt-1.5 px-1 text-[10px]">
+                                            <span className="text-[#848e9c] font-medium">Tasa Implícita:</span>
+                                            <span className="text-[#f0b90b] font-black tracking-tighter">
+                                                {token.p2pPrice && token.spotPrice ? (token.p2pPrice / token.spotPrice).toFixed(2) : '0.00'} BS/$
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-[#2b3139] flex items-center justify-between">
