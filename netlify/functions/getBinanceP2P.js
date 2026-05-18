@@ -72,13 +72,16 @@ exports.handler = async (event, context) => {
                         const finishRate = parseFloat(offer.advertiser.monthFinishRate) || 0;
 
                         const isTradable = offer.adv.isTradable !== false;
+                        const dynamicMax = parseFloat(offer.adv.dynamicMaxSingleTransAmount) || 0;
                         const isSpam = (max - min) < 100 || (max / min < 1.02 && min < 10000);
                         const hasReputation = orderCount >= 15 && finishRate > 0.80;
+                        const canOperate = dynamicMax >= min;
 
                         return isTradable &&
                             offer.adv.takerAdditionalKycRequired !== 1 &&
                             !isSpam &&
-                            hasReputation;
+                            hasReputation &&
+                            canOperate;
                     });
 
                     if (validOffers.length > 0) {
