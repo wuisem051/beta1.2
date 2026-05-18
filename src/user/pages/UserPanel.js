@@ -34,6 +34,7 @@ import CryptoMarketMonitor from '../components/CryptoMarketMonitor';
 import AirtmCashierContent from '../components/AirtmCashierContent';
 import BotZoneContent from '../components/BotZoneContent';
 import P2PCalculator from '../components/P2PCalculator';
+import USDTTrend from '../components/USDTTrend';
 
 // Componentes de las sub-secciones
 
@@ -1723,7 +1724,10 @@ const UserPanel = () => {
             <Route path="p2p-marketplace/*" element={<P2P_MarketplacePage userBalances={userBalances} isSidebarHidden={isSidebarHidden} dashboardMaxWidth={dashboardMaxWidth} />} />
           )}
           {(!siteSettings || siteSettings.showP2PMonitor !== false) && (
-            <Route path="p2p-monitor/*" element={<P2PCalculator />} />
+            <>
+              <Route path="p2p-monitor/*" element={<P2PCalculator />} />
+              <Route path="p2p-trend/*" element={<USDTTrend />} />
+            </>
           )}
           {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
             <Route path="collective-fund/*" element={<CollectiveFundContent />} />

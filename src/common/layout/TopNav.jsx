@@ -115,7 +115,10 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
         ...(!siteSettings || siteSettings.showP2PMarketplace !== false
             ? [{ path: '/user/p2p-marketplace', label: 'P2P Marketplace', icon: <FaExchangeAlt />, desc: 'Compra y vende entre usuarios' }] : []),
         ...(!siteSettings || siteSettings.showP2PMonitor !== false
-            ? [{ path: '/user/p2p-monitor', label: 'P2P Monitor', icon: <FaChartLine />, desc: 'Arbitraje en tiempo real', tag: { text: 'NUEVO', cls: 'orange' } }] : []),
+            ? [
+                { path: '/user/p2p-monitor', label: 'P2P Monitor', icon: <FaChartLine />, desc: 'Arbitraje en tiempo real', tag: { text: 'NUEVO', cls: 'orange' } },
+                { path: '/user/p2p-trend', label: 'Tendencia USDT', icon: <FaHistory />, desc: 'Gráfica histórica BS/USDT', tag: { text: 'BETA', cls: 'green' } }
+            ] : []),
         ...(!siteSettings || siteSettings.showCajeroAirtm !== false
             ? [{ path: '/user/cajero', label: 'Cajero Airtm', icon: <FaWallet />, desc: 'Canjear saldo con Airtm' }] : []),
     ];
@@ -365,7 +368,10 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                             { to: '/user/my-wallet', icon: <FaWallet />, label: 'Billetera' },
                             ...(!siteSettings || siteSettings.showDeposits !== false ? [{ to: '/user/deposits', label: '↓ Depósito', sub: true }] : []),
                             ...(!siteSettings || siteSettings.showWithdrawals !== false ? [{ to: '/user/withdrawals', label: '↑ Retiro', sub: true }] : []),
-                            ...(!siteSettings || siteSettings.showP2PMonitor !== false ? [{ to: '/user/p2p-monitor', label: '🔍 P2P Monitor', sub: true }] : []),
+                            ...(!siteSettings || siteSettings.showP2PMonitor !== false ? [
+                                { to: '/user/p2p-monitor', label: '🔍 P2P Monitor', sub: true },
+                                { to: '/user/p2p-trend', label: '📈 Tendencia USDT', sub: true }
+                            ] : []),
                             ...(!siteSettings || siteSettings.showExchangeSection !== false ? [{ to: '/user/exchange', icon: <FaChartLine />, label: 'Terminal Spot' }] : []),
                             ...(!siteSettings || siteSettings.showCopyTrading !== false ? [{ to: '/user/miners', icon: <FaGem />, label: 'Señales VIP' }] : []),
                             ...(!siteSettings || siteSettings.showTradingPortfolio !== false ? [{ to: '/user/mining-portfolio', icon: <FaChartLine />, label: 'Mi Portafolio' }] : []),
