@@ -100,9 +100,16 @@ const P2PCalculator = () => {
                         };
                     }
 
+                    // Fallback para cualquier asset si no hay data directa (usando USDT del exchange actual)
                     const usdtData = data.prices['USDT'];
-                    if (usdtData && !['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'].includes(symbolUpper)) {
-                        return { ...token, p2pPrice: usdtData.price * token.spotPrice, advertiser: `Estimado (${activeExchange})` };
+                    if (usdtData && symbolUpper !== 'USDT') {
+                        return {
+                            ...token,
+                            p2pPrice: usdtData.price * token.spotPrice,
+                            advertiser: `Estimado (${activeExchange})`,
+                            isMerchant: false,
+                            orderCount: null
+                        };
                     }
 
                     return token;
@@ -143,10 +150,13 @@ const P2PCalculator = () => {
     };
 
     const ranking = useMemo(() => {
-        return tokens.map(token => {
-            const implicitRate = token.p2pPrice / token.spotPrice;
-            return { ...token, implicitRate };
-        }).sort((a, b) => a.implicitRate - b.implicitRate);
+        return tokens
+            .filter(t => t.p2pPrice !== null && t.p2pPrice > 0) // Solo rankear lo que tiene precio
+            .map(token => {
+                const implicitRate = token.p2pPrice / token.spotPrice;
+                return { ...token, implicitRate };
+            })
+            .sort((a, b) => a.implicitRate - b.implicitRate);
     }, [tokens]);
 
     const bestOption = ranking[0];
