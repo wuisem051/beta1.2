@@ -80,7 +80,14 @@ const P2PCalculator = () => {
                     const p2pData = data.prices[symbolUpper];
 
                     if (p2pData) {
-                        return { ...token, p2pPrice: p2pData.price, advertiser: p2pData.advertiser };
+                        return {
+                            ...token,
+                            p2pPrice: p2pData.price,
+                            advertiser: p2pData.advertiser,
+                            orderCount: p2pData.orderCount,
+                            finishRate: p2pData.finishRate,
+                            isMerchant: p2pData.isMerchant
+                        };
                     }
 
                     const usdtData = data.prices['USDT'];
@@ -157,10 +164,17 @@ const P2PCalculator = () => {
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-widest text-[#848e9c]">{token.name}</span>
                                         </div>
-                                        <span className="text-[9px] font-bold text-[#f0b90b] bg-[#f0b90b]/10 px-2 py-0.5 rounded border border-[#f0b90b]/20 flex items-center gap-1">
-                                            <TrendingDown className="w-2.5 h-2.5" />
-                                            {token.advertiser ? `ORDEN: ${token.advertiser}` : 'CAPTANDO ORDEN...'}
-                                        </span>
+                                        <div className="flex flex-col items-end gap-0.5">
+                                            <span className={`text-[9px] font-bold ${token.isMerchant ? 'text-[#f0b90b] bg-[#f0b90b]/10' : 'text-[#848e9c] bg-[#848e9c]/10'} px-2 py-0.5 rounded border ${token.isMerchant ? 'border-[#f0b90b]/20' : 'border-[#848e9c]/20'} flex items-center gap-1`}>
+                                                {token.isMerchant ? <ShieldCheck className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                                                {token.advertiser ? token.advertiser : 'CAPTANDO...'}
+                                            </span>
+                                            {token.orderCount && (
+                                                <span className="text-[7px] font-black text-[#848e9c]/70 uppercase tracking-tighter">
+                                                    {token.orderCount} ord. | {token.finishRate}%
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="relative group/input">
                                         <input

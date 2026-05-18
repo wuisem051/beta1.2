@@ -88,7 +88,10 @@ exports.handler = async (event, context) => {
                         const bestOffer = validOffers[0];
                         results[asset] = {
                             price: parseFloat(bestOffer.adv.price),
-                            advertiser: bestOffer.advertiser.nickName
+                            advertiser: bestOffer.advertiser.nickName,
+                            orderCount: bestOffer.advertiser.monthOrderCount,
+                            finishRate: (bestOffer.advertiser.monthFinishRate * 100).toFixed(1),
+                            isMerchant: bestOffer.advertiser.userType === 'merchant' || bestOffer.advertiser.userGrade > 2
                         };
                     } else {
                         results[asset] = null;
