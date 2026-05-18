@@ -36,7 +36,7 @@ exports.handler = async (event, context) => {
                 page: 1,
                 rows: 20,
                 payTypes: [],
-                publisherType: "merchant",
+                publisherType: null,
                 countries: [],
                 additionalKycVerifyFilter: 1
             };
@@ -61,10 +61,15 @@ exports.handler = async (event, context) => {
                 });
 
                 if (response.data && response.data.data && response.data.data.length > 0) {
-                    // Filtro de seguridad manual adicional
-                    const validOffers = response.data.data.filter(offer =>
-                        offer.adv.takerAdditionalKycRequired !== 1
-                    );
+                    // Filtro de seguridad:
+                    // 1. Quitar los que piden KYC adicional explicito
+                    // 2. Filtrar órdenes spam/manipuladas (las que tienen un rango ridículo entre min y max, ej: min 300, max 301)
+                    const validOffers = response.data.data.filter(offer => {
+                        const min = parseFloat(offer.adv.minSingleTransAmount);
+                        const max = parseFloat(offer.adv.maxSingleTransAmount);
+                        const isSpam = (max - min) < 100;
+                        return offer.adv.takerAdditionalKycRequired !== 1 && !isSpam;
+                    });
 
                     if (validOffers.length > 0) {
                         const bestOffer = validOffers[0];
