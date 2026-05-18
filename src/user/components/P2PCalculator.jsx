@@ -117,15 +117,24 @@ const P2PCalculator = () => {
     };
 
     useEffect(() => {
+        // Limpiar metadatos al cambiar de exchange para evitar confusión
+        setTokens(prev => prev.map(t => ({
+            ...t,
+            p2pPrice: null,
+            advertiser: null,
+            orderCount: null,
+            isMerchant: false
+        })));
+
         const syncAll = () => {
             fetchBinancePrices();
             fetchP2PPrices();
         };
 
         syncAll();
-        const interval = setInterval(syncAll, 4000); // 4 segundos para evitar rate limit multi-exchange
+        const interval = setInterval(syncAll, 5000);
         return () => clearInterval(interval);
-    }, [activeExchange]); // Re-sync when exchange changes
+    }, [activeExchange]);
 
     // Manejo de cambio en precio P2P
     const handleP2PChange = (id, value) => {

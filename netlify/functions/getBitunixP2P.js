@@ -4,7 +4,6 @@ exports.handler = async (event, context) => {
     try {
         const { asset = "USDT", fiat = "VES" } = event.queryStringParameters || {};
 
-        // Bitunix API for P2P (Buy board = selling USDT)
         const bitunixUrl = "https://api.bitunix.com/web/p2p/ad/buy";
         const payload = {
             fiatCode: fiat.toUpperCase(),
@@ -25,16 +24,20 @@ exports.handler = async (event, context) => {
             timeout: 10000
         });
 
-        if (response.data && response.data.data && response.data.data.list) {
-            // Filtrar solo los que están ONLINE para Bitunix
-            const list = response.data.data.list.filter(item => item.onlineFlag === "online" || !item.onlineFlag);
+        if (response.data && response.data.data) {
+            const dataObj = response.data.data;
+            // Manejar tanto .items como .list para robustez
+            const rawList = dataObj.items || dataObj.list || [];
+
+            // Filtrar solo los que están ONLINE
+            const list = rawList.filter(item => item.onlineFlag === "online" || !item.onlineFlag);
             const results = {};
 
             if (list.length > 0) {
                 const best = list[0];
                 results[asset.toUpperCase()] = {
                     price: parseFloat(best.price),
-                    advertiser: best.nickname || best.memberName,
+                    advertiser: best.nickname || best.memberName || "Comerciante",
                     orderCount: best.thirtyOrderQuantity || best.orderCount || 0,
                     finishRate: (parseFloat(best.thirtyCompleteRate) || 100).toFixed(1),
                     isMerchant: best.customizeState === 1 || best.isMerchant === 1
