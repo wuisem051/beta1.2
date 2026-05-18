@@ -210,7 +210,7 @@ const P2PCalculator = () => {
                                         <input
                                             type="number"
                                             step="0.01"
-                                            value={token.p2pPrice}
+                                            value={token.p2pPrice || ''}
                                             onChange={(e) => handleP2PChange(token.id, e.target.value)}
                                             className="w-full bg-[#0b0e11] border border-[#2b3139] rounded-lg py-2 pl-4 pr-12 text-sm font-black text-[#f0b90b] outline-none focus:border-[#f0b90b] transition-all"
                                             placeholder="0.00"
@@ -284,7 +284,7 @@ const P2PCalculator = () => {
                                             )}
                                         </div>
                                         <p className="text-[10px] font-bold text-[#848e9c] uppercase tracking-widest leading-none mt-1.5">
-                                            P2P: Bs. {token.p2pPrice.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                            P2P: Bs. {token.p2pPrice ? token.p2pPrice.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '---'}
                                         </p>
                                     </div>
                                 </div>
@@ -293,7 +293,7 @@ const P2PCalculator = () => {
                                 <div className="text-right">
                                     <p className="text-[9px] font-black text-[#848e9c] uppercase tracking-widest leading-none mb-1">Tasa Implícita</p>
                                     <div className={`text-xl font-black italic tracking-tight leading-none ${isBest ? 'text-[#00C087]' : 'text-white'}`}>
-                                        Bs. {token.implicitRate.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+                                        Bs. {token.implicitRate ? token.implicitRate.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '0.000'}
                                     </div>
                                     <p className={`text-[10px] font-black uppercase tracking-tighter mt-1 leading-none ${isBest ? 'text-[#00C087]' : 'text-[#f0b90b]'}`}>
                                         {isBest ? 'Referencia' : `+${variation}% más caro`}
