@@ -62,13 +62,23 @@ exports.handler = async (event, context) => {
 
                 if (response.data && response.data.data && response.data.data.length > 0) {
                     // Filtro de seguridad:
-                    // 1. Quitar los que piden KYC adicional explicito
+                    // 1. Quitar los que piden KYC adicional explicito o no son tradeables
                     // 2. Filtrar órdenes spam/manipuladas (las que tienen un rango ridículo entre min y max, ej: min 300, max 301)
+                    // 3. Omitir anunciantes con muy poca reputación (menos de 15 órdenes al mes) para filtrar "fantasmas"
                     const validOffers = response.data.data.filter(offer => {
                         const min = parseFloat(offer.adv.minSingleTransAmount);
                         const max = parseFloat(offer.adv.maxSingleTransAmount);
-                        const isSpam = (max - min) < 100;
-                        return offer.adv.takerAdditionalKycRequired !== 1 && !isSpam;
+                        const orderCount = parseInt(offer.advertiser.monthOrderCount) || 0;
+                        const finishRate = parseFloat(offer.advertiser.monthFinishRate) || 0;
+
+                        const isTradable = offer.adv.isTradable !== false;
+                        const isSpam = (max - min) < 100 || (max / min < 1.02 && min < 10000);
+                        const hasReputation = orderCount >= 15 && finishRate > 0.80;
+
+                        return isTradable &&
+                            offer.adv.takerAdditionalKycRequired !== 1 &&
+                            !isSpam &&
+                            hasReputation;
                     });
 
                     if (validOffers.length > 0) {
