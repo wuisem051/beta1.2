@@ -122,6 +122,14 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             isActive={pathname.includes('/dashboard')}
           />
 
+          {/* Terminal P2P Pro - Move to Top Level */}
+          <NavLink
+            to="/user/p2p-trading"
+            icon={<FaExchangeAlt />}
+            label="Terminal P2P Pro"
+            isActive={pathname.includes('/p2p-trading')}
+          />
+
           {/* Update Item */}
           <NavLink
             to="/user/updates"
@@ -182,10 +190,10 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showPlanTrading !== false) && (
                   <NavLink to="/user/plan-trading" label="Plan de Trading" isActive={pathname.includes('/plan-trading')} />
                 )}
-                <NavLink to="/user/p2p-trading" label="Terminal P2P" isActive={pathname.includes('/p2p-trading')} />
               </div>
             )}
           </div>
+
 
           {/* Fondo Colectivo */}
           {(!siteSettings || siteSettings.showCollectiveFund !== false) && (

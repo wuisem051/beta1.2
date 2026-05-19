@@ -114,6 +114,28 @@ const P2PTradingTerminal = () => {
                     >
                         <RefreshCw className={`w-4 h-4 text-slate-400 ${isLoading ? 'animate-spin text-[#f0b90b]' : ''}`} />
                     </button>
+                    <button
+                        onClick={async () => {
+                            if (parseFloat(currentPrice) > 0) {
+                                try {
+                                    const { db } = await import('../../services/firebase');
+                                    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+                                    await addDoc(collection(db, 'p2p_price_trend'), {
+                                        timestamp: serverTimestamp(),
+                                        binance: parseFloat(currentPrice),
+                                        bitunix: 0,
+                                        bingx: 0
+                                    });
+                                    alert('Punto de tendencia grabado: ' + currentPrice);
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }
+                        }}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[#f0b90b]/10 border border-[#f0b90b]/20 rounded-lg text-[10px] font-black text-[#f0b90b] hover:bg-[#f0b90b] hover:text-black transition-all"
+                    >
+                        <Database className="w-3 h-3" /> Grabar Tendencia
+                    </button>
                     <div className="h-8 w-[1px] bg-white/5"></div>
                     <div className="flex items-center gap-2">
                         <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 animate-pulse" />

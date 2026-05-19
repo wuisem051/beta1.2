@@ -58,7 +58,7 @@ async function fetchP2POrders(asset, fiat, tradeType, rows) {
         publisherType: null,
         countries: [],
         additionalKycVerifyFilter: 0,
-        filterType: "trading"
+        filterType: "all"
     };
 
     const binanceUrl = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search?t=${Date.now()}`;
