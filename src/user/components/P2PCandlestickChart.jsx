@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createChart, CrosshairMode, ColorType } from 'lightweight-charts';
+import { createChart, CrosshairMode, ColorType, CandlestickSeries, HistogramSeries } from 'lightweight-charts';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
 
 const TIMEFRAME_CONFIG = {
@@ -132,7 +132,7 @@ const P2PCandlestickChart = ({ currentPrice = 0 }) => {
         });
 
         // Candlestick series
-        const cs = chart.addCandlestickSeries({
+        const cs = chart.addSeries(CandlestickSeries, {
             upColor: '#10b981',
             downColor: '#ef4444',
             borderUpColor: '#10b981',
@@ -143,7 +143,7 @@ const P2PCandlestickChart = ({ currentPrice = 0 }) => {
         });
 
         // Volume series (histogram)
-        const vs = chart.addHistogramSeries({
+        const vs = chart.addSeries(HistogramSeries, {
             color: '#26a69a',
             priceFormat: { type: 'volume' },
             priceScaleId: 'volume',
