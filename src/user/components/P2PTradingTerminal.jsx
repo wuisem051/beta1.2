@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
     RefreshCw, Circle, TrendingUp, TrendingDown,
-    ShieldCheck, Star, Clock, Filter, ChevronDown, Activity
+    ShieldCheck, Clock, Filter, ChevronDown, Activity
 } from 'lucide-react';
 import { db } from '../../services/firebase';
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import {
-    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
-} from 'recharts';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import P2PCandlestickChart from './P2PCandlestickChart';
 
 /* ─── Payment method constants ─────────────────────── */
 const PAY_METHODS = [
@@ -19,7 +17,7 @@ const PAY_METHODS = [
     { id: 'BNC', label: 'BNC' },
 ];
 
-const TIMEFRAMES = ['1H', '24H', '7D', 'ALL'];
+
 
 /* ─── Method badge color map ────────────────────────── */
 const METHOD_COLORS = {
@@ -30,20 +28,7 @@ const METHOD_COLORS = {
     BNC: { bg: '#ef444415', text: '#ef4444', border: '#ef444430' },
 };
 
-/* ─── Custom Tooltip for PriceChart ─────────────────── */
-const ChartTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div style={{ background: '#1e2329', border: '1px solid #2b3139', borderRadius: 12, padding: '10px 14px' }}>
-                <p style={{ color: '#848e9c', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', marginBottom: 4 }}>{label}</p>
-                <p style={{ color: '#f0b90b', fontWeight: 900, fontSize: 14, fontStyle: 'italic' }}>
-                    Bs. {payload[0]?.value?.toLocaleString('es-VE')}
-                </p>
-            </div>
-        );
-    }
-    return null;
-};
+
 
 /* ─── Main Component ─────────────────────────────────── */
 const P2PTradingTerminal = () => {
@@ -52,9 +37,6 @@ const P2PTradingTerminal = () => {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(new Date());
-    const [chartData, setChartData] = useState([]);
-    const [timeframe, setTimeframe] = useState('24H');
-    const [chartLoading, setChartLoading] = useState(true);
     const intervalRef = useRef(null);
 
     /* ── Fetch P2P orders from backend ──────────────── */
@@ -92,30 +74,6 @@ const P2PTradingTerminal = () => {
         return () => clearInterval(intervalRef.current);
     }, [fetchOrders]);
 
-    /* ── Load Firestore trend data ────────────────────── */
-    useEffect(() => {
-        setChartLoading(true);
-        const tfLimits = { '1H': 12, '24H': 96, '7D': 336, 'ALL': 500 };
-        const q = query(
-            collection(db, 'p2p_price_trend'),
-            orderBy('timestamp', 'desc'),
-            limit(tfLimits[timeframe] || 96)
-        );
-        const unsub = onSnapshot(q, snap => {
-            const raw = snap.docs.map(d => {
-                const ts = d.data().timestamp?.toDate?.() || new Date();
-                return { ts, price: d.data().binance || 0 };
-            }).filter(r => r.price > 0).reverse();
-            const formatted = raw.map(r => ({
-                time: r.ts.toLocaleString('es-VE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-                price: r.price
-            }));
-            setChartData(formatted);
-            setChartLoading(false);
-        }, () => setChartLoading(false));
-        return unsub;
-    }, [timeframe]);
-
     /* ── Stats ───────────────────────────────────────── */
     const stats = useMemo(() => {
         if (!orders.length) return { best: 0, avg: 0, worst: 0 };
@@ -126,21 +84,6 @@ const P2PTradingTerminal = () => {
         return { best, avg, worst };
     }, [orders, tab]);
 
-    const chartMin = useMemo(() => {
-        if (!chartData.length) return 0;
-        const vals = chartData.map(d => d.price);
-        return Math.floor(Math.min(...vals) * 0.998);
-    }, [chartData]);
-
-    const chartPriceChange = useMemo(() => {
-        if (chartData.length < 2) return 0;
-        const first = chartData[0].price;
-        const last = chartData[chartData.length - 1].price;
-        return ((last - first) / first * 100).toFixed(2);
-    }, [chartData]);
-
-    const isPositive = parseFloat(chartPriceChange) >= 0;
-
     /* ── Record current price to Firestore ────────────── */
     const recordPrice = async () => {
         if (!orders.length) return;
@@ -148,8 +91,7 @@ const P2PTradingTerminal = () => {
             ? Math.min(...orders.map(o => o.price))
             : Math.max(...orders.map(o => o.price));
         try {
-            const { collection: col, addDoc, serverTimestamp } = await import('firebase/firestore');
-            await addDoc(col(db, 'p2p_price_trend'), {
+            await addDoc(collection(db, 'p2p_price_trend'), {
                 timestamp: serverTimestamp(),
                 binance: best,
                 bitunix: 0,
@@ -209,62 +151,11 @@ const P2PTradingTerminal = () => {
                 {/* ── LEFT: CHART + FILTERS + TABLE ─────────── */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-                    {/* Price Chart */}
-                    <div style={{ height: 200, background: '#161a1e', borderBottom: '1px solid #2b3139', flexShrink: 0, padding: '12px 0 0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {isPositive ? <TrendingUp size={14} color="#10b981" /> : <TrendingDown size={14} color="#ef4444" />}
-                                <span style={{ fontSize: 10, fontWeight: 800, color: '#848e9c', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                                    Tendencia USDT / Bs.
-                                </span>
-                            </div>
-                            <div style={{ display: 'flex', gap: 4 }}>
-                                {TIMEFRAMES.map(tf => (
-                                    <button key={tf} onClick={() => setTimeframe(tf)} style={{
-                                        padding: '3px 10px', borderRadius: 6, fontSize: 9, fontWeight: 800,
-                                        border: 'none', cursor: 'pointer', letterSpacing: '0.1em',
-                                        background: timeframe === tf ? '#f0b90b' : 'transparent',
-                                        color: timeframe === tf ? '#000' : '#848e9c'
-                                    }}>{tf}</button>
-                                ))}
-                            </div>
-                        </div>
-                        {chartLoading ? (
-                            <div style={{ height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                <RefreshCw size={16} style={{ color: '#f0b90b', animation: 'spin 1s linear infinite' }} />
-                                <span style={{ fontSize: 10, color: '#848e9c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cargando...</span>
-                            </div>
-                        ) : chartData.length === 0 ? (
-                            <div style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                                <TrendingUp size={28} style={{ color: '#2b3139' }} />
-                                <span style={{ fontSize: 10, color: '#848e9c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sin datos aún</span>
-                                <span style={{ fontSize: 9, color: '#4a5568', textAlign: 'center', maxWidth: 200 }}>Usa el botón "Grabar Tendencia" para iniciar el historial</span>
-                            </div>
-                        ) : (
-                            <ResponsiveContainer width="100%" height={140}>
-                                <AreaChart data={chartData} margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
-                                    <defs>
-                                        <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0.2} />
-                                            <stop offset="95%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#2b3139" vertical={false} />
-                                    <XAxis dataKey="time" hide />
-                                    <YAxis domain={[chartMin, 'auto']} hide />
-                                    <Tooltip content={<ChartTooltip />} />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="price"
-                                        stroke={isPositive ? '#10b981' : '#ef4444'}
-                                        strokeWidth={2}
-                                        fill="url(#priceGrad)"
-                                        dot={false}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        )}
+                    {/* Candlestick Chart */}
+                    <div style={{ height: 280, background: '#0b0e11', borderBottom: '1px solid #2b3139', flexShrink: 0 }}>
+                        <P2PCandlestickChart currentPrice={stats.best} />
                     </div>
+
 
                     {/* ── FILTERS ───────────────────────────────── */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', background: '#1e2329', borderBottom: '1px solid #2b3139', flexShrink: 0 }}>
@@ -450,18 +341,7 @@ const P2PTradingTerminal = () => {
                         </div>
                     </div>
 
-                    {/* Chart stat */}
-                    {chartData.length > 0 && (
-                        <div style={{ padding: '14px 16px' }}>
-                            <div style={{ fontSize: 9, fontWeight: 800, color: '#4a5568', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Cambio ({timeframe})</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                {isPositive ? <TrendingUp size={14} color="#10b981" /> : <TrendingDown size={14} color="#ef4444" />}
-                                <span style={{ fontSize: 16, fontWeight: 900, color: isPositive ? '#10b981' : '#ef4444' }}>
-                                    {isPositive ? '+' : ''}{chartPriceChange}%
-                                </span>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
             </div>
         </div>
