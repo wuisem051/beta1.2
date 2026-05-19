@@ -1,298 +1,467 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
-    Activity,
-    ArrowUpRight,
-    ArrowDownRight,
-    RefreshCw,
-    TrendingUp,
-    Circle,
-    Database,
-    ShieldCheck,
-    Coins,
-    BarChart3,
-    Clock,
-    Lock
+    RefreshCw, Circle, TrendingUp, TrendingDown,
+    ShieldCheck, Star, Clock, Filter, ChevronDown, Activity
 } from 'lucide-react';
-import TradingViewWidget from './TradingViewWidget';
+import { db } from '../../services/firebase';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import {
+    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
+} from 'recharts';
 
+/* ─── Payment method constants ─────────────────────── */
+const PAY_METHODS = [
+    { id: '', label: 'Todos' },
+    { id: 'PagoMovil', label: 'Pago Móvil' },
+    { id: 'Mercantil', label: 'Mercantil' },
+    { id: 'Provincial', label: 'Provincial' },
+    { id: 'Banesco', label: 'Banesco' },
+    { id: 'BNC', label: 'BNC' },
+];
+
+const TIMEFRAMES = ['1H', '24H', '7D', 'ALL'];
+
+/* ─── Method badge color map ────────────────────────── */
+const METHOD_COLORS = {
+    PagoMovil: { bg: '#10b98115', text: '#10b981', border: '#10b98130' },
+    Mercantil: { bg: '#3b82f615', text: '#3b82f6', border: '#3b82f630' },
+    Provincial: { bg: '#f59e0b15', text: '#f59e0b', border: '#f59e0b30' },
+    Banesco: { bg: '#8b5cf615', text: '#8b5cf6', border: '#8b5cf630' },
+    BNC: { bg: '#ef444415', text: '#ef4444', border: '#ef444430' },
+};
+
+/* ─── Custom Tooltip for PriceChart ─────────────────── */
+const ChartTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div style={{ background: '#1e2329', border: '1px solid #2b3139', borderRadius: 12, padding: '10px 14px' }}>
+                <p style={{ color: '#848e9c', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', marginBottom: 4 }}>{label}</p>
+                <p style={{ color: '#f0b90b', fontWeight: 900, fontSize: 14, fontStyle: 'italic' }}>
+                    Bs. {payload[0]?.value?.toLocaleString('es-VE')}
+                </p>
+            </div>
+        );
+    }
+    return null;
+};
+
+/* ─── Main Component ─────────────────────────────────── */
 const P2PTradingTerminal = () => {
-    const [orderBook, setOrderBook] = useState({ buyOrders: [], sellOrders: [] });
+    const [tab, setTab] = useState('BUY');          // BUY = quiero comprar USDT | SELL = quiero vender
+    const [payFilter, setPayFilter] = useState('');  // Payment method filter
+    const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(new Date());
-    const [asset, setAsset] = useState('USDT');
-    const [fiat, setFiat] = useState('VES');
-    const [maxCap, setMaxCap] = useState(2000); // Tope de 2000 USDT
+    const [chartData, setChartData] = useState([]);
+    const [timeframe, setTimeframe] = useState('24H');
+    const [chartLoading, setChartLoading] = useState(true);
+    const intervalRef = useRef(null);
 
-    const fetchOrderBook = async () => {
+    /* ── Fetch P2P orders from backend ──────────────── */
+    const fetchOrders = useCallback(async () => {
         try {
-            const response = await fetch('/.netlify/functions/getBinanceOrderBook', {
+            const body = {
+                asset: 'USDT',
+                fiat: 'VES',
+                rows: 20,
+                tradeType: tab,
+                payTypes: payFilter ? [payFilter] : []
+            };
+            const res = await fetch('/.netlify/functions/getBinanceOrderBook', {
                 method: 'POST',
-                body: JSON.stringify({ asset, fiat, rows: 50 })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
-            const data = await response.json();
-
-            if (data.buyOrders && data.sellOrders) {
-                setOrderBook({
-                    buyOrders: data.buyOrders,
-                    sellOrders: data.sellOrders
-                });
-            }
+            const data = await res.json();
+            const list = tab === 'BUY' ? (data.buyOrders || []) : (data.sellOrders || []);
+            setOrders(list);
             setLastUpdate(new Date());
-        } catch (error) {
-            console.error("Error fetching P2P order book:", error);
+        } catch (e) {
+            console.error('P2P fetch error:', e);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [tab, payFilter]);
 
     useEffect(() => {
-        fetchOrderBook();
-        const interval = setInterval(fetchOrderBook, 15000);
-        return () => clearInterval(interval);
-    }, [asset, fiat]);
+        setIsLoading(true);
+        setOrders([]);
+        fetchOrders();
+        clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(fetchOrders, 15000);
+        return () => clearInterval(intervalRef.current);
+    }, [fetchOrders]);
 
-    // Filtrar órdenes por el tope de 2000 USDT
-    // El "tope" puede interpretarse como que el anunciante debe tener al menos esa disponibilidad 
-    // o que el rango debe permitir tradear esa cantidad.
-    const filteredBuyOrders = useMemo(() => {
-        return orderBook.buyOrders.filter(order => order.amount <= maxCap || order.maxAmount / order.price <= maxCap).slice(0, 15);
-    }, [orderBook.buyOrders, maxCap]);
+    /* ── Load Firestore trend data ────────────────────── */
+    useEffect(() => {
+        setChartLoading(true);
+        const tfLimits = { '1H': 12, '24H': 96, '7D': 336, 'ALL': 500 };
+        const q = query(
+            collection(db, 'p2p_price_trend'),
+            orderBy('timestamp', 'desc'),
+            limit(tfLimits[timeframe] || 96)
+        );
+        const unsub = onSnapshot(q, snap => {
+            const raw = snap.docs.map(d => {
+                const ts = d.data().timestamp?.toDate?.() || new Date();
+                return { ts, price: d.data().binance || 0 };
+            }).filter(r => r.price > 0).reverse();
+            const formatted = raw.map(r => ({
+                time: r.ts.toLocaleString('es-VE', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                price: r.price
+            }));
+            setChartData(formatted);
+            setChartLoading(false);
+        }, () => setChartLoading(false));
+        return unsub;
+    }, [timeframe]);
 
-    const filteredSellOrders = useMemo(() => {
-        return orderBook.sellOrders.filter(order => order.amount <= maxCap || order.maxAmount / order.price <= maxCap).slice(0, 15);
-    }, [orderBook.sellOrders, maxCap]);
+    /* ── Stats ───────────────────────────────────────── */
+    const stats = useMemo(() => {
+        if (!orders.length) return { best: 0, avg: 0, worst: 0 };
+        const prices = orders.map(o => o.price);
+        const best = tab === 'BUY' ? Math.min(...prices) : Math.max(...prices);
+        const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+        const worst = tab === 'BUY' ? Math.max(...prices) : Math.min(...prices);
+        return { best, avg, worst };
+    }, [orders, tab]);
 
-    const currentPrice = useMemo(() => {
-        if (orderBook.buyOrders.length > 0 && orderBook.sellOrders.length > 0) {
-            return ((orderBook.buyOrders[0].price + orderBook.sellOrders[0].price) / 2).toFixed(2);
-        }
-        return "0.00";
-    }, [orderBook]);
+    const chartMin = useMemo(() => {
+        if (!chartData.length) return 0;
+        const vals = chartData.map(d => d.price);
+        return Math.floor(Math.min(...vals) * 0.998);
+    }, [chartData]);
+
+    const chartPriceChange = useMemo(() => {
+        if (chartData.length < 2) return 0;
+        const first = chartData[0].price;
+        const last = chartData[chartData.length - 1].price;
+        return ((last - first) / first * 100).toFixed(2);
+    }, [chartData]);
+
+    const isPositive = parseFloat(chartPriceChange) >= 0;
+
+    /* ── Record current price to Firestore ────────────── */
+    const recordPrice = async () => {
+        if (!orders.length) return;
+        const best = tab === 'BUY'
+            ? Math.min(...orders.map(o => o.price))
+            : Math.max(...orders.map(o => o.price));
+        try {
+            const { collection: col, addDoc, serverTimestamp } = await import('firebase/firestore');
+            await addDoc(col(db, 'p2p_price_trend'), {
+                timestamp: serverTimestamp(),
+                binance: best,
+                bitunix: 0,
+                bingx: 0
+            });
+        } catch (e) { console.error(e); }
+    };
 
     return (
-        <div className="flex flex-col h-screen bg-[#0b0e11] text-[#eaecef] overflow-hidden font-sans">
-            {/* Header / Ticker */}
-            <header className="flex items-center justify-between px-6 py-3 bg-[#1e2329] border-b border-[#2b3139] shrink-0">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-[#f0b90b]/10 rounded-lg">
-                            <Coins className="text-[#f0b90b] w-5 h-5" />
-                        </div>
-                        <div>
-                            <h1 className="text-sm font-black uppercase tracking-tighter leading-none">P2P Trading Terminal</h1>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Binance Blockchain Feed</p>
-                        </div>
-                    </div>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0b0e11', color: '#eaecef', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
 
-                    <div className="hidden md:flex items-center gap-6">
-                        <div>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Par</p>
-                            <p className="text-xs font-black text-white">{asset}/{fiat}</p>
+            {/* ── HEADER ─────────────────────────────────────── */}
+            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', background: '#1e2329', borderBottom: '1px solid #2b3139', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 18, fontWeight: 900, fontStyle: 'italic', color: '#f0b90b', letterSpacing: '-0.02em' }}>USDT</span>
+                            <span style={{ color: '#848e9c', fontWeight: 700, fontSize: 14 }}>/</span>
+                            <span style={{ fontSize: 18, fontWeight: 900, color: '#eaecef', letterSpacing: '-0.02em' }}>VES</span>
                         </div>
-                        <div>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Precio P2P</p>
-                            <p className="text-xs font-black text-[#f0b90b] tracking-tighter">Bs. {parseFloat(currentPrice).toLocaleString()}</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Tope Operativo</p>
-                            <p className="text-xs font-black text-emerald-500 tracking-tighter">{maxCap} {asset}</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Update</p>
-                            <p className="text-xs font-black text-slate-400 flex items-center gap-1.5">
-                                <Clock className="w-3 h-3 text-slate-600" />
-                                {lastUpdate.toLocaleTimeString()}
-                            </p>
+                        <div style={{ fontSize: 9, fontWeight: 800, color: '#848e9c', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 2 }}>
+                            Binance P2P · Bolívares
                         </div>
                     </div>
+                    {stats.best > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <span style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: tab === 'BUY' ? '#10b981' : '#ef4444', letterSpacing: '-0.03em' }}>
+                                Bs. {stats.best.toLocaleString('es-VE')}
+                            </span>
+                            <span style={{ fontSize: 10, fontWeight: 800, color: isPositive ? '#10b981' : '#ef4444' }}>
+                                {isPositive ? '▲' : '▼'} {Math.abs(chartPriceChange)}%
+                            </span>
+                        </div>
+                    )}
                 </div>
-
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => { setIsLoading(true); fetchOrderBook(); }}
-                        className="p-2 hover:bg-white/5 rounded-lg transition-all active:scale-90"
-                    >
-                        <RefreshCw className={`w-4 h-4 text-slate-400 ${isLoading ? 'animate-spin text-[#f0b90b]' : ''}`} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <button onClick={recordPrice} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#f0b90b15', border: '1px solid #f0b90b30', borderRadius: 8, color: '#f0b90b', fontSize: 10, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.1em' }}>
+                        <Activity size={12} /> Grabar Tendencia
                     </button>
-                    <button
-                        onClick={async () => {
-                            if (parseFloat(currentPrice) > 0) {
-                                try {
-                                    const { db } = await import('../../services/firebase');
-                                    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-                                    await addDoc(collection(db, 'p2p_price_trend'), {
-                                        timestamp: serverTimestamp(),
-                                        binance: parseFloat(currentPrice),
-                                        bitunix: 0,
-                                        bingx: 0
-                                    });
-                                    alert('Punto de tendencia grabado: ' + currentPrice);
-                                } catch (e) {
-                                    console.error(e);
-                                }
-                            }
-                        }}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-[#f0b90b]/10 border border-[#f0b90b]/20 rounded-lg text-[10px] font-black text-[#f0b90b] hover:bg-[#f0b90b] hover:text-black transition-all"
-                    >
-                        <Database className="w-3 h-3" /> Grabar Tendencia
+                    <button onClick={() => { setIsLoading(true); fetchOrders(); }} style={{ padding: 8, background: 'transparent', border: 'none', cursor: 'pointer', color: '#848e9c' }}>
+                        <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} style={{ color: isLoading ? '#f0b90b' : undefined }} />
                     </button>
-                    <div className="h-8 w-[1px] bg-white/5"></div>
-                    <div className="flex items-center gap-2">
-                        <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Live P2P Ledger</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Circle size={8} fill="#10b981" color="#10b981" style={{ animation: 'pulse 2s infinite' }} />
+                        <span style={{ fontSize: 9, fontWeight: 800, color: '#10b981', letterSpacing: '0.15em', textTransform: 'uppercase' }}>En Vivo</span>
                     </div>
+                    <span style={{ fontSize: 9, color: '#848e9c' }}>
+                        <Clock size={10} style={{ display: 'inline', marginRight: 4 }} />
+                        {lastUpdate.toLocaleTimeString('es-VE')}
+                    </span>
                 </div>
             </header>
 
-            {/* Main Content Area */}
-            <div className="flex flex-1 overflow-hidden">
+            {/* ── MAIN CONTENT ──────────────────────────────── */}
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-                {/* Left: Chart Section */}
-                <div className="flex-1 flex flex-col border-r border-[#2b3139] bg-[#0b0e11]">
-                    <div className="flex-1 overflow-hidden relative">
-                        {/* Fake "Blockchain" Background Elements */}
-                        <div className="absolute inset-0 pointer-events-none opacity-[0.02]">
-                            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
+                {/* ── LEFT: CHART + FILTERS + TABLE ─────────── */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+                    {/* Price Chart */}
+                    <div style={{ height: 200, background: '#161a1e', borderBottom: '1px solid #2b3139', flexShrink: 0, padding: '12px 0 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {isPositive ? <TrendingUp size={14} color="#10b981" /> : <TrendingDown size={14} color="#ef4444" />}
+                                <span style={{ fontSize: 10, fontWeight: 800, color: '#848e9c', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                                    Tendencia USDT / Bs.
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                                {TIMEFRAMES.map(tf => (
+                                    <button key={tf} onClick={() => setTimeframe(tf)} style={{
+                                        padding: '3px 10px', borderRadius: 6, fontSize: 9, fontWeight: 800,
+                                        border: 'none', cursor: 'pointer', letterSpacing: '0.1em',
+                                        background: timeframe === tf ? '#f0b90b' : 'transparent',
+                                        color: timeframe === tf ? '#000' : '#848e9c'
+                                    }}>{tf}</button>
+                                ))}
+                            </div>
+                        </div>
+                        {chartLoading ? (
+                            <div style={{ height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                <RefreshCw size={16} style={{ color: '#f0b90b', animation: 'spin 1s linear infinite' }} />
+                                <span style={{ fontSize: 10, color: '#848e9c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cargando...</span>
+                            </div>
+                        ) : chartData.length === 0 ? (
+                            <div style={{ height: 130, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                <TrendingUp size={28} style={{ color: '#2b3139' }} />
+                                <span style={{ fontSize: 10, color: '#848e9c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sin datos aún</span>
+                                <span style={{ fontSize: 9, color: '#4a5568', textAlign: 'center', maxWidth: 200 }}>Usa el botón "Grabar Tendencia" para iniciar el historial</span>
+                            </div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={140}>
+                                <AreaChart data={chartData} margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
+                                    <defs>
+                                        <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0.2} />
+                                            <stop offset="95%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2b3139" vertical={false} />
+                                    <XAxis dataKey="time" hide />
+                                    <YAxis domain={[chartMin, 'auto']} hide />
+                                    <Tooltip content={<ChartTooltip />} />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="price"
+                                        stroke={isPositive ? '#10b981' : '#ef4444'}
+                                        strokeWidth={2}
+                                        fill="url(#priceGrad)"
+                                        dot={false}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
+
+                    {/* ── FILTERS ───────────────────────────────── */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', background: '#1e2329', borderBottom: '1px solid #2b3139', flexShrink: 0 }}>
+                        {/* BUY / SELL toggle */}
+                        <div style={{ display: 'flex', background: '#0b0e11', borderRadius: 8, padding: 3, gap: 2 }}>
+                            <button onClick={() => setTab('BUY')} style={{
+                                padding: '6px 18px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                                background: tab === 'BUY' ? '#10b981' : 'transparent',
+                                color: tab === 'BUY' ? '#000' : '#848e9c'
+                            }}>Comprar</button>
+                            <button onClick={() => setTab('SELL')} style={{
+                                padding: '6px 18px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                                background: tab === 'SELL' ? '#ef4444' : 'transparent',
+                                color: tab === 'SELL' ? '#fff' : '#848e9c'
+                            }}>Vender</button>
                         </div>
 
-                        <div className="h-full w-full">
-                            <TradingViewWidget symbol="BINANCE:BTCUSDT" interval="1" />
+                        {/* Asset label */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', background: '#0b0e11', borderRadius: 8, border: '1px solid #2b3139' }}>
+                            <span style={{ fontSize: 11, fontWeight: 900, color: '#f0b90b' }}>USDT</span>
+                            <span style={{ fontSize: 9, color: '#848e9c', fontWeight: 700 }}>4.09% APR</span>
+                        </div>
+
+                        {/* Fiat */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', background: '#0b0e11', borderRadius: 8, border: '1px solid #2b3139' }}>
+                            <span style={{ fontSize: 11, fontWeight: 900, color: '#eaecef' }}>VES</span>
+                            <ChevronDown size={12} color="#848e9c" />
+                        </div>
+
+                        {/* Payment methods */}
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {PAY_METHODS.map(pm => (
+                                <button key={pm.id} onClick={() => setPayFilter(pm.id)} style={{
+                                    padding: '5px 12px', borderRadius: 6, border: `1px solid ${payFilter === pm.id ? '#f0b90b50' : '#2b3139'}`,
+                                    background: payFilter === pm.id ? '#f0b90b15' : 'transparent',
+                                    color: payFilter === pm.id ? '#f0b90b' : '#848e9c',
+                                    fontSize: 10, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.05em'
+                                }}>{pm.label}</button>
+                            ))}
+                        </div>
+
+                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, color: '#848e9c', fontSize: 10 }}>
+                            <Filter size={12} />
+                            <span style={{ fontWeight: 700 }}>Más filtros</span>
                         </div>
                     </div>
 
-                    {/* Bottom Panel: Recent Trades / Blockchain History */}
-                    <div className="h-1/3 border-t border-[#2b3139] bg-[#161a1e] flex flex-col">
-                        <div className="px-4 py-2 bg-[#1e2329] border-b border-[#2b3139] flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Database className="w-3 h-3 text-[#f0b90b]" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">P2P Blockchain Explorer</span>
+                    {/* ── ORDER TABLE HEADER ────────────────────── */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1.8fr 1fr 1fr', padding: '8px 20px', background: '#0b0e11', borderBottom: '1px solid #2b3139', flexShrink: 0 }}>
+                        {['Anunciantes', 'Precio', 'Disponible / Límite de órdenes', 'Pago', ''].map((h, i) => (
+                            <div key={i} style={{ fontSize: 10, fontWeight: 800, color: '#848e9c', letterSpacing: '0.08em', textAlign: i >= 3 ? 'center' : 'left', textTransform: 'uppercase' }}>{h}</div>
+                        ))}
+                    </div>
+
+                    {/* ── ORDER ROWS ────────────────────────────── */}
+                    <div style={{ flex: 1, overflowY: 'auto' }}>
+                        {isLoading ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 12 }}>
+                                <RefreshCw size={24} style={{ color: '#f0b90b', animation: 'spin 1s linear infinite' }} />
+                                <span style={{ fontSize: 11, fontWeight: 800, color: '#848e9c', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Cargando órdenes Binance P2P...</span>
                             </div>
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Hash Validated</span>
-                        </div>
-                        <div className="flex-1 overflow-y-auto no-scrollbar font-mono text-[10px]">
-                            <table className="w-full text-left">
-                                <thead className="sticky top-0 bg-[#161a1e] text-slate-600 uppercase tracking-widest text-[8px] font-black border-b border-white/5">
-                                    <tr>
-                                        <th className="px-4 py-2 font-black">Bloque / Advertiser</th>
-                                        <th className="px-4 py-2 font-black">Operación</th>
-                                        <th className="px-4 py-2 font-black">Precio (BS)</th>
-                                        <th className="px-4 py-2 font-black">Amount</th>
-                                        <th className="px-4 py-2 font-black">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {[...orderBook.sellOrders, ...orderBook.buyOrders].slice(0, 10).map((order, i) => (
-                                        <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                                            <td className="px-4 py-3 text-white font-bold opacity-80 flex items-center gap-2">
-                                                <span className="text-[#f0b90b]">#{(1042300 + i).toString().substring(0, 6)}</span>
-                                                {order.advertiser}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-0.5 rounded-full uppercase text-[8px] font-black ${i % 2 === 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                                    {i % 2 === 0 ? 'Deposit' : 'Withdrawal'}
+                        ) : orders.length === 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 8 }}>
+                                <span style={{ fontSize: 32 }}>📭</span>
+                                <span style={{ fontSize: 11, fontWeight: 800, color: '#848e9c', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Sin órdenes disponibles</span>
+                            </div>
+                        ) : orders.map((order, i) => (
+                            <div key={i} style={{
+                                display: 'grid', gridTemplateColumns: '2fr 1.2fr 1.8fr 1fr 1fr',
+                                padding: '16px 20px', borderBottom: '1px solid #2b311930',
+                                transition: 'background 0.15s', cursor: 'pointer',
+                                background: i % 2 === 0 ? 'transparent' : '#ffffff04'
+                            }}
+                                onMouseEnter={e => e.currentTarget.style.background = '#f0b90b08'}
+                                onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : '#ffffff04'}
+                            >
+                                {/* Advertiser */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#f0b90b20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#f0b90b', flexShrink: 0 }}>
+                                            {order.advertiser?.charAt(0)?.toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: 12, fontWeight: 800, color: '#eaecef' }}>{order.advertiser}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                                                <span style={{ fontSize: 9, color: '#848e9c', fontWeight: 700 }}>{order.tradeCount} órdenes</span>
+                                                <span style={{ fontSize: 9, color: order.finishRate >= 95 ? '#10b981' : '#f59e0b', fontWeight: 800 }}>
+                                                    <ShieldCheck size={8} style={{ display: 'inline', marginRight: 2 }} />
+                                                    {order.finishRate}% completado
                                                 </span>
-                                            </td>
-                                            <td className="px-4 py-3 font-black text-main tabular-nums italic">
-                                                {order.price.toLocaleString()}
-                                            </td>
-                                            <td className="px-4 py-3 font-bold text-slate-400">
-                                                {order.amount.toFixed(2)} USDT
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                                    <span className="text-[9px] uppercase font-black text-emerald-500 tracking-tighter">Confirmed</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Price */}
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <span style={{ fontSize: 18, fontWeight: 900, fontStyle: 'italic', color: tab === 'BUY' ? '#10b981' : '#ef4444', letterSpacing: '-0.02em' }}>
+                                        {order.price.toLocaleString('es-VE')}
+                                    </span>
+                                    <span style={{ fontSize: 9, color: '#848e9c', fontWeight: 700 }}>VES</span>
+                                </div>
+
+                                {/* Amount / Limits */}
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 800, color: '#eaecef' }}>
+                                        {order.amount.toLocaleString('es-VE', { maximumFractionDigits: 2 })} USDT
+                                    </span>
+                                    <span style={{ fontSize: 9, color: '#848e9c', fontWeight: 600 }}>
+                                        {order.minAmount.toLocaleString('es-VE', { maximumFractionDigits: 0 })} – {order.maxAmount.toLocaleString('es-VE', { maximumFractionDigits: 0 })} VES
+                                    </span>
+                                </div>
+
+                                {/* Payment methods */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+                                    {(order.methods || []).slice(0, 3).map((m, mi) => {
+                                        const c = METHOD_COLORS[m.id] || { bg: '#2b313915', text: '#848e9c', border: '#2b313950' };
+                                        return (
+                                            <span key={mi} style={{
+                                                padding: '2px 7px', borderRadius: 4,
+                                                background: c.bg, color: c.text, border: `1px solid ${c.border}`,
+                                                fontSize: 8, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: '0.05em'
+                                            }}>
+                                                {m.name || m.id}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Action button */}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <button style={{
+                                        padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                                        background: tab === 'BUY' ? '#10b981' : '#ef4444',
+                                        color: tab === 'BUY' ? '#000' : '#fff',
+                                        fontSize: 10, fontWeight: 900, letterSpacing: '0.06em',
+                                        transition: 'opacity 0.15s'
+                                    }}
+                                        onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                                    >
+                                        {tab === 'BUY' ? 'Comprar' : 'Vender'}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* Right: Order Book Section */}
-                <div className="w-80 flex flex-col bg-[#161a1e]">
-                    <div className="px-4 py-3 bg-[#1e2329] border-b border-[#2b3139] flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4 text-slate-400" />
-                            <h2 className="text-xs font-black uppercase tracking-tight">Libro de Órdenes</h2>
+                {/* ── RIGHT: STATS PANEL ────────────────────────── */}
+                <div style={{ width: 220, flexShrink: 0, background: '#161a1e', borderLeft: '1px solid #2b3139', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {/* Header */}
+                    <div style={{ padding: '14px 16px', background: '#1e2329', borderBottom: '1px solid #2b3139' }}>
+                        <span style={{ fontSize: 10, fontWeight: 900, color: '#848e9c', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Estadísticas de Mercado</span>
+                    </div>
+
+                    {/* Stats Cards */}
+                    {[
+                        { label: tab === 'BUY' ? 'Mejor precio compra' : 'Mejor precio venta', value: stats.best, color: tab === 'BUY' ? '#10b981' : '#ef4444' },
+                        { label: 'Precio promedio', value: stats.avg, color: '#f0b90b' },
+                        { label: tab === 'BUY' ? 'Precio más alto (compra)' : 'Precio más bajo (venta)', value: stats.worst, color: '#848e9c' },
+                    ].map((s, i) => (
+                        <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid #2b313940' }}>
+                            <div style={{ fontSize: 9, fontWeight: 800, color: '#4a5568', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>{s.label}</div>
+                            <div style={{ fontSize: 16, fontWeight: 900, fontStyle: 'italic', color: s.color, letterSpacing: '-0.02em' }}>
+                                {s.value > 0 ? `Bs. ${s.value.toLocaleString('es-VE', { maximumFractionDigits: 0 })}` : '—'}
+                            </div>
                         </div>
-                        <div className="px-2 py-0.5 bg-white/5 rounded-md text-[9px] font-black text-slate-500">
-                            P2P.V2
+                    ))}
+
+                    {/* Total orders */}
+                    <div style={{ padding: '14px 16px', borderBottom: '1px solid #2b313940' }}>
+                        <div style={{ fontSize: 9, fontWeight: 800, color: '#4a5568', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Órdenes activas</div>
+                        <div style={{ fontSize: 22, fontWeight: 900, color: '#eaecef' }}>{orders.length}</div>
+                    </div>
+
+                    {/* Escrow badge */}
+                    <div style={{ margin: 14, padding: '10px 12px', background: '#10b98108', border: '1px solid #10b98120', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <ShieldCheck size={16} color="#10b981" />
+                        <div>
+                            <div style={{ fontSize: 9, fontWeight: 900, color: '#10b981', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Escrow Protegido</div>
+                            <div style={{ fontSize: 8, color: '#4a5568', marginTop: 2 }}>Fondos en custodia Binance</div>
                         </div>
                     </div>
 
-                    <div className="flex-1 flex flex-col overflow-hidden">
-                        {/* Order Book Header */}
-                        <div className="grid grid-cols-3 px-4 py-2 text-[9px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5 bg-[#0b0e11]/50">
-                            <div>Precio (BS)</div>
-                            <div className="text-right">Cantidad</div>
-                            <div className="text-right">Total</div>
-                        </div>
-
-                        {/* SELL ORDERS (ASKS) */}
-                        <div className="flex-1 overflow-hidden flex flex-col-reverse justify-end">
-                            {filteredBuyOrders.map((order, i) => (
-                                <div key={i} className="group relative grid grid-cols-3 px-4 py-1.5 text-[11px] font-black tabular-nums hover:bg-white/5 transition-all cursor-pointer">
-                                    <div className="absolute inset-y-0 right-0 bg-rose-500/5 transition-all duration-500" style={{ width: `${(order.amount / maxCap) * 100}%` }}></div>
-                                    <div className="text-rose-500 relative z-10 italic">{order.price.toLocaleString()}</div>
-                                    <div className="text-right text-slate-400 relative z-10">{order.amount.toFixed(1)}</div>
-                                    <div className="text-right text-slate-300 relative z-10">{(order.price * order.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Spread / Mid Price */}
-                        <div className="py-3 bg-[#1e2329] flex flex-col items-center justify-center border-y border-[#2b3139] relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-[#f0b90b]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-lg font-black text-[#f0b90b] tracking-tighter tabular-nums italic">
-                                    {currentPrice.toLocaleString()}
+                    {/* Chart stat */}
+                    {chartData.length > 0 && (
+                        <div style={{ padding: '14px 16px' }}>
+                            <div style={{ fontSize: 9, fontWeight: 800, color: '#4a5568', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Cambio ({timeframe})</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                {isPositive ? <TrendingUp size={14} color="#10b981" /> : <TrendingDown size={14} color="#ef4444" />}
+                                <span style={{ fontSize: 16, fontWeight: 900, color: isPositive ? '#10b981' : '#ef4444' }}>
+                                    {isPositive ? '+' : ''}{chartPriceChange}%
                                 </span>
-                                {parseFloat(currentPrice) > orderBook.buyOrders[0]?.price ? (
-                                    <ArrowUpRight className="w-4 h-4 text-emerald-500" />
-                                ) : (
-                                    <ArrowDownRight className="w-4 h-4 text-rose-500" />
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Market Price Index</span>
                             </div>
                         </div>
-
-                        {/* BUY ORDERS (BIDS) */}
-                        <div className="flex-1 overflow-hidden flex flex-col">
-                            {filteredSellOrders.map((order, i) => (
-                                <div key={i} className="group relative grid grid-cols-3 px-4 py-1.5 text-[11px] font-black tabular-nums hover:bg-white/5 transition-all cursor-pointer">
-                                    <div className="absolute inset-y-0 right-0 bg-emerald-500/5 transition-all duration-500" style={{ width: `${(order.amount / maxCap) * 100}%` }}></div>
-                                    <div className="text-emerald-500 relative z-10 italic">{order.price.toLocaleString()}</div>
-                                    <div className="text-right text-slate-400 relative z-10">{order.amount.toFixed(1)}</div>
-                                    <div className="text-right text-slate-300 relative z-10">{(order.price * order.amount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Trade Panel Stub */}
-                    <div className="p-4 bg-[#1e2329] border-t border-[#2b3139] space-y-4">
-                        <div className="flex items-center gap-2 justify-between">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tope de Seguridad</span>
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/5">
-                                <Lock className="w-3 h-3 text-[#f0b90b]" />
-                                <span className="text-[10px] font-black text-white">{maxCap} USDT</span>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button className="py-2 bg-emerald-500 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all">Buy USDT</button>
-                            <button className="py-2 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all outline-none">Sell USDT</button>
-                        </div>
-                        <div className="flex items-center gap-2 justify-center py-1 opacity-40">
-                            <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                            <span className="text-[8px] font-black uppercase tracking-widest">Escrow Protected</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
