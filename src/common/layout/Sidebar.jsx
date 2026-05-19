@@ -182,6 +182,7 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
                 {(!siteSettings || siteSettings.showPlanTrading !== false) && (
                   <NavLink to="/user/plan-trading" label="Plan de Trading" isActive={pathname.includes('/plan-trading')} />
                 )}
+                <NavLink to="/user/p2p-trading" label="Terminal P2P" isActive={pathname.includes('/p2p-trading')} />
               </div>
             )}
           </div>

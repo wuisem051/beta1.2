@@ -85,3 +85,6 @@ build/
 # Scripts with credentials (keep local only)
 scripts/
 
+
+# Local Netlify folder
+.netlify

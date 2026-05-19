@@ -35,6 +35,7 @@ import AirtmCashierContent from '../components/AirtmCashierContent';
 import BotZoneContent from '../components/BotZoneContent';
 import P2PCalculator from '../components/P2PCalculator';
 import USDTTrend from '../components/USDTTrend';
+import P2PTradingTerminal from '../components/P2PTradingTerminal';
 
 // Componentes de las sub-secciones
 
@@ -1727,6 +1728,7 @@ const UserPanel = () => {
             <>
               <Route path="p2p-monitor/*" element={<P2PCalculator />} />
               <Route path="p2p-trend/*" element={<USDTTrend />} />
+              <Route path="p2p-trading/*" element={<P2PTradingTerminal />} />
             </>
           )}
           {(!siteSettings || siteSettings.showCollectiveFund !== false) && (
