@@ -121,9 +121,6 @@ const P2PTradingTerminal = () => {
                             <span style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: tab === 'BUY' ? '#10b981' : '#ef4444', letterSpacing: '-0.03em' }}>
                                 Bs. {stats.best.toLocaleString('es-VE')}
                             </span>
-                            <span style={{ fontSize: 10, fontWeight: 800, color: isPositive ? '#10b981' : '#ef4444' }}>
-                                {isPositive ? '▲' : '▼'} {Math.abs(chartPriceChange)}%
-                            </span>
                         </div>
                     )}
                 </div>
