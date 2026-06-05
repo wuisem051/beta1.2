@@ -21,7 +21,7 @@ const BOT_CATALOG = [
         description: 'Compra bajo y vende caro automáticamente en un rango de precios definido. Ideal para mercados laterales.',
         yield7d: '+12.45%',
         params: [
-            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT'] },
+            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'AAVE/USDT', 'DOT/USDT', 'BNB/USDT'] },
             { key: 'range_min', label: 'Precio Inferior', type: 'number', placeholder: '70000' },
             { key: 'range_max', label: 'Precio Superior', type: 'number', placeholder: '83000' },
             { key: 'grids', label: 'Número de Grillas', type: 'number', placeholder: '10' },
@@ -33,7 +33,7 @@ const BOT_CATALOG = [
         description: 'Reduce el precio promedio de entrada comprando más cuando el precio cae. Ideal para mercados volátiles.',
         yield7d: '+8.12%',
         params: [
-            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'SOL/USDT'] },
+            { key: 'pair', label: 'Par de trading', type: 'select', options: ['BTC/USDT', 'ETH/USDT', 'AAVE/USDT', 'DOT/USDT'] },
             { key: 'base_order', label: 'Orden Base (USDT)', type: 'number', placeholder: '10' },
             { key: 'safety_orders', label: 'Órdenes de Seguridad', type: 'number', placeholder: '5' },
             { key: 'step_percentage', label: 'Paso de Precio (%)', type: 'number', placeholder: '1.5' },

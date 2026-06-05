@@ -29,8 +29,8 @@ const P2PCalculator = () => {
         { id: 'usdc', name: 'USDC', symbol: 'USDCUSDT', p2pPrice: 709.48, spotPrice: 1, color: '#2775CA', icon: <Coins /> },
         { id: 'btc', name: 'BTC', symbol: 'BTCUSDT', p2pPrice: 55000000, spotPrice: 78000, color: '#F7931A', icon: <Bitcoin /> },
         { id: 'eth', name: 'ETH', symbol: 'ETHUSDT', p2pPrice: 2950000, spotPrice: 4200, color: '#627EEA', icon: <Zap /> },
-        { id: 'xrp', name: 'XRP', symbol: 'XRPUSDT', p2pPrice: 1750.50, spotPrice: 2.50, color: '#23292F', icon: <TrendingDown /> },
-        { id: 'sol', name: 'SOL', symbol: 'SOLUSDT', p2pPrice: 161000, spotPrice: 230, color: '#14F195', icon: <Sun /> },
+        { id: 'aave', name: 'AAVE', symbol: 'AAVEUSDT', p2pPrice: 7000.50, spotPrice: 100, color: '#B6509E', icon: <TrendingUp /> },
+        { id: 'dot', name: 'DOT', symbol: 'DOTUSDT', p2pPrice: 420.50, spotPrice: 6, color: '#E6007A', icon: <Sun /> },
         { id: 'wld', name: 'WLD', symbol: 'WLDUSDT', p2pPrice: 1470.40, spotPrice: 2.10, color: '#FFFFFF', icon: <Globe /> },
         { id: 'trump', name: 'TRUMP', symbol: 'TRUMPUSDT', p2pPrice: 1435.60, spotPrice: 2.05, color: '#E91E63', icon: <ShieldCheck /> },
     ]);
@@ -70,7 +70,7 @@ const P2PCalculator = () => {
             if (activeExchange === 'bitunix') endpoint = '/.netlify/functions/getBitunixP2P';
             if (activeExchange === 'bingx') endpoint = '/.netlify/functions/getBingXP2P';
 
-            const assetsToFetch = ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'FDUSD'];
+            const assetsToFetch = ['USDT', 'USDC', 'BTC', 'ETH', 'BNB', 'AAVE', 'DOT', 'DOGE', 'FDUSD'];
             const response = await fetch(endpoint + '?t=' + new Date().getTime(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

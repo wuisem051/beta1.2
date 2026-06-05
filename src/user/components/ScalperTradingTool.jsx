@@ -32,8 +32,8 @@ const ScalperTradingTool = ({ exchange, balance, onRefresh }) => {
 
     // Pares disponibles
     const availablePairs = [
-        'BTC/USDT', 'ETH/USDT', 'NAS100USD', 'BTC.D', 'BNB/USDT', 'SOL/USDT', 'XRP/USDT',
-        'ADA/USDT', 'DOGE/USDT', 'MATIC/USDT', 'DOT/USDT', 'AVAX/USDT', 'ARPA/USDT'
+        'BTC/USDT', 'ETH/USDT', 'AAVE/USDT', 'DOT/USDT', 'BNB/USDT', 'LTC/USDT', 'DOGE/USDT',
+        'ADA/USDT', 'MATIC/USDT', 'AVAX/USDT', 'ARPA/USDT'
     ];
 
     // Cargar configuración desde Firebase al iniciar

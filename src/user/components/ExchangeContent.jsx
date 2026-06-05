@@ -60,10 +60,10 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const [charts, setCharts] = useState([
         { id: 1, symbol: 'BTC/USDT', interval: '15' },
         { id: 2, symbol: 'ETH/USDT', interval: '15' },
-        { id: 3, symbol: 'NAS100USD', interval: '15' },
-        { id: 4, symbol: 'BTC.D', interval: '15' },
+        { id: 3, symbol: 'AAVE/USDT', interval: '15' },
+        { id: 4, symbol: 'DOT/USDT', interval: '15' },
         { id: 5, symbol: 'BNB/USDT', interval: '15' },
-        { id: 6, symbol: 'SOL/USDT', interval: '15' }
+        { id: 6, symbol: 'NAS100USD', interval: '15' }
     ]);
     const [activeChartId, setActiveChartId] = useState(1);
 
@@ -120,13 +120,11 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
     const [availablePairs, setAvailablePairs] = useState([
         'BTC/USDT',
         'ETH/USDT',
-        'NAS100USD',
-        'BTC.D',
+        'AAVE/USDT',
+        'DOT/USDT',
+        'BNB/USDT',
         'LTC/USDT',
         'DOGE/USDT',
-        'BNB/USDT',
-        'SOL/USDT',
-        'XRP/USDT',
         'ADA/USDT',
         'ARPA/USDT'
     ]);
