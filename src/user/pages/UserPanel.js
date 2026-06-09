@@ -36,6 +36,7 @@ import BotZoneContent from '../components/BotZoneContent';
 import P2PCalculator from '../components/P2PCalculator';
 import USDTTrend from '../components/USDTTrend';
 import P2PTradingTerminal from '../components/P2PTradingTerminal';
+import ScamMonitor from '../components/ScamMonitor';
 
 // Componentes de las sub-secciones
 
@@ -1753,6 +1754,7 @@ const UserPanel = () => {
             <Route path="cajero/*" element={<AirtmCashierContent />} />
           )}
           <Route path="bot-zone/*" element={<BotZoneContent />} />
+          <Route path="scam-monitor/*" element={<ScamMonitor />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
           <Route path="/*" element={<DashboardContent chartData={chartData} userBalances={userBalances} styles={styles} paymentsHistory={paymentsHistory} withdrawalsHistory={withdrawalsHistory} estimatedDailyUSD={estimatedDailyUSD} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} isSidebarHidden={isSidebarHidden} />} />

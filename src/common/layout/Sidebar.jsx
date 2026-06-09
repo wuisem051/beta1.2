@@ -226,6 +226,14 @@ const Sidebar = ({ unreadTicketsCount, newTradingSignalsCount, markTradingSignal
             />
           )}
 
+          {/* Scam Monitor */}
+          <NavLink
+            to="/user/scam-monitor"
+            icon={<FaShieldAlt />}
+            label="Monitor de Estafas"
+            isActive={pathname.includes('/scam-monitor')}
+          />
+
           <div className="pt-4 pb-2 px-3 text-[10px] font-black uppercase tracking-[0.2em] text-soft">SISTEMA</div>
 
           {/* Soporte Section */}

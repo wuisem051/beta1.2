@@ -141,6 +141,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     const supportItems = [
         { path: '/user/contact-support', label: 'Tickets de Soporte', icon: <FaHeadset />, desc: 'Abre o responde un ticket' },
         { path: '/user/updates', label: 'Actualizaciones', icon: <FaHistory />, desc: 'Novedades de la plataforma' },
+        { path: '/user/scam-monitor', label: 'Monitor de Estafas', icon: <FaShieldAlt />, desc: 'Análisis forense de amenazas', tag: { text: 'NUEVO', cls: 'orange' } },
     ];
 
     const cuentaItems = [
@@ -382,6 +383,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                             { to: '/user/bonus', label: 'Campañas' },
                             { to: '/user/contact-support', icon: <FaHeadset />, label: 'Soporte' },
                             { to: '/user/updates', icon: <FaHistory />, label: 'Actualizaciones' },
+                            { to: '/user/scam-monitor', icon: <FaShieldAlt />, label: 'Monitor de Estafas', sub: true },
                             { to: '/user/settings', icon: <FaCog />, label: 'Ajustes' },
                             ...(!siteSettings || siteSettings.showReferrals !== false ? [{ to: '/user/referrals', icon: <FaUsers />, label: 'Referidos' }] : []),
                         ].map((item, i) =>
