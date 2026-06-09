@@ -510,6 +510,34 @@ const DashboardContent = ({ userBalances, styles, paymentsHistory, withdrawalsHi
         </div>
       </div>
 
+      {/* Acceso Rápido Futuro Cash */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Link to="/user/my-soles" className="bg-gradient-to-br from-[#F3BA2F] to-[#ffd700] p-6 rounded-[32px] shadow-2xl flex items-center justify-between group hover:scale-[1.02] transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-20 pointer-events-none group-hover:scale-110 transition-transform">
+            <FaRobot size={80} color="black" />
+          </div>
+          <div className="relative z-10 text-black">
+            <h3 className="text-xl font-black italic uppercase tracking-tighter mb-1">Futuro Cash</h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Activa tu bot de arbitraje hoy</p>
+          </div>
+          <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-[#F3BA2F]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </div>
+        </Link>
+
+        <Link to="/user/p2p-trading" className="bg-[var(--bg-card)] p-6 rounded-[32px] border border-white/5 flex items-center justify-between group hover:scale-[1.02] transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-black transition-all">
+              <FaHistory size={24} />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-main uppercase italic tracking-tighter">Terminal P2P Pro</h3>
+              <p className="text-[9px] text-soft font-bold uppercase tracking-widest">Tradea como los expertos</p>
+            </div>
+          </div>
+        </Link>
+      </div>
+
       {/* Market Watch Section */}
       <CryptoMarketMonitor />
     </div>

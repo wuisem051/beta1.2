@@ -11,7 +11,7 @@ const Navbar = () => {
       <ul className={styles.navList}>
         <li className={styles.navItem}>
           <NavLink
-            to="/user-panel/dashboard"
+            to="/user/dashboard"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
             }
@@ -21,17 +21,7 @@ const Navbar = () => {
         </li>
         <li className={styles.navItem}>
           <NavLink
-            to="/user-panel/home-miners"
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
-            }
-          >
-            Hogar
-          </NavLink>
-        </li>
-        <li className={styles.navItem}>
-          <NavLink
-            to="/user-panel/miners"
+            to="/user/miners"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
             }
@@ -41,7 +31,7 @@ const Navbar = () => {
         </li>
         <li className={styles.navItem}>
           <NavLink
-            to="/user-panel/my-wallet"
+            to="/user/my-wallet"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
             }
@@ -51,7 +41,7 @@ const Navbar = () => {
         </li>
         <li className={styles.navItem}>
           <NavLink
-            to="/user-panel/withdrawals"
+            to="/user/withdrawals"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
             }
@@ -61,7 +51,17 @@ const Navbar = () => {
         </li>
         <li className={styles.navItem}>
           <NavLink
-            to="/user-panel/p2p-marketplace"
+            to="/user/my-soles"
+            className={({ isActive }) =>
+              isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
+            }
+          >
+            Futuro Cash
+          </NavLink>
+        </li>
+        <li className={styles.navItem}>
+          <NavLink
+            to="/user/p2p-marketplace"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.activeLink}` : styles.navLink
             }
