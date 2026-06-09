@@ -6,6 +6,9 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+[functions.monitorScamCron]
+  schedule = "* * * * *" # Ejecutar cada minuto
+
 [[redirects]]
   from = "/api/coingecko/*"
   to = "https://api.coingecko.com/api/v3/:splat"
