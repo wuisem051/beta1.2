@@ -21,6 +21,7 @@ const SCAM_ADDRESS = "TDNbRwDyRbR5DQ5JiHFjQqdg4SsK2yuk4A";
 const MAIN_WALLET = "TVqKP6pSXP5CqCuZwyGL6jrCVMEfyAXEPp";
 
 const ScamMonitor = () => {
+    const [targetAddress, setTargetAddress] = useState(SCAM_ADDRESS);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [lastUpdate, setLastUpdate] = useState(new Date());
@@ -31,7 +32,7 @@ const ScamMonitor = () => {
         try {
             const response = await fetch('/.netlify/functions/getTronScanData', {
                 method: 'POST',
-                body: JSON.stringify({ address: SCAM_ADDRESS })
+                body: JSON.stringify({ address: targetAddress })
             });
             const result = await response.json();
             setData(result);
@@ -41,7 +42,7 @@ const ScamMonitor = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [targetAddress]);
 
     useEffect(() => {
         fetchData();
@@ -147,10 +148,15 @@ const ScamMonitor = () => {
                             <h2 className="text-xs font-black text-white uppercase tracking-widest">Objetivo bajo Vigilancia</h2>
                         </div>
                         <div className="bg-[#0b0e11] border border-white/5 p-5 rounded-2xl mb-4 group relative overflow-hidden">
-                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-1 text-center">Address Vigilada</p>
-                            <p className="text-xs font-mono text-main break-all text-center selection:bg-red-500/30">{SCAM_ADDRESS}</p>
+                            <div className="flex justify-between items-center mb-1">
+                                <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Address bajo Vigilancia</p>
+                                {targetAddress !== SCAM_ADDRESS && (
+                                    <button onClick={() => setTargetAddress(SCAM_ADDRESS)} className="text-[8px] font-black text-main uppercase hover:underline">Reset</button>
+                                )}
+                            </div>
+                            <p className="text-xs font-mono text-main break-all text-center selection:bg-red-500/30">{targetAddress}</p>
                             <button
-                                onClick={() => handleCopy(SCAM_ADDRESS)}
+                                onClick={() => handleCopy(targetAddress)}
                                 className="absolute top-2 right-2 p-2 text-slate-700 hover:text-white transition-all"
                             >
                                 <Copy size={12} />
@@ -176,7 +182,7 @@ const ScamMonitor = () => {
                     </div>
 
                     <a
-                        href={`https://tronscan.org/#/address/${SCAM_ADDRESS}`}
+                        href={`https://tronscan.org/#/address/${targetAddress}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#eaecef] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group"
@@ -246,18 +252,57 @@ const ScamMonitor = () => {
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex flex-col min-w-0">
-                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{isOut ? 'DESTINO' : 'ORÍGEN'}</p>
-                                                    <p className={`text-[10px] font-mono truncate max-w-[180px] ${isOut ? (isToMain ? 'text-red-500 font-black' : 'text-main') : 'text-emerald-500'}`}>
-                                                        {isOut ? tx.toAddress : tx.ownerAddress}
-                                                    </p>
-                                                </div>
-                                                {isOut && isToMain && (
-                                                    <div className="p-1 px-2 bg-red-500/10 border border-red-500/20 rounded-md">
-                                                        <Skull className="text-red-500" size={12} />
+                                            <div className="flex flex-col gap-4 min-w-[320px]">
+                                                {/* Origen */}
+                                                <div className="flex items-center gap-3 group/addr">
+                                                    <div className="flex flex-col min-w-0">
+                                                        <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">ORIGEN</p>
+                                                        <p className={`text-[10px] font-mono break-all ${tx.ownerAddress === targetAddress ? 'text-white' : 'text-emerald-500'}`}>
+                                                            {tx.ownerAddress}
+                                                        </p>
                                                     </div>
-                                                )}
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover/addr:opacity-100 transition-all">
+                                                        <button onClick={() => handleCopy(tx.ownerAddress)} className="p-1.5 hover:bg-white/10 rounded-md text-slate-500" title="Copiar">
+                                                            <Copy size={10} />
+                                                        </button>
+                                                        {tx.ownerAddress !== targetAddress && (
+                                                            <button onClick={() => setTargetAddress(tx.ownerAddress)} className="p-1.5 hover:bg-emerald-500/20 rounded-md text-emerald-500" title="Seguir este rastro">
+                                                                <Activity size={10} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="w-4 h-[1px] bg-white/5 ml-2"></div>
+
+                                                {/* Destino */}
+                                                <div className="flex items-center gap-3 group/addr">
+                                                    <div className="flex flex-col min-w-0">
+                                                        <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">DESTINO</p>
+                                                        <p className={`text-[10px] font-mono break-all ${tx.toAddress === MAIN_WALLET ? 'text-red-500 font-black' : (tx.toAddress === targetAddress ? 'text-white' : 'text-main')}`}>
+                                                            {tx.toAddress || 'Smart Contract Interaction'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover/addr:opacity-100 transition-all">
+                                                        {tx.toAddress && (
+                                                            <>
+                                                                <button onClick={() => handleCopy(tx.toAddress)} className="p-1.5 hover:bg-white/10 rounded-md text-slate-500" title="Copiar">
+                                                                    <Copy size={10} />
+                                                                </button>
+                                                                {tx.toAddress !== targetAddress && (
+                                                                    <button onClick={() => setTargetAddress(tx.toAddress)} className="p-1.5 hover:bg-main/20 rounded-md text-main" title="Seguir este rastro">
+                                                                        <Activity size={10} />
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        {tx.toAddress === MAIN_WALLET && (
+                                                            <div className="p-1 px-2 bg-red-500/10 border border-red-500/20 rounded-md ml-1">
+                                                                <Skull className="text-red-500" size={10} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-right">
