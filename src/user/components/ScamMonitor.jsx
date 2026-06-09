@@ -194,7 +194,7 @@ const ScamMonitor = () => {
                             <Activity size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Registro Forense TRX</h2>
+                            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Registro Forense de Activos</h2>
                             <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mt-1">Sincronizado vía TronGrid API</p>
                         </div>
                     </div>
@@ -240,9 +240,9 @@ const ScamMonitor = () => {
                                         <td className="px-8 py-6 whitespace-nowrap">
                                             <div className="flex flex-col">
                                                 <span className={`text-sm font-black italic tracking-tighter ${isOut ? 'text-red-400' : 'text-emerald-400'}`}>
-                                                    {isOut ? '-' : '+'}{(tx.amount / 1000000).toLocaleString()} TRX
+                                                    {isOut ? '-' : '+'}{(tx.amount / Math.pow(10, tx.tokenDecimal || 6)).toLocaleString()} {tx.token || 'TRX'}
                                                 </span>
-                                                <span className="text-[8px] text-slate-600 font-black uppercase">Token: TRX</span>
+                                                <span className="text-[8px] text-slate-600 font-black uppercase">Red: {tx.type || 'TRX'}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
