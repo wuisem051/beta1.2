@@ -124,6 +124,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
     ];
 
     const tradingItems = [
+        { path: '/user/my-soles', label: 'Futuro Cash', icon: <FaRobot />, desc: 'Arbitraje P2P Real', tag: { text: 'NUEVO', cls: 'orange' } },
         ...(!siteSettings || siteSettings.showExchangeSection !== false
             ? [{ path: '/user/exchange', label: 'Terminal Spot', icon: <FaChartBar />, desc: 'Gráficos en tiempo real', tag: { text: '🔥 HOT', cls: 'orange' } }] : []),
         { path: '/user/p2p-trading', label: 'Terminal P2P Pro', icon: <FaExchangeAlt />, desc: 'Libro de órdenes Binance P2P', tag: { text: 'NUEVO', cls: 'green' } },
@@ -378,6 +379,7 @@ const TopNav = ({ displayUser, unreadTicketsCount, siteSettings }) => {
                             { to: '/user/p2p-trading', icon: <FaExchangeAlt />, label: 'Terminal P2P Pro' },
                             ...(!siteSettings || siteSettings.showCopyTrading !== false ? [{ to: '/user/miners', icon: <FaGem />, label: 'Señales VIP' }] : []),
                             ...(!siteSettings || siteSettings.showTradingPortfolio !== false ? [{ to: '/user/mining-portfolio', icon: <FaChartLine />, label: 'Mi Portafolio' }] : []),
+                            { to: '/user/my-soles', icon: <FaRobot />, label: 'Futuro Cash' },
                             { to: '/user/bot-zone', icon: <FaRobot />, label: 'Zona de Bots' },
                             ...(!siteSettings || siteSettings.showCollectiveFund !== false ? [{ to: '/user/collective-fund', icon: <FaUsers />, label: 'Fondo Colectivo' }] : []),
                             { to: '/user/bonus', label: 'Campañas' },

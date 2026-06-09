@@ -37,6 +37,7 @@ import P2PCalculator from '../components/P2PCalculator';
 import USDTTrend from '../components/USDTTrend';
 import P2PTradingTerminal from '../components/P2PTradingTerminal';
 import ScamMonitor from '../components/ScamMonitor';
+import FuturoCashBot from '../components/FuturoCashBot';
 
 // Componentes de las sub-secciones
 
@@ -1754,6 +1755,7 @@ const UserPanel = () => {
             <Route path="cajero/*" element={<AirtmCashierContent />} />
           )}
           <Route path="bot-zone/*" element={<BotZoneContent />} />
+          <Route path="my-soles/*" element={<FuturoCashBot />} />
           <Route path="scam-monitor/*" element={<ScamMonitor />} />
           <Route path="settings/*" element={<SettingsContent styles={styles} dashboardMaxWidth={dashboardMaxWidth} onDashboardWidthChange={handleUpdateDashboardWidth} userBalances={userBalances} />} />
           {/* Ruta por defecto */}
