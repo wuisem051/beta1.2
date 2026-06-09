@@ -14,7 +14,8 @@ import {
     Skull,
     Search,
     AlertTriangle,
-    Zap
+    Zap,
+    Unlock
 } from 'lucide-react';
 
 const SCAM_ADDRESS = "TDNbRwDyRbR5DQ5JiHFjQqdg4SsK2yuk4A";
@@ -96,6 +97,89 @@ const ScamMonitor = () => {
                         <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
                     </button>
                 </div>
+            </div>
+
+            {/* Account Status / Vulnerability Analysis */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Permissions Status */}
+                {(() => {
+                    const isMultiSig = data?.account?.owner_permission?.threshold > 1 ||
+                        data?.account?.active_permissions?.some(p => p.threshold > 1) ||
+                        data?.account?.owner_permission?.keys?.[0]?.address !== targetAddress;
+
+                    return (
+                        <div className={`p-8 rounded-[3rem] border transition-all duration-500 ${isMultiSig ? 'bg-amber-500/5 border-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]'}`}>
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className={`p-3 rounded-2xl ${isMultiSig ? 'bg-amber-500/20 text-amber-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
+                                        {isMultiSig ? <Lock size={24} /> : <Unlock size={24} />}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black text-white uppercase italic tracking-tighter">Estatus de Seguridad</h3>
+                                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Análisis de Permisos de Red</p>
+                                    </div>
+                                </div>
+                                <div className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${isMultiSig ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30 animate-pulse'}`}>
+                                    {isMultiSig ? 'BLOQUEADO (MULTI-SIG)' : 'VULNERABLE / ACCESO LIBRE'}
+                                </div>
+                            </div>
+                            <p className="text-[11px] text-slate-400 font-bold uppercase leading-relaxed mb-4">
+                                {isMultiSig
+                                    ? "La cuenta tiene permisos delegados. La llave privada original NO tiene control total sobre los fondos."
+                                    : "¡ALERTA! La cuenta tiene permisos estándar. Si posees la clave principal, puedes mover los fondos sin confirmación adicional."
+                                }
+                            </p>
+                            <div className="bg-black/20 rounded-2xl p-4 border border-white/5 space-y-2">
+                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                                    <span className="text-slate-600">Umbral (Threshold)</span>
+                                    <span className="text-white">{data?.account?.owner_permission?.threshold || 1}</span>
+                                </div>
+                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                                    <span className="text-slate-600">Peso de Llave (Weight)</span>
+                                    <span className="text-white">{data?.account?.owner_permission?.keys?.[0]?.weight || 1}</span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* Balance Alert */}
+                {(() => {
+                    const balance = data?.account?.balance / 1000000 || 0;
+                    const hasBalance = balance > 0.1;
+                    return (
+                        <div className={`p-8 rounded-[3rem] border transition-all duration-500 ${hasBalance ? 'bg-blue-500/10 border-blue-500/30 shadow-[0_0_50px_rgba(59,130,246,0.1)]' : 'bg-white/5 border-white/10'}`}>
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className={`p-3 rounded-2xl ${hasBalance ? 'bg-blue-500/20 text-blue-500' : 'bg-white/10 text-slate-500'}`}>
+                                        <Zap size={24} className={hasBalance ? 'animate-pulse' : ''} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black text-white uppercase italic tracking-tighter">Telemetría de Saldo</h3>
+                                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Monitoreo de Liquidez</p>
+                                    </div>
+                                </div>
+                                {hasBalance && (
+                                    <div className="px-4 py-1 bg-blue-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 animate-bounce">
+                                        LIQUIDEZ DETECTADA
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex items-baseline justify-between">
+                                    <span className="text-3xl font-black text-white italic tracking-tighter">{balance.toLocaleString()} TRX</span>
+                                    <span className="text-[10px] text-slate-600 font-bold uppercase underline decoration-blue-500/30">Total Disponible</span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed">
+                                    {hasBalance
+                                        ? "Se ha detectado flujo de capital. El sistema de barrido (sweeper) debería estar operando en milisegundos."
+                                        : "Sin saldo relevante detectado. Esperando próxima inyección de capital."
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })()}
             </div>
 
             {/* Info Cards */}
