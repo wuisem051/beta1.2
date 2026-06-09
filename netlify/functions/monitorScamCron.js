@@ -19,8 +19,8 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const SCAM_ADDRESS = "TDNbRwDyRbR5DQ5JiHFjQqdg4SsK2yuk4A";
-const TG_TOKEN = "8596744338:AAF9sEA_v_fmdW4-IvKDndVIfR_9MXKj_lU";
-const TG_CHAT_ID = "5523815984";
+const TG_TOKEN = process.env.TELEGRAM_TOKEN;
+const TG_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 async function sendTelegram(message) {
     const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
