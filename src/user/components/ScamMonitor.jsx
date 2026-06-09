@@ -240,7 +240,7 @@ const ScamMonitor = () => {
                                         <td className="px-8 py-6 whitespace-nowrap">
                                             <div className="flex flex-col">
                                                 <span className={`text-sm font-black italic tracking-tighter ${isOut ? 'text-red-400' : 'text-emerald-400'}`}>
-                                                    {isOut ? '-' : '+'}{(tx.amount / Math.pow(10, tx.tokenDecimal || 6)).toLocaleString()} {tx.token || 'TRX'}
+                                                    {isOut ? '-' : '+'}{(tx.amount / Math.pow(10, tx.tokenDecimal || 6)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })} {tx.token || 'TRX'}
                                                 </span>
                                                 <span className="text-[8px] text-slate-600 font-black uppercase">Red: {tx.type || 'TRX'}</span>
                                             </div>
