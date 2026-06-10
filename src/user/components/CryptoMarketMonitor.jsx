@@ -144,6 +144,7 @@ const CryptoMarketMonitor = () => {
     };
 
     const toggleCompare = (crypto) => {
+        if (!Array.isArray(compareList)) return;
         if (compareList.find(c => c.id === crypto.id)) {
             setCompareList(compareList.filter(c => c.id !== crypto.id));
         } else if (compareList.length < 3) {
@@ -354,7 +355,7 @@ const CryptoMarketMonitor = () => {
                                     : 'bg-[var(--bg-main)] text-slate-400 hover:text-white'
                                     }`}
                             >
-                                ⭐ Favoritos ({favorites.length})
+                                ⭐ Favoritos ({(favorites?.length || 0)})
                             </button>
                             <button
                                 onClick={() => setFilter('gainers')}
@@ -378,14 +379,12 @@ const CryptoMarketMonitor = () => {
                     )}
 
                     {/* Price Alerts Summary */}
-                    {priceAlerts.filter(a => !a.triggered).length > 0 && (
-                        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                            <div className="flex items-center gap-3">
-                                <FaBell className="text-blue-400" />
-                                <p className="text-xs font-bold text-blue-400">
-                                    Tienes {priceAlerts.filter(a => !a.triggered).length} alerta(s) de precio activa(s)
-                                </p>
-                            </div>
+                    {(Array.isArray(priceAlerts) ? priceAlerts.filter(a => !a.triggered).length : 0) > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full animate-pulse mt-6">
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                            <span className="text-[9px] font-black text-yellow-500 uppercase tracking-widest">
+                                Tienes {priceAlerts.filter(a => !a.triggered).length} alerta(s) de precio activa(s)
+                            </span>
                         </div>
                     )}
                 </div>
@@ -397,15 +396,15 @@ const CryptoMarketMonitor = () => {
                             <div className="flex items-center gap-3">
                                 <FaExchangeAlt className="text-[var(--accent)]" />
                                 <p className="text-xs font-bold text-[var(--accent)]">
-                                    Modo Comparación Activo - Selecciona hasta 3 criptomonedas ({compareList.length}/3)
+                                    Modo Comparación Activo - Selecciona hasta 3 criptomonedas ({(compareList?.length || 0)}/3)
                                 </p>
                             </div>
-                            {compareList.length > 0 && (
+                            {(compareList?.length || 0) > 0 && (
                                 <button
                                     onClick={() => setCompareList([])}
-                                    className="text-xs font-bold text-slate-400 hover:text-white transition-colors"
+                                    className="text-[9px] font-black text-rose-500 hover:text-rose-400 uppercase tracking-widest"
                                 >
-                                    Limpiar Selección
+                                    Limpiar
                                 </button>
                             )}
                         </div>
@@ -564,7 +563,7 @@ const CryptoMarketMonitor = () => {
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="w-20 h-8 ml-auto flex items-center justify-end overflow-hidden opacity-30 group-hover:opacity-100 transition-opacity">
-                                                    {crypto.sparkline_in_7d?.price && (
+                                                    {Array.isArray(crypto.sparkline_in_7d?.price) && crypto.sparkline_in_7d.price.length > 1 && (
                                                         <svg className="w-full h-full" viewBox="0 0 100 40">
                                                             <path
                                                                 d={crypto.sparkline_in_7d.price.reduce((path, price, i, arr) => {
@@ -635,7 +634,7 @@ const CryptoMarketMonitor = () => {
                 <div className="px-10 py-6 border-t border-white/5 bg-[var(--bg-main)]/30">
                     <div className="flex justify-between items-center">
                         <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
-                            Mostrando {filteredCryptos.length} de {cryptos.length} criptomonedas
+                            Mostrando {(filteredCryptos?.length || 0)} de {(cryptos?.length || 0)} criptomonedas
                         </p>
                         <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest">
                             Datos proporcionados por CoinGecko API
@@ -645,7 +644,7 @@ const CryptoMarketMonitor = () => {
             </div>
 
             {/* Comparison Panel */}
-            {compareMode && compareList.length > 1 && (
+            {compareMode && (compareList?.length || 0) > 1 && (
                 <div className="bg-[var(--bg-card)] rounded-[40px] border border-white/5 shadow-2xl overflow-hidden mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="px-10 py-8 border-b border-white/5">
                         <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Comparación de Criptomonedas</h3>

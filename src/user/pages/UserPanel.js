@@ -136,20 +136,22 @@ const VIPChatContent = ({ styles, userBalances }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
-        {messages.map((msg, idx) => {
-          const isMe = msg.userId === currentUser.uid;
+        {(Array.isArray(messages) ? messages : []).map((msg, idx) => {
+          const isMe = msg?.userId === currentUser?.uid;
           return (
-            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg?.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex gap-4 max-w-[80%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/10 shadow-lg">
-                  {msg.profilePhotoUrl ? <img src={msg.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle className="text-slate-600 text-2xl" />}
+                  {msg?.profilePhotoUrl ? <img src={msg.profilePhotoUrl} className="w-full h-full object-cover" /> : <FaUserCircle className="text-slate-600 text-2xl" />}
                 </div>
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                  <span className="text-[9px] font-black text-soft uppercase tracking-widest mb-1">{msg.displayName || msg.username}</span>
+                  <span className="text-[9px] font-black text-soft uppercase tracking-widest mb-1">{msg?.displayName || msg?.username || 'Usuario'}</span>
                   <div className={`px-6 py-4 rounded-3xl text-sm font-bold shadow-xl ${isMe ? 'bg-[var(--accent)] text-black rounded-tr-none' : 'bg-[var(--bg-sidebar)] text-main border border-white/5 rounded-tl-none'}`}>
-                    {msg.text}
+                    {msg?.text}
                   </div>
-                  <span className="text-[8px] text-slate-600 font-black mt-1 uppercase tracking-tighter">{msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="text-[8px] text-slate-600 font-black mt-1 uppercase tracking-tighter">
+                    {msg?.createdAt instanceof Date ? msg.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -198,11 +200,14 @@ const CopyTraderContent = ({ styles, userBalances }) => {
     setIsLoadingSignals(true);
     const q = query(collection(db, 'tradingSignals'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedSignals = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-      }));
+      const fetchedSignals = (snapshot.docs || []).map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now()),
+        };
+      });
       setSignals(fetchedSignals);
       setIsLoadingSignals(false);
     }, (err) => {
@@ -561,14 +566,17 @@ const ContactSupportContent = ({ onUnreadCountChange, styles }) => {
     if (!currentUser) return;
     const q = query(collection(db, 'contactRequests'), where('userId', '==', currentUser.uid), orderBy('updatedAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedTickets = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      }));
+      const fetchedTickets = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now()),
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt || Date.now()),
+        };
+      });
       setTickets(fetchedTickets);
-      const unreadCount = fetchedTickets.filter(t => t.status === 'Respondido' && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser)).length;
+      const unreadCount = fetchedTickets.filter(t => t.status === 'Respondido' && Array.isArray(t.conversation) && t.conversation.some(msg => msg.sender === 'admin' && !msg.readByUser)).length;
       onUnreadCountChange(unreadCount);
       if (selectedTicket) {
         const updated = fetchedTickets.find(t => t.id === selectedTicket.id);
@@ -1609,7 +1617,14 @@ const UserPanel = () => {
     console.log("UserPanel: Configurando suscripción para historial de pagos.");
     const paymentsQuery = query(collection(db, "payments"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
-      const fetchedPayments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
+      const fetchedPayments = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || Date.now())
+        };
+      });
       setPaymentsHistory(fetchedPayments);
     }, (error) => {
       console.error("UserPanel: Error en la suscripción de pagos:", error);
