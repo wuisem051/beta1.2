@@ -1154,7 +1154,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {(activeTab === 'orders' ? recentOrders : orderHistory).map(order => (
+                                    {(Array.isArray(activeTab === 'orders' ? recentOrders : orderHistory) ? (activeTab === 'orders' ? recentOrders : orderHistory) : []).map(order => (
                                         <tr key={order.id || order.info?.orderId} className="hover:bg-white/[0.02] transition-colors group">
                                             <td className="px-8 py-6">
                                                 <div className="flex items-center gap-3">
@@ -1187,7 +1187,7 @@ const ExchangeContent = ({ isSidebarHidden = false, dashboardMaxWidth = 1600 }) 
                                             </td>
                                         </tr>
                                     ))}
-                                    {(activeTab === 'orders' ? recentOrders : orderHistory).length === 0 && (
+                                    {(Array.isArray(activeTab === 'orders' ? recentOrders : orderHistory) ? (activeTab === 'orders' ? recentOrders : orderHistory).length : 0) === 0 && (
                                         <tr>
                                             <td colSpan="6" className="px-8 py-32 text-center text-slate-600 italic">
                                                 <div className="opacity-20 flex flex-col items-center">

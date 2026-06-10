@@ -131,9 +131,12 @@ const WalletHub = ({ initialTab: propTab, dashboardMaxWidth }) => {
         let withdrawals = [];
 
         const mergeAndSort = () => {
+            const safeDeposits = Array.isArray(deposits) ? deposits : [];
+            const safeWithdrawals = Array.isArray(withdrawals) ? withdrawals : [];
+
             const all = [
-                ...deposits.map(d => ({ ...d, _type: 'deposit' })),
-                ...withdrawals.map(w => ({ ...w, _type: 'withdrawal' }))
+                ...safeDeposits.map(d => ({ ...d, _type: 'deposit' })),
+                ...safeWithdrawals.map(w => ({ ...w, _type: 'withdrawal' }))
             ].sort((a, b) => {
                 const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
                 const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
