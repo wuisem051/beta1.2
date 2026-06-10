@@ -62,12 +62,18 @@ const CryptoMarketMonitor = () => {
     useEffect(() => {
         const savedFavorites = localStorage.getItem('cryptoFavorites');
         if (savedFavorites) {
-            setFavorites(JSON.parse(savedFavorites));
+            try {
+                const parsed = JSON.parse(savedFavorites);
+                if (Array.isArray(parsed)) setFavorites(parsed);
+            } catch (e) { console.error("Error parsing favorites", e); }
         }
 
         const savedAlerts = localStorage.getItem('priceAlerts');
         if (savedAlerts) {
-            setPriceAlerts(JSON.parse(savedAlerts));
+            try {
+                const parsed = JSON.parse(savedAlerts);
+                if (Array.isArray(parsed)) setPriceAlerts(parsed);
+            } catch (e) { console.error("Error parsing alerts", e); }
         }
     }, []);
 
@@ -180,33 +186,35 @@ const CryptoMarketMonitor = () => {
     };
 
     // Filtrado y ordenamiento
-    let filteredCryptos = cryptos;
+    let filteredCryptos = Array.isArray(cryptos) ? cryptos : [];
 
     // Aplicar búsqueda
-    if (searchTerm) {
+    if (searchTerm && Array.isArray(filteredCryptos)) {
         filteredCryptos = filteredCryptos.filter(crypto =>
-            crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+            crypto.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            crypto.symbol?.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }
 
     // Aplicar filtros
-    switch (filter) {
-        case 'favorites':
-            filteredCryptos = filteredCryptos.filter(crypto => favorites.includes(crypto.id));
-            break;
-        case 'gainers':
-            filteredCryptos = filteredCryptos.filter(crypto => crypto.price_change_percentage_24h > 0);
-            break;
-        case 'losers':
-            filteredCryptos = filteredCryptos.filter(crypto => crypto.price_change_percentage_24h < 0);
-            break;
-        default:
-            break;
+    if (Array.isArray(filteredCryptos)) {
+        switch (filter) {
+            case 'favorites':
+                filteredCryptos = filteredCryptos.filter(crypto => favorites.includes(crypto.id));
+                break;
+            case 'gainers':
+                filteredCryptos = filteredCryptos.filter(crypto => crypto.price_change_percentage_24h > 0);
+                break;
+            case 'losers':
+                filteredCryptos = filteredCryptos.filter(crypto => crypto.price_change_percentage_24h < 0);
+                break;
+            default:
+                break;
+        }
     }
 
     // Aplicar ordenamiento
-    filteredCryptos = [...filteredCryptos].sort((a, b) => {
+    filteredCryptos = [...(Array.isArray(filteredCryptos) ? filteredCryptos : [])].sort((a, b) => {
         let aValue = a[sortConfig.key];
         let bValue = b[sortConfig.key];
 

@@ -197,7 +197,7 @@ const UpdatesContent = ({ styles }) => {
                                         {update.description}
                                     </p>
 
-                                    {update.changes && (
+                                    {Array.isArray(update.changes) && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-white/5">
                                             {update.changes.map((change, i) => (
                                                 <div key={i} className="flex items-start gap-3">
