@@ -151,7 +151,7 @@ const P2P_Marketplace = ({ userBalances, isSidebarHidden = false, dashboardMaxWi
 
       {/* MaxiOS P2P Submenu */}
       <div className="flex gap-8 mb-10 border-b border-white/5 pb-1 overflow-x-auto no-scrollbar">
-        {['Compra con un clic', 'Depósito Fiat', 'Tarjeta de crédito/débito', 'Comercio P2P', 'Express'].map((item) => (
+        {['Comercio P2P'].map((item) => (
           <button
             key={item}
             onClick={() => setActiveView('marketplace')}
